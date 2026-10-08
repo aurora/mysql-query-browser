@@ -1,0 +1,299 @@
+<?xml version="1.0" ?>
+<functionindex>
+  <functiongroup name="Operators">
+    <function caption="=" id="IDX1183" />
+    <function caption="&#60;=&#62;" id="IDX1186" />
+    <function caption="&#60;&#62;" id="IDX1190" />
+    <function caption="!=" id="IDX1190" />
+    <function caption="&#60;=" id="IDX1192" />
+    <function caption="&#60;" id="IDX1194" />
+    <function caption="&#62;=" id="IDX1196" />
+    <function caption="&#62;" id="IDX1198" />
+    <function caption="IS NULL" id="IDX1201" />
+    <function caption="IS NOT NULL" id="IDX1201" />
+    <function caption="expr BETWEEN min AND max" id="IDX1204" />
+    <function caption="expr NOT BETWEEN min AND max" id="IDX1205" />
+    <function caption="GREATEST(X,Y,...)" id="IDX1206" />
+    <function caption="expr IN (value,...)" id="IDX1207" />
+    <function caption="expr NOT IN (value,...)" id="IDX1208" />
+    <function caption="ISNULL(expr)" id="IDX1209" />
+    <function caption="COALESCE(value,...)" id="IDX1211" />
+    <function caption="INTERVAL(N,N1,N2,N3,...)" id="IDX1212" />
+    <function caption="LEAST(X,Y,...)" id="IDX1213" />
+    <function caption="NOT" id="IDX1216" />
+    <function caption="!" id="IDX1217" />
+    <function caption="AND" id="IDX1219" />
+    <function caption="&#38;&#38;" id="IDX1219" />
+    <function caption="OR" id="IDX1221" />
+    <function caption="||" id="IDX1221" />
+    <function caption="XOR" id="IDX1222" />
+  </functiongroup>
+  <functiongroup name="Control Flow Functions">
+    <function caption="CASE value WHEN [compare-value] THEN result [WHEN [compare-value] THEN result ...] [ELSE result] END" id="IDX1229" />
+    <function caption="CASE WHEN [condition] THEN result [WHEN [condition] THEN result ...] [ELSE result] END" id="IDX1229" />
+    <function caption="IF(expr1,expr2,expr3)" id="IDX1230" />
+    <function caption="IFNULL(expr1,expr2)" id="IDX1232" />
+    <function caption="NULLIF(expr1,expr2)" id="IDX1233" />
+  </functiongroup>
+  <functiongroup name="String Functions">
+    <function caption="ASCII(str)" id="IDX1236" />
+    <function caption="BIN(N)" id="IDX1237" />
+    <function caption="BIT_LENGTH(str)" id="IDX1238" />
+    <function caption="CHAR(N,...)" id="IDX1239" />
+    <function caption="CHAR_LENGTH(str)" id="IDX1240" />
+    <function caption="CHARACTER_LENGTH(str)" id="IDX1241" />
+    <function caption="COMPRESS(string_to_compress)" id="IDX1242" />
+    <function caption="CONCAT(str1,str2,...)" id="IDX1243" />
+    <function caption="CONCAT_WS(separator, str1, str2,...)" id="IDX1244" />
+    <function caption="CONV(N,from_base,to_base)" id="IDX1245" />
+    <function caption="ELT(N,str1,str2,str3,...)" id="IDX1246" />
+    <function caption="EXPORT_SET(bits,on,off,[separator,[number_of_bits]])" id="IDX1247" />
+    <function caption="FIELD(str,str1,str2,str3,...)" id="IDX1248" />
+    <function caption="FIND_IN_SET(str,strlist)" id="IDX1249" />
+    <function caption="HEX(N_or_S)" id="IDX1250" />
+    <function caption="INSERT(str,pos,len,newstr)" id="IDX1251" />
+    <function caption="INSTR(str,substr)" id="IDX1252" />
+    <function caption="LCASE(str)" id="IDX1253" />
+    <function caption="LEFT(str,len)" id="IDX1254" />
+    <function caption="LENGTH(str)" id="IDX1255" />
+    <function caption="LOAD_FILE(file_name)" id="IDX1257" />
+    <function caption="LOCATE(substr,str)" id="IDX1258" />
+    <function caption="LOCATE(substr,str,pos)" id="IDX1258" />
+    <function caption="LOWER(str)" id="IDX1259" />
+    <function caption="LPAD(str,len,padstr)" id="IDX1260" />
+    <function caption="LTRIM(str)" id="IDX1261" />
+    <function caption="MAKE_SET(bits,str1,str2,...)" id="IDX1262" />
+    <function caption="MID(str,pos,len)" id="IDX1263" />
+    <function caption="OCT(N)" id="IDX1264" />
+    <function caption="OCTET_LENGTH(str)" id="IDX1265" />
+    <function caption="ORD(str)" id="IDX1266" />
+    <function caption="POSITION(substr IN str)" id="IDX1267" />
+    <function caption="QUOTE(str)" id="IDX1268" />
+    <function caption="REPEAT(str,count)" id="IDX1269" />
+    <function caption="REPLACE(str,from_str,to_str)" id="IDX1270" />
+    <function caption="REVERSE(str)" id="IDX1271" />
+    <function caption="RIGHT(str,len)" id="IDX1272" />
+    <function caption="RPAD(str,len,padstr)" id="IDX1273" />
+    <function caption="RTRIM(str)" id="IDX1274" />
+    <function caption="SOUNDEX(str)" id="IDX1275" />
+    <function caption="expr1 SOUNDS LIKE expr2" id="IDX1276" />
+    <function caption="SPACE(N)" id="IDX1277" />
+    <function caption="SUBSTRING(str,pos)" id="IDX1278" />
+    <function caption="SUBSTRING(str FROM pos)" id="IDX1278" />
+    <function caption="SUBSTRING(str,pos,len)" id="IDX1278" />
+    <function caption="SUBSTRING(str FROM pos FOR len)" id="IDX1278" />
+    <function caption="SUBSTRING_INDEX(str,delim,count)" id="IDX1279" />
+    <function caption="TRIM([[BOTH | LEADING | TRAILING] [remstr] FROM] str)" id="IDX1280" />
+    <function caption="UCASE(str)" id="IDX1281" />
+    <function caption="UNCOMPRESS(string_to_uncompress)" id="IDX1282" />
+    <function caption="UNCOMPRESSED_LENGTH(compressed_string)" id="IDX1283" />
+    <function caption="UNHEX(str)" id="IDX1284" />
+    <function caption="UPPER(str)" id="IDX1285" />
+    <function caption="expr LIKE pat [ESCAPE 'escape-char']" id="IDX1290" />
+    <function caption="expr NOT LIKE pat [ESCAPE 'escape-char']" id="IDX1291" />
+    <function caption="expr NOT REGEXP pat" id="IDX1292" />
+    <function caption="expr NOT RLIKE pat" id="IDX1292" />
+    <function caption="expr REGEXP pat" id="IDX1296" />
+    <function caption="expr RLIKE pat" id="IDX1296" />
+    <function caption="STRCMP(expr1,expr2)" id="IDX1297" />
+  </functiongroup>
+  <functiongroup name="Numeric Functions">
+    <function caption="+" id="IDX1301" />
+    <function caption="-" id="IDX1304" />
+    <function caption="-" id="IDX1307" />
+    <function caption="*" id="IDX1309" />
+    <function caption="/" id="IDX1311" />
+    <function caption="ABS(X)" id="IDX1314" />
+    <function caption="ACOS(X)" id="IDX1315" />
+    <function caption="ASIN(X)" id="IDX1316" />
+    <function caption="ATAN(X)" id="IDX1317" />
+    <function caption="ATAN(Y,X)" id="IDX1318" />
+    <function caption="ATAN2(Y,X)" id="IDX1318" />
+    <function caption="CEILING(X)" id="IDX1319" />
+    <function caption="CEIL(X)" id="IDX1319" />
+    <function caption="COS(X)" id="IDX1320" />
+    <function caption="COT(X)" id="IDX1321" />
+    <function caption="CRC32(expr)" id="IDX1322" />
+    <function caption="DEGREES(X)" id="IDX1323" />
+    <function caption="DIV" id="IDX1324" />
+    <function caption="EXP(X)" id="IDX1325" />
+    <function caption="FLOOR(X)" id="IDX1326" />
+    <function caption="LN(X)" id="IDX1327" />
+    <function caption="LOG(X)" id="IDX1328" />
+    <function caption="LOG(B,X)" id="IDX1328" />
+    <function caption="LOG2(X)" id="IDX1329" />
+    <function caption="LOG10(X)" id="IDX1330" />
+    <function caption="MOD(N,M)" id="IDX1335" />
+    <function caption="N % M" id="IDX1335" />
+    <function caption="N MOD M" id="IDX1335" />
+    <function caption="PI()" id="IDX1336" />
+    <function caption="POW(X,Y)" id="IDX1338" />
+    <function caption="POWER(X,Y)" id="IDX1338" />
+    <function caption="RADIANS(X)" id="IDX1339" />
+    <function caption="RAND()" id="IDX1340" />
+    <function caption="RAND(N)" id="IDX1340" />
+    <function caption="ROUND(X)" id="IDX1341" />
+    <function caption="ROUND(X,D)" id="IDX1341" />
+    <function caption="SIGN(X)" id="IDX1342" />
+    <function caption="SIN(X)" id="IDX1343" />
+    <function caption="SQRT(X)" id="IDX1344" />
+    <function caption="TAN(X)" id="IDX1345" />
+    <function caption="TRUNCATE(X,D)" id="IDX1346" />
+  </functiongroup>
+  <functiongroup name="Date and Time Functions">
+    <function caption="ADDDATE(date,INTERVAL expr type)" id="IDX1350" />
+    <function caption="ADDDATE(expr,days)" id="IDX1350" />
+    <function caption="ADDTIME(expr,expr2)" id="IDX1351" />
+    <function caption="CURDATE()" id="IDX1352" />
+    <function caption="CURRENT_DATE" id="IDX1353" />
+    <function caption="CURRENT_DATE()" id="IDX1353" />
+    <function caption="CURTIME()" id="IDX1354" />
+    <function caption="CURRENT_TIME" id="IDX1355" />
+    <function caption="CURRENT_TIME()" id="IDX1355" />
+    <function caption="CURRENT_TIMESTAMP" id="IDX1356" />
+    <function caption="CURRENT_TIMESTAMP()" id="IDX1356" />
+    <function caption="DATE(expr)" id="IDX1357" />
+    <function caption="DATEDIFF(expr,expr2)" id="IDX1358" />
+    <function caption="DATE_ADD(date,INTERVAL expr type)" id="IDX1360" />
+    <function caption="DATE_SUB(date,INTERVAL expr type)" id="IDX1360" />
+    <function caption="DATE_FORMAT(date,format)" id="IDX1361" />
+    <function caption="DAY(date)" id="IDX1362" />
+    <function caption="DAYNAME(date)" id="IDX1363" />
+    <function caption="DAYOFMONTH(date)" id="IDX1364" />
+    <function caption="DAYOFWEEK(date)" id="IDX1365" />
+    <function caption="DAYOFYEAR(date)" id="IDX1366" />
+    <function caption="EXTRACT(type FROM date)" id="IDX1367" />
+    <function caption="FROM_DAYS(N)" id="IDX1368" />
+    <function caption="FROM_UNIXTIME(unix_timestamp)" id="IDX1369" />
+    <function caption="FROM_UNIXTIME(unix_timestamp,format)" id="IDX1369" />
+    <function caption="GET_FORMAT(DATE | TIME | TIMESTAMP, 'EUR' | 'USA' | 'JIS' | 'ISO' | 'INTERNAL')" id="IDX1370" />
+    <function caption="HOUR(time)" id="IDX1371" />
+    <function caption="LAST_DAY(date)" id="IDX1372" />
+    <function caption="LOCALTIME" id="IDX1373" />
+    <function caption="LOCALTIME()" id="IDX1373" />
+    <function caption="LOCALTIMESTAMP" id="IDX1374" />
+    <function caption="LOCALTIMESTAMP()" id="IDX1374" />
+    <function caption="MAKEDATE(year,dayofyear)" id="IDX1375" />
+    <function caption="MAKETIME(hour,minute,second)" id="IDX1376" />
+    <function caption="MICROSECOND(expr)" id="IDX1377" />
+    <function caption="MINUTE(time)" id="IDX1378" />
+    <function caption="MONTH(date)" id="IDX1379" />
+    <function caption="MONTHNAME(date)" id="IDX1380" />
+    <function caption="NOW()" id="IDX1381" />
+    <function caption="PERIOD_ADD(P,N)" id="IDX1382" />
+    <function caption="PERIOD_DIFF(P1,P2)" id="IDX1383" />
+    <function caption="QUARTER(date)" id="IDX1384" />
+    <function caption="SECOND(time)" id="IDX1385" />
+    <function caption="SEC_TO_TIME(seconds)" id="IDX1386" />
+    <function caption="STR_TO_DATE(str,format)" id="IDX1387" />
+    <function caption="SUBDATE(date,INTERVAL expr type)" id="IDX1388" />
+    <function caption="SUBDATE(expr,days)" id="IDX1388" />
+    <function caption="SUBTIME(expr,expr2)" id="IDX1389" />
+    <function caption="SYSDATE()" id="IDX1390" />
+    <function caption="TIME(expr)" id="IDX1391" />
+    <function caption="TIMEDIFF(expr,expr2)" id="IDX1392" />
+    <function caption="TIMESTAMP(expr)" id="IDX1393" />
+    <function caption="TIMESTAMP(expr,expr2)" id="IDX1393" />
+    <function caption="TIMESTAMPADD(interval,int_expr,datetime_expr)" id="IDX1394" />
+    <function caption="TIMESTAMPDIFF(interval,datetime_expr1,datetime_expr2)" id="IDX1395" />
+    <function caption="TIME_FORMAT(time,format)" id="IDX1396" />
+    <function caption="TIME_TO_SEC(time)" id="IDX1397" />
+    <function caption="TO_DAYS(date)" id="IDX1398" />
+    <function caption="UNIX_TIMESTAMP()" id="IDX1399" />
+    <function caption="UNIX_TIMESTAMP(date)" id="IDX1399" />
+    <function caption="UTC_DATE" id="IDX1400" />
+    <function caption="UTC_DATE()" id="IDX1400" />
+    <function caption="UTC_TIME" id="IDX1401" />
+    <function caption="UTC_TIME()" id="IDX1401" />
+    <function caption="UTC_TIMESTAMP" id="IDX1402" />
+    <function caption="UTC_TIMESTAMP()" id="IDX1402" />
+    <function caption="WEEK(date [,mode])" id="IDX1403" />
+    <function caption="WEEKDAY(date)" id="IDX1404" />
+    <function caption="WEEKOFYEAR(date)" id="IDX1405" />
+    <function caption="YEAR(date)" id="IDX1406" />
+    <function caption="YEARWEEK(date)" id="IDX1406" />
+    <function caption="YEARWEEK(date,start)" id="IDX1406" />
+  </functiongroup>
+  <functiongroup name="Full-text Search Functions">
+    <function caption="MATCH (col1,col2,...) AGAINST (expr [IN BOOLEAN MODE | WITH QUERY EXPANSION] )" id="IDX1410" />
+    <function caption="+" id="IDX1410" />
+    <function caption="-" id="IDX1410" />
+    <function caption="" id="IDX1410" />
+    <function caption="&#62; &#60;" id="IDX1410" />
+    <function caption="( )" id="IDX1410" />
+    <function caption="~" id="IDX1410" />
+    <function caption="*" id="IDX1410" />
+    <function caption="&#34;" id="IDX1410" />
+    <function caption="'apple banana'" id="IDX1410" />
+    <function caption="'+apple +juice'" id="IDX1410" />
+    <function caption="'+apple macintosh'" id="IDX1410" />
+    <function caption="'+apple -macintosh'" id="IDX1410" />
+    <function caption="'+apple +(&#62;turnover &#60;strudel)'" id="IDX1410" />
+    <function caption="'apple*'" id="IDX1410" />
+    <function caption="'&#34;some words&#34;'" id="IDX1410" />
+  </functiongroup>
+  <functiongroup name="Cast Functions">
+    <function caption="CAST(expr AS type)" id="IDX1411" />
+    <function caption="CONVERT(expr,type)" id="IDX1412" />
+    <function caption="CONVERT(expr USING transcoding_name)" id="IDX1412" />
+  </functiongroup>
+  <functiongroup name="Other Functions">
+    <function caption="|" id="IDX1416" />
+    <function caption="&#38;" id="IDX1419" />
+    <function caption="^" id="IDX1421" />
+    <function caption="&#60;&#60;" id="IDX1422" />
+    <function caption="&#62;&#62;" id="IDX1423" />
+    <function caption="~" id="IDX1424" />
+    <function caption="BIT_COUNT(N)" id="IDX1425" />
+    <function caption="AES_ENCRYPT(str,key_str)" id="IDX1428" />
+    <function caption="AES_DECRYPT(str,key_str)" id="IDX1429" />
+    <function caption="DECODE(crypt_str,pass_str)" id="IDX1430" />
+    <function caption="ENCODE(str,pass_str)" id="IDX1431" />
+    <function caption="DES_DECRYPT(str_to_decrypt [, key_str])" id="IDX1432" />
+    <function caption="DES_ENCRYPT(str_to_encrypt [, (key_num | key_str) ] )" id="IDX1433" />
+    <function caption="ENCRYPT(str[,salt])" id="IDX1434" />
+    <function caption="MD5(str)" id="IDX1435" />
+    <function caption="PASSWORD(str)" id="IDX1437" />
+    <function caption="OLD_PASSWORD(str)" id="IDX1437" />
+    <function caption="SHA1(str)" id="IDX1440" />
+    <function caption="SHA(str)" id="IDX1440" />
+    <function caption="BENCHMARK(count,expr)" id="IDX1443" />
+    <function caption="CHARSET(str)" id="IDX1444" />
+    <function caption="COERCIBILITY(str)" id="IDX1445" />
+    <function caption="COLLATION(str)" id="IDX1446" />
+    <function caption="CONNECTION_ID()" id="IDX1447" />
+    <function caption="CURRENT_USER()" id="IDX1448" />
+    <function caption="DATABASE()" id="IDX1449" />
+    <function caption="FOUND_ROWS()" id="IDX1451" />
+    <function caption="LAST_INSERT_ID()" id="IDX1452" />
+    <function caption="LAST_INSERT_ID(expr)" id="IDX1452" />
+    <function caption="SESSION_USER()" id="IDX1454" />
+    <function caption="SYSTEM_USER()" id="IDX1455" />
+    <function caption="USER()" id="IDX1456" />
+    <function caption="VERSION()" id="IDX1457" />
+    <function caption="FORMAT(X,D)" id="IDX1460" />
+    <function caption="GET_LOCK(str,timeout)" id="IDX1462" />
+    <function caption="INET_ATON(expr)" id="IDX1463" />
+    <function caption="INET_NTOA(expr)" id="IDX1464" />
+    <function caption="IS_FREE_LOCK(str)" id="IDX1465" />
+    <function caption="IS_USED_LOCK(str)" id="IDX1466" />
+    <function caption="MASTER_POS_WAIT(log_name, log_pos [, timeout])" id="IDX1467" />
+    <function caption="RELEASE_LOCK(str)" id="IDX1468" />
+    <function caption="UUID()" id="IDX1469" />
+  </functiongroup>
+  <functiongroup name="Functions and Modifiers for Use with GROUP BY Clauses">
+    <function caption="AVG(expr)" id="IDX1472" />
+    <function caption="BIT_AND(expr)" id="IDX1473" />
+    <function caption="BIT_OR(expr)" id="IDX1474" />
+    <function caption="BIT_XOR(expr)" id="IDX1475" />
+    <function caption="COUNT(expr)" id="IDX1476" />
+    <function caption="COUNT(DISTINCT expr,[expr...])" id="IDX1478" />
+    <function caption="GROUP_CONCAT(expr)" id="IDX1479" />
+    <function caption="MIN(expr)" id="IDX1481" />
+    <function caption="MAX(expr)" id="IDX1481" />
+    <function caption="STD(expr)" id="IDX1485" />
+    <function caption="STDDEV(expr)" id="IDX1485" />
+    <function caption="SUM(expr)" id="IDX1486" />
+    <function caption="VARIANCE(expr)" id="IDX1487" />
+  </functiongroup>
+</functionindex>

@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<functionindex>
+  <functiongroup name="Data Manipulation">
+    <function caption="DELETE" id="DELETE" />
+    <function caption="DO" id="DO" />
+    <function caption="HANDLER" id="HANDLER" />
+    <function caption="INSERT" id="INSERT" />
+    <function caption="LOAD DATA INFILE" id="LOAD_DATA" />
+    <function caption="REPLACE" id="REPLACE" />
+    <function caption="SELECT" id="SELECT" />
+    <function caption="Subquery" id="Subqueries" />
+    <function caption="TRUNCATE" id="TRUNCATE" />
+    <function caption="UPDATE" id="UPDATE" />
+  </functiongroup>
+  <functiongroup name="Data Definition">
+    <function caption="ALTER DATABASE" id="ALTER_DATABASE" />
+    <function caption="ALTER TABLE" id="ALTER_TABLE" />
+    <function caption="CREATE DATABASE" id="CREATE_DATABASE" />
+    <function caption="CREATE INDEX" id="CREATE_INDEX" />
+    <function caption="CREATE TABLE" id="CREATE_TABLE" />
+    <function caption="DROP DATABASE" id="DROP_DATABASE" />
+    <function caption="DROP INDEX" id="DROP_INDEX" />
+    <function caption="DROP TABLE" id="DROP_TABLE" />
+    <function caption="RENAME TABLE" id="RENAME_TABLE" />
+  </functiongroup>
+  <functiongroup name="MySQL Utility">
+    <function caption="DESCRIBE" id="DESCRIBE" />
+    <function caption="USE" id="USE" />
+  </functiongroup>
+  <functiongroup name="Transactional and Locking">
+    <function caption="START TRANSACTION" id="START_TRANSACTION" />
+    <function caption="COMMIT" id="COMMIT" />
+    <function caption="ROLLBACK" id="ROLLBACK" />
+    <function caption="SAVEPOINT" id="Savepoints" />
+    <function caption="ROLLBACK TO SAVEPOINT" id="Savepoints" />
+    <function caption="LOCK TABLES" id="LOCK_TABLES" />
+    <function caption="UNLOCK TABLES" id="LOCK_TABLES" />
+    <function caption="SET TRANSACTION" id="SET_TRANSACTION" />
+  </functiongroup>
+</functionindex>
+

@@ -1,0 +1,3506 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2006-10-23 12:47\n"
+"PO-Revision-Date: 2006-10-23 12:47\n"
+"Last-Translator: Somebody <your.email@address.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: dxgettext 1.2 beta 5\n"
+
+#. AboutForm..Caption
+#: About.dfm:6
+msgid "About MySQL Administrator"
+msgstr ""
+
+#. AboutForm..VersionLbl..Caption
+#: About.dfm:48
+msgid "version 1.0.7 BETA"
+msgstr ""
+
+#. AboutForm..LicenceLbl....AutoSize
+#: About.dfm:82
+msgid "This software is released under the GNU General Public License (GPL), "
+"which is probably the best known Open Source license. The formal "
+"terms of the GPL license can be found at "
+"http://www.fsf.org/licenses/."
+msgstr ""
+
+#. AboutForm..CloseBtn..Caption
+#: About.dfm:105
+#. ConnectToInstanceForm..BottomPnl..OKBtn..Caption
+#: ConnectToInstance.dfm:465
+#. MySQLResultSetFieldViewerForm..PageControl..TextSheet..TextSheetBtnPnl..OKBtn..Caption
+#: MySQLResultSetFieldViewer.dfm:60
+#. MySQLResultSetFieldViewerForm..PageControl..ImageSheet..ImageSheetBtnPnl..Ok2Btn..Caption
+#: MySQLResultSetFieldViewer.dfm:153
+#. MySQLResultSetFieldViewerForm..PageControl..BinarySheet..TntPanel1..OK3Btn..Caption
+#: MySQLResultSetFieldViewer.dfm:879
+#. MyxConnectionDialogForm..BottomPnl..OKBtn..Caption
+#: MyxConnectionDialog.dfm:268
+#. SchemaSelectionForm..BottomPnl..OKBtn..Caption
+#: SchemaSelection.dfm:120
+#: ConnectToInstance.pas:1006
+#: ConnectToInstance.pas:1020
+#: EditorTable.pas:2706
+#: EditorTable.pas:3042
+#: EditorTable.pas:3068
+#: EditorTable.pas:3219
+#: MigrationObjSelFilter.pas:572
+#: MySQLConnection.pas:442
+#: MySQLConnection.pas:1376
+#: MyxError.pas:241
+#: MyxError.pas:247
+#: MyxError.pas:253
+#: SchemataTreeView.pas:2198
+msgid "OK"
+msgstr ""
+
+#. AboutForm..CreditsBtn..Caption
+#: About.dfm:115
+#: About.pas:94
+msgid "Credits"
+msgstr ""
+
+#. ConnectToInstanceForm..Caption
+#: ConnectToInstance.dfm:7
+msgid "MySQL Administrator"
+msgstr ""
+
+#. ConnectToInstanceForm..BottomPnl..OKBtn..Hint
+#: ConnectToInstance.dfm:464
+#. MyxConnectionDialogForm..BottomPnl..OKBtn..Hint
+#: MyxConnectionDialog.dfm:267
+msgid "Click this button to connect"
+msgstr ""
+
+#. ConnectToInstanceForm..BottomPnl..CancelBtn..Hint
+#: ConnectToInstance.dfm:478
+#. MyxConnectionDialogForm..BottomPnl..CancelBtn..Hint
+#: MyxConnectionDialog.dfm:281
+msgid "Click this button to cancel the connection"
+msgstr ""
+
+#. ConnectToInstanceForm..BottomPnl..CancelBtn..Caption
+#: ConnectToInstance.dfm:479
+#. EditorSqlForm..BottomPnl..CancelBtn..Caption
+#: EditorSql.dfm:58
+#. MySQLResultSetFieldViewerForm..PageControl..TextSheet..TextSheetBtnPnl..CancelBtn..Caption
+#: MySQLResultSetFieldViewer.dfm:70
+#. MySQLResultSetFieldViewerForm..PageControl..ImageSheet..ImageSheetBtnPnl..Cancel2Btn..Caption
+#: MySQLResultSetFieldViewer.dfm:163
+#. MySQLResultSetFieldViewerForm..PageControl..BinarySheet..TntPanel1..Cancel3Btn..Caption
+#: MySQLResultSetFieldViewer.dfm:889
+#. MyxConnectionDialogForm..BottomPnl..CancelBtn..Caption
+#: MyxConnectionDialog.dfm:282
+#. SchemaSelectionForm..BottomPnl..CancelBtn..Caption
+#: SchemaSelection.dfm:111
+#: ConnectToInstance.pas:1214
+#: MigrationObjSelFilter.pas:572
+#: MyxConnectionDialog.pas:1187
+#: MyxConnectionDialog.pas:1355
+#: MyxEditor.pas:112
+#: MyxRoutineEditorFrame.pas:336
+#: MyxRoutineEditorFrame.pas:356
+#: MyxTabHeader.pas:1587
+#: OptionsEditor.pas:548
+#: SchemataTreeView.pas:2198
+#: SchemataTreeView.pas:2373
+#: TabHeader.pas:1228
+msgid "Cancel"
+msgstr ""
+
+#. ConnectToInstanceForm..BottomPnl..ClearFieldsBtn..Hint
+#: ConnectToInstance.dfm:490
+#. MyxConnectionDialogForm..BottomPnl..ClearFieldsBtn..Hint
+#: MyxConnectionDialog.dfm:293
+msgid "Click this button to clear all fields"
+msgstr ""
+
+#. ConnectToInstanceForm..BottomPnl..ClearFieldsBtn..Caption
+#: ConnectToInstance.dfm:491
+#. MyxConnectionDialogForm..BottomPnl..ClearFieldsBtn..Caption
+#: MyxConnectionDialog.dfm:294
+msgid "Clear"
+msgstr ""
+
+#. ConnectToInstanceForm..BottomPnl..DetailsBtn..Caption
+#: ConnectToInstance.dfm:502
+#. TextSearchForm..PageControl..SearchTabSheet..DetailsBtn..Caption
+#: TextSearch.dfm:90
+#. TextSearchForm..PageControl..ReplaceTabSheet..Details2Btn..Caption
+#: TextSearch.dfm:170
+#: TextSearch.pas:336
+msgid "Details >>"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..Caption
+#: ConnectToInstance.dfm:512
+msgid "Connect to MySQL Server Instance"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..HostnameLbl..Caption
+#: ConnectToInstance.dfm:520
+msgid "Server Host:"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..ConnectionLbl..Caption
+#: ConnectToInstance.dfm:528
+#. MyxConnectionDialogForm..ParamsMainPnl..ConnectGBox..StoredConnPnl..ConnectionLbl..Caption
+#: MyxConnectionDialog.dfm:149
+msgid "Stored Connection:"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..UsernameLbl..Caption
+#: ConnectToInstance.dfm:536
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..UsernameLbl..Caption
+#: OptionsEditor.dfm:707
+msgid "Username:"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..PasswordLbl..Caption
+#: ConnectToInstance.dfm:544
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..PasswordLbl..Caption
+#: OptionsEditor.dfm:714
+msgid "Password:"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..PortLbl..Caption
+#: ConnectToInstance.dfm:552
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..PortLbl..Caption
+#: OptionsEditor.dfm:721
+msgid "Port:"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..SchemataEdLbl..Caption
+#: ConnectToInstance.dfm:560
+msgid "Default Schema:"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..HostnameCBox....Height
+#: ConnectToInstance.dfm:570
+msgid "Enter the Hostname to connect to. Can be a network name or IP "
+"address"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..ConnectionCBox..Hint
+#: ConnectToInstance.dfm:584
+#. MyxConnectionDialogForm..ParamsMainPnl..ConnectGBox..StoredConnPnl..StoredConnComboBox..Hint
+#: MyxConnectionDialog.dfm:198
+#. MyxConnectionDialogForm..ConnTypeMainPnl..ConnTypeGBox..ConnTypePnl..DriverComboBox..Hint
+#: MyxConnectionDialog.dfm:359
+#. MyxConnectionDialogForm..ConnTypeMainPnl..ConnTypeGBox..ConnTypePnl..RdbmsComboBox..Hint
+#: MyxConnectionDialog.dfm:374
+msgid "All stored connections"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..PasswordEd..Hint
+#: ConnectToInstance.dfm:602
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..PasswordEd..Hint
+#: OptionsEditor.dfm:757
+msgid "Enter the password of the user account"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..PortEd..Hint
+#: ConnectToInstance.dfm:614
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..PortEd..Hint
+#: OptionsEditor.dfm:768
+msgid "Specify the TCP/IP port to connect to"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..SchemataEd..Hint
+#: ConnectToInstance.dfm:626
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..SchemataEd..Hint
+#: OptionsEditor.dfm:799
+msgid "Enter the schema to select after the connection is "
+"established"
+msgstr ""
+
+#. ConnectToInstanceForm..ConnectToHostPnl..UsernameCBox....Height
+#: ConnectToInstance.dfm:640
+msgid "Enter a username of a user account which has privileges to connect to "
+"the instance"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..Caption
+#: ConnectToInstance.dfm:664
+msgid "Advanced Connection Options"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..MySQLOptionsTabSheet..Caption
+#: ConnectToInstance.dfm:684
+msgid "MySQLOptionsTabSheet"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..MySQLOptionsTabSheet..PipeNameLabel..Caption
+#: ConnectToInstance.dfm:691
+msgid "Pipe name:"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..MySQLOptionsTabSheet..UseCompressionCBox..Caption
+#: ConnectToInstance.dfm:699
+msgid "Use compression protocol"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..MySQLOptionsTabSheet..NamedPipeCBox..Caption
+#: ConnectToInstance.dfm:709
+msgid "Use named pipe (localhost only)"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..MySQLOptionsTabSheet..UseAnsiQuotesCBox..Caption
+#: ConnectToInstance.dfm:718
+msgid "Use ANSI quotes to quote identifiers"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..MySQLOptionsTabSheet..UseSSLCBox..Caption
+#: ConnectToInstance.dfm:728
+msgid "Use SSL if available (the client library needs to support "
+"it)"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..MySQLOptionsTabSheet..PipeNameEdit....Height
+#: ConnectToInstance.dfm:739
+msgid "Enter the name to be used for the pipe. Must be the same as set for "
+"the server (see advanced networking "
+"page)"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..AdvancedOptionsGeneralTabSheet..Caption
+#: ConnectToInstance.dfm:748
+msgid "AdvancedOptionsGeneralTabSheet"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..AdvancedOptionsGeneralTabSheet..AdvancedOptionsBottomPnl..AdvancedOptionsBottomRightPnl..AdvancedOptionsDelBtn..Hint
+#: ConnectToInstance.dfm:788
+#. MyxConnectionDialogForm..ParamsMainPnl..ConnectGBox..StoredConnPnl..StoredConnDelBtn..Hint
+#: MyxConnectionDialog.dfm:177
+msgid "Remove Option"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..AdvancedOptionsGeneralTabSheet..AdvancedOptionsBottomPnl..AdvancedOptionsBottomRightPnl..AdvancedOptionsAddBtn..Hint
+#: ConnectToInstance.dfm:807
+#. MyxConnectionDialogForm..ParamsMainPnl..ConnectGBox..StoredConnPnl..StoredConnAddBtn..Hint
+#: MyxConnectionDialog.dfm:156
+msgid "Add Option"
+msgstr ""
+
+#. ConnectToInstanceForm..AdvancedOptionsGBox..AdvancedOptionsPageControl..AdvancedOptionsGeneralTabSheet..AdvancedOptionsBottomPnl..AdvancedOptionsBottomRightPnl..AdvancedOptionsResetBtn..Hint
+#: ConnectToInstance.dfm:826
+msgid "Reset Options to Defaul Values"
+msgstr ""
+
+#. EditorSqlForm..Caption
+#: EditorSql.dfm:5
+msgid "MySQL SQL Editor"
+msgstr ""
+
+#. EditorSqlForm..BottomPnl..ExecuteSQLBtn..Caption
+#: EditorSql.dfm:48
+msgid "Execute SQL"
+msgstr ""
+
+#. EditorSqlForm..UCESQLHighlighter..DefaultFilter
+#: EditorSql.dfm:402
+#. RoutineFrame..UCESQLHighlighter..DefaultFilter
+#: MyxRoutineEditorFrame.dfm:399
+#. MyxTableEditorForm..UCESQLHighlighter..DefaultFilter
+#: MyxTableEditor.dfm:1920
+#. MyxViewEditorForm..UCESQLHighlighter..DefaultFilter
+#: MyxViewEditor.dfm:791
+msgid "SQL script files (*.sql)|*.sql"
+msgstr ""
+
+#. EditorTableForm..Caption
+#: EditorTable.dfm:5
+msgid "MySQL Table Editor"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..HeaderPnl..TableNameLbl..Caption
+#: EditorTable.dfm:51
+#. MyxTableEditorForm..TablePageControl..TableSheet..TableSheetPnl..TableNameLbl..Caption
+#: MyxTableEditor.dfm:138
+msgid "Table Name:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..HeaderPnl..TntLabel2..Caption
+#: EditorTable.dfm:59
+msgid "Database:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..HeaderPnl..TntLabel3..Caption
+#: EditorTable.dfm:67
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntLabel8..Caption
+#: EditorTable.dfm:736
+#. MyxRoutineGroupEditorForm..RoutinePageControl..CommentSheet..CommentSheetPnl..TntLabel2..Caption
+#: MyxRoutineGroupEditor.dfm:491
+#. MyxTableEditorForm..TablePageControl..TableSheet..TableSheetPnl..TntLabel2..Caption
+#: MyxTableEditor.dfm:165
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnsDetailsPnl..ColumnDetailsGroupBox..TntLabel8..Caption
+#: MyxTableEditor.dfm:336
+msgid "Comment:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..BottomPnl..DiscardChangesBtn..Caption
+#: EditorTable.dfm:133
+msgid "&Discard Changes"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..BottomPnl..ApplyChangesBtn..Caption
+#: EditorTable.dfm:144
+msgid "&Apply Changes"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..BottomPnl..CloseBtn..Caption
+#: EditorTable.dfm:155
+msgid "&Close"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..BottomPnl..DetailsBtn..Caption
+#: EditorTable.dfm:164
+msgid "&Details >>"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..Caption
+#: EditorTable.dfm:189
+msgid "Columns and Indices"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnVST......WideText
+#: EditorTable.dfm:243
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST......WideText
+#: MyxTableEditor.dfm:487
+msgid "Column Name"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnVST......WideText
+#: EditorTable.dfm:248
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST......WideText
+#: MyxTableEditor.dfm:493
+msgid "Datatype"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnVST......WideText
+#: EditorTable.dfm:265
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST......WideText
+#: MyxTableEditor.dfm:511
+msgid "Flags"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnVST......WideText
+#: EditorTable.dfm:270
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST......WideText
+#: MyxTableEditor.dfm:516
+msgid "Default Value"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnVST......WideText
+#: EditorTable.dfm:276
+#. MyxRoutineGroupEditorForm..RoutinePageControl..CommentSheet..Caption
+#: MyxRoutineGroupEditor.dfm:339
+#. MyxSchemaEditorForm..PageControl..CommentTabSheet..Caption
+#: MyxSchemaEditor.dfm:131
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST......WideText
+#: MyxTableEditor.dfm:522
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexVST......WideText
+#: MyxTableEditor.dfm:626
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexColumnVST......WideText
+#: MyxTableEditor.dfm:680
+#. MyxTableEditorForm..TablePageControl..ForeignKeySheet..FkSheetPnl..ForeignKeyVST......WideText
+#: MyxTableEditor.dfm:762
+#. MyxViewEditorForm..ViewPageControl..CommentTabSheet..Caption
+#: MyxViewEditor.dfm:621
+msgid "Comment"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet2..Caption
+#: EditorTable.dfm:289
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..Caption
+#: MyxTableEditor.dfm:530
+#. SchemataFrame..SchemaSearchPopupMenu..CustomMI..IndicesSubMI..Caption
+#: SchemataTreeView.dfm:167
+#: SchemataTreeView.pas:1730
+msgid "Indices"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet2..TntGroupBox1..Caption
+#: EditorTable.dfm:359
+msgid "Index Settings"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet2..TntGroupBox1..IndexKindLbl..Caption
+#: EditorTable.dfm:376
+msgid "Index Kind:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet2..TntGroupBox1..TntLabel12..Caption
+#: EditorTable.dfm:383
+msgid "Index Columns"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet2..TntGroupBox1..IndexTypeLbl..Caption
+#: EditorTable.dfm:391
+msgid "Index Type:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet2..TntGroupBox1..TntLabel9..Caption
+#: EditorTable.dfm:457
+msgid "(Use Drag'n'Drop)"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet8..Caption
+#: EditorTable.dfm:512
+#. MyxTableEditorForm..TablePageControl..ForeignKeySheet..Caption
+#: MyxTableEditor.dfm:688
+msgid "Foreign Keys"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet8..TntGroupBox2..Caption
+#: EditorTable.dfm:556
+msgid "Foreign Key Settings"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet8..TntGroupBox2..TntLabel14..Caption
+#: EditorTable.dfm:566
+msgid "Key Name:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet8..TntGroupBox2..TntLabel15..Caption
+#: EditorTable.dfm:573
+msgid "On Delete:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet8..TntGroupBox2..TntLabel16..Caption
+#: EditorTable.dfm:580
+msgid "On Update:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet8..TntGroupBox2..TntLabel17..Caption
+#: EditorTable.dfm:587
+msgid "Ref. Table:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet8..TntGroupBox2..FKColsVST......WideText
+#: EditorTable.dfm:639
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexColumnVST......WideText
+#: MyxTableEditor.dfm:660
+#. MyxTableEditorForm..TablePageControl..ForeignKeySheet..FkSheetPnl..ForeignKeyColumnVST......WideText
+#: MyxTableEditor.dfm:796
+msgid "Column"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet8..TntGroupBox2..FKColsVST......WideText
+#: EditorTable.dfm:645
+msgid "Reference Column"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..Caption
+#: EditorTable.dfm:699
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnsDetailsPnl..ColumnDetailsGroupBox..Caption
+#: MyxTableEditor.dfm:292
+msgid "Column Details"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntLabel4..Caption
+#: EditorTable.dfm:708
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnsDetailsPnl..ColumnDetailsGroupBox..TntLabel4..Caption
+#: MyxTableEditor.dfm:303
+#: MyxConnectionDialog.pas:1188
+#: MyxTabHeader.pas:1587
+#: SchemataTreeView.pas:2374
+#: TabHeader.pas:1228
+msgid "Name:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntLabel5..Caption
+#: EditorTable.dfm:715
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnsDetailsPnl..ColumnDetailsGroupBox..TntLabel5..Caption
+#: MyxTableEditor.dfm:312
+msgid "Datatype:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntLabel6..Caption
+#: EditorTable.dfm:722
+msgid "Flags:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntLabel7..Caption
+#: EditorTable.dfm:729
+msgid "Default Value:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntLabel36..Caption
+#: EditorTable.dfm:743
+msgid "Column Charset:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntLabel37..Caption
+#: EditorTable.dfm:750
+msgid "Column Collate:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntGroupBox5..Caption
+#: EditorTable.dfm:823
+msgid "Column Options"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntGroupBox5..ColumnPKCBox..Caption
+#: EditorTable.dfm:830
+msgid "Primary Key"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntGroupBox5..ColumnNotNullCBox..Caption
+#: EditorTable.dfm:839
+msgid "Not Null"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..ColumnTabSheet..ColumnsPageControl..TntTabSheet1..TntGroupBox5..ColumnAutoIncCBox..Caption
+#: EditorTable.dfm:848
+msgid "Auto Increment"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..Caption
+#: EditorTable.dfm:891
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..Caption
+#: MyxTableEditor.dfm:878
+msgid "Table Options"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..TableOptionScrollBox..TntGroupBox6..Caption
+#: EditorTable.dfm:920
+msgid "Character Set"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..TableOptionScrollBox..TntGroupBox6..TableCharsetCaptionLbl..Caption
+#: EditorTable.dfm:927
+msgid "Charset:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..TableOptionScrollBox..TntGroupBox6..TableCollationCaptionLbl..Caption
+#: EditorTable.dfm:934
+#. MyxSchemaEditorForm..HeaderPnl..TntLabel1..Caption
+#: MyxSchemaEditor.dfm:47
+#. MyxTableEditorForm..TablePageControl..TableSheet..TableSheetPnl..TntLabel1..Caption
+#: MyxTableEditor.dfm:156
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnsDetailsPnl..ColumnDetailsGroupBox..TntLabel37..Caption
+#: MyxTableEditor.dfm:321
+msgid "Collation:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..TableOptionScrollBox..TntGroupBox6..TableCharsetDescLbl....AutoSize
+#: EditorTable.dfm:945
+msgid "The default character set that is used for the table. Starting from "
+"MySQL 4.1 you can specify an individual character set for each "
+"column."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..TableOptionScrollBox..TntGroupBox6..TableCollationDescLbl..Caption
+#: EditorTable.dfm:954
+msgid "Collation method that is used to compare text and sort "
+"columns."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..TableOptionScrollBox..StorageEngineGBox..Caption
+#: EditorTable.dfm:983
+msgid "Storage Engine"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..TableOptionScrollBox..StorageEngineGBox..TableEngineDescLbl....AutoSize
+#: EditorTable.dfm:994
+#: EditorTable.pas:549
+msgid "Very fast, disk based storage engine without support for "
+"transactions. Offers fulltext search, packed keys, and is the default "
+"storage engine."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..TabSheet2..TableOptionScrollBox..StorageEngineGBox..TntLabel11..Caption
+#: EditorTable.dfm:1002
+msgid "Table Engine:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..Caption
+#: EditorTable.dfm:1019
+msgid "Advanced Options"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..StorageOptionsGBox..Caption
+#: EditorTable.dfm:1048
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..StorageOptionsGBox..Caption
+#: MyxTableEditor.dfm:1162
+msgid "Storage Options"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..StorageOptionsGBox..TntLabel27..Caption
+#: EditorTable.dfm:1055
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..StorageOptionsGBox..TntLabel27..Caption
+#: MyxTableEditor.dfm:1169
+msgid "Data Directory:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..StorageOptionsGBox..TntLabel28..Caption
+#: EditorTable.dfm:1062
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..StorageOptionsGBox..TntLabel28..Caption
+#: MyxTableEditor.dfm:1176
+msgid "Index Directory:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..StorageOptionsGBox..TntLabel55....AutoSize
+#: EditorTable.dfm:1072
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..StorageOptionsGBox..TntLabel55....AutoSize
+#: MyxTableEditor.dfm:1186
+msgid "Directory where to put the tables data file. This works only for "
+"MyISAM tables only and not on some operating systems "
+"(Windows)."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..StorageOptionsGBox..TntLabel56....AutoSize
+#: EditorTable.dfm:1084
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..StorageOptionsGBox..TntLabel56....AutoSize
+#: MyxTableEditor.dfm:1198
+msgid "Directory where to put the tables index file. This works only for "
+"MyISAM tables only and not on some operating systems "
+"(Windows)."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..Caption
+#: EditorTable.dfm:1109
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..Caption
+#: MyxTableEditor.dfm:1028
+msgid "Row Options"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel22..Caption
+#: EditorTable.dfm:1116
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel22..Caption
+#: MyxTableEditor.dfm:1035
+msgid "Avg Row Len:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel24..Caption
+#: EditorTable.dfm:1123
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel24..Caption
+#: MyxTableEditor.dfm:1042
+msgid "Min Rows:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel25..Caption
+#: EditorTable.dfm:1130
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel25..Caption
+#: MyxTableEditor.dfm:1049
+msgid "Max Rows:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel26..Caption
+#: EditorTable.dfm:1137
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel26..Caption
+#: MyxTableEditor.dfm:1056
+msgid "Row Format:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel39....AutoSize
+#: EditorTable.dfm:1149
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel39....AutoSize
+#: MyxTableEditor.dfm:1068
+msgid "Defines how the rows in MyISAM tables should be stored. The option "
+"value can FIXED or DYNAMIC for static or variable-length row format. "
+"The utility myisampack can be used to set the type to "
+"COMPRESSED."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel60....AutoSize
+#: EditorTable.dfm:1161
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel60....AutoSize
+#: MyxTableEditor.dfm:1080
+msgid "Activate this option if you want MySQL to maintain a live checksum "
+"for all rows. This makes the table a little slower to update, but "
+"also makes it easier to find corrupted "
+"tables."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel61....AutoSize
+#: EditorTable.dfm:1173
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel61....AutoSize
+#: MyxTableEditor.dfm:1092
+msgid "An approximation of the average row length for your table. You need "
+"to set this only for large tables with variable-size "
+"records."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel62..Caption
+#: EditorTable.dfm:1182
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel62..Caption
+#: MyxTableEditor.dfm:1101
+msgid "The minimum number of rows you plan to store in the "
+"table."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel63..Caption
+#: EditorTable.dfm:1191
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..TntLabel63..Caption
+#: MyxTableEditor.dfm:1110
+msgid "The maximum number of rows you plan to store in the "
+"table."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RowOptionsGBox..UseChecksumCBox..Caption
+#: EditorTable.dfm:1223
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..RowOptionsGBox..UseChecksumCBox..Caption
+#: MyxTableEditor.dfm:1142
+msgid "Use Checksum"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RaidOptionsGBox..Caption
+#: EditorTable.dfm:1243
+msgid "Table RAID Settings"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RaidOptionsGBox..TntLabel29..Caption
+#: EditorTable.dfm:1250
+msgid "RAID Type:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RaidOptionsGBox..NumberOfChunksCaptionLbl..Caption
+#: EditorTable.dfm:1257
+msgid "Number of Chunks:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RaidOptionsGBox..ChunkSizeCaptionEd..Caption
+#: EditorTable.dfm:1264
+msgid "Chunksize:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RaidOptionsGBox..ChunkSizeUnitLbl..Caption
+#: EditorTable.dfm:1271
+msgid "kB"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RaidOptionsGBox..TntLabel57....AutoSize
+#: EditorTable.dfm:1284
+msgid "The RAID functionality can be used to exceed the 2GB/4GB limit for "
+"MyISAM data files on operating systems that do not support big files "
+"(unrecommended if they do). When the RAID type is set to STRIPED the "
+"table data file will be split into a number for "
+"chunks."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RaidOptionsGBox..NumberOfChunksDescLbl....AutoSize
+#: EditorTable.dfm:1296
+msgid "Number of chunks to create, the maximum value is 255. For each chunk "
+"there will be a subdirectory created named '00', '01', ... and a "
+"'tbl_name.MYD' file will be created in each "
+"directory."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..RaidOptionsGBox..ChunkSizeDescLbl....AutoSize
+#: EditorTable.dfm:1307
+msgid "Size of chunk that will be written to first file, to the next file, "
+"and so on."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..Caption
+#: EditorTable.dfm:1362
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..Caption
+#: MyxTableEditor.dfm:921
+msgid "Various"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..TntLabel19..Caption
+#: EditorTable.dfm:1369
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..TntLabel19..Caption
+#: MyxTableEditor.dfm:928
+msgid "Pack Keys:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..TntLabel20..Caption
+#: EditorTable.dfm:1376
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..TntLabel20..Caption
+#: MyxTableEditor.dfm:935
+msgid "Auto Increment:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..TntLabel21..Caption
+#: EditorTable.dfm:1383
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..TntLabel21..Caption
+#: MyxTableEditor.dfm:942
+msgid "Table Password:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..TntLabel51....AutoSize
+#: EditorTable.dfm:1394
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..TntLabel51....AutoSize
+#: MyxTableEditor.dfm:953
+msgid "Use this option to generate smaller indices. This usually makes "
+"updates slower and reads faster. Setting it to DEFAULT tells the "
+"storage engine to only pack long CHAR/VARCHAR "
+"columns."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..TntLabel52....AutoSize
+#: EditorTable.dfm:1405
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..TntLabel52....AutoSize
+#: MyxTableEditor.dfm:964
+msgid "Password to encrypt the table definition file. This option doesn't do "
+"anything in the standard MySQL version."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..TntLabel53..Caption
+#: EditorTable.dfm:1414
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..TntLabel53..Caption
+#: MyxTableEditor.dfm:973
+msgid "The initial AUTO_INCREMENT value for the table, only for "
+"MyISAM."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..TntLabel54....AutoSize
+#: EditorTable.dfm:1425
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..TntLabel54....AutoSize
+#: MyxTableEditor.dfm:984
+msgid "Use this option to delay the key updates until the table is closed. "
+"This works for MyISAM only."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..VariousGBox..DelayKeyUpdatesCBox..Caption
+#: EditorTable.dfm:1459
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..VariousGBox..DelayKeyUpdatesCBox..Caption
+#: MyxTableEditor.dfm:1018
+msgid "Delay Key Updates"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..MergeOptionGBox..Caption
+#: EditorTable.dfm:1469
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..MergeOptionGBox..Caption
+#: MyxTableEditor.dfm:1223
+msgid "Merge Table Options"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..MergeOptionGBox..MergeInsertMethodCapionLbl..Caption
+#: EditorTable.dfm:1476
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..MergeOptionGBox..MergeInsertMethodCapionLbl..Caption
+#: MyxTableEditor.dfm:1230
+msgid "Insert Method:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..MergeOptionGBox..UnionTablesCaptionLbl..Caption
+#: EditorTable.dfm:1483
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..MergeOptionGBox..UnionTablesCaptionLbl..Caption
+#: MyxTableEditor.dfm:1237
+msgid "Union Tables:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..MergeOptionGBox..UnionTablesDescLbl..Caption
+#: EditorTable.dfm:1491
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..MergeOptionGBox..UnionTablesDescLbl..Caption
+#: MyxTableEditor.dfm:1245
+msgid "List of MyISAM tables that should be used by the MERGE "
+"table."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..MergeOptionGBox..MergeInsertMethodDescLbl..Caption
+#: EditorTable.dfm:1500
+#. MyxTableEditorForm..TablePageControl..TntTabSheet1..AdvancedOptionsSheetPnl..AdvancedOptionsScrollBox..MergeOptionGBox..MergeInsertMethodDescLbl..Caption
+#: MyxTableEditor.dfm:1254
+msgid "The union table which should be used for "
+"inserts."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..TntGroupBox3..Caption
+#: EditorTable.dfm:1527
+msgid "Federated"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..TntGroupBox3..TntLabel18..Caption
+#: EditorTable.dfm:1534
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..ConnectionLbl..Caption
+#: OptionsEditor.dfm:700
+msgid "Connection:"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..AdvTableOptionsSheet..AdvancedOptionsScrollBox..TntGroupBox3..TntLabel23..Caption
+#: EditorTable.dfm:1542
+msgid "The connection string for federated "
+"tables."
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..StdInsertsTabSheet..Caption
+#: EditorTable.dfm:1557
+#. MyxTableEditorForm..TablePageControl..TntTabSheet4..Caption
+#: MyxTableEditor.dfm:1280
+msgid "Standard Inserts"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..StdInsertsTabSheet..TntLabel40..Caption
+#: EditorTable.dfm:1567
+msgid "SQL Inserts"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..DescTabSheet..Caption
+#: EditorTable.dfm:1579
+#: MySQLResultSetControls.pas:3698
+msgid "Description"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..GirdOptionPnl..MainPageControl..DescTabSheet..TntLabel41..Caption
+#: EditorTable.dfm:1589
+msgid "Table Description"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..DockedHeaderPnl..TntLabel1..Caption
+#: EditorTable.dfm:1634
+#. MyxTableEditorForm..Caption
+#: MyxTableEditor.dfm:4
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..Caption
+#: OptionsEditor.dfm:906
+msgid "Table Editor"
+msgstr ""
+
+#. EditorTableForm..TableEditorPnl..DockedHeaderPnl..TntLabel10..Caption
+#: EditorTable.dfm:1647
+msgid "Use this editor to create or alter tables."
+msgstr ""
+
+#. EditorTableForm..IndexColumnPopupMenu..SetIndexColumnLengthMI..Caption
+#: EditorTable.dfm:1868
+msgid "Set Index Column Length"
+msgstr ""
+
+#. EditorTableForm..ColumnPopupMenu..DeleteTableColumnsMI..Caption
+#: EditorTable.dfm:1878
+msgid "Delete Table Columns"
+msgstr ""
+
+#. EditorTableForm..FKColumnPopupMenu..RemoveFKColumnMI..Caption
+#: EditorTable.dfm:1888
+msgid "Remove Column"
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..Caption
+#: MigrationObjMapDetail.dfm:18
+msgid "Mapping of Type Oracle Table"
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..TntLabel2..Caption
+#: MigrationObjMapDetail.dfm:34
+msgid "Migration method:"
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..DefMethodDescLbl..Caption
+#: MigrationObjMapDetail.dfm:42
+msgid "No migration method available for this source "
+"type."
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..ParameterLbl..Caption
+#: MigrationObjMapDetail.dfm:49
+msgid "Parameter:"
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..MethodComboBox..Text
+#: MigrationObjMapDetail.dfm:66
+#. MigrationObjMapDetailFrame..ObjectSelGBox..MethodComboBox....Items.Strings
+#: MigrationObjMapDetail.dfm:69
+msgid "Standard Migration"
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..DetailsPnl..TntLabel5....AutoSize
+#: MigrationObjMapDetail.dfm:88
+msgid "Choose this parameter set for tables that contain lots of data which "
+"does not need transaction safety. This method is ideal for logging "
+"information or statistical data."
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..DetailsPnl..TntLabel3....AutoSize
+#: MigrationObjMapDetail.dfm:99
+msgid "Standard parameter set. The migrated tables will use the InnoDB "
+"storage engine to offer transactional and foreign key "
+"support."
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..DetailsPnl..TntRadioButton2..Caption
+#: MigrationObjMapDetail.dfm:107
+msgid "Statistical data / latin1"
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..DetailsPnl..TntRadioButton1..Caption
+#: MigrationObjMapDetail.dfm:121
+msgid "Data consistancy / multilanguage"
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..DetailBtn..Caption
+#: MigrationObjMapDetail.dfm:137
+msgid "<< Hide Detailes"
+msgstr ""
+
+#. MigrationObjMapDetailFrame..ObjectSelGBox..UserDefinedParamsPnl..ParamsUserDefinedCBox..Caption
+#: MigrationObjMapDetail.dfm:154
+msgid "User defined"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..ObjectsToMigrateLbl..Caption
+#: MigrationObjSelFilter.dfm:46
+msgid "Number to migrate:"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..TntLabel1..Caption
+#: MigrationObjSelFilter.dfm:53
+msgid "Objects of type:"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..StructTypeLbl..Caption
+#: MigrationObjSelFilter.dfm:60
+msgid "Oracle Table"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..TntLabel2..Caption
+#: MigrationObjSelFilter.dfm:75
+msgid "Use the [Detailed Selection] to put objects on the ignore "
+"list."
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..DetailFilterPnl..ObjIgnoreVT......WideText
+#: MigrationObjSelFilter.dfm:114
+msgid "Ignored Objects"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..DetailFilterPnl..RemoveFromIgnoreListBtn..Hint
+#: MigrationObjSelFilter.dfm:122
+msgid "Remove selected objects from the ignore "
+"list"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..DetailFilterPnl..AddToIgnoreListBtn..Hint
+#: MigrationObjSelFilter.dfm:134
+#. MigrationObjSelFilterFrame..ObjectSelGBox..DetailFilterPnl..AddAllToIgnoreListBtn..Hint
+#: MigrationObjSelFilter.dfm:202
+#. MigrationObjSelFilterFrame..ObjectSelGBox..DetailFilterPnl..RemoveAllFromIgnoreListBtn..Hint
+#: MigrationObjSelFilter.dfm:214
+msgid "Add selected objects to ignore list"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..DetailFilterPnl..ObjListVT......WideText
+#: MigrationObjSelFilter.dfm:167
+msgid "Object to Migrate"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..DetailFilterPnl..AddIgnoreListExprBtn..Hint
+#: MigrationObjSelFilter.dfm:190
+msgid "Add an ignore pattern"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..ObjectSelGBox..DetailFilterObjectBtn..Caption
+#: MigrationObjSelFilter.dfm:228
+#: MigrationObjMapDetail.pas:400
+#: MigrationObjSelFilter.pas:169
+msgid "<< Hide Details"
+msgstr ""
+
+#. MigrationObjSelFilterFrame..MigrateCBox..Caption
+#: MigrationObjSelFilter.dfm:238
+msgid "Migrate Objects of Type Oracle Table"
+msgstr ""
+
+#. MySQLResultSetFieldViewerForm..Caption
+#: MySQLResultSetFieldViewer.dfm:7
+msgid "Field Viewer"
+msgstr ""
+
+#. MySQLResultSetFieldViewerForm..PageControl..TextSheet..Caption
+#: MySQLResultSetFieldViewer.dfm:33
+msgid "Text"
+msgstr ""
+
+#. MySQLResultSetFieldViewerForm..PageControl..ImageSheet..Caption
+#: MySQLResultSetFieldViewer.dfm:77
+msgid "Image"
+msgstr ""
+
+#. MySQLResultSetFieldViewerForm..PageControl..ImageSheet..ImageSheetBtnPnl..ImageFormatTitleLbl..Caption
+#: MySQLResultSetFieldViewer.dfm:116
+msgid "Image Format:"
+msgstr ""
+
+#. MySQLResultSetFieldViewerForm..PageControl..ImageSheet..ImageSheetBtnPnl..ImageSizeTitleLbl..Caption
+#: MySQLResultSetFieldViewer.dfm:131
+#. MySQLResultSetFieldViewerForm..PageControl..BinarySheet..TntPanel1..BinarySizeTitelLbl..Caption
+#: MySQLResultSetFieldViewer.dfm:864
+msgid "Size:"
+msgstr ""
+
+#. MySQLResultSetFieldViewerForm..PageControl..BinarySheet..Caption
+#: MySQLResultSetFieldViewer.dfm:170
+msgid "Binary"
+msgstr ""
+
+#. MyxConnectionDialogForm..Caption
+#: MyxConnectionDialog.dfm:5
+msgid "Connect to Database"
+msgstr ""
+
+#. MyxConnectionDialogForm..ParamsMainPnl..DriverNotInstalledPnl..TntLabel2..Caption
+#: MyxConnectionDialog.dfm:49
+msgid "Driver not attached"
+msgstr ""
+
+#. MyxConnectionDialogForm..ParamsMainPnl..DriverNotInstalledPnl..TntLabel9..Caption
+#: MyxConnectionDialog.dfm:64
+msgid "The selected driver is not attached to the application "
+"yet."
+msgstr ""
+
+#. MyxConnectionDialogForm..ParamsMainPnl..DriverNotInstalledPnl..LocateDriverBtn..Caption
+#: MyxConnectionDialog.dfm:73
+msgid "Locate Driver on Harddisk"
+msgstr ""
+
+#. MyxConnectionDialogForm..ParamsMainPnl..DriverNotInstalledPnl..DownloadDriverPnl..TntLabel12..Caption
+#: MyxConnectionDialog.dfm:94
+msgid "To download the driver from the internet press the button "
+"below."
+msgstr ""
+
+#. MyxConnectionDialogForm..ParamsMainPnl..DriverNotInstalledPnl..DownloadDriverPnl..DownloadDriverBtn..Caption
+#: MyxConnectionDialog.dfm:103
+msgid "Download Driver from the Web"
+msgstr ""
+
+#. MyxConnectionDialogForm..ParamsMainPnl..ConnectGBox..Caption
+#: MyxConnectionDialog.dfm:126
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..Caption
+#: OptionsEditor.dfm:694
+msgid "Connection Parameters"
+msgstr ""
+
+#. MyxConnectionDialogForm..AdvParamsMainPnl..TntGroupBox1..Caption
+#: MyxConnectionDialog.dfm:242
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnAdvTabSheet..Caption
+#: OptionsEditor.dfm:838
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnAdvTabSheet..Label5..Caption
+#: OptionsEditor.dfm:845
+msgid "Advanced Parameters"
+msgstr ""
+
+#. MyxConnectionDialogForm..BottomPnl..AdvancedBtn..Caption
+#: MyxConnectionDialog.dfm:305
+#. MyxTableEditorForm..BottomPnl..AdvancedBtn..Caption
+#: MyxTableEditor.dfm:57
+#: MyxConnectionDialog.pas:1089
+#: MyxTableEditor.pas:3338
+msgid "Advanced >>"
+msgstr ""
+
+#. MyxConnectionDialogForm..ConnTypeMainPnl..ConnTypeGBox..Caption
+#: MyxConnectionDialog.dfm:328
+msgid "Connection Type"
+msgstr ""
+
+#. MyxConnectionDialogForm..ConnTypeMainPnl..ConnTypeGBox..ConnTypePnl..DriverLbl..Caption
+#: MyxConnectionDialog.dfm:343
+msgid "Driver:"
+msgstr ""
+
+#. MyxConnectionDialogForm..ConnTypeMainPnl..ConnTypeGBox..ConnTypePnl..RdbmsLbl..Caption
+#: MyxConnectionDialog.dfm:352
+msgid "Database System:"
+msgstr ""
+
+#. RoutineFrame..RoutinePanel..RoutineHeaderPanel..Caption
+#: MyxRoutineEditorFrame.dfm:24
+msgid "  New Routine"
+msgstr ""
+
+#. RoutineFrame..RoutinePanel..RoutineHeaderPanel..RoutineLbl..Caption
+#: MyxRoutineEditorFrame.dfm:43
+msgid "New_Routine"
+msgstr ""
+
+#. RoutineFrame..TntActionList1..DeleteRoutineAction..Caption
+#: MyxRoutineEditorFrame.dfm:456
+msgid "Delete Routine"
+msgstr ""
+
+#. RoutineFrame..TntActionList1..SetBodyFunctionAction..Caption
+#: MyxRoutineEditorFrame.dfm:462
+msgid "Function Body"
+msgstr ""
+
+#. RoutineFrame..TntActionList1..SetBodyProcedureAction..Caption
+#: MyxRoutineEditorFrame.dfm:466
+msgid "Procedure Body"
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..Caption
+#: MyxRoutineGroupEditor.dfm:6
+msgid "Routine Group Editor"
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..BottomPnl..CancelBtn..Caption
+#: MyxRoutineGroupEditor.dfm:56
+#. MyxRoutineGroupEditorForm..TntActionList1..CloseAction..Caption
+#: MyxRoutineGroupEditor.dfm:525
+#. MyxSchemaEditorForm..BottomPnl..CancelBtn..Caption
+#: MyxSchemaEditor.dfm:117
+#. MyxTableEditorForm..TntActionList..CloseAction..Caption
+#: MyxTableEditor.dfm:1872
+#. MyxViewEditorForm..TntActionList1..CloseAction..Caption
+#: MyxViewEditor.dfm:849
+#. OptionsForm..CloseBtn..Caption
+#: OptionsEditor.dfm:1113
+#. TextSearchForm..PageControl..SearchTabSheet..CloseBtn..Caption
+#: TextSearch.dfm:80
+#. TextSearchForm..PageControl..ReplaceTabSheet..Close2Btn..Caption
+#: TextSearch.dfm:150
+#: MyxConnectionDialog.pas:1355
+msgid "Close"
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..RoutinePageControl..RoutineGroupSheet..Caption
+#: MyxRoutineGroupEditor.dfm:89
+msgid "Routine Group"
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..RoutinePageControl..RoutineGroupSheet..RoutineGroupSheetPnl..NameLbl..Caption
+#: MyxRoutineGroupEditor.dfm:242
+msgid "Group Name:"
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..RoutinePageControl..RoutineGroupSheet..RoutineGroupSheetPnl..TntLabel6..Caption
+#: MyxRoutineGroupEditor.dfm:251
+msgid "The name of the routine group."
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..RoutinePageControl..RoutineGroupSheet..RoutineGroupSheetPnl..TntLabel1..Caption
+#: MyxRoutineGroupEditor.dfm:261
+msgid "Routines:"
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..TntActionList1..ApplyChangesAndCloseAction..Caption
+#: MyxRoutineGroupEditor.dfm:509
+#. MyxViewEditorForm..TntActionList1..ApplyChangesAndCloseAction..Caption
+#: MyxViewEditor.dfm:832
+msgid "ApplyChangesAndCloseAction"
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..TntActionList1..ApplyChangesAction..Caption
+#: MyxRoutineGroupEditor.dfm:514
+#. MyxSchemaEditorForm..BottomPnl..ApplyChangesBtn..Caption
+#: MyxSchemaEditor.dfm:105
+#. MyxTableEditorForm..TntActionList..ApplyChangesAction..Caption
+#: MyxTableEditor.dfm:1860
+#. MyxViewEditorForm..TntActionList1..ApplyChangesAction..Caption
+#: MyxViewEditor.dfm:837
+#: MySQLResultSetControls.pas:3521
+#: MyxTabHeader.pas:1072
+msgid "Apply Changes"
+msgstr ""
+
+#. MyxRoutineGroupEditorForm..TntActionList1..DiscardChangesAction..Caption
+#: MyxRoutineGroupEditor.dfm:520
+#. MyxTableEditorForm..TntActionList..DiscardChangesAction..Caption
+#: MyxTableEditor.dfm:1866
+#. MyxViewEditorForm..TntActionList1..DiscardChangesAction..Caption
+#: MyxViewEditor.dfm:843
+#: MySQLResultSetControls.pas:3518
+#: MyxTabHeader.pas:1066
+msgid "Discard Changes"
+msgstr ""
+
+#. MyxSchemaEditorForm..Caption
+#: MyxSchemaEditor.dfm:6
+msgid "Schema Editor"
+msgstr ""
+
+#. MyxSchemaEditorForm..HeaderPnl..NameLbl..Caption
+#: MyxSchemaEditor.dfm:38
+msgid "Schema Name:"
+msgstr ""
+
+#. MyxTabHeaderFrame..TabHeaderPopupMenu..RenameTabsheetMI..Caption
+#: MyxTabHeader.dfm:15
+#. TabHeaderFrame..TabHeaderPopupMenu..RenameTabsheetMI..Caption
+#: TabHeader.dfm:15
+msgid "Rename Tabsheet"
+msgstr ""
+
+#. MyxTabHeaderFrame..TabHeaderPopupMenu..CloseTabsheetMI..Caption
+#: MyxTabHeader.dfm:22
+#. TabHeaderFrame..TabHeaderPopupMenu..CloseTabsheetMI..Caption
+#: TabHeader.dfm:22
+msgid "Close Tabsheet"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..TableSheet..Caption
+#: MyxTableEditor.dfm:99
+msgid "Table"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..TableSheet..TableSheetPnl..TntLabel3..Caption
+#: MyxTableEditor.dfm:147
+msgid "Engine:"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..TableSheet..TableSheetPnl..TntLabel6....AutoSize
+#: MyxTableEditor.dfm:177
+msgid "The name of the table. It is recommended to use only alpha-numeric "
+"characters. Spaces should be avoided and be replaced by "
+"_"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..TableSheet..TableSheetPnl..TntLabel9....AutoSize
+#: MyxTableEditor.dfm:190
+msgid "The database engine that is used for the table. This option specifies "
+"the performance, data consistency and much "
+"more."
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..TableSheet..TableSheetPnl..TntLabel10....AutoSize
+#: MyxTableEditor.dfm:203
+msgid "The collation specifies which language specific characters can be "
+"stored in the table. Common choices are Latin1 or "
+"UTF8."
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..Caption
+#: MyxTableEditor.dfm:252
+#. SchemataFrame..SchemaSearchPopupMenu..CustomMI..ColumnsSubMI..Caption
+#: SchemataTreeView.dfm:159
+msgid "Columns"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnsDetailsPnl..ColumnDetailsGroupBox..TntLabel7..Caption
+#: MyxTableEditor.dfm:329
+msgid "Default:"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST....ClipboardFormats.Strings
+#: MyxTableEditor.dfm:439
+msgid "CSV"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST....ClipboardFormats.Strings
+#: MyxTableEditor.dfm:440
+msgid "HTML Format"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST....ClipboardFormats.Strings
+#: MyxTableEditor.dfm:441
+msgid "Plain text"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST....ClipboardFormats.Strings
+#: MyxTableEditor.dfm:442
+msgid "Rich Text Format"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST....ClipboardFormats.Strings
+#: MyxTableEditor.dfm:443
+msgid "Rich Text Format Without Objects"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST....ClipboardFormats.Strings
+#: MyxTableEditor.dfm:444
+msgid "Unicode text"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ColumnSheet..ColumnsContentPnl..ColumnVST....ClipboardFormats.Strings
+#: MyxTableEditor.dfm:445
+msgid "Virtual Tree Data"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexDetailsPnl..TntGroupBox3..Caption
+#: MyxTableEditor.dfm:581
+msgid "Index Details"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexVST......WideText
+#: MyxTableEditor.dfm:616
+msgid "Index Name"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexVST......WideText
+#: MyxTableEditor.dfm:621
+msgid "Type"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexColumnVST......WideText
+#: MyxTableEditor.dfm:665
+msgid "Order"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexColumnVST......WideText
+#: MyxTableEditor.dfm:670
+msgid "Length"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..IndicesSheet..IndexContentPnl..IndexColumnVST......WideText
+#: MyxTableEditor.dfm:675
+msgid "Stored Function"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ForeignKeySheet..FkSheetPnl..ForeignKeyVST......WideText
+#: MyxTableEditor.dfm:742
+msgid "Foreign Key Name"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ForeignKeySheet..FkSheetPnl..ForeignKeyVST......WideText
+#: MyxTableEditor.dfm:747
+msgid "Refered Table"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ForeignKeySheet..FkSheetPnl..ForeignKeyVST......WideText
+#: MyxTableEditor.dfm:752
+msgid "On Update"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ForeignKeySheet..FkSheetPnl..ForeignKeyVST......WideText
+#: MyxTableEditor.dfm:757
+msgid "On Delete"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..ForeignKeySheet..FkSheetPnl..ForeignKeyColumnVST......WideText
+#: MyxTableEditor.dfm:801
+msgid "Refered Column"
+msgstr ""
+
+#. MyxTableEditorForm..TablePageControl..TriggersTab..Caption
+#: MyxTableEditor.dfm:809
+#. SchemataFrame..SchemaSearchPopupMenu..CustomMI..TriggersSubMI..Caption
+#: SchemataTreeView.dfm:191
+msgid "Triggers"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..NextTabsheetAction..Caption
+#: MyxTableEditor.dfm:1832
+msgid "Next Tabsheet"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..PreviousTabsheetAction..Caption
+#: MyxTableEditor.dfm:1837
+msgid "Previous Tabsheet"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..DeleteSelectedColumnsAction..Category
+#: MyxTableEditor.dfm:1842
+#. MyxTableEditorForm..TntActionList..CopyToClipboardAction..Category
+#: MyxTableEditor.dfm:1876
+#. MyxTableEditorForm..TntActionList..PasteFromClipboardAction..Category
+#: MyxTableEditor.dfm:1883
+#. MyxTableEditorForm..TntActionList..SelectAllAction..Category
+#: MyxTableEditor.dfm:1890
+#. SchemataFrame..SchemaTreeViewPopupMenu..EditMI..Caption
+#: SchemataTreeView.dfm:204
+#: MySQLResultSetControls.pas:3524
+#: SchemataTreeView.pas:1529
+msgid "Edit"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..DeleteSelectedColumnsAction..Caption
+#: MyxTableEditor.dfm:1843
+msgid "Delete Selected Columns"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..ApplyChangeAndCloseAction..Caption
+#: MyxTableEditor.dfm:1849
+msgid "Apply Change And Close"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..ShowAdvancedAction..Caption
+#: MyxTableEditor.dfm:1855
+msgid "Show Advanced Controls"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..CopyToClipboardAction..Caption
+#: MyxTableEditor.dfm:1877
+msgid "Copy selected columns to clipboard"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..PasteFromClipboardAction..Caption
+#: MyxTableEditor.dfm:1884
+msgid "Paste column definition from clipboard"
+msgstr ""
+
+#. MyxTableEditorForm..TntActionList..SelectAllAction..Caption
+#: MyxTableEditor.dfm:1891
+msgid "Select all columns"
+msgstr ""
+
+#. MyxViewEditorForm..Caption
+#: MyxViewEditor.dfm:4
+msgid "View Editor"
+msgstr ""
+
+#. MyxViewEditorForm..ViewPageControl..ViewTabSheet..Caption
+#: MyxViewEditor.dfm:89
+msgid "View"
+msgstr ""
+
+#. MyxViewEditorForm..ViewPageControl..ViewTabSheet..ViewSheetPnl..NameLbl..Caption
+#: MyxViewEditor.dfm:121
+msgid "View Name:"
+msgstr ""
+
+#. MyxViewEditorForm..ViewPageControl..ViewTabSheet..ViewSheetPnl..TntLabel6....AutoSize
+#: MyxViewEditor.dfm:255
+msgid "The name of the view. It is recommended to use only alpha-numeric "
+"characters. Spaces should be avoided and be replaced by "
+"_"
+msgstr ""
+
+#. MyxViewEditorForm..ViewPageControl..ViewTabSheet..ViewSheetPnl..TntLabel1..Caption
+#: MyxViewEditor.dfm:265
+msgid "SQL:"
+msgstr ""
+
+#. MyxViewEditorForm..ViewPageControl..CommentTabSheet..CommentSheetPnl..TntLabel2..Caption
+#: MyxViewEditor.dfm:776
+msgid "Comments:"
+msgstr ""
+
+#. OptionsForm..Caption
+#: OptionsEditor.dfm:5
+#. TextSearchForm..PageControl..OptionsTabSheet..Caption
+#: TextSearch.dfm:176
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..OptionsGBox..Caption
+#: TextSearch.dfm:246
+msgid "Options"
+msgstr ""
+
+#. OptionsForm..HeaderPnl..TitleLbl..Caption
+#: OptionsEditor.dfm:262
+#. OptionsForm..OptionPageControl..GeneralTabSheet..Caption
+#: OptionsEditor.dfm:284
+msgid "General"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox1..Caption
+#: OptionsEditor.dfm:290
+msgid "Applications Options"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox1..Label3..Caption
+#: OptionsEditor.dfm:298
+msgid "Language:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox1..Label4....AutoSize
+#: OptionsEditor.dfm:315
+msgid "Note: a localized help for languages other than english is available "
+"from the MySQL site."
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox1..ShowTipOfDayCBox..Caption
+#: OptionsEditor.dfm:332
+msgid "Show Tip of Day"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox1..StoreWindowsPosCBox..Caption
+#: OptionsEditor.dfm:342
+msgid "Store Windows Positions"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox1..LanguageCBox..Text
+#: OptionsEditor.dfm:355
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox1..LanguageCBox....Items.Strings
+#: OptionsEditor.dfm:358
+msgid "English"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox1..DisableTransparencyEffectsCBox..Caption
+#: OptionsEditor.dfm:365
+msgid "Disable transparency effects"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..Caption
+#: OptionsEditor.dfm:375
+msgid "Application Fonts"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..Label2..Caption
+#: OptionsEditor.dfm:383
+msgid "Default Font:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel1..Caption
+#: OptionsEditor.dfm:391
+msgid "Data Font:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel2..Caption
+#: OptionsEditor.dfm:399
+msgid "Code Font:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel3..Caption
+#: OptionsEditor.dfm:407
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel4..Caption
+#: OptionsEditor.dfm:415
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel5..Caption
+#: OptionsEditor.dfm:423
+msgid "Size"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel7..Caption
+#: OptionsEditor.dfm:431
+msgid "Width:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel8..Caption
+#: OptionsEditor.dfm:439
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel9..Caption
+#: OptionsEditor.dfm:447
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..TntLabel10..Caption
+#: OptionsEditor.dfm:455
+msgid "pt"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..ApplicationFontBtn..Caption
+#: OptionsEditor.dfm:462
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..DataFontBtn..Caption
+#: OptionsEditor.dfm:471
+#. OptionsForm..OptionPageControl..GeneralTabSheet..GroupBox2..CodeFontBtn..Caption
+#: OptionsEditor.dfm:480
+msgid "Choose ..."
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..TntGroupBox1..Caption
+#: OptionsEditor.dfm:600
+msgid "Password Storage"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..TntGroupBox1..PasswordStorageTypeLbl..Caption
+#: OptionsEditor.dfm:608
+msgid "Password storage method:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..TntGroupBox1..StorePasswordCBox..Caption
+#: OptionsEditor.dfm:615
+msgid "Store passwords"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..TntGroupBox2..Caption
+#: OptionsEditor.dfm:635
+msgid "Warnings and Messages"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..TntGroupBox2..TntLabel6..Caption
+#: OptionsEditor.dfm:643
+msgid "Ignorelist:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..GeneralTabSheet..TntGroupBox2..RemoveWarningFromIgnoreListBtn..Caption
+#: OptionsEditor.dfm:659
+msgid "Remove"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..Caption
+#: OptionsEditor.dfm:666
+#: OptionsEditor.pas:394
+#: OptionsEditor.pas:770
+msgid "Connections"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..HostnameLbl..Caption
+#: OptionsEditor.dfm:728
+msgid "Hostname:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..TypeLbl..Caption
+#: OptionsEditor.dfm:736
+msgid "Type:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..SchemataEdLbl..Caption
+#: OptionsEditor.dfm:743
+msgid "Schema:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..Label1..Caption
+#: OptionsEditor.dfm:750
+msgid "Notes:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..TypeCBox..Hint
+#: OptionsEditor.dfm:781
+msgid "Select the type of database connection"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..TypeCBox....Items.Strings
+#: OptionsEditor.dfm:790
+msgid "MySQL"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..TypeCBox....Items.Strings
+#: OptionsEditor.dfm:791
+msgid "Oracle"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnGeneralTabSheet..TypeCBox....Items.Strings
+#: OptionsEditor.dfm:792
+msgid "ODBC"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnAdvTabSheet..ConnValueListEditor....TitleCaptions.Strings
+#: OptionsEditor.dfm:857
+msgid "Parameter"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..ConnectionPageControl..ConnAdvTabSheet..ConnValueListEditor....TitleCaptions.Strings
+#: OptionsEditor.dfm:858
+msgid "Value"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..AddConnectionButton..Caption
+#: OptionsEditor.dfm:871
+#: OptionsEditor.pas:702
+msgid "New Connection"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..DeleteConnectionButton..Caption
+#: OptionsEditor.dfm:880
+msgid "Delete Connection"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..ConnectionsTabSheet..CloneConnectionButton..Caption
+#: OptionsEditor.dfm:889
+msgid "Duplicate Connection"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..Caption
+#: OptionsEditor.dfm:895
+#: OptionsEditor.pas:397
+msgid "Editors"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..Label6..Caption
+#: OptionsEditor.dfm:917
+msgid "PK Naming:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..Label7..Caption
+#: OptionsEditor.dfm:925
+msgid "Index naming:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..Label8..Caption
+#: OptionsEditor.dfm:933
+msgid "FK naming:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..Label9..Caption
+#: OptionsEditor.dfm:942
+msgid "PK datatype:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..Label10..Caption
+#: OptionsEditor.dfm:951
+msgid "Def. data type:"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..TntLabel11..Caption
+#: OptionsEditor.dfm:960
+msgid "Default storage engine"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblShowSQLBeforeApplyingCBox..Caption
+#: OptionsEditor.dfm:968
+msgid "Show SQL command before applying changes"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblAllColsNotNullCBox..Caption
+#: OptionsEditor.dfm:978
+msgid "All columns Not Null per default"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblPKAutoNamingEd..Text
+#: OptionsEditor.dfm:990
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblPKAutoNamingEd....Items.Strings
+#: OptionsEditor.dfm:993
+msgid "id%tablename%"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblPKAutoNamingEd....Items.Strings
+#: OptionsEditor.dfm:994
+msgid "id_%tablename%"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblPKAutoNamingEd....Items.Strings
+#: OptionsEditor.dfm:995
+msgid "%tablename%id"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblPKAutoNamingEd....Items.Strings
+#: OptionsEditor.dfm:996
+msgid "%tablename%_id"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblAllIntUnsignedCBox..Caption
+#: OptionsEditor.dfm:1004
+msgid "All integer columns unsigned per default"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblIndexNamingEd..Text
+#: OptionsEditor.dfm:1016
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblIndexNamingEd....Items.Strings
+#: OptionsEditor.dfm:1019
+msgid "index_%nr%"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblIndexNamingEd....Items.Strings
+#: OptionsEditor.dfm:1020
+msgid "index%nr%"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblIndexNamingEd....Items.Strings
+#: OptionsEditor.dfm:1021
+msgid "ind_%tablename%_%nr%"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblFKNamingEd..Text
+#: OptionsEditor.dfm:1031
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblFKNamingEd....Items.Strings
+#: OptionsEditor.dfm:1034
+msgid "FK_%tablename%_%nr%"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblFKNamingEd....Items.Strings
+#: OptionsEditor.dfm:1035
+msgid "FK%tablename%%nr%"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..EdTblPKDatatypeEd..Text
+#: OptionsEditor.dfm:1045
+msgid "INTEGER"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..DefaultStorageEngineLU..Text
+#: OptionsEditor.dfm:1068
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..DefaultStorageEngineLU....Items.Strings
+#: OptionsEditor.dfm:1071
+msgid "InnoDB"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..DefaultStorageEngineLU....Items.Strings
+#: OptionsEditor.dfm:1072
+msgid "MyISAM"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..DefaultStorageEngineLU....Items.Strings
+#: OptionsEditor.dfm:1073
+msgid "NDB"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..DefaultStorageEngineLU....Items.Strings
+#: OptionsEditor.dfm:1074
+msgid "Memory"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..DefaultStorageEngineLU....Items.Strings
+#: OptionsEditor.dfm:1075
+msgid "Merge"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..DefaultStorageEngineLU....Items.Strings
+#: OptionsEditor.dfm:1076
+msgid "BDB"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox4..DefaultStorageEngineLU....Items.Strings
+#: OptionsEditor.dfm:1077
+msgid "ISAM"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox3..Caption
+#: OptionsEditor.dfm:1085
+msgid "General Settings"
+msgstr ""
+
+#. OptionsForm..OptionPageControl..EditorsTabSheet..GroupBox3..KeepRoutineEditorOnTopCBox..Caption
+#: OptionsEditor.dfm:1092
+msgid "Always keep editor windows on top"
+msgstr ""
+
+#. OptionsForm..ApplyChangesBtn..Caption
+#: OptionsEditor.dfm:1123
+#: MyxEditor.pas:112
+msgid "Apply"
+msgstr ""
+
+#. OptionsForm..DiscardChangesBtn..Caption
+#: OptionsEditor.dfm:1134
+#: MySQLResultSet.pas:410
+msgid "Discard"
+msgstr ""
+
+#. OptionsForm..Panel1..Caption
+#: OptionsEditor.dfm:1155
+msgid "Category"
+msgstr ""
+
+#. ProgressForm..Caption
+#: Progress.dfm:6
+msgid "Progress ..."
+msgstr ""
+
+#. ProgressForm..StoppingLbl..Caption
+#: Progress.dfm:28
+msgid "Stopping process ..."
+msgstr ""
+
+#. ProgressForm..ProgressGBox..Caption
+#: Progress.dfm:36
+msgid "Progress"
+msgstr ""
+
+#. ProgressForm..ProgressGBox..ActionCaptionLbl..Caption
+#: Progress.dfm:43
+msgid "Action:"
+msgstr ""
+
+#. ProgressForm..StopBtn..Caption
+#: Progress.dfm:72
+msgid "Stop"
+msgstr ""
+
+#. SchemaSelectionForm..Caption
+#: SchemaSelection.dfm:8
+#. SchemaSelectionForm..HeaderPnl..Label1..Caption
+#: SchemaSelection.dfm:69
+msgid "Schema Selection"
+msgstr ""
+
+#. SchemaSelectionForm..SchemataFrame..CatalogVST..WideDefaultText
+#: SchemaSelection.dfm:37
+#. SchemataFrame..CatalogVST..WideDefaultText
+#: SchemataTreeView.dfm:40
+msgid "Fetching Data ..."
+msgstr ""
+
+#. SchemaSelectionForm..HeaderPnl..Label2..Caption
+#: SchemaSelection.dfm:82
+msgid "Please select a schema from the schema list "
+msgstr ""
+
+#. SchemataFrame..TopPnl..SchemataLbl..Caption
+#: SchemataTreeView.dfm:55
+#. SchemataFrame..SchemaSearchPopupMenu..SearchSchemataMI..Caption
+#: SchemataTreeView.dfm:101
+#. SchemataFrame..SchemaSearchPopupMenu..CustomMI..SchemataSubMI..Caption
+#: SchemataTreeView.dfm:143
+msgid "Schemata"
+msgstr ""
+
+#. SchemataFrame..SchemaSearchPopupMenu..SearchAllMI..Caption
+#: SchemataTreeView.dfm:89
+msgid "All"
+msgstr ""
+
+#. SchemataFrame..SchemaSearchPopupMenu..SearchAssetsMI..Caption
+#: SchemataTreeView.dfm:111
+msgid "Schema Assets"
+msgstr ""
+
+#. SchemataFrame..SchemaSearchPopupMenu..SearchColumnsMI..Caption
+#: SchemataTreeView.dfm:121
+msgid "Columns/Indices"
+msgstr ""
+
+#. SchemataFrame..SchemaSearchPopupMenu..CustomMI..Caption
+#: SchemataTreeView.dfm:135
+msgid "Custom Selection"
+msgstr ""
+
+#. SchemataFrame..SchemaSearchPopupMenu..CustomMI..TableSubMI..Caption
+#: SchemataTreeView.dfm:151
+#: SchemataTreeView.pas:1727
+msgid "Tables"
+msgstr ""
+
+#. SchemataFrame..SchemaSearchPopupMenu..CustomMI..SPSubMI..Caption
+#: SchemataTreeView.dfm:175
+msgid "Stored Procedures/Functions"
+msgstr ""
+
+#. SchemataFrame..SchemaSearchPopupMenu..CustomMI..ViewsSubMI..Caption
+#: SchemataTreeView.dfm:183
+msgid "Views"
+msgstr ""
+
+#. SchemataFrame..SchemaTreeViewPopupMenu..RenameMI..Caption
+#: SchemataTreeView.dfm:210
+#: MyxTabHeader.pas:1587
+#: SchemataTreeView.pas:1531
+#: SchemataTreeView.pas:2373
+#: TabHeader.pas:1228
+msgid "Rename"
+msgstr ""
+
+#. SchemataFrame..SchemaTreeViewPopupMenu..DropMI..Caption
+#: SchemataTreeView.dfm:217
+#: SchemataTreeView.pas:1530
+msgid "Drop"
+msgstr ""
+
+#. SchemataFrame..SchemaTreeViewPopupMenu..CopyAssetSQLMI..Caption
+#: SchemataTreeView.dfm:223
+msgid "Copy SQL to Clipboard"
+msgstr ""
+
+#. SchemataFrame..SchemaTreeViewPopupMenu..CreateNewSchemaMI..Caption
+#: SchemataTreeView.dfm:234
+msgid "Create New Schema"
+msgstr ""
+
+#. SchemataFrame..SchemaTreeViewPopupMenu..CreateNewTableMI..Caption
+#: SchemataTreeView.dfm:240
+msgid "Create New Table"
+msgstr ""
+
+#. SchemataFrame..SchemaTreeViewPopupMenu..CreateNewViewMI..Caption
+#: SchemataTreeView.dfm:246
+msgid "Create New View"
+msgstr ""
+
+#. SchemataFrame..SchemaTreeViewPopupMenu..CreateNewStoredProcedureMI..Caption
+#: SchemataTreeView.dfm:252
+msgid "Create New Procedure / Function"
+msgstr ""
+
+#. SchemataFrame..SchemaTreeViewPopupMenu..RefreshCatalogsSchemataListMI..Caption
+#: SchemataTreeView.dfm:263
+msgid "Refresh"
+msgstr ""
+
+#. TextSearchForm..Caption
+#: TextSearch.dfm:7
+msgid "Search ..."
+msgstr ""
+
+#. TextSearchForm..PageControl..SearchTabSheet..Caption
+#: TextSearch.dfm:43
+#. TextSearchForm..PageControl..SearchTabSheet..SearchBtn..Caption
+#: TextSearch.dfm:70
+#: MySQLResultSetControls.pas:3503
+msgid "Search"
+msgstr ""
+
+#. TextSearchForm..PageControl..SearchTabSheet..SearchLbl..Caption
+#: TextSearch.dfm:53
+#. TextSearchForm..PageControl..ReplaceTabSheet..ReplacesSearchLbl..Caption
+#: TextSearch.dfm:106
+msgid "Search for:"
+msgstr ""
+
+#. TextSearchForm..PageControl..ReplaceTabSheet..Caption
+#: TextSearch.dfm:96
+#. TextSearchForm..PageControl..ReplaceTabSheet..ReplaceBtn..Caption
+#: TextSearch.dfm:160
+#: MyxRoutineEditorFrame.pas:336
+#: MyxRoutineEditorFrame.pas:356
+msgid "Replace"
+msgstr ""
+
+#. TextSearchForm..PageControl..ReplaceTabSheet..ReplaceWithLbl..Caption
+#: TextSearch.dfm:114
+msgid "Replace with:"
+msgstr ""
+
+#. TextSearchForm..PageControl..ReplaceTabSheet..ReplaceAllBtn..Caption
+#: TextSearch.dfm:140
+msgid "Replace All"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..ScopeGBox..Caption
+#: TextSearch.dfm:190
+msgid "Scope"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..ScopeGBox..SearchInSelectedColumnRBtn..Caption
+#: TextSearch.dfm:197
+msgid "Search only in selected text/column"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..ScopeGBox..SearchAllColumnsRBtn..Caption
+#: TextSearch.dfm:206
+msgid "Search all text/columns"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..DirectionGBox..Caption
+#: TextSearch.dfm:218
+msgid "Direction"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..DirectionGBox..SearchDownRBtn..Caption
+#: TextSearch.dfm:225
+msgid "Search down"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..DirectionGBox..SearchUpRBtn..Caption
+#: TextSearch.dfm:236
+msgid "Search up"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..OptionsGBox..CaseSensitiveCBox..Caption
+#: TextSearch.dfm:253
+msgid "Case sensitive"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..OptionsGBox..WholeWordsOnlyCBox..Caption
+#: TextSearch.dfm:262
+msgid "Whole words only"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..OptionsGBox..UseRegExCBox..Caption
+#: TextSearch.dfm:271
+msgid "Use RegEx"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..TntGroupBox1..Caption
+#: TextSearch.dfm:283
+msgid "Origin"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..TntGroupBox1..SearchFromCursorRBtn..Caption
+#: TextSearch.dfm:290
+msgid "Search from cursor"
+msgstr ""
+
+#. TextSearchForm..PageControl..OptionsTabSheet..OptionPnl..TntGroupBox1..SearchFromTopRBtn..Caption
+#: TextSearch.dfm:301
+msgid "Search from top"
+msgstr ""
+
+#. TextSearchForm..NoMatchFoundPnl..Caption
+#: TextSearch.dfm:317
+msgid "No match found."
+msgstr ""
+
+#: About.pas:85
+msgid "About"
+msgstr ""
+
+#: AuxFuncs.pas:2485
+msgid "Do not show this message anymore."
+msgstr ""
+
+#. Programmer's name for it: REG_MACHINE_LOCATION
+#: AuxFuncs.pas:3140
+#. Programmer's name for it: REG_MACHINE_LOCATION
+#: AuxFuncs.pas:3176
+msgid "System\\CurrentControlSet\\Control\\Session "
+"Manager\\Environment"
+msgstr ""
+
+#. Programmer's name for it: REG_USER_LOCATION
+#: AuxFuncs.pas:3141
+msgid "Environment"
+msgstr ""
+
+#: CommonFuncs.pas:123
+#: CommonFuncs.pas:144
+msgid "About "
+msgstr ""
+
+#: CommonFuncs.pas:124
+#: CommonFuncs.pas:145
+msgid "version"
+msgstr ""
+
+#: ConnectToInstance.pas:543
+#: MySQLConnection.pas:481
+msgid "Error while allocating memory for MySQL "
+"Struct."
+msgstr ""
+
+#. ignore ConnectionResult -10 after warning
+#: ConnectToInstance.pas:909
+msgid "Could not connect to the specified instance. \n"
+"\nMySQL Error Number %d\n%s\n\n"
+"If you want to check the network connection, please click the Ping "
+"button."
+msgstr ""
+
+#: ConnectToInstance.pas:1002
+msgid "Connection Dialog - MySQL 3.x Server "
+"Unsupported"
+msgstr ""
+
+#: ConnectToInstance.pas:1005
+msgid "You are connecting to an MySQL 3.x server. The MySQL GUI tools only "
+"support MySQL servers 4.0 and higher. Using this tool with a 3.x "
+"server might result in unexpected behaviour."
+msgstr ""
+
+#: ConnectToInstance.pas:1006
+#: ConnectToInstance.pas:1020
+#: MyxEditor.pas:112
+msgid "Ignore"
+msgstr ""
+
+#: ConnectToInstance.pas:1016
+msgid "Connection Dialog - No Default Schema "
+"Specified"
+msgstr ""
+
+#: ConnectToInstance.pas:1019
+msgid "You have not specified a default schema for this connection. Although "
+"it is possible to connect without specifying default schema you are "
+"highly encouraged to do so."
+msgstr ""
+
+#. Ask the user if he wants to create the given schema
+#: ConnectToInstance.pas:1031
+msgid "Connection Dialog - Default Schema Does Not "
+"Exist"
+msgstr ""
+
+#: ConnectToInstance.pas:1033
+msgid "The schema `%s` does not exist. Do you want to create the schema "
+"now?"
+msgstr ""
+
+#: ConnectToInstance.pas:1034
+#: EditorSql.pas:172
+#: EditorTable.pas:734
+#: EditorTable.pas:781
+#: EditorTable.pas:3325
+#: MyxConnectionDialog.pas:1255
+#: OptionsEditor.pas:548
+#: OptionsEditor.pas:671
+msgid "Yes"
+msgstr ""
+
+#: ConnectToInstance.pas:1034
+#: EditorSql.pas:172
+#: EditorTable.pas:734
+#: EditorTable.pas:781
+#: EditorTable.pas:3325
+#: MyxConnectionDialog.pas:1255
+#: OptionsEditor.pas:548
+#: OptionsEditor.pas:671
+msgid "No"
+msgstr ""
+
+#: ConnectToInstance.pas:1194
+msgid "Skip"
+msgstr ""
+
+#: ConnectToInstance.pas:1195
+msgid "Skip the connection dialog and open service "
+"configuration."
+msgstr ""
+
+#: ConnectToInstance.pas:1215
+msgid "Click this button to cancel the connection."
+msgstr ""
+
+#: ConnectToInstance.pas:1291
+msgid "Warning"
+msgstr ""
+
+#: ConnectToInstance.pas:1293
+msgid "A duplicate connection name was found: \"%s\".\n"
+"Please use the connection manager and adjust your connection settings "
+"in order to avoid trouble e.g. with backup and "
+"restore."
+msgstr ""
+
+#: EditorSql.pas:170
+msgid "View name has changed"
+msgstr ""
+
+#: EditorSql.pas:171
+msgid "Would you like to keep the original view object? "
+msgstr ""
+
+#: EditorTable.pas:516
+#: MyxTableEditor.pas:599
+msgid "No Inserts"
+msgstr ""
+
+#: EditorTable.pas:517
+#: MyxTableEditor.pas:600
+msgid "Inserts into first table"
+msgstr ""
+
+#: EditorTable.pas:518
+#: MyxTableEditor.pas:601
+msgid "Inserts into last table"
+msgstr ""
+
+#: EditorTable.pas:521
+#: EditorTable.pas:526
+#. Fill Charsets
+#: EditorTable.pas:1041
+#: EditorTable.pas:1615
+#: EditorTable.pas:1617
+#: MyxTableEditor.pas:605
+#: MyxTableEditor.pas:614
+msgid "Default"
+msgstr ""
+
+#: EditorTable.pas:522
+#: MyxTableEditor.pas:607
+msgid "Pack None"
+msgstr ""
+
+#: EditorTable.pas:523
+#: MyxTableEditor.pas:609
+msgid "Pack All"
+msgstr ""
+
+#: EditorTable.pas:527
+#: MyxTableEditor.pas:616
+msgid "Dynamic"
+msgstr ""
+
+#: EditorTable.pas:528
+#: MyxTableEditor.pas:618
+msgid "Fixed"
+msgstr ""
+
+#: EditorTable.pas:529
+#: MyxTableEditor.pas:620
+msgid "Compressed"
+msgstr ""
+
+#: EditorTable.pas:532
+msgid "None"
+msgstr ""
+
+#: EditorTable.pas:533
+msgid "Striped"
+msgstr ""
+
+#: EditorTable.pas:536
+msgid "No Action"
+msgstr ""
+
+#: EditorTable.pas:537
+msgid "Cascade"
+msgstr ""
+
+#: EditorTable.pas:538
+msgid "Set Null"
+msgstr ""
+
+#: EditorTable.pas:539
+msgid "Restrict"
+msgstr ""
+
+#: EditorTable.pas:545
+msgid "Transaction safe, disk based storage engine with row locking. "
+"Recommended engine for tables that need support for "
+"transactions."
+msgstr ""
+
+#: EditorTable.pas:547
+msgid "Transactional engine for modern scale-out applications. Supports MVCC "
+"(multiversion concurrency control)."
+msgstr ""
+
+#: EditorTable.pas:551
+msgid "Collection of MyISAM tables with identical column and index "
+"information. Recommended for log tables or archived "
+"data."
+msgstr ""
+
+#: EditorTable.pas:553
+msgid "Extremly fast memory based storage engine that uses hash indices. "
+"Recommended storage engine for temporary "
+"data."
+msgstr ""
+
+#: EditorTable.pas:555
+msgid "Transaction safe storage engine with page locking. This engine is "
+"also know as Berkeley DB."
+msgstr ""
+
+#: EditorTable.pas:557
+msgid "MySQL Cluster storage engine. Transaction safe, memory based with row "
+"locking. Recommended for real time critical "
+"applications."
+msgstr ""
+
+#: EditorTable.pas:559
+msgid "Archive engine storing data in a compressed form to save storage "
+"space. Note that SELECTs require a full table "
+"scan."
+msgstr ""
+
+#: EditorTable.pas:561
+msgid "Engine that stores data as a comma separated values list, suited for "
+"data export. Note that this engine does not support "
+"indices."
+msgstr ""
+
+#: EditorTable.pas:563
+msgid "The BLACKHOLE storage engine acts as a \"black hole\" that accepts data "
+"but throws it away and does not store "
+"it."
+msgstr ""
+
+#: EditorTable.pas:704
+msgid "Tables Overview"
+msgstr ""
+
+#: EditorTable.pas:733
+#: EditorTable.pas:780
+#: EditorTable.pas:3322
+msgid "Discard changes"
+msgstr ""
+
+#: EditorTable.pas:733
+msgid "Are you sure you want to discard your "
+"changes?"
+msgstr ""
+
+#: EditorTable.pas:780
+msgid "Are you sure you want to discard your current "
+"changes?"
+msgstr ""
+
+#: EditorTable.pas:838
+msgid "Cannot fetch charset information."
+msgstr ""
+
+#: EditorTable.pas:853
+msgid "Cannot fetch table information."
+msgstr ""
+
+#. Delete nodes from TableData
+#: EditorTable.pas:1939
+msgid "Deleting Columns"
+msgstr ""
+
+#: EditorTable.pas:1939
+msgid "Are you sure you want to delete the selected "
+"columns?"
+msgstr ""
+
+#: EditorTable.pas:1940
+msgid "Yes\n"
+"No"
+msgstr ""
+
+#: EditorTable.pas:2638
+msgid "Add Index"
+msgstr ""
+
+#: EditorTable.pas:2639
+msgid "Please enter the name of the new index."
+msgstr ""
+
+#. There can only be one PRIMARY index
+#: EditorTable.pas:2704
+msgid "Only one Primary Key"
+msgstr ""
+
+#: EditorTable.pas:2705
+msgid "A primary key has already been defined."
+msgstr ""
+
+#: EditorTable.pas:2798
+msgid "Add Foreign Key"
+msgstr ""
+
+#: EditorTable.pas:2799
+msgid "Please enter the name of the new foreign "
+"key."
+msgstr ""
+
+#: EditorTable.pas:3039
+msgid "Server Messages"
+msgstr ""
+
+#: EditorTable.pas:3066
+#: MySQLConnection.pas:481
+#: MySQLConnection.pas:496
+#: MySQLConnection.pas:509
+#. Connect to instance
+#: MySQLConnection.pas:1265
+#: MySQLConnection.pas:1376
+#: MySQLResultSetControls.pas:564
+msgid "Error"
+msgstr ""
+
+#: EditorTable.pas:3067
+msgid "You have to add at least one column to the "
+"table"
+msgstr ""
+
+#. Get current table
+#: EditorTable.pas:3183
+msgid "Cannot fetch table information for diff."
+msgstr ""
+
+#: EditorTable.pas:3191
+msgid "Cannot generate the diff between the edited and the existing "
+"table."
+msgstr ""
+
+#: EditorTable.pas:3203
+msgid "Confirm Table Edit"
+msgstr ""
+
+#: EditorTable.pas:3205
+msgid "Are you sure you want to execute the following SQL command to apply "
+"the changes to the table?"
+msgstr ""
+
+#: EditorTable.pas:3206
+msgid "Execute\n"
+"Cancel"
+msgstr ""
+
+#. Execute Script
+#: EditorTable.pas:3217
+msgid "No Changes"
+msgstr ""
+
+#: EditorTable.pas:3218
+msgid "The changes you made did not result in the need to alter the "
+"table."
+msgstr ""
+
+#: EditorTable.pas:3324
+msgid "Are you sure you want to quit the table editor without applying the "
+"changes?"
+msgstr ""
+
+#: Grt.pas:795
+msgid "Could not initialize the GRT Environment. A timeout occured during "
+"the initalization."
+msgstr ""
+
+#: Grt.pas:1053
+msgid "Script file not found"
+msgstr ""
+
+#: Grt.pas:1053
+msgid "The script file %s cannot be found."
+msgstr ""
+
+#: Grt.pas:1120
+msgid "BuildGrtParamList called with unsupported parameter "
+"type."
+msgstr ""
+
+#: Grt.pas:1186
+msgid "The value %s cannot be set."
+msgstr ""
+
+#: Grt.pas:1203
+msgid "The value %s is not a string value."
+msgstr ""
+
+#: Grt.pas:1234
+msgid "The value %s is not a int value."
+msgstr ""
+
+#: Grt.pas:1265
+msgid "The value %s is not a real value."
+msgstr ""
+
+#: Grt.pas:1358
+msgid "The following error occured. Error Nr. "
+"%d"
+msgstr ""
+
+#. Check what the original value's type is and auto-convert the given string to a native type if possible.
+#: Grt.pas:1661
+#. Check what the original value's type is and auto-convert the given string to a native type if possible.
+#: Grt.pas:1850
+msgid "The string %s cannot be converted to an integer "
+"value."
+msgstr ""
+
+#: Grt.pas:1667
+#: Grt.pas:1856
+msgid "The string %s cannot be converted to a float "
+"value."
+msgstr ""
+
+#: Grt.pas:2281
+msgid "The call to the function %s:%s returned with an "
+"exception."
+msgstr ""
+
+#: Grt.pas:2285
+msgid "Exception encountered while executing the shell command: "
+"\"%s\""
+msgstr ""
+
+#: Grt.pas:2288
+msgid "An unknown error occured during execution of a GRT "
+"function."
+msgstr ""
+
+#: Grt.pas:2359
+msgid "Error while loading struct definitions "
+"(%d)."
+msgstr ""
+
+#: Grt.pas:2364
+msgid "Registered 1 struct definition file."
+msgstr ""
+
+#: Grt.pas:2367
+msgid "Registered %d struct definition files."
+msgstr ""
+
+#. Init Delphi loader
+#: Grt.pas:2396
+msgid "Initializing native loader..."
+msgstr ""
+
+#: Grt.pas:2402
+msgid "Could not register Delphi modules."
+msgstr ""
+
+#: Grt.pas:2408
+msgid "Error initializing Delphi modules (%d)"
+msgstr ""
+
+#. Init Java loader
+#: Grt.pas:2414
+msgid "Initializing Java loader..."
+msgstr ""
+
+#: Grt.pas:2428
+msgid "Could not register Java module loader."
+msgstr ""
+
+#: Grt.pas:2435
+msgid "Error initializing Java module loader (%d). Please check the .\\java "
+"and .\\java\\lib directories."
+msgstr ""
+
+#. Init PHP loader
+#: Grt.pas:2443
+msgid "Initializing PHP loader..."
+msgstr ""
+
+#: Grt.pas:2450
+msgid "Could not register PHP module loader."
+msgstr ""
+
+#: Grt.pas:2456
+msgid "Error initializing PHP module loader "
+"(%d)"
+msgstr ""
+
+#. Init lua loader
+#: Grt.pas:2462
+msgid "Initializing Lua loader..."
+msgstr ""
+
+#: Grt.pas:2468
+msgid "Could not register Lua module loader."
+msgstr ""
+
+#: Grt.pas:2474
+msgid "Error initializing Lua module loader "
+"(%d)"
+msgstr ""
+
+#. Init python loader
+#: Grt.pas:2478
+msgid "Initializing Python loader..."
+msgstr ""
+
+#: Grt.pas:2484
+msgid "Could not register Python module loader."
+msgstr ""
+
+#: Grt.pas:2490
+msgid "Error initializing Python module loader "
+"(%d)"
+msgstr ""
+
+#: Grt.pas:2550
+msgid "Error while loading %s modules (%d)."
+msgstr ""
+
+#: Grt.pas:2555
+msgid "Registered 1 %s module."
+msgstr ""
+
+#: Grt.pas:2559
+msgid "Registered %d %s modules."
+msgstr ""
+
+#: GrtForms.pas:236
+msgid "The object cannot be created at the given path "
+"%s."
+msgstr ""
+
+#: GrtObjectTree.pas:399
+msgid "Values"
+msgstr ""
+
+#. handle global root value
+#: GrtObjectTree.pas:650
+msgid "root"
+msgstr ""
+
+#: MigrationObjMapDetail.pas:183
+msgid "Migration of type %s"
+msgstr ""
+
+#: MigrationObjMapDetail.pas:407
+msgid "Set Parameter >>"
+msgstr ""
+
+#: MigrationObjSelFilter.pas:178
+msgid "Detailed selection >>"
+msgstr ""
+
+#: MigrationObjSelFilter.pas:212
+msgid "Objects of type %s"
+msgstr ""
+
+#: MigrationObjSelFilter.pas:424
+msgid "Owner object of %s not found"
+msgstr ""
+
+#: MigrationObjSelFilter.pas:568
+msgid "Add Ignore Pattern"
+msgstr ""
+
+#: MigrationObjSelFilter.pas:571
+msgid "Please enter the pattern to ignore. You can use * and ? to match the "
+"objects you would like to ignore. Please note that the string is "
+"matched case sensitive"
+msgstr ""
+
+#: MigrationObjSelFilter.pas:573
+msgid "Pattern"
+msgstr ""
+
+#. Fetch connections from library
+#: MySQLConnection.pas:414
+#. Fetch connections
+#: OptionsEditor.pas:762
+msgid "Error while loading stored connections."
+msgstr ""
+
+#: MySQLConnection.pas:440
+msgid "Connection not found"
+msgstr ""
+
+#: MySQLConnection.pas:441
+msgid "The connection %s cannot be found in the list of stored "
+"connections."
+msgstr ""
+
+#: MySQLConnection.pas:496
+msgid "The schema %s cannot be selected."
+msgstr ""
+
+#: MySQLConnection.pas:510
+msgid "Could not connect to the specified host."
+msgstr ""
+
+#: MySQLConnection.pas:511
+#: MySQLConnection.pas:1267
+msgid "MySQL Error Number %d\n"
+"%s"
+msgstr ""
+
+#: MySQLConnection.pas:1058
+msgid "The default schema cannot be changed to "
+"%s"
+msgstr ""
+
+#: MySQLConnection.pas:1266
+msgid "Could not connect to embedded server."
+msgstr ""
+
+#: MySQLResultSet.pas:407
+msgid "Unapplied Changes"
+msgstr ""
+
+#: MySQLResultSet.pas:409
+msgid "You have made changes to the resultset that have not been applied "
+"yet. Do you want to discard the changes?"
+msgstr ""
+
+#: MySQLResultSet.pas:410
+msgid "Abort"
+msgstr ""
+
+#: MySQLResultSet.pas:429
+msgid "No SQL Command"
+msgstr ""
+
+#: MySQLResultSet.pas:430
+msgid "You tried to execute an empty string. Please type an SQL command into "
+"the SQL edit field and execute again."
+msgstr ""
+
+#: MySQLResultSet.pas:431
+#: MyxConnectionDialog.pas:1187
+msgid "Ok"
+msgstr ""
+
+#. Apply actions.
+#: MySQLResultSet.pas:823
+msgid "Error while applying actions."
+msgstr ""
+
+#. Update resultset which will clear or re-generate a action list.
+#: MySQLResultSet.pas:848
+msgid "Error while applying changes to the result "
+"set."
+msgstr ""
+
+#: MySQLResultSet.pas:872
+msgid "Do you really want to discard all changes?"
+msgstr ""
+
+#: MySQLResultSet.pas:1003
+msgid "Error while allocating memory for MySQL Struct in Query Execute "
+"Thread."
+msgstr ""
+
+#: MySQLResultSet.pas:1009
+msgid "Query Execute Thread cannot connect to "
+"MySQL"
+msgstr ""
+
+#: MySQLResultSet.pas:1260
+msgid "%d rows fetched so far."
+msgstr ""
+
+#: MySQLResultSet.pas:1336
+msgid "%d row%s fetched in %.4fs (%.4fs)"
+msgstr ""
+
+#: MySQLResultSet.pas:1347
+msgid "1 row affected by the last command, no resultset "
+"returned."
+msgstr ""
+
+#: MySQLResultSet.pas:1349
+msgid "%s rows affected by the last command, no resultset "
+"returned."
+msgstr ""
+
+#: MySQLResultSet.pas:1353
+msgid "Query returned no resultset."
+msgstr ""
+
+#: MySQLResultSet.pas:1375
+msgid "Query aborted. %d rows fetched so far in %.4fs "
+"(%.4fs)"
+msgstr ""
+
+#: MySQLResultSet.pas:1381
+msgid "Query aborted."
+msgstr ""
+
+#. Check if ExceptionMsg is set
+#: MySQLResultSet.pas:1405
+msgid "The query could not be executed."
+msgstr ""
+
+#: MySQLResultSet.pas:1411
+msgid "No resultset returned."
+msgstr ""
+
+#: MySQLResultSetControls.pas:524
+msgid "The two resultsets cannot be compared. Please make sure that they "
+"have a primary key and the same column "
+"names."
+msgstr ""
+
+#: MySQLResultSetControls.pas:528
+msgid "Only two resultsets can be compared. Use the [Split Tab] function in "
+"the grid's popup menu to get a second "
+"grid."
+msgstr ""
+
+#: MySQLResultSetControls.pas:565
+msgid "You can split the panel only in one "
+"direction."
+msgstr ""
+
+#: MySQLResultSetControls.pas:1067
+msgid "Copy Column Names"
+msgstr ""
+
+#: MySQLResultSetControls.pas:2812
+#: MySQLResultSetControls.pas:2867
+msgid "Any File"
+msgstr ""
+
+#: MySQLResultSetControls.pas:3234
+msgid "You have to enable editing first."
+msgstr ""
+
+#: MySQLResultSetControls.pas:3506
+#: MyxTableEditor.pas:631
+msgid "Last"
+msgstr ""
+
+#: MySQLResultSetControls.pas:3510
+#: MyxTableEditor.pas:629
+msgid "First"
+msgstr ""
+
+#: MySQLResultSetControls.pas:3700
+msgid "ErrorNr."
+msgstr ""
+
+#: MySQLResultSetControls.pas:3724
+msgid "Copy Message Text"
+msgstr ""
+
+#: MySQLResultSetControls.pas:3729
+msgid "Clear Messages"
+msgstr ""
+
+#: MySQLResultSetFieldViewer.pas:125
+#: MySQLResultSetFieldViewer.pas:148
+msgid "Byte"
+msgstr ""
+
+#: MySQLResultSetFieldViewer.pas:142
+msgid "JPEG"
+msgstr ""
+
+#: MySQLResultSetFieldViewer.pas:144
+msgid "PNG"
+msgstr ""
+
+#: MySQLResultSetFieldViewer.pas:146
+msgid "BMP"
+msgstr ""
+
+#: MySQLResultSetFieldViewer.pas:168
+msgid "PNG image corrupted."
+msgstr ""
+
+#: MySQLResultSetFieldViewer.pas:169
+#: MySQLResultSetFieldViewer.pas:186
+msgid "The BLOB field contains a corrupted image "
+"file."
+msgstr ""
+
+#: MySQLResultSetFieldViewer.pas:185
+msgid "JPG image corrupted."
+msgstr ""
+
+#: MyxConnectionDialog.pas:520
+#: MyxConnectionDialog.pas:599
+msgid "Fetching of list failed."
+msgstr ""
+
+#: MyxConnectionDialog.pas:673
+msgid "Open File ..."
+msgstr ""
+
+#: MyxConnectionDialog.pas:678
+#: MyxConnectionDialog.pas:680
+#: MyxConnectionDialog.pas:1322
+msgid "All files"
+msgstr ""
+
+#: MyxConnectionDialog.pas:864
+msgid "<New Connection>"
+msgstr ""
+
+#: MyxConnectionDialog.pas:939
+msgid "The driver used by the given connection is not "
+"available."
+msgstr ""
+
+#. Select correct Driver
+#: MyxConnectionDialog.pas:963
+msgid "The Driver %s is not available for selection"
+msgstr ""
+
+#: MyxConnectionDialog.pas:968
+msgid "The RDBMS %s is not available for selection"
+msgstr ""
+
+#: MyxConnectionDialog.pas:1087
+#: MyxTableEditor.pas:3347
+msgid "<< Advanced"
+msgstr ""
+
+#: MyxConnectionDialog.pas:1185
+msgid "Store Connection."
+msgstr ""
+
+#: MyxConnectionDialog.pas:1186
+msgid "Please enter a name for the connection."
+msgstr ""
+
+#: MyxConnectionDialog.pas:1253
+msgid "Delete stored connection."
+msgstr ""
+
+#: MyxConnectionDialog.pas:1254
+msgid "Are you sure you want to delete the stored "
+"connection?"
+msgstr ""
+
+#: MyxConnectionDialog.pas:1320
+msgid "Driver file"
+msgstr ""
+
+#: MyxConnectionDialog.pas:1352
+msgid "The application needs to be restarted."
+msgstr ""
+
+#: MyxConnectionDialog.pas:1354
+msgid "The application needs to be restarted. Please click on [Close] to "
+"close the application."
+msgstr ""
+
+#: MyxConnectionDialog.pas:1448
+msgid "Select a RDBMS from the list of supported "
+"systems"
+msgstr ""
+
+#: MyxConnectionDialog.pas:1456
+msgid "Choose from the list of available drivers for this "
+"RDBMS"
+msgstr ""
+
+#: MyxEditor.pas:111
+msgid "Confirm"
+msgstr ""
+
+#: MyxEditor.pas:111
+msgid "There are unapplied changes. Would you like to apply them "
+"now?"
+msgstr ""
+
+#: MyxError.pas:127
+msgid "%s\n"
+" The following error occured: %s (%d)"
+msgstr ""
+
+#: MyxError.pas:151
+msgid "System Error Number %d\n"
+"%s"
+msgstr ""
+
+#: MyxError.pas:159
+msgid "A MySQL error was encountered. The message is:\n"
+"\n"
+"%s"
+msgstr ""
+
+#: MyxError.pas:175
+msgid "Library Error Number %d\n"
+"%s"
+msgstr ""
+
+#: MyxError.pas:185
+msgid "The File %s cannot be opened."
+msgstr ""
+
+#: MyxError.pas:187
+msgid "A connection to the server cannot be "
+"established."
+msgstr ""
+
+#: MyxError.pas:189
+msgid "An error occured while parsing the XML file "
+"%s."
+msgstr ""
+
+#: MyxError.pas:191
+msgid "An error occured while validating the XML file "
+"%s."
+msgstr ""
+
+#: MyxError.pas:193
+msgid "The XML file %s is empty."
+msgstr ""
+
+#: MyxError.pas:195
+msgid "An SQL error occured."
+msgstr ""
+
+#: MyxError.pas:197
+msgid "The execution was stopped."
+msgstr ""
+
+#: MyxError.pas:222
+msgid "Critical Error"
+msgstr ""
+
+#: MyxError.pas:225
+msgid "The following Exception occurred:\n"
+"%s\n"
+"\n"
+"Please choose whether to continue %s, terminate the application or "
+"restart the program."
+msgstr ""
+
+#: MyxError.pas:226
+#: Options.pas:747
+msgid "Continue"
+msgstr ""
+
+#: MyxError.pas:226
+msgid "Terminate"
+msgstr ""
+
+#: MyxError.pas:226
+msgid "Restart"
+msgstr ""
+
+#: MyxError.pas:240
+msgid "SQL Error"
+msgstr ""
+
+#: MyxError.pas:246
+msgid "System Error"
+msgstr ""
+
+#: MyxError.pas:252
+msgid "Library Error"
+msgstr ""
+
+#: MyxOptions.pas:395
+msgid "The option %s is a fixed option and cannot be "
+"set."
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:168
+msgid "Getting a routine's name"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:185
+msgid "Getting a routine's type"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:206
+msgid "Adding new routine"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:334
+#: MyxRoutineEditorFrame.pas:354
+msgid "Replace Text"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:335
+#: MyxRoutineEditorFrame.pas:355
+msgid "Are you sure you want to replace the current routine "
+"text?"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:427
+msgid "Getting a trigger's name"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:444
+msgid "Getting a trigger's statement"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:457
+msgid "Getting a trigger's event"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:469
+msgid "Getting a trigger's timing"
+msgstr ""
+
+#: MyxRoutineEditorFrame.pas:495
+msgid "Adding new trigger"
+msgstr ""
+
+#: MyxTabHeader.pas:1585
+#: TabHeader.pas:1226
+msgid "Tabsheet Caption"
+msgstr ""
+
+#: MyxTabHeader.pas:1586
+#: TabHeader.pas:1227
+msgid "Please enter the new name of the tabsheet."
+msgstr ""
+
+#: MyxTableEditor.pas:622
+msgid "Redundant"
+msgstr ""
+
+#: MyxTableEditor.pas:624
+msgid "Compact"
+msgstr ""
+
+#. update indices
+#: MyxTableEditor.pas:1616
+msgid "Setting column datatype"
+msgstr ""
+
+#: MyxTableEditor.pas:1916
+#: MyxTableEditor.pas:2022
+msgid "NOT NULL"
+msgstr ""
+
+#: MyxTableEditor.pas:1921
+#: MyxTableEditor.pas:2025
+msgid "AUTO INCREMENT"
+msgstr ""
+
+#. datatype
+#: MyxTableEditor.pas:1999
+msgid "Setting column data type"
+msgstr ""
+
+#: MyxTableEditor.pas:2376
+#: MyxTableEditor.pas:2451
+#: MyxTableEditorIndexColumnVTEdit.pas:622
+msgid "Descendant"
+msgstr ""
+
+#: MyxTableEditor.pas:2378
+#: MyxTableEditorIndexColumnVTEdit.pas:617
+msgid "Ascendant"
+msgstr ""
+
+#: MyxTableEditor.pas:3109
+msgid "Please columns to the table before adding the foreign "
+"keys."
+msgstr ""
+
+#. build relationships
+#: MyxTableEditor.pas:3781
+msgid "Creating relationships from foreign "
+"keys"
+msgstr ""
+
+#: MyxTableEditorFkVTEdit.pas:627
+msgid "NO ACTION"
+msgstr ""
+
+#: MyxTableEditorFkVTEdit.pas:632
+msgid "RESTRICT"
+msgstr ""
+
+#: MyxTableEditorFkVTEdit.pas:637
+msgid "CASCADE"
+msgstr ""
+
+#: MyxTableEditorFkVTEdit.pas:642
+msgid "SET NULL"
+msgstr ""
+
+#. Read list of all known column datatypes.
+#: Options.pas:744
+msgid "Cannot fetch datatype information."
+msgstr ""
+
+#: Options.pas:746
+msgid "The data types file `%s` could not be loaded. You won't be able to to "
+"use the table editor.\n"
+"\n"
+"Do you want to exit now or continue "
+"anyway?"
+msgstr ""
+
+#: Options.pas:747
+msgid "Exit"
+msgstr ""
+
+#: OptionsEditor.pas:391
+msgid "General Options"
+msgstr ""
+
+#. Set DiscardingChanges so there will be no recursive calls
+#: OptionsEditor.pas:546
+msgid "Save changes?"
+msgstr ""
+
+#: OptionsEditor.pas:547
+msgid "Some of the settings have changed. Do you want to apply these changes "
+"permanently?"
+msgstr ""
+
+#: OptionsEditor.pas:669
+msgid "Delete connection?"
+msgstr ""
+
+#: OptionsEditor.pas:669
+msgid "Are you sure you want to delete the "
+"connection?"
+msgstr ""
+
+#: OptionsEditor.pas:708
+msgid "Copy of "
+msgstr ""
+
+#: OptionsEditor.pas:762
+msgid "Error Number "
+msgstr ""
+
+#: OptionsEditor.pas:771
+msgid "History"
+msgstr ""
+
+#. Check if the schema node's subdata has been loaded already.
+#: SchemataTreeView.pas:582
+#: SchemataTreeView.pas:1266
+msgid "Fetching assets ..."
+msgstr ""
+
+#. (Re-)load CatalogList, AllowDuplicatedKindOfData
+#: SchemataTreeView.pas:921
+msgid "Fetching Catalogs/Schemata data ..."
+msgstr ""
+
+#: SchemataTreeView.pas:947
+msgid "Could not fetch Catalogs/Schemata data."
+msgstr ""
+
+#: SchemataTreeView.pas:1186
+msgid "Could not fetch schema tables."
+msgstr ""
+
+#: SchemataTreeView.pas:1199
+msgid "Could not fetch stored procedures."
+msgstr ""
+
+#: SchemataTreeView.pas:1373
+msgid "Could not fetch Schema Indices."
+msgstr ""
+
+#: SchemataTreeView.pas:1446
+msgid "Create new Schema"
+msgstr ""
+
+#: SchemataTreeView.pas:1447
+msgid "Please enter a name for the new schema."
+msgstr ""
+
+#: SchemataTreeView.pas:1449
+msgid "Schema name:"
+msgstr ""
+
+#: SchemataTreeView.pas:1491
+msgid "Edit Schema"
+msgstr ""
+
+#: SchemataTreeView.pas:1492
+msgid "Drop Schema"
+msgstr ""
+
+#: SchemataTreeView.pas:1493
+msgid "Rename Schema"
+msgstr ""
+
+#: SchemataTreeView.pas:1499
+msgid "Edit Table"
+msgstr ""
+
+#: SchemataTreeView.pas:1500
+msgid "Drop Table"
+msgstr ""
+
+#: SchemataTreeView.pas:1501
+#: SchemataTreeView.pas:2370
+msgid "Rename Table"
+msgstr ""
+
+#: SchemataTreeView.pas:1507
+msgid "Edit View"
+msgstr ""
+
+#: SchemataTreeView.pas:1508
+msgid "Drop View"
+msgstr ""
+
+#: SchemataTreeView.pas:1509
+msgid "Rename View"
+msgstr ""
+
+#: SchemataTreeView.pas:1515
+msgid "Edit Procedure"
+msgstr ""
+
+#: SchemataTreeView.pas:1516
+msgid "Drop Procedure"
+msgstr ""
+
+#: SchemataTreeView.pas:1517
+msgid "Rename Procedure"
+msgstr ""
+
+#: SchemataTreeView.pas:1523
+msgid "Edit Function"
+msgstr ""
+
+#: SchemataTreeView.pas:1524
+msgid "Drop Function"
+msgstr ""
+
+#: SchemataTreeView.pas:1525
+msgid "Rename Function"
+msgstr ""
+
+#: SchemataTreeView.pas:1733
+msgid "Users"
+msgstr ""
+
+#. Remove trailing new line. We don't need it here.
+#: SchemataTreeView.pas:2191
+msgid "Are you sure you want to delete the "
+"object"
+msgstr ""
+
+#: SchemataTreeView.pas:2194
+msgid "Are you sure you want to delete these "
+"objects"
+msgstr ""
+
+#: SchemataTreeView.pas:2196
+#: SchemataTreeView.pas:2217
+msgid "Delete Objects"
+msgstr ""
+
+#: SchemataTreeView.pas:2197
+msgid "Attention: this action cannot be rolled "
+"back!"
+msgstr ""
+
+#: SchemataTreeView.pas:2208
+msgid "Cannot Drop MySQL Schema"
+msgstr ""
+
+#: SchemataTreeView.pas:2209
+msgid "You cannot drop the MySQL schema"
+msgstr ""
+
+#: SchemataTreeView.pas:2219
+msgid "Do you want do remove the associated schema privileges?\n"
+"\n"
+"Please note that this action cannot be rolled "
+"back."
+msgstr ""
+
+#: SchemataTreeView.pas:2371
+msgid "Please enter the new name for the table "
+"%s."
+msgstr ""
+
+#: SchemataTreeView.pas:2377
+msgid "RENAME TABLE `%s`.`%s` TO `%s`.`%s`"
+msgstr ""
+
+#: TextSearch.pas:327
+msgid "<< Details"
+msgstr ""
+
+#: Toolbar.pas:1535
+msgid "The image %s cannot be found in the attached "
+"resources"
+msgstr ""
+

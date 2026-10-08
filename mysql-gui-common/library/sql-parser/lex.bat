@@ -1,0 +1,1 @@
+..\..\mysql-gui-win-res\bin\flex "-osource\myx_sql_scanner.lex.c" "source\myx_sql_scanner.lex"
