@@ -26,6 +26,16 @@ PCRE. If you modify this file, you may extend this exception to your
 version of the file, but you are not obligated to do so. If you do not
 wish to do so, delete this exception statement from your version.
 
+Code derived from UniCodeEditor
+-------------------------------
+
+The console and editor compatibility layer (ADR-0012) is derived in part from UniCodeEditor,
+a Unicode Source Code Editor for Delphi, Copyright (c) 1999-2005 Mike Zinner, Mike Lischke
+(support@soft-gems.net, www.soft-gems.net), released under the MIT licence. The licence text is
+in legacy/mysql-gui-common/source/windows/UniCodeEditor/ and is to be reproduced next to any
+derived file. The authors ask for credit in the product documentation or about box, which this
+notice records for the time being.
+
 Third-party components
 ----------------------
 
