@@ -33,8 +33,20 @@ waits until after parity and gets its own decision.
 1. ~~Port the units of the connect dialog.~~ Done. Remaining for the dialog: the busy
    animation (`TAnimate` placeholder), the options dialog opened from it, and review of the
    `Windows`-API code that is still in the ported units (`AuxFuncs`, `Options`).
-2. Main window: `ApplicationDataModule`, `Main`, `QueryBrowser` (267 KB), then the code-built parts of the main window: `Toolbar`, `TabHeader`, `SqlCmdPanel`,
-   `ScriptPanel`, result grid, schema tree (`SchemataTreeView`).
+2. Main window. Its closure is 79 units / ~145k lines, of which roughly 35k are the project's own
+   code and ~11k small Mike Lischke helper libraries; the rest is third-party that is replaced
+   (ADR-0007). Own code still to port, with sizes (lines):
+   - application shell: `ApplicationDataModule` 561, `QueryBrowserOptionPages` 182, `Main` 1318,
+     `AppInstanceMgmt` 212, `MySQLCommonFuncs` 252, `CommonTypes` 174
+   - UI building blocks: `Sections` 1803, `InstanceSections` 60, `Toolbar` 1901, `TabHeader` 1295,
+     `AdvancedEdit` 197, `TableDrag` 457, `TextSearch` 343, `SchemaSelection` 92
+   - data and results: `MySQLResultSet` 1636, `MySQLResultSetControls` 4525,
+     `MySQLResultSetFieldViewer` 307, `SQLErrorGrid` 384, `SchemataTreeView` 2670
+   - editing and scripting: `ScriptPanel` 2118, `RegExTextImporter` 1728, `EditorTable` 3709
+     (+ `EditorTableVTEdit` 657, `EditorTableVTFKEdit` 691)
+   - the main form: `QueryBrowser` 8149 (the largest single unit)
+   Suggested order: shell → building blocks → results/tree → main form last, running the
+   self-tests after each step.
 3. SQL editor on SynEdit with a highlighter that matches the original colours.
 4. Remaining dialogs and flows: options pages, RegEx importer, field viewer,
    about, text search, schema selection.
