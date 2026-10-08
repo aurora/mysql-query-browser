@@ -48,12 +48,9 @@ MYX_CATALOGS * myx_get_catalogs(MYSQL *mysql)
   MYSQL_RES *res;
   MYSQL_ROW row;
 
-  if (myx_get_mysql_major_version(mysql)>=6)
-  {
-    catalogs->catalogs_num= 0;
-    return catalogs;
-  }
-  else
+  /* The original code returned no catalogs for server versions >= 6, which was
+     meant for the never-released MySQL 6 with real catalogs. MySQL 8 and later
+     still have the single implicit catalog "def", so always use this path. */
   {
     MYX_SCHEMA *schema;
 

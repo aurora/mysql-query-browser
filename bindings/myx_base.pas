@@ -82,6 +82,59 @@ type
     fetch_time: Double;
   end;
 
+  { catalogs / schemata / tables }
+  PMYX_SCHEMA_TABLE_COLUMN = ^TMYX_SCHEMA_TABLE_COLUMN;
+  TMYX_SCHEMA_TABLE_COLUMN = record
+    column_name: PAnsiChar;
+    column_type: PAnsiChar;
+    default_value: PAnsiChar;
+    extra: PAnsiChar;
+    primary_key: LongWord;
+    not_null: LongWord;
+  end;
+
+const
+  MSTT_BASE_TABLE = 0;
+  MSTT_VIEW = 1;
+
+type
+  PMYX_SCHEMA_TABLE = ^TMYX_SCHEMA_TABLE;
+  TMYX_SCHEMA_TABLE = record
+    table_name: PAnsiChar;
+    columns_num: LongWord;
+    columns: PMYX_SCHEMA_TABLE_COLUMN;
+    table_type: LongInt;
+  end;
+
+  PMYX_SCHEMA_TABLES = ^TMYX_SCHEMA_TABLES;
+  TMYX_SCHEMA_TABLES = record
+    schema_tables_num: LongWord;
+    schema_tables: PMYX_SCHEMA_TABLE;
+  end;
+
+  PMYX_SCHEMA = ^TMYX_SCHEMA;
+  TMYX_SCHEMA = record
+    schema_name: PAnsiChar;
+    escaped_schema_name: PAnsiChar;
+    catalog_name: PAnsiChar;
+    schema_tables: Pointer;
+    schema_indices: Pointer;
+    schema_sps: Pointer;
+  end;
+
+  PMYX_CATALOG = ^TMYX_CATALOG;
+  TMYX_CATALOG = record
+    catalog_name: PAnsiChar;
+    schemata_num: LongWord;
+    schemata: PMYX_SCHEMA;
+  end;
+
+  PMYX_CATALOGS = ^TMYX_CATALOGS;
+  TMYX_CATALOGS = record
+    catalogs_num: LongWord;
+    catalogs: PMYX_CATALOG;
+  end;
+
 function myx_get_public_interface_version: LongInt; cdecl; external LIB_MYSQLX;
 function myx_mysql_init: PMYSQL; cdecl; external LIB_MYSQLX;
 function myx_connect_to_instance(conn: PMYX_USER_CONNECTION; mysql: PMYSQL): LongInt; cdecl; external LIB_MYSQLX;
@@ -92,6 +145,12 @@ function myx_query_execute(mysql: PMYSQL; sql: PAnsiChar; enforce_editable: Long
   params: Pointer; var error_code: TMYX_LIB_ERROR; user_data: Pointer;
   progress_row_fetch, resultset_realloc_before, resultset_realloc_after: Pointer): PMYX_RESULTSET; cdecl; external LIB_MYSQLX;
 function myx_query_free_resultset(rs: PMYX_RESULTSET): LongInt; cdecl; external LIB_MYSQLX;
+
+function myx_mysql_query(mysql: PMYSQL; cmd: PAnsiChar): LongInt; cdecl; external LIB_MYSQLX;
+function myx_get_catalogs(mysql: PMYSQL): PMYX_CATALOGS; cdecl; external LIB_MYSQLX;
+function myx_free_catalogs(catalogs: PMYX_CATALOGS): LongInt; cdecl; external LIB_MYSQLX;
+function myx_get_schema_tables(mysql: PMYSQL; catalog_name, schema_name: PAnsiChar): PMYX_SCHEMA_TABLES; cdecl; external LIB_MYSQLX;
+function myx_free_schema_tables(tables: PMYX_SCHEMA_TABLES): LongInt; cdecl; external LIB_MYSQLX;
 
 implementation
 
