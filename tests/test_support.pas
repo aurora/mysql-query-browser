@@ -5,7 +5,7 @@ unit test_support;
 interface
 
 uses
-  SysUtils, myx_base;
+  SysUtils, myx_types, myx_util, myx_base;
 
 { Connects to the test server configured via QBR_TEST_* (see tests/README.md).
   Raises an exception when the connection fails. }

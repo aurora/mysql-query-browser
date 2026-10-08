@@ -5,7 +5,7 @@ unit test_connect;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, myx_base;
+  Classes, SysUtils, fpcunit, testregistry, myx_types, myx_util, myx_base;
 
 type
   TConnectTest = class(TTestCase)
@@ -65,7 +65,7 @@ begin
     AssertEquals('connect (' + myx_mysql_error(My) + ')', 0, myx_connect_to_instance(@Conn, My));
 
     Err := MYX_NO_ERROR;
-    Rs := myx_query_execute(My, 'SELECT VERSION()', 0, nil, Err, nil, nil, nil, nil);
+    Rs := myx_query_execute(My, 'SELECT VERSION()', 0, nil, @Err, nil, nil, nil, nil);
     AssertNotNull('resultset', Rs);
     try
       AssertEquals('error code', MYX_NO_ERROR, Err);
