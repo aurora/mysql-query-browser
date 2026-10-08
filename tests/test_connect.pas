@@ -72,7 +72,8 @@ begin
       AssertEquals('columns', 1, Rs^.columns_num);
       AssertEquals('rows', 1, Rs^.rows_num);
       SetString(Value, Rs^.rows^.fields^.value, Rs^.rows^.fields^.value_length);
-      AssertTrue('server version is 8.x, got ' + Value, Pos('8.', Value) = 1);
+      AssertTrue('supported server version (>= 5.7), got ' + Value,
+        (StrToIntDef(Copy(Value, 1, Pos('.', Value) - 1), 0) >= 8) or (Pos('5.7.', Value) = 1));
     finally
       myx_query_free_resultset(Rs);
     end;
