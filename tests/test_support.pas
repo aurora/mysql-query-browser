@@ -5,7 +5,7 @@ unit test_support;
 interface
 
 uses
-  SysUtils, myx_types, myx_util, myx_base;
+  SysUtils, myx_types, myx_util_public_interface, myx_public_interface;
 
 { Connects to the test server configured via QBR_TEST_* (see tests/README.md).
   Raises an exception when the connection fails. }
@@ -24,7 +24,7 @@ end;
 
 function ConnectTestServer: PMYSQL;
 var
-  Conn: TMYX_USER_CONNECTION;
+  Conn: MYX_USER_CONNECTION;
   User, Pwd, Host: AnsiString;
 begin
   User := Env('QBR_TEST_USER', 'root');

@@ -5,7 +5,7 @@ unit test_catalog;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, myx_types, myx_util, myx_base, test_support;
+  Classes, SysUtils, fpcunit, testregistry, myx_types, myx_util_public_interface, myx_public_interface, test_support;
 
 type
   TCatalogTest = class(TTestCase)

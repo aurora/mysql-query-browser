@@ -3,7 +3,7 @@ program qbr_tests;
 {$mode objfpc}{$H+}
 
 uses
-  Classes, consoletestrunner, test_connect, test_catalog, test_schema_info;
+  Classes, consoletestrunner, test_connect, test_catalog, test_schema_info, test_classes;
 
 var
   App: TTestRunner;

@@ -5,13 +5,13 @@ unit test_connect;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, myx_types, myx_util, myx_base;
+  Classes, SysUtils, fpcunit, testregistry, myx_types, myx_util_public_interface, myx_public_interface;
 
 type
   TConnectTest = class(TTestCase)
   private
     function Env(const Name, Default: string): string;
-    procedure FillConnection(var Conn: TMYX_USER_CONNECTION; const User, Pwd, Host: AnsiString);
+    procedure FillConnection(var Conn: MYX_USER_CONNECTION; const User, Pwd, Host: AnsiString);
   published
     procedure TestInterfaceVersion;
     procedure TestConnectAndSelectVersion;
@@ -27,7 +27,7 @@ begin
     Result := Default;
 end;
 
-procedure TConnectTest.FillConnection(var Conn: TMYX_USER_CONNECTION;
+procedure TConnectTest.FillConnection(var Conn: MYX_USER_CONNECTION;
   const User, Pwd, Host: AnsiString);
 begin
   FillChar(Conn, SizeOf(Conn), 0);
@@ -47,10 +47,10 @@ end;
 
 procedure TConnectTest.TestConnectAndSelectVersion;
 var
-  Conn: TMYX_USER_CONNECTION;
+  Conn: MYX_USER_CONNECTION;
   User, Pwd, Host: AnsiString;
   My: PMYSQL;
-  Err: TMYX_LIB_ERROR;
+  Err: MYX_LIB_ERROR;
   Rs: PMYX_RESULTSET;
   Value: AnsiString;
 begin
@@ -84,7 +84,7 @@ end;
 
 procedure TConnectTest.TestWrongPasswordFails;
 var
-  Conn: TMYX_USER_CONNECTION;
+  Conn: MYX_USER_CONNECTION;
   My: PMYSQL;
 begin
   FillConnection(Conn, Env('QBR_TEST_USER', 'root'), 'definitely-wrong', Env('QBR_TEST_HOST', '127.0.0.1'));

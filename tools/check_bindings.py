@@ -34,7 +34,8 @@ def main():
     tmp = tempfile.mkdtemp(prefix="qbr-layout-")
     try:
         run([sys.executable, os.path.join(ROOT, "tools", "gen_bindings.py"), "--out", tmp, "--layout", tmp])
-        shutil.copy(os.path.join(ROOT, "bindings", "myx_types.pas"), tmp)
+        for hand_written in ("myx_types.pas", "AuxLists.pas"):
+            shutil.copy(os.path.join(ROOT, "bindings", hand_written), tmp)
 
         src = os.path.join(BACKEND, "src")
         incs = [os.path.join(BACKEND, "compat")] + [

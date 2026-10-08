@@ -5,7 +5,7 @@ unit test_schema_info;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, myx_types, myx_util, myx_base, test_support;
+  Classes, SysUtils, fpcunit, testregistry, myx_types, myx_util_public_interface, myx_public_interface, test_support;
 
 type
   { Indices, table status and stored routines; these are the queries that

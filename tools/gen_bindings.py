@@ -19,15 +19,18 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gen_classes  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "backend", "src")
 
 # (header, unit name, library basename), in dependency order.
 HEADERS = [
-    ("utilities/include/myx_util_public_interface.h", "myx_util", "libmysqlutil"),
-    ("base-library/include/myx_public_interface.h", "myx_base", "libmysqlx"),
-    ("sql-parser/include/myx_sql_parser_public_interface.h", "myx_sql_parser", "libmysqlsqlparser"),
-    ("qb/include/myx_qb_public_interface.h", "myx_qb", "libmysqlqb"),
+    ("utilities/include/myx_util_public_interface.h", "myx_util_public_interface", "libmysqlutil"),
+    ("base-library/include/myx_public_interface.h", "myx_public_interface", "libmysqlx"),
+    ("sql-parser/include/myx_sql_parser_public_interface.h", "myx_sql_parser_public_interface", "libmysqlsqlparser"),
+    ("qb/include/myx_qb_public_interface.h", "myx_qb_public_interface", "libmysqlqb"),
 ]
 
 # Types that come from system or MySQL headers. Declared by hand in
@@ -125,6 +128,7 @@ class Model:
         self.tags = {}       # struct/enum tag -> c name
         self.consts = {}     # name -> (unit, value)
         self.funcs = []      # dict(name, unit, ret, params, varargs)
+        self.classes = []    # struct names marked -generate_classes
         self.enum_values = {}
         self.order = []      # type names in declaration order
 
@@ -284,6 +288,9 @@ def parse_struct_body(body):
 
 def parse_header(model, path, unit):
     text = read_header(path)
+    raw = open(path, encoding="latin-1").read()
+    for m in re.finditer(r"\[SCRIPT::LibInterfaceMapper\]\s+-generate_classes\s+(\w+)", raw):
+        model.classes.append(m.group(1))
     # constants
     for m in re.finditer(r"^[ \t]*#define[ \t]+([A-Za-z_]\w*)[ \t]+(\S.*)$", text, flags=re.M):
         name, val = m.group(1), m.group(2).strip()
@@ -363,6 +370,7 @@ def parse_typedef(model, toks, unit):
 
 def parse_prototype(model, toks, unit):
     base, rest = parse_base(toks)
+    ret_const = "const" in toks[:toks.index("(")]
     stars = 0
     while rest and rest[0] == "*":
         stars += 1
@@ -371,7 +379,8 @@ def parse_prototype(model, toks, unit):
     if rest[1] != "(" or rest[-1] != ")":
         raise GenError("bad prototype %s" % " ".join(toks[:12]))
     params, varargs = parse_params(rest[2:-1])
-    model.funcs.append(dict(name=name, unit=unit, ret=(base, stars), params=params, varargs=varargs))
+    model.funcs.append(dict(name=name, unit=unit, ret=(base, stars), params=params, varargs=varargs,
+                            ret_const=ret_const))
 
 
 # --------------------------------------------------------------------------- emitting
@@ -429,7 +438,7 @@ class Emitter:
         if info["unit"] != unit:
             self.used_units.setdefault(unit, set()).add(info["unit"])
         if stars == 0:
-            return "T" + cname
+            return cname
         if info["kind"] == "fnptr":
             return "Pointer"
         if stars == 1:
@@ -449,6 +458,7 @@ class Emitter:
         w("")
         w("{$mode objfpc}{$H+}")
         w("{$PACKRECORDS C}")
+        w("{$POINTERMATH ON}")
         w("")
         w("interface")
         w("")
@@ -478,12 +488,12 @@ class Emitter:
         # pointer types first (forward references are legal inside one type block)
         for n in types:
             if m.types[n]["kind"] in ("struct", "enum", "alias"):
-                b("  P%s = ^T%s;" % (n, n))
+                b("  P%s = ^%s;" % (n, n))
         ptr2_at = len(body)
         b("")
         for n in types:
             if m.types[n]["kind"] == "enum":
-                b("  T%s = cint;" % n)
+                b("  %s = cint;" % n)
         # aliases and records ordered by by-value dependencies
         pending = [n for n in types if m.types[n]["kind"] in ("struct", "alias")]
         done = {n for n in m.types if m.types[n]["unit"] != unit}
@@ -504,18 +514,18 @@ class Emitter:
         for n in types:
             if m.types[n]["kind"] == "fnptr":
                 info = m.types[n]
-                b("  T%s = %s;" % (n, self.proc_type(info["ret"], info["params"], unit)))
+                b("  %s = %s;" % (n, self.proc_type(info["ret"], info["params"], unit)))
         b("")
         for n in ordered:
             info = m.types[n]
             if info["kind"] == "alias":
                 target = info["target"]
                 if target[0] == "tag" and info["stars"] == 0 and self.m.resolve(target[1]) == n:
-                    b("  T%s = record end;   { opaque: struct defined in a private header }" % n)
+                    b("  %s = record end;   { opaque: struct defined in a private header }" % n)
                 else:
-                    b("  T%s = %s;" % (n, self.type_ref(target, info["stars"], unit)))
+                    b("  %s = %s;" % (n, self.type_ref(target, info["stars"], unit)))
             else:
-                b("  T%s = record" % n)
+                b("  %s = record" % n)
                 for f in info["fields"]:
                     b("    %s: %s;" % (self.pas_name(f["name"]), self.type_ref(f["base"], f["stars"], unit, f["fnptr"])))
                 b("  end;")
@@ -527,13 +537,20 @@ class Emitter:
         extra = ["  PP%s = ^P%s;" % (n, n) for n in sorted(self.extra_ptr2) if m.types[n]["unit"] == unit]
         body[ptr2_at:ptr2_at] = extra
 
-        uses = ["ctypes", "myx_types"] + sorted(self.used_units.get(unit, []))
+        class_decl, class_impl = gen_classes.emit_classes(self, unit)
+        wrappers = [f for f in m.funcs if f["unit"] == unit and self.wraps_string(f)]
+        uses = ["ctypes", "Classes", "SysUtils", "Contnrs", "AuxLists", "myx_types"] + sorted(self.used_units.get(unit, []))
         w("uses %s;" % ", ".join(uses))
         w("")
         out.extend(body)
         w("")
+        out.extend(class_decl)
+        w("")
         w("implementation")
         w("")
+        for f in wrappers:
+            w(self.func_wrapper_impl(f))
+        out.extend(class_impl)
         w("end.")
         return "\n".join(out) + "\n"
 
@@ -558,15 +575,36 @@ class Emitter:
     def param_type(self, p, unit):
         return self.type_ref(p["base"], p["stars"], unit, p["fnptr"])
 
+    def wraps_string(self, f):
+        """char* / const char* results are returned as String by a wrapper, like the
+        original LibInterfaceMapper did (it freed non-const results with g_free)."""
+        base, stars = f["ret"]
+        return base == ("builtin", "char") and stars == 1 and not f["varargs"]
+
     def func_decl(self, f, unit, libname):
         plist = "; ".join("%s: %s" % (self.pas_name(p["name"]), self.param_type(p, unit)) for p in f["params"])
         rtype = self.type_ref(f["ret"][0], f["ret"][1], unit)
         tail = " cdecl;" + (" varargs;" if f["varargs"] else "")
         lib = "LIB_" + libname.upper().replace("LIB", "")
-        head = "procedure %s" % f["name"] if rtype == "void" else "function %s" % f["name"]
+        wrap = self.wraps_string(f)
+        name = "_" + f["name"] if wrap else f["name"]
+        head = "procedure %s" % name if rtype == "void" else "function %s" % name
         sig = ("(%s)" % plist) if plist else ""
         res = "" if rtype == "void" else ": %s" % rtype
-        return "%s%s%s;%s external %s;" % (head, sig, res, tail, lib)
+        ext = "external %s name '%s'" % (lib, f["name"]) if wrap else "external %s" % lib
+        decl = "%s%s%s;%s %s;" % (head, sig, res, tail, ext)
+        if wrap:
+            decl += "\nfunction %s%s: String;" % (f["name"], sig)
+        return decl
+
+    def func_wrapper_impl(self, f):
+        plist = "; ".join("%s: %s" % (self.pas_name(p["name"]), self.param_type(p, "")) for p in f["params"])
+        args = ", ".join(self.pas_name(p["name"]) for p in f["params"])
+        sig = ("(%s)" % plist) if plist else ""
+        free = "" if f.get("ret_const") else "  g_free(P);\n"
+        return ("function %s%s: String;\nvar\n  P: PAnsiChar;\nbegin\n  P := _%s(%s);\n"
+                "  if P = nil then\n    Result := ''\n  else\n    Result := String(P);\n%send;\n"
+                % (f["name"], sig, f["name"], args, free))
 
     # ------------------------------------------------------------------ layout check
     def layout_programs(self, c_includes):
@@ -582,7 +620,7 @@ class Emitter:
         units = [u for _, u, _ in HEADERS]
         p = ["program layout;", "{$mode objfpc}{$H+}", "uses " + ", ".join(units) + ";", "begin"]
         for n in structs:
-            p.append("  writeln('%s size ', SizeOf(T%s));" % (n, n))
+            p.append("  writeln('%s size ', SizeOf(%s));" % (n, n))
             for f in self.m.types[n]["fields"]:
                 p.append("  writeln('%s.%s ', PtrUInt(@P%s(nil)^.%s));" % (n, f["name"], n, self.pas_name(f["name"])))
         p += ["end.", ""]
