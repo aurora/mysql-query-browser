@@ -19,7 +19,9 @@ FPC = shutil.which("fpc") or r"C:\lazarus\fpc\3.2.2\bin\x86_64-win64\fpc.exe"
 
 
 def run(cmd, **kw):
-    r = subprocess.run(cmd, capture_output=True, text=True, **kw)
+    # On Windows the executable is looked up in the caller's PATH, not in env=.
+    exe = shutil.which(cmd[0], path=kw.get("env", os.environ)["PATH"]) or cmd[0]
+    r = subprocess.run([exe] + cmd[1:], capture_output=True, text=True, **kw)
     if r.returncode != 0:
         sys.stderr.write("command failed: %s\n%s%s\n" % (" ".join(cmd), r.stdout, r.stderr))
         sys.exit(1)
