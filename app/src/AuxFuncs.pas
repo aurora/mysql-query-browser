@@ -788,7 +788,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-// This function is taken from VirtualTrees, (C) Mike Lischke and was modified
+// This function is taken from laz.VirtualTrees, VTCompat, (C) Mike Lischke and was modified
 
 procedure DrawWideStringText(DC: HDC; lpString: PWideChar; nCount: Integer; lpRect: TRect; uFormat: Cardinal;
   AdjustRight: Boolean);

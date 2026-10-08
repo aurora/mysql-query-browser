@@ -11,7 +11,10 @@ uses
   TntClasses, TntStdCtrls, TntCheckLst, TntExtCtrls, TntForms, TntComCtrls, TntButtons, TntGrids,
   TntMenus, TntActnList, TntDialogs, TntRegistry, TntSysUtils, TntSystem, TntClipBrd,
   gnugettext, PNGImage, PNGTools, ResSelfTest, AuxFuncs, Options, MyxError, AuxApplicationFuncs,
-  MySQLConnection, ConnectToInstance, CommonFuncs, About, DevTools;
+  MySQLConnection, ConnectToInstance, CommonFuncs, About, DevTools,
+  CommonTypes, MySQLCommonFuncs, AppInstanceMgmt, TextSearch, AdvancedEdit, TabHeader,
+  QueryBrowserOptionPages, ApplicationDataModule,
+  Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools;
 
 var
   I: Integer;

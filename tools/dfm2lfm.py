@@ -294,10 +294,12 @@ DROP_BY_CLASS = {
 # Tnt (WideString) property names -> LCL names; the LCL is Unicode throughout.
 RENAME_PROP = {
     "WideDefaultText": "DefaultText",
+    # TntMenus owner draw; same parameter list as the LCL's TMenuItem.OnDrawItem
+    "OnAdvancedDrawItem": "OnDrawItem",
 }
 RENAME_ITEM_PROP = {"WideText": "Text", "WideHint": "Hint"}
 DROP_SUFFIXES = ("_UTF7",)
-DROP_EVENTS = {"OnAdvancedDrawItem"}     # TntMenus owner draw; handled in code later
+DROP_EVENTS = set()
 
 
 def lcl_class(cls):
