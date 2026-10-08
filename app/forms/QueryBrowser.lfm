@@ -90,7 +90,7 @@ object QueryBrowserForm: TQueryBrowserForm
             Align = alClient
             OnClick = AnimStillImgClick
           end
-          object BusyAnimate: TPanel
+          object BusyAnimate: TAnimate
             Left = 0
             Top = 0
             Width = 56
@@ -176,7 +176,7 @@ object QueryBrowserForm: TQueryBrowserForm
             Align = alClient
             OnClick = AnimStillImgClick
           end
-          object ScriptBusyAnimate: TPanel
+          object ScriptBusyAnimate: TAnimate
             Left = 0
             Top = 0
             Width = 56

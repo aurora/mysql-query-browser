@@ -57,7 +57,8 @@ type
   MYX_INTL_FILE = record end;   { opaque: struct defined in a private header }
 
 function myx_get_util_public_interface_version: cint; cdecl; external LIB_MYSQLUTIL;
-function myx_new_intl_file(filename: PAnsiChar; charset: PAnsiChar; error: PMYX_LIB_ERROR): PMYX_INTL_FILE; cdecl; external LIB_MYSQLUTIL;
+function _myx_new_intl_file(filename: PAnsiChar; charset: PAnsiChar; error: PMYX_LIB_ERROR): PMYX_INTL_FILE; cdecl; external LIB_MYSQLUTIL name 'myx_new_intl_file';
+function myx_new_intl_file(const filename: WideString; const charset: WideString; error: PMYX_LIB_ERROR): PMYX_INTL_FILE;
 procedure myx_free_intl_file(intl_file: PMYX_INTL_FILE); cdecl; external LIB_MYSQLUTIL;
 function myx_read_char_from_intl_file(intl_file: PMYX_INTL_FILE; bytes_read: pcint; error: PMYX_LIB_ERROR): Int64; cdecl; external LIB_MYSQLUTIL;
 function _myx_intl_fgets(&string: PAnsiChar; n: cint; stream: PFILE): PAnsiChar; cdecl; external LIB_MYSQLUTIL name 'myx_intl_fgets';
@@ -65,9 +66,9 @@ function myx_intl_fgets(&string: PAnsiChar; n: cint; stream: PFILE): String;
 procedure myx_intl_rewind(stream: PFILE); cdecl; external LIB_MYSQLUTIL;
 procedure myx_intl_skip(stream: PFILE; count: cint); cdecl; external LIB_MYSQLUTIL;
 function _escape_string(source: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLUTIL name 'escape_string';
-function escape_string(source: PAnsiChar): String;
+function escape_string(const source: WideString): String;
 function _escape_string_for_search(source: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLUTIL name 'escape_string_for_search';
-function escape_string_for_search(source: PAnsiChar): String;
+function escape_string_for_search(const source: WideString): String;
 function _baseconv(num: QWord; base: cint): PAnsiChar; cdecl; external LIB_MYSQLUTIL name 'baseconv';
 function baseconv(num: QWord; base: cint): String;
 
@@ -137,6 +138,11 @@ type
 
 implementation
 
+function myx_new_intl_file(const filename: WideString; const charset: WideString; error: PMYX_LIB_ERROR): PMYX_INTL_FILE;
+begin
+  Result := _myx_new_intl_file(PAnsiChar(UTF8Encode(filename)), PAnsiChar(UTF8Encode(charset)), error);
+end;
+
 function myx_intl_fgets(&string: PAnsiChar; n: cint; stream: PFILE): String;
 var
   P: PAnsiChar;
@@ -149,11 +155,11 @@ begin
   g_free(P);
 end;
 
-function escape_string(source: PAnsiChar): String;
+function escape_string(const source: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _escape_string(source);
+  P := _escape_string(PAnsiChar(UTF8Encode(source)));
   if P = nil then
     Result := ''
   else
@@ -161,11 +167,11 @@ begin
   g_free(P);
 end;
 
-function escape_string_for_search(source: PAnsiChar): String;
+function escape_string_for_search(const source: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _escape_string_for_search(source);
+  P := _escape_string_for_search(PAnsiChar(UTF8Encode(source)));
   if P = nil then
     Result := ''
   else

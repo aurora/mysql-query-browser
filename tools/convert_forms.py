@@ -31,7 +31,8 @@ FORMS = {
     "QueryBrowserOptionPages": os.path.join(QB, "QueryBrowserOptionPages.dfm"),
     "RegExTextImporter": os.path.join(QB, "RegExTextImporter.dfm"),
     "TableDrag": os.path.join(QB, "TableDrag.dfm"),
-    "About": os.path.join(QB, "About.dfm"),
+    # the program file compiles the shared About.pas/.dfm; QB/About.pas is an unused leftover
+    "About": os.path.join(COMMON, "About.dfm"),
     "ConnectToInstance": os.path.join(COMMON, "ConnectToInstance.dfm"),
     "OptionsEditor": os.path.join(COMMON, "OptionsEditor.dfm"),
     "TextSearch": os.path.join(COMMON, "TextSearch.dfm"),

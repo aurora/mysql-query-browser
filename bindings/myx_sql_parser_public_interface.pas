@@ -30,21 +30,46 @@ type
   process_sql_statement_callback = function(sql: PAnsiChar; user_data: Pointer): cint; cdecl;
 
 
-function myx_process_sql_statements(sql: PAnsiChar; process_sql_statement_callback: Pointer; user_data: Pointer; mode: cint): cint; cdecl; external LIB_MYSQLSQLPARSER;
-function myx_process_sql_statements_from_file(filename: PAnsiChar; process_sql_statement_callback: Pointer; user_data: Pointer; mode: cint): cint; cdecl; external LIB_MYSQLSQLPARSER;
-procedure myx_set_parser_source(sql: PAnsiChar); cdecl; external LIB_MYSQLSQLPARSER;
+function _myx_process_sql_statements(sql: PAnsiChar; process_sql_statement_callback: Pointer; user_data: Pointer; mode: cint): cint; cdecl; external LIB_MYSQLSQLPARSER name 'myx_process_sql_statements';
+function myx_process_sql_statements(const sql: WideString; process_sql_statement_callback: Pointer; user_data: Pointer; mode: cint): cint;
+function _myx_process_sql_statements_from_file(filename: PAnsiChar; process_sql_statement_callback: Pointer; user_data: Pointer; mode: cint): cint; cdecl; external LIB_MYSQLSQLPARSER name 'myx_process_sql_statements_from_file';
+function myx_process_sql_statements_from_file(const filename: WideString; process_sql_statement_callback: Pointer; user_data: Pointer; mode: cint): cint;
+procedure _myx_set_parser_source(sql: PAnsiChar); cdecl; external LIB_MYSQLSQLPARSER name 'myx_set_parser_source';
+procedure myx_set_parser_source(const sql: WideString);
 procedure myx_free_parser_source; cdecl; external LIB_MYSQLSQLPARSER;
 procedure myx_parse; cdecl; external LIB_MYSQLSQLPARSER;
 function myx_get_parser_tree: Pointer; cdecl; external LIB_MYSQLSQLPARSER;
-function tree_item_get_subitem_by_name(tree: Pointer; name: PAnsiChar; pos: cint): Pointer; cdecl; external LIB_MYSQLSQLPARSER;
+function _tree_item_get_subitem_by_name(tree: Pointer; name: PAnsiChar; pos: cint): Pointer; cdecl; external LIB_MYSQLSQLPARSER name 'tree_item_get_subitem_by_name';
+function tree_item_get_subitem_by_name(tree: Pointer; const name: WideString; pos: cint): Pointer;
 function _tree_item_get_name(tree: Pointer): PAnsiChar; cdecl; external LIB_MYSQLSQLPARSER name 'tree_item_get_name';
 function tree_item_get_name(tree: Pointer): String;
 function _tree_item_get_value(tree: Pointer): PAnsiChar; cdecl; external LIB_MYSQLSQLPARSER name 'tree_item_get_value';
 function tree_item_get_value(tree: Pointer): String;
-procedure tree_item_dump_xml_to_file(tree_item: Pointer; filename: PAnsiChar); cdecl; external LIB_MYSQLSQLPARSER;
+procedure _tree_item_dump_xml_to_file(tree_item: Pointer; filename: PAnsiChar); cdecl; external LIB_MYSQLSQLPARSER name 'tree_item_dump_xml_to_file';
+procedure tree_item_dump_xml_to_file(tree_item: Pointer; const filename: WideString);
 
 
 implementation
+
+function myx_process_sql_statements(const sql: WideString; process_sql_statement_callback: Pointer; user_data: Pointer; mode: cint): cint;
+begin
+  Result := _myx_process_sql_statements(PAnsiChar(UTF8Encode(sql)), process_sql_statement_callback, user_data, mode);
+end;
+
+function myx_process_sql_statements_from_file(const filename: WideString; process_sql_statement_callback: Pointer; user_data: Pointer; mode: cint): cint;
+begin
+  Result := _myx_process_sql_statements_from_file(PAnsiChar(UTF8Encode(filename)), process_sql_statement_callback, user_data, mode);
+end;
+
+procedure myx_set_parser_source(const sql: WideString);
+begin
+  _myx_set_parser_source(PAnsiChar(UTF8Encode(sql)));
+end;
+
+function tree_item_get_subitem_by_name(tree: Pointer; const name: WideString; pos: cint): Pointer;
+begin
+  Result := _tree_item_get_subitem_by_name(tree, PAnsiChar(UTF8Encode(name)), pos);
+end;
 
 function tree_item_get_name(tree: Pointer): String;
 var
@@ -66,6 +91,11 @@ begin
     Result := ''
   else
     Result := String(P);
+end;
+
+procedure tree_item_dump_xml_to_file(tree_item: Pointer; const filename: WideString);
+begin
+  _tree_item_dump_xml_to_file(tree_item, PAnsiChar(UTF8Encode(filename)));
 end;
 
 end.

@@ -61,7 +61,19 @@ pwsh tests/run-matrix.ps1                # all supported servers in throw-away c
 # forms: convert everything and render screenshots into docs/reconstructed/
 python tools/convert_forms.py            # needs tools/lfmview built: lazbuild tools/lfmview/lfmview.lpi
 python tools/build_resources.py          # compile the .rc files into app/res/
+python tools/prepare_runtime.py          # XML data, fonts, docs, locale/*.po next to app/bin/qbr.exe
 lazbuild app/qbr.lpi                     # the application
+
+# porting a Delphi unit (see "Porting" below)
+python tools/unit_deps.py <Unit>         # what it pulls in; honours the .dpr's unit paths
+python tools/unit_usage.py <Unit> Main QueryBrowser   # which of its routines the program uses
+python tools/port_unit.py <Unit>         # mechanical copy to app/src (encoding, mode, form path)
+python tools/drop_routines.py app/src/<Unit>.pas Name1 Name2   # remove unused routines
+
+# application self-tests (GUI program: results go to files; always use a timeout)
+qbr.exe -datadir <tmp> --shot-connect out.png                     # screenshot of the dialog
+qbr.exe -datadir <tmp> -u root -p <pwd> -h 127.0.0.1 -P <port> --selftest-connect out.txt
+qbr.exe ... --selftest-dialog out.txt                              # drives the connect dialog
 ```
 
 A change is not done until the relevant tests pass **on the server matrix**,
@@ -84,6 +96,19 @@ not just on one server (version differences are where the bugs were).
 - **Never hand-edit `legacy/`.** Copy what you need and port the copy.
 - **Test credentials** (`QBR_TEST_*`, containers `qbr-*`) are for throw-away local
   servers only. Never put real credentials or hosts in the repo.
+
+## Porting a unit (what worked)
+
+1. `unit_deps.py` to see the closure, `unit_usage.py` to see which routines the program really calls.
+   Shared units such as `AuxFuncs` carry a lot of MySQL Administrator code: remove what is unused
+   instead of porting it (the removed names are listed at the top of the ported unit).
+2. `port_unit.py`, add the unit to `app/qbr.lpr`, build with lazbuild, fix errors in order. Typical
+   fixes: LCL has `bsNone`/`fsStayOnTop` in `Controls`; `Screen.ResetFonts` does not exist;
+   `TStringList.Find` needs `Sorted := True`; `TCriticalSection` hides its field (own lock class);
+   `{$R *.dfm}` becomes `{$R ../forms/<Unit>.lfm}`.
+3. Use the original unit that the **program file** lists (`MySQLQueryBrowser.dpr`), not a same-named
+   one in another folder (the Query Browser folder has an unused `About.pas`).
+4. Check with the self-tests above and the server matrix before moving on.
 
 ## Decisions
 

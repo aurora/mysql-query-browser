@@ -18,6 +18,7 @@ type
     procedure TestCatalogsAsClasses;
     procedure TestStringWrapperFreesResult;
     procedure TestListAssignIsDeep;
+    procedure TestNonAsciiThroughWideStringWrappers;
   end;
 
 implementation
@@ -167,6 +168,32 @@ begin
   finally
     A.Free;
     B.Free;
+  end;
+end;
+
+procedure TClassesTest.TestNonAsciiThroughWideStringWrappers;
+var
+  My: PMYSQL;
+  Err: MYX_LIB_ERROR;
+  Rs: PMYX_RESULTSET;
+  Text, Got: String;
+begin
+  Text := 'K' + #$C3#$A4 + 'se ' + #$E2#$82#$AC;                 // "Kaese" with a-umlaut, plus euro sign
+  My := ConnectTestServer;
+  try
+    Err := MYX_NO_ERROR;
+    // the SQL travels as WideString through the wrapper and is UTF-8 encoded on the way to C
+    Rs := myx_query_execute(My, 'SELECT ''' + Text + ''' AS x', 0, nil, @Err, nil, nil, nil, nil);
+    AssertNotNull('resultset', Rs);
+    try
+      AssertEquals('error code', Integer(MYX_NO_ERROR), Integer(Err));
+      SetString(Got, Rs^.rows^.fields^.value, Rs^.rows^.fields^.value_length);
+      AssertEquals('text survives the round trip', Text, Got);
+    finally
+      myx_query_free_resultset(Rs);
+    end;
+  finally
+    DisconnectTestServer(My);
   end;
 end;
 

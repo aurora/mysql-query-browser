@@ -10,6 +10,8 @@ var
   App: TTestRunner;
 
 begin
+  // like a Lazarus application: String is UTF-8, so String <-> WideString conversions keep non-ASCII text
+  SetMultiByteConversionCodePage(CP_UTF8);
   App := TTestRunner.Create(nil);
   App.Initialize;
   App.Title := 'Query Browser Revival tests';

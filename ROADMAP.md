@@ -22,14 +22,18 @@ waits until after parity and gets its own decision.
   `docs/reconstructed/` has screenshots of every form and tab.
 - **Third-party replacements:** TNT aliases, PNG, gettext `.po` reader
   (ADR-0007); PNG and other resources embedded and loadable.
+- **Connect dialog ported and running:** `ConnectToInstance`, `MySQLConnection`, `Options`,
+  `OptionsEditor`, `AuxFuncs` (pruned to what the Query Browser uses), `CommonFuncs`, `About`,
+  `MyxError`, `AuxApplicationFuncs`. The dialog shows with the original banner and translations,
+  and the original code path connects to all six matrix servers, both from the command line and by
+  driving the dialog (`qbr --selftest-connect/--selftest-dialog`, part of `tests/run-matrix.ps1`).
 
 ## Next (in this order)
 
-1. Port the units of the connect dialog: `MyxError`, `AuxApplicationFuncs`,
-   `Options`, `AuxFuncs` (Windows API heavy), `MySQLConnection`, `OptionsEditor`,
-   `ConnectToInstance`. Goal: a running Lazarus program whose dialog connects
-   to the test server through the generated bindings.
-2. Code-built parts of the main window: `Toolbar`, `TabHeader`, `SqlCmdPanel`,
+1. ~~Port the units of the connect dialog.~~ Done. Remaining for the dialog: the busy
+   animation (`TAnimate` placeholder), the options dialog opened from it, and review of the
+   `Windows`-API code that is still in the ported units (`AuxFuncs`, `Options`).
+2. Main window: `ApplicationDataModule`, `Main`, `QueryBrowser` (267 KB), then the code-built parts of the main window: `Toolbar`, `TabHeader`, `SqlCmdPanel`,
    `ScriptPanel`, result grid, schema tree (`SchemataTreeView`).
 3. SQL editor on SynEdit with a highlighter that matches the original colours.
 4. Remaining dialogs and flows: options pages, RegEx importer, field viewer,

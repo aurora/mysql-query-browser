@@ -212,29 +212,39 @@ type
 
 
 function myx_get_qb_public_interface_version: cint; cdecl; external LIB_MYSQLQB;
-function myx_query_explain(mysql: PMYSQL; query: PAnsiChar): PMYX_EXPLAIN_RESULT; cdecl; external LIB_MYSQLQB;
+function _myx_query_explain(mysql: PMYSQL; query: PAnsiChar): PMYX_EXPLAIN_RESULT; cdecl; external LIB_MYSQLQB name 'myx_query_explain';
+function myx_query_explain(mysql: PMYSQL; const query: WideString): PMYX_EXPLAIN_RESULT;
 function myx_free_explain_result(res: PMYX_EXPLAIN_RESULT): cint; cdecl; external LIB_MYSQLQB;
 function myx_history_new: PMYX_HISTORY; cdecl; external LIB_MYSQLQB;
-function myx_history_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_HISTORY; cdecl; external LIB_MYSQLQB;
-function myx_history_store(filename: PAnsiChar; history: PMYX_HISTORY): MYX_LIB_ERROR; cdecl; external LIB_MYSQLQB;
+function _myx_history_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_HISTORY; cdecl; external LIB_MYSQLQB name 'myx_history_load';
+function myx_history_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_HISTORY;
+function _myx_history_store(filename: PAnsiChar; history: PMYX_HISTORY): MYX_LIB_ERROR; cdecl; external LIB_MYSQLQB name 'myx_history_store';
+function myx_history_store(const filename: WideString; history: PMYX_HISTORY): MYX_LIB_ERROR;
 procedure myx_history_free(history: PMYX_HISTORY); cdecl; external LIB_MYSQLQB;
-function myx_history_add_entry(history: PMYX_HISTORY; catalog: PAnsiChar; schema: PAnsiChar; query: PAnsiChar; max_entries: cuint): PMYX_HISTORY_ENTRY; cdecl; external LIB_MYSQLQB;
+function _myx_history_add_entry(history: PMYX_HISTORY; catalog: PAnsiChar; schema: PAnsiChar; query: PAnsiChar; max_entries: cuint): PMYX_HISTORY_ENTRY; cdecl; external LIB_MYSQLQB name 'myx_history_add_entry';
+function myx_history_add_entry(history: PMYX_HISTORY; const catalog: WideString; const schema: WideString; const query: WideString; max_entries: cuint): PMYX_HISTORY_ENTRY;
 function myx_history_get_tree(history: PMYX_HISTORY): PMYX_HISTORY_TREE; cdecl; external LIB_MYSQLQB;
 procedure myx_history_free_tree(history_tree: PMYX_HISTORY_TREE); cdecl; external LIB_MYSQLQB;
-function myx_bookmarks_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_BOOKMARKS; cdecl; external LIB_MYSQLQB;
-function myx_bookmarks_store(filename: PAnsiChar; bookmarks: PMYX_BOOKMARKS): MYX_LIB_ERROR; cdecl; external LIB_MYSQLQB;
+function _myx_bookmarks_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_BOOKMARKS; cdecl; external LIB_MYSQLQB name 'myx_bookmarks_load';
+function myx_bookmarks_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_BOOKMARKS;
+function _myx_bookmarks_store(filename: PAnsiChar; bookmarks: PMYX_BOOKMARKS): MYX_LIB_ERROR; cdecl; external LIB_MYSQLQB name 'myx_bookmarks_store';
+function myx_bookmarks_store(const filename: WideString; bookmarks: PMYX_BOOKMARKS): MYX_LIB_ERROR;
 procedure myx_bookmarks_free(bookmarks: PMYX_BOOKMARKS); cdecl; external LIB_MYSQLQB;
-function myx_load_sql_function_list(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_SQL_FUNCTIONINDEX; cdecl; external LIB_MYSQLQB;
+function _myx_load_sql_function_list(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_SQL_FUNCTIONINDEX; cdecl; external LIB_MYSQLQB name 'myx_load_sql_function_list';
+function myx_load_sql_function_list(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_SQL_FUNCTIONINDEX;
 function myx_free_sql_function_list(f: PMYX_SQL_FUNCTIONINDEX): cint; cdecl; external LIB_MYSQLQB;
 function myx_init_mysql_text: PMYX_SQL_TEXT; cdecl; external LIB_MYSQLQB;
-procedure myx_analyze_text(s: PMYX_SQL_TEXT; text: PAnsiChar); cdecl; external LIB_MYSQLQB;
+procedure _myx_analyze_text(s: PMYX_SQL_TEXT; text: PAnsiChar); cdecl; external LIB_MYSQLQB name 'myx_analyze_text';
+procedure myx_analyze_text(s: PMYX_SQL_TEXT; const text: WideString);
 procedure myx_free_sql_text(text: PMYX_SQL_TEXT); cdecl; external LIB_MYSQLQB;
-function myx_parse_script_file(filename: PAnsiChar; block_size: cint; block_num: cint; last_block: pcint): PMYX_SCRIPT_FILE_BLOCK; cdecl; external LIB_MYSQLQB;
+function _myx_parse_script_file(filename: PAnsiChar; block_size: cint; block_num: cint; last_block: pcint): PMYX_SCRIPT_FILE_BLOCK; cdecl; external LIB_MYSQLQB name 'myx_parse_script_file';
+function myx_parse_script_file(const filename: WideString; block_size: cint; block_num: cint; last_block: pcint): PMYX_SCRIPT_FILE_BLOCK;
 procedure myx_free_script_file_block(script: PMYX_SCRIPT_FILE_BLOCK); cdecl; external LIB_MYSQLQB;
-function myx_strip_embedded_sql(sql: PAnsiChar; code_lang: MYX_Q_SQL_STRIPPED_CODE_LANGUAGE; copy_mode: MYX_Q_SQL_STRIPPED_COPY_MODE): PMYX_Q_SQL_STRIPPED; cdecl; external LIB_MYSQLQB;
+function _myx_strip_embedded_sql(sql: PAnsiChar; code_lang: MYX_Q_SQL_STRIPPED_CODE_LANGUAGE; copy_mode: MYX_Q_SQL_STRIPPED_COPY_MODE): PMYX_Q_SQL_STRIPPED; cdecl; external LIB_MYSQLQB name 'myx_strip_embedded_sql';
+function myx_strip_embedded_sql(const sql: WideString; code_lang: MYX_Q_SQL_STRIPPED_CODE_LANGUAGE; copy_mode: MYX_Q_SQL_STRIPPED_COPY_MODE): PMYX_Q_SQL_STRIPPED;
 function myx_get_params_from_stripped_query(stripped: PMYX_Q_SQL_STRIPPED): PMYX_STRINGLIST; cdecl; external LIB_MYSQLQB;
 function _myx_reconstruct_embedded_sql(stripped: PMYX_Q_SQL_STRIPPED; sql: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLQB name 'myx_reconstruct_embedded_sql';
-function myx_reconstruct_embedded_sql(stripped: PMYX_Q_SQL_STRIPPED; sql: PAnsiChar): String;
+function myx_reconstruct_embedded_sql(stripped: PMYX_Q_SQL_STRIPPED; const sql: WideString): String;
 procedure myx_free_stripped_sql(stripped_sql: PMYX_Q_SQL_STRIPPED); cdecl; external LIB_MYSQLQB;
 
 type
@@ -521,11 +531,61 @@ type
 
 implementation
 
-function myx_reconstruct_embedded_sql(stripped: PMYX_Q_SQL_STRIPPED; sql: PAnsiChar): String;
+function myx_query_explain(mysql: PMYSQL; const query: WideString): PMYX_EXPLAIN_RESULT;
+begin
+  Result := _myx_query_explain(mysql, PAnsiChar(UTF8Encode(query)));
+end;
+
+function myx_history_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_HISTORY;
+begin
+  Result := _myx_history_load(PAnsiChar(UTF8Encode(filename)), error_code);
+end;
+
+function myx_history_store(const filename: WideString; history: PMYX_HISTORY): MYX_LIB_ERROR;
+begin
+  Result := _myx_history_store(PAnsiChar(UTF8Encode(filename)), history);
+end;
+
+function myx_history_add_entry(history: PMYX_HISTORY; const catalog: WideString; const schema: WideString; const query: WideString; max_entries: cuint): PMYX_HISTORY_ENTRY;
+begin
+  Result := _myx_history_add_entry(history, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(query)), max_entries);
+end;
+
+function myx_bookmarks_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_BOOKMARKS;
+begin
+  Result := _myx_bookmarks_load(PAnsiChar(UTF8Encode(filename)), error_code);
+end;
+
+function myx_bookmarks_store(const filename: WideString; bookmarks: PMYX_BOOKMARKS): MYX_LIB_ERROR;
+begin
+  Result := _myx_bookmarks_store(PAnsiChar(UTF8Encode(filename)), bookmarks);
+end;
+
+function myx_load_sql_function_list(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_SQL_FUNCTIONINDEX;
+begin
+  Result := _myx_load_sql_function_list(PAnsiChar(UTF8Encode(filename)), error_code);
+end;
+
+procedure myx_analyze_text(s: PMYX_SQL_TEXT; const text: WideString);
+begin
+  _myx_analyze_text(s, PAnsiChar(UTF8Encode(text)));
+end;
+
+function myx_parse_script_file(const filename: WideString; block_size: cint; block_num: cint; last_block: pcint): PMYX_SCRIPT_FILE_BLOCK;
+begin
+  Result := _myx_parse_script_file(PAnsiChar(UTF8Encode(filename)), block_size, block_num, last_block);
+end;
+
+function myx_strip_embedded_sql(const sql: WideString; code_lang: MYX_Q_SQL_STRIPPED_CODE_LANGUAGE; copy_mode: MYX_Q_SQL_STRIPPED_COPY_MODE): PMYX_Q_SQL_STRIPPED;
+begin
+  Result := _myx_strip_embedded_sql(PAnsiChar(UTF8Encode(sql)), code_lang, copy_mode);
+end;
+
+function myx_reconstruct_embedded_sql(stripped: PMYX_Q_SQL_STRIPPED; const sql: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_reconstruct_embedded_sql(stripped, sql);
+  P := _myx_reconstruct_embedded_sql(stripped, PAnsiChar(UTF8Encode(sql)));
   if P = nil then
     Result := ''
   else

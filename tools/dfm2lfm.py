@@ -263,7 +263,7 @@ def write_node(lines, node, level=0):
 CLASS_MAP = {
     "TUniCodeEdit": "TSynEdit",
     "TUCESQLHighlighter": "TSynSQLSyn",
-    "TAnimate": "TPanel",
+    # TAnimate stays TAnimate: the LCL has none, app/compat/TntComCtrls declares a placeholder
 }
 
 # For these target classes only the listed properties survive; everything the
@@ -273,8 +273,8 @@ KEEP_ONLY = {
                  "Color", "Font.Charset", "Font.Color", "Font.Height", "Font.Name", "Font.Style",
                  "PopupMenu", "Constraints.MinHeight", "Constraints.MinWidth", "Cursor", "Hint", "ShowHint"},
     "TSynSQLSyn": set(),
-    "TPanel(animate)": {"Left", "Top", "Width", "Height", "Align", "Anchors", "Visible", "TabOrder",
-                        "Constraints.MinHeight", "Constraints.MinWidth"},
+    "TAnimate": {"Left", "Top", "Width", "Height", "Align", "Anchors", "Visible", "TabOrder",
+                 "Constraints.MinHeight", "Constraints.MinWidth"},
 }
 
 # Properties that exist in the VCL only (or are pure designer state).
@@ -349,8 +349,6 @@ class Converter:
         orig_cls = node.cls
         node.cls = lcl_class(node.cls)
         keep = KEEP_ONLY.get(node.cls)
-        if orig_cls == "TAnimate":
-            keep = KEEP_ONLY["TPanel(animate)"]
         dropped = DROP_BY_CLASS.get(node.cls, set())
         new_props = []
         for name, v in node.props:

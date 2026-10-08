@@ -230,9 +230,11 @@ def parse_params(toks):
         if part == ["..."]:
             varargs = True
             continue
+        before_star = part[:part.index("*")] if "*" in part else part
         base, rest = parse_base(part)
         d = parse_declarator(rest)
-        params.append(dict(base=base, stars=d["stars"], name=d["name"] or "p%d" % (i + 1), fnptr=d["fnptr"]))
+        params.append(dict(base=base, stars=d["stars"], name=d["name"] or "p%d" % (i + 1), fnptr=d["fnptr"],
+                           const="const" in before_star))
     return params, varargs
 
 
@@ -577,11 +579,29 @@ class Emitter:
     def param_type(self, p, unit):
         return self.type_ref(p["base"], p["stars"], unit, p["fnptr"])
 
-    def wraps_string(self, f):
-        """char* / const char* results are returned as String by a wrapper, like the
-        original LibInterfaceMapper did (it freed non-const results with g_free)."""
+    # Non-const `char *` parameters that are NOT input text: output buffers and pointers that
+    # are handed back to the library to be freed. They stay PAnsiChar.
+    RAW_CHAR_PARAMS = {("myx_intl_fgets", "string"), ("myx_free_lib_str", "str"), ("myx_get_ip_as_string", "ip")}
+
+    def is_string_param(self, f, p):
+        """`char *` input parameter: the wrapper takes a WideString for it (the original mapper
+        treated every `char *` parameter as text; the exceptions are listed above)."""
+        if p["base"] != ("builtin", "char") or p["stars"] != 1 or p["fnptr"]:
+            return False
+        return p.get("const") or (f["name"], p["name"]) not in self.RAW_CHAR_PARAMS
+
+    def returns_string(self, f):
         base, stars = f["ret"]
-        return base == ("builtin", "char") and stars == 1 and not f["varargs"]
+        return base == ("builtin", "char") and stars == 1
+
+    def wraps_string(self, f):
+        """Functions with text parameters or a text result get a wrapper like the original
+        LibInterfaceMapper generated: `const char *` parameters become WideString, `char *`
+        results become String (non-const ones are freed with g_free). The raw function keeps
+        the name `_name`. Varargs functions cannot be wrapped."""
+        if f["varargs"]:
+            return False
+        return self.returns_string(f) or any(self.is_string_param(f, p) for p in f["params"])
 
     def func_decl(self, f, unit, libname):
         plist = "; ".join("%s: %s" % (self.pas_name(p["name"]), self.param_type(p, unit)) for p in f["params"])
@@ -596,17 +616,36 @@ class Emitter:
         ext = "external %s name '%s'" % (lib, f["name"]) if wrap else "external %s" % lib
         decl = "%s%s%s;%s %s;" % (head, sig, res, tail, ext)
         if wrap:
-            decl += "\nfunction %s%s: String;" % (f["name"], sig)
+            wsig = self.wrapper_signature(f)
+            if self.returns_string(f):
+                decl += "\nfunction %s%s: String;" % (f["name"], wsig)
+            elif rtype == "void":
+                decl += "\nprocedure %s%s;" % (f["name"], wsig)
+            else:
+                decl += "\nfunction %s%s: %s;" % (f["name"], wsig, rtype)
         return decl
 
+    def wrapper_signature(self, f):
+        plist = "; ".join(
+            ("const %s: WideString" % self.pas_name(p["name"])) if self.is_string_param(f, p)
+            else "%s: %s" % (self.pas_name(p["name"]), self.param_type(p, ""))
+            for p in f["params"])
+        return ("(%s)" % plist) if plist else ""
+
     def func_wrapper_impl(self, f):
-        plist = "; ".join("%s: %s" % (self.pas_name(p["name"]), self.param_type(p, "")) for p in f["params"])
-        args = ", ".join(self.pas_name(p["name"]) for p in f["params"])
-        sig = ("(%s)" % plist) if plist else ""
-        free = "" if f.get("ret_const") else "  g_free(P);\n"
-        return ("function %s%s: String;\nvar\n  P: PAnsiChar;\nbegin\n  P := _%s(%s);\n"
-                "  if P = nil then\n    Result := ''\n  else\n    Result := String(P);\n%send;\n"
-                % (f["name"], sig, f["name"], args, free))
+        sig = self.wrapper_signature(f)
+        args = ", ".join(("PAnsiChar(UTF8Encode(%s))" % self.pas_name(p["name"])) if self.is_string_param(f, p)
+                         else self.pas_name(p["name"]) for p in f["params"])
+        call = "_%s(%s)" % (f["name"], args)
+        rtype = self.type_ref(f["ret"][0], f["ret"][1], "")
+        if self.returns_string(f):
+            free = "" if f.get("ret_const") else "  g_free(P);\n"
+            return ("function %s%s: String;\nvar\n  P: PAnsiChar;\nbegin\n  P := %s;\n"
+                    "  if P = nil then\n    Result := ''\n  else\n    Result := String(P);\n%send;\n"
+                    % (f["name"], sig, call, free))
+        if rtype == "void":
+            return "procedure %s%s;\nbegin\n  %s;\nend;\n" % (f["name"], sig, call)
+        return "function %s%s: %s;\nbegin\n  Result := %s;\nend;\n" % (f["name"], sig, rtype, call)
 
     # ------------------------------------------------------------------ layout check
     def layout_programs(self, c_includes):

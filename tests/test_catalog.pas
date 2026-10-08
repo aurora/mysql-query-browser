@@ -79,7 +79,7 @@ var
   T: PMYX_SCHEMA_TABLE;
   Names: TStringList;
 begin
-  Tabs := myx_get_schema_tables(FMy, nil, SchemaName);
+  Tabs := myx_get_schema_tables(FMy, '', SchemaName);
   AssertNotNull('tables', Tabs);
   Names := TStringList.Create;
   try
@@ -107,7 +107,7 @@ var
   Col: PMYX_SCHEMA_TABLE_COLUMN;
   Checked: Integer;
 begin
-  Tabs := myx_get_schema_tables(FMy, nil, SchemaName);
+  Tabs := myx_get_schema_tables(FMy, '', SchemaName);
   AssertNotNull('tables', Tabs);
   Checked := 0;
   try

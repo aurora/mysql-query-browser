@@ -51,7 +51,7 @@ end;
 
 procedure ExecSQL(My: PMYSQL; const SQL: AnsiString);
 begin
-  if myx_mysql_query(My, PAnsiChar(SQL)) <> 0 then
+  if myx_mysql_query(My, SQL) <> 0 then
     raise Exception.Create('SQL failed: ' + SQL + ' -> ' + myx_mysql_error(My));
 end;
 

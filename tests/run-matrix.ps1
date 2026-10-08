@@ -64,10 +64,29 @@ foreach ($m in $matrix) {
   $fail = [regex]::Match($log, 'Number of failures:\s+(\d+)').Groups[1].Value
   $status = if ($run -and $err -eq '0' -and $fail -eq '0') { 'PASS' } else { 'FAIL' }
   $details = if ($status -eq 'FAIL') { ($log -split "`n" | Select-String 'Failed:|Exception|Assertion|Message' | Select-Object -First 5) -join ' | ' } else { '' }
-  $results += [pscustomobject]@{ Server = $m.Image; Result = "$status ($run tests)"; Details = $details }
+  # the application itself: connect through the ported code, once via the command line path and
+  # once by driving the connect dialog (needs app/bin/qbr.exe and `python tools/prepare_runtime.py`)
+  $app = Join-Path $root 'app\bin\qbr.exe'
+  $appResult = 'n/a'
+  if (Test-Path $app) {
+    $dataDir = Join-Path ([IO.Path]::GetTempPath()) "qbr-matrix-data"
+    New-Item -ItemType Directory -Force $dataDir | Out-Null
+    $ok = @()
+    foreach ($mode in 'selftest-connect', 'selftest-dialog') {
+      $report = Join-Path $dataDir "$mode.txt"
+      Remove-Item $report -ErrorAction SilentlyContinue
+      $p = Start-Process -FilePath $app -PassThru -WindowStyle Hidden -ArgumentList @(
+        '-datadir', $dataDir, '-u', 'root', '-p', $password, '-h', '127.0.0.1', '-P', "$port", "--$mode", $report)
+      if (-not $p.WaitForExit(60000)) { $p.Kill() }
+      $text = if (Test-Path $report) { (Get-Content $report -Raw).Trim() } else { 'no report' }
+      $ok += ($text -match '^(dialog )?connected')
+    }
+    $appResult = if ($ok -notcontains $false) { 'PASS' } else { 'FAIL' }
+  }
+  $results += [pscustomobject]@{ Server = $m.Image; Result = "$status ($run tests)"; App = $appResult; Details = $details }
 
   if (-not $Keep) { & $engine rm -f $name | Out-Null }
 }
 
 $results | Format-Table -AutoSize -Wrap
-if ($results | Where-Object { $_.Result -notlike 'PASS*' }) { exit 1 }
+if ($results | Where-Object { $_.Result -notlike "PASS*" -or $_.App -eq "FAIL" }) { exit 1 }

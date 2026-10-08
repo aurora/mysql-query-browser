@@ -16,7 +16,9 @@ OUT = os.path.join(ROOT, "app", "compat")
 # shim unit -> (LCL units to use, {TTntX: LCL class}, extra interface/implementation text)
 UNITS = {
     "TntClasses": (["Classes"], {
-        "TTntStringList": "TStringList", "TTntStrings": "TStrings", "TTntFileStream": "TFileStream",
+        "TTntStringList": "TStringList", "TTntStrings": "TStrings",
+        # Delphi's WideStrings unit; TNT re-exported it
+        "TWideStringList": "TStringList", "TWideStrings": "TStrings", "TTntFileStream": "TFileStream",
         "TTntMemoryStream": "TMemoryStream", "TTntResourceStream": "TResourceStream"}),
     "TntStdCtrls": (["StdCtrls", "ComCtrls"], {
         "TTntLabel": "TLabel", "TTntEdit": "TEdit", "TTntMemo": "TMemo", "TTntComboBox": "TComboBox",
@@ -28,7 +30,7 @@ UNITS = {
         "TTntPanel": "TPanel", "TTntSplitter": "TSplitter"}),
     "TntForms": (["Forms"], {
         "TTntForm": "TForm", "TTntFrame": "TFrame", "TTntScrollBox": "TScrollBox"}),
-    "TntComCtrls": (["ComCtrls", "StdCtrls"], {
+    "TntComCtrls": (["Classes", "Controls", "ExtCtrls", "ComCtrls", "StdCtrls"], {
         "TTntPageControl": "TPageControl", "TTntTabSheet": "TTabSheet", "TTntTabControl": "TTabControl",
         "TTntTreeView": "TTreeView", "TTntTreeNode": "TTreeNode", "TTntListView": "TListView",
         "TTntListItem": "TListItem", "TTntStatusBar": "TStatusBar", "TTntProgressBar": "TProgressBar",
@@ -70,6 +72,27 @@ def main():
             decl = ("{ TNT's TntApplication gave access to Unicode versions of the Application methods }\n"
                     "function TntApplication: TApplication;")
             impl = "function TntApplication: TApplication;\nbegin\n  Result := Application;\nend;\n"
+        if name == "TntComCtrls":
+            decl = ("{ The VCL's ComCtrls.TAnimate plays an AVI resource (the busy indicator). The LCL has no\n"
+                    "  equivalent; this placeholder keeps the properties the ported code uses and shows nothing\n"
+                    "  yet. ROADMAP: rebuild the animation. Declared here because every ported unit that uses\n"
+                    "  TAnimate also uses TntComCtrls. }\n"
+                    "type\n"
+                    "  TAnimate = class(TPanel)\n"
+                    "  private\n"
+                    "    FResName: String;\n"
+                    "    FActive: Boolean;\n"
+                    "  public\n"
+                    "    constructor Create(AOwner: TComponent); override;\n"
+                    "    property ResName: String read FResName write FResName;\n"
+                    "    property Active: Boolean read FActive write FActive;\n"
+                    "  end;")
+            impl = ("constructor TAnimate.Create(AOwner: TComponent);\n"
+                    "begin\n"
+                    "  inherited Create(AOwner);\n"
+                    "  BevelOuter := bvNone;\n"
+                    "  Caption := '';\n"
+                    "end;\n")
         write_unit(name, uses, aliases, decl, impl)
     print("wrote %d units to %s" % (len(UNITS), OUT))
 

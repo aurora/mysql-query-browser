@@ -64,7 +64,7 @@ var
   Ix: PMYX_TABLE_INDEX;
   Seen: TStringList;
 begin
-  Idx := myx_get_schema_indices(FMy, nil, SchemaName);
+  Idx := myx_get_schema_indices(FMy, '', SchemaName);
   AssertNotNull('indices', Idx);
   Seen := TStringList.Create;
   try
@@ -104,7 +104,7 @@ var
   St: PMYX_SCHEMA_TABLE_STATUS;
   T: PMYX_TABLE_STATUS;
 begin
-  St := myx_get_schema_table_status(FMy, nil, SchemaName);
+  St := myx_get_schema_table_status(FMy, '', SchemaName);
   AssertNotNull('table status', St);
   try
     AssertEquals('one table', 1, St^.schema_tables_num);
@@ -126,7 +126,7 @@ var
   Sp: PMYX_SCHEMA_STORED_PROCEDURE;
   GotProc, GotFunc: Boolean;
 begin
-  Sps := myx_get_schema_sps(FMy, nil, SchemaName);
+  Sps := myx_get_schema_sps(FMy, '', SchemaName);
   AssertNotNull('routines', Sps);
   GotProc := False;
   GotFunc := False;

@@ -16,6 +16,8 @@ type
   TTntResourceStream = TResourceStream;
   TTntStringList = TStringList;
   TTntStrings = TStrings;
+  TWideStringList = TStringList;
+  TWideStrings = TStrings;
 
 implementation
 

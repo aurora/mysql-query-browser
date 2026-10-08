@@ -21,7 +21,33 @@ KNOWN_REPLACED = {
 }
 
 
+_DPR = None
+
+
+def dpr_paths():
+    """Unit name -> path as listed in the program file (`Unit in 'path'`): the files the
+    original project really compiled. Needed because some unit names exist twice
+    (e.g. About.pas in the Query Browser folder is an unused leftover)."""
+    global _DPR
+    if _DPR is None:
+        _DPR = {}
+        dpr = os.path.join(ROOT, "legacy", "mysql-query-browser", "source", "windows", "MySQLQueryBrowser.dpr")
+        base = os.path.dirname(dpr)
+        text = open(dpr, encoding="cp1252", errors="replace").read()
+        for m in re.finditer(r"(\w+)\s+in\s+'([^']+)'", text):
+            path = os.path.normpath(os.path.join(base, m.group(2).replace("\\", os.sep)))
+            # the project tree had the shared library in "common"; here it is mysql-gui-common
+            legacy = os.path.join(ROOT, "legacy") + os.sep
+            if path.startswith(legacy + "common" + os.sep):
+                path = legacy + "mysql-gui-common" + os.sep + path[len(legacy + "common" + os.sep):]
+            _DPR[m.group(1).lower()] = path
+    return _DPR
+
+
 def find_unit(name):
+    p = dpr_paths().get(name.lower())
+    if p and os.path.exists(p):
+        return p
     for d in DIRS:
         for root, _, files in os.walk(d):
             if "testing" in root or "GenericCanvas" in root:

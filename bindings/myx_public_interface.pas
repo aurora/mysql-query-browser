@@ -902,24 +902,29 @@ type
 
 function myx_get_public_interface_version: cint; cdecl; external LIB_MYSQLX;
 procedure myx_free_lib_str(str: PAnsiChar); cdecl; external LIB_MYSQLX;
-function myx_str_in_stringlist(stringlist: PMYX_STRINGLIST; src: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_str_in_stringlist(stringlist: PMYX_STRINGLIST; src: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_str_in_stringlist';
+function myx_str_in_stringlist(stringlist: PMYX_STRINGLIST; const src: WideString): cint;
 function myx_free_lib_stringlist(stringlist: PMYX_STRINGLIST): cint; cdecl; external LIB_MYSQLX;
 function _get_value_from_text_ex(txt: PAnsiChar; txt_length: cint; regexpr: PAnsiChar; substring_nr: cuint): PAnsiChar; cdecl; external LIB_MYSQLX name 'get_value_from_text_ex';
-function get_value_from_text_ex(txt: PAnsiChar; txt_length: cint; regexpr: PAnsiChar; substring_nr: cuint): String;
+function get_value_from_text_ex(const txt: WideString; txt_length: cint; const regexpr: WideString; substring_nr: cuint): String;
 function myx_mysql_embedded_start: cint; cdecl; external LIB_MYSQLX;
 procedure myx_mysql_embedded_prevent_start; cdecl; external LIB_MYSQLX;
 procedure myx_mysql_embedded_shutdown; cdecl; external LIB_MYSQLX;
 function myx_mysql_embedded_init: PMYSQL; cdecl; external LIB_MYSQLX;
 function myx_mysql_init: PMYSQL; cdecl; external LIB_MYSQLX;
-function myx_init_library(datadir: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_init_library(datadir: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_init_library';
+function myx_init_library(const datadir: WideString): cint;
 procedure myx_mysql_set_query_hooks(mysql: PMYSQL; pre_hook: Pointer; post_hook: Pointer; client_data: Pointer); cdecl; external LIB_MYSQLX;
-function myx_set_my_cnf_path(path: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_set_my_cnf_path(path: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_set_my_cnf_path';
+function myx_set_my_cnf_path(const path: WideString): cint;
 function _myx_get_my_cnf_path: PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_get_my_cnf_path';
 function myx_get_my_cnf_path: String;
 function myx_connect_to_instance(user_connection: PMYX_USER_CONNECTION; mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
 function myx_mysql_close(mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
-function myx_use_schema(mysql: PMYSQL; schema: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_push_schema(mysql: PMYSQL; schema: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_use_schema(mysql: PMYSQL; schema: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_use_schema';
+function myx_use_schema(mysql: PMYSQL; const schema: WideString): cint;
+function _myx_push_schema(mysql: PMYSQL; schema: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_push_schema';
+function myx_push_schema(mysql: PMYSQL; const schema: WideString): cint;
 function myx_pop_schema(mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
 function _myx_get_default_schema(mysql: PMYSQL): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_get_default_schema';
 function myx_get_default_schema(mysql: PMYSQL): String;
@@ -927,9 +932,11 @@ function myx_get_thread_id(mysql: PMYSQL): culong; cdecl; external LIB_MYSQLX;
 function myx_ping_server(mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
 function myx_get_mysql_quote_char(mysql: PMYSQL; detect: cint): cint; cdecl; external LIB_MYSQLX;
 function myx_mysql_esc(mysql: PMYSQL; cmd: PAnsiChar): PAnsiChar; cdecl; varargs; external LIB_MYSQLX;
-function myx_mysql_query(mysql: PMYSQL; cmd: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_mysql_query(mysql: PMYSQL; cmd: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_mysql_query';
+function myx_mysql_query(mysql: PMYSQL; const cmd: WideString): cint;
 function myx_mysql_query_esc(mysql: PMYSQL; cmd: PAnsiChar): cint; cdecl; varargs; external LIB_MYSQLX;
-function myx_mysql_real_query(mysql: PMYSQL; cmd: PAnsiChar; len: cuint): cint; cdecl; external LIB_MYSQLX;
+function _myx_mysql_real_query(mysql: PMYSQL; cmd: PAnsiChar; len: cuint): cint; cdecl; external LIB_MYSQLX name 'myx_mysql_real_query';
+function myx_mysql_real_query(mysql: PMYSQL; const cmd: WideString; len: cuint): cint;
 function myx_mysql_affected_rows(mysql: PMYSQL): Int64; cdecl; external LIB_MYSQLX;
 function _myx_get_mysql_charset(mysql: PMYSQL): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_get_mysql_charset';
 function myx_get_mysql_charset(mysql: PMYSQL): String;
@@ -941,31 +948,41 @@ function myx_get_mysql_release(mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
 function mysql_version_is_later_or_equal_than(mysql: PMYSQL; major_version: cint; minor_version: cint): cint; cdecl; external LIB_MYSQLX;
 function mysql_full_version_is_later_or_equal_than(mysql: PMYSQL; major_version: cint; minor_version: cint; patchlevel: cint): cint; cdecl; external LIB_MYSQLX;
 function _myx_get_server_variable(mysql: PMYSQL; name: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_get_server_variable';
-function myx_get_server_variable(mysql: PMYSQL; name: PAnsiChar): String;
+function myx_get_server_variable(mysql: PMYSQL; const name: WideString): String;
 function _myx_convert_dbstr_utf8(mysql: PMYSQL; str: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_convert_dbstr_utf8';
-function myx_convert_dbstr_utf8(mysql: PMYSQL; str: PAnsiChar): String;
+function myx_convert_dbstr_utf8(mysql: PMYSQL; const str: WideString): String;
 function _myx_convert_utf8_dbstr(mysql: PMYSQL; str: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_convert_utf8_dbstr';
-function myx_convert_utf8_dbstr(mysql: PMYSQL; str: PAnsiChar): String;
+function myx_convert_utf8_dbstr(mysql: PMYSQL; const str: WideString): String;
 function myx_mysql_errno(mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
 function _myx_mysql_error(mysql: PMYSQL): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_mysql_error';
 function myx_mysql_error(mysql: PMYSQL): String;
-procedure myx_set_mysql_error(error: PAnsiChar; errn: cint); cdecl; external LIB_MYSQLX;
+procedure _myx_set_mysql_error(error: PAnsiChar; errn: cint); cdecl; external LIB_MYSQLX name 'myx_set_mysql_error';
+procedure myx_set_mysql_error(const error: WideString; errn: cint);
 function myx_mysql_error_msgs_fetch(mysql: PMYSQL): PMYX_MYSQL_ERROR_MSGS; cdecl; external LIB_MYSQLX;
 procedure myx_mysql_error_msgs_free(errors: PMYX_MYSQL_ERROR_MSGS); cdecl; external LIB_MYSQLX;
 procedure build_field_subst(column_name: PPAnsiChar; column_name_end: PPAnsiChar; res_fields: PMYSQL_FIELD; res_fields_end: PMYSQL_FIELD; i_field: pcint); cdecl; external LIB_MYSQLX;
-function use_schema_store_old_one(mysql: PMYSQL; schema_name: PAnsiChar; old_schema_name: PPAnsiChar): cint; cdecl; external LIB_MYSQLX;
-procedure restore_old_schema(mysql: PMYSQL; old_schema_name: PAnsiChar); cdecl; external LIB_MYSQLX;
-function myx_resolve_network_name(hostname: PAnsiChar): culong; cdecl; external LIB_MYSQLX;
+function _use_schema_store_old_one(mysql: PMYSQL; schema_name: PAnsiChar; old_schema_name: PPAnsiChar): cint; cdecl; external LIB_MYSQLX name 'use_schema_store_old_one';
+function use_schema_store_old_one(mysql: PMYSQL; const schema_name: WideString; old_schema_name: PPAnsiChar): cint;
+procedure _restore_old_schema(mysql: PMYSQL; old_schema_name: PAnsiChar); cdecl; external LIB_MYSQLX name 'restore_old_schema';
+procedure restore_old_schema(mysql: PMYSQL; const old_schema_name: WideString);
+function _myx_resolve_network_name(hostname: PAnsiChar): culong; cdecl; external LIB_MYSQLX name 'myx_resolve_network_name';
+function myx_resolve_network_name(const hostname: WideString): culong;
 function myx_ping_host(ip: culong; ping_timeout: cint; ping_result: PMYX_PING_RESULT): cint; cdecl; external LIB_MYSQLX;
-function myx_is_localhost(hostname: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_get_ip_as_string(hostname: PAnsiChar; ip: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_load_user_connections(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_USER_CONNECTIONS; cdecl; external LIB_MYSQLX;
-function myx_store_user_connections(user_connections: PMYX_USER_CONNECTIONS; pwd_storage_type: MYX_PASSWORD_STORAGE_TYPE; filename: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_is_localhost(hostname: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_is_localhost';
+function myx_is_localhost(const hostname: WideString): cint;
+function _myx_get_ip_as_string(hostname: PAnsiChar; ip: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_get_ip_as_string';
+function myx_get_ip_as_string(const hostname: WideString; ip: PAnsiChar): cint;
+function _myx_load_user_connections(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_USER_CONNECTIONS; cdecl; external LIB_MYSQLX name 'myx_load_user_connections';
+function myx_load_user_connections(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_USER_CONNECTIONS;
+function _myx_store_user_connections(user_connections: PMYX_USER_CONNECTIONS; pwd_storage_type: MYX_PASSWORD_STORAGE_TYPE; filename: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_store_user_connections';
+function myx_store_user_connections(user_connections: PMYX_USER_CONNECTIONS; pwd_storage_type: MYX_PASSWORD_STORAGE_TYPE; const filename: WideString): cint;
 function myx_free_user_connections(user_connections: PMYX_USER_CONNECTIONS): cint; cdecl; external LIB_MYSQLX;
 function myx_free_user_connection_content(user_connection: PMYX_USER_CONNECTION): cint; cdecl; external LIB_MYSQLX;
 function myx_add_user_connection(user_connections: PPMYX_USER_CONNECTIONS; new_connection: PMYX_USER_CONNECTION): cint; cdecl; external LIB_MYSQLX;
-function myx_load_im_connections(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_IM_CONNECTIONS; cdecl; external LIB_MYSQLX;
-function myx_store_im_connections(im_connections: PMYX_IM_CONNECTIONS; pwd_storage_type: MYX_PASSWORD_STORAGE_TYPE; filename: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_load_im_connections(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_IM_CONNECTIONS; cdecl; external LIB_MYSQLX name 'myx_load_im_connections';
+function myx_load_im_connections(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_IM_CONNECTIONS;
+function _myx_store_im_connections(im_connections: PMYX_IM_CONNECTIONS; pwd_storage_type: MYX_PASSWORD_STORAGE_TYPE; filename: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_store_im_connections';
+function myx_store_im_connections(im_connections: PMYX_IM_CONNECTIONS; pwd_storage_type: MYX_PASSWORD_STORAGE_TYPE; const filename: WideString): cint;
 function myx_free_im_connections(im_connections: PMYX_IM_CONNECTIONS): cint; cdecl; external LIB_MYSQLX;
 function myx_add_im_connection(im_connections: PPMYX_IM_CONNECTIONS; new_connection: PMYX_IM_CONNECTION): cint; cdecl; external LIB_MYSQLX;
 function myx_add_mysqld_connection(im_connection: PPMYX_IM_CONNECTION; new_connection: PMYX_MYSQLD_CONNECTION): cint; cdecl; external LIB_MYSQLX;
@@ -976,12 +993,18 @@ function myx_get_client_info(mysql: PMYSQL): PMYX_MACHINE_INFO; cdecl; external 
 function myx_free_pc_info(machine_info: PMYX_MACHINE_INFO): cint; cdecl; external LIB_MYSQLX;
 function myx_get_available_server_features(mysql: PMYSQL; features: PMYX_AVAILABLE_FEATURES): cint; cdecl; external LIB_MYSQLX;
 function myx_get_catalogs(mysql: PMYSQL): PMYX_CATALOGS; cdecl; external LIB_MYSQLX;
-function myx_get_schema_tables(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_TABLES; cdecl; external LIB_MYSQLX;
-function myx_get_schema_indices(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_INDICES; cdecl; external LIB_MYSQLX;
-function myx_get_schema_table_status(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_TABLE_STATUS; cdecl; external LIB_MYSQLX;
-function myx_get_schema_view_status(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_VIEW_STATUS; cdecl; external LIB_MYSQLX;
-function myx_get_schema_sps(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_STORED_PROCEDURES; cdecl; external LIB_MYSQLX;
-function myx_get_schema_entity_status(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_ENTITY_STATUS; cdecl; external LIB_MYSQLX;
+function _myx_get_schema_tables(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_TABLES; cdecl; external LIB_MYSQLX name 'myx_get_schema_tables';
+function myx_get_schema_tables(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_TABLES;
+function _myx_get_schema_indices(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_INDICES; cdecl; external LIB_MYSQLX name 'myx_get_schema_indices';
+function myx_get_schema_indices(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_INDICES;
+function _myx_get_schema_table_status(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_TABLE_STATUS; cdecl; external LIB_MYSQLX name 'myx_get_schema_table_status';
+function myx_get_schema_table_status(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_TABLE_STATUS;
+function _myx_get_schema_view_status(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_VIEW_STATUS; cdecl; external LIB_MYSQLX name 'myx_get_schema_view_status';
+function myx_get_schema_view_status(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_VIEW_STATUS;
+function _myx_get_schema_sps(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_STORED_PROCEDURES; cdecl; external LIB_MYSQLX name 'myx_get_schema_sps';
+function myx_get_schema_sps(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_STORED_PROCEDURES;
+function _myx_get_schema_entity_status(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar): PMYX_SCHEMA_ENTITY_STATUS; cdecl; external LIB_MYSQLX name 'myx_get_schema_entity_status';
+function myx_get_schema_entity_status(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_ENTITY_STATUS;
 function myx_free_catalogs(catalogs: PMYX_CATALOGS): cint; cdecl; external LIB_MYSQLX;
 function myx_free_schema_tables(schema_tables: PMYX_SCHEMA_TABLES): cint; cdecl; external LIB_MYSQLX;
 function myx_free_schema_indices(schema_indices: PMYX_SCHEMA_INDICES): cint; cdecl; external LIB_MYSQLX;
@@ -989,27 +1012,39 @@ function myx_free_schema_entity_status(schema_tables: PMYX_SCHEMA_ENTITY_STATUS)
 function myx_free_schema_table_status(schema_tables: PMYX_SCHEMA_TABLE_STATUS): cint; cdecl; external LIB_MYSQLX;
 function myx_free_schema_view_status(schema_tables: PMYX_SCHEMA_VIEW_STATUS): cint; cdecl; external LIB_MYSQLX;
 function myx_free_schema_sps(schema_sps: PMYX_SCHEMA_STORED_PROCEDURES): cint; cdecl; external LIB_MYSQLX;
-function myx_store_application_options(options: PMYX_APPLICATION_OPTIONS; filename: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_get_application_options(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_APPLICATION_OPTIONS; cdecl; external LIB_MYSQLX;
+function _myx_store_application_options(options: PMYX_APPLICATION_OPTIONS; filename: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_store_application_options';
+function myx_store_application_options(options: PMYX_APPLICATION_OPTIONS; const filename: WideString): cint;
+function _myx_get_application_options(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_APPLICATION_OPTIONS; cdecl; external LIB_MYSQLX name 'myx_get_application_options';
+function myx_get_application_options(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_APPLICATION_OPTIONS;
 function myx_free_application_options(options: PMYX_APPLICATION_OPTIONS): cint; cdecl; external LIB_MYSQLX;
-function myx_match_pattern(text: PAnsiChar; search: PAnsiChar; case_insensitive: cint; strict: cint): cint; cdecl; external LIB_MYSQLX;
-function myx_check_utf8_convertible(str: PAnsiChar; encoding: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_match_pattern(text: PAnsiChar; search: PAnsiChar; case_insensitive: cint; strict: cint): cint; cdecl; external LIB_MYSQLX name 'myx_match_pattern';
+function myx_match_pattern(const text: WideString; const search: WideString; case_insensitive: cint; strict: cint): cint;
+function _myx_check_utf8_convertible(str: PAnsiChar; encoding: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_check_utf8_convertible';
+function myx_check_utf8_convertible(const str: WideString; const encoding: WideString): cint;
 function myx_refresh_dbinfo(mysql: PMYSQL; _syn: PMYX_SYN): PMYX_SYN; cdecl; external LIB_MYSQLX;
 function myx_free_syn(syn: PMYX_SYN): cint; cdecl; external LIB_MYSQLX;
 function myx_init_sql_parsing(syn: PMYX_SYN): PMYX_SQL_HIGHLIGHTING; cdecl; external LIB_MYSQLX;
 function myx_free_sql_highlighting(h: PMYX_SQL_HIGHLIGHTING): cint; cdecl; external LIB_MYSQLX;
-function myx_highlight(sql_highlighting: PMYX_SQL_HIGHLIGHTING; text: PAnsiChar; line_no: cuint): cint; cdecl; external LIB_MYSQLX;
-function myx_get_identifier_type(syn: PMYX_SYN; word: PAnsiChar): MYX_SYN_TYPE; cdecl; external LIB_MYSQLX;
-function myx_lookup_line(syn: PMYX_SYN; line: PAnsiChar): PMYX_SYN_SUGGESTIONS; cdecl; external LIB_MYSQLX;
-function myx_lookup_word(syn: PMYX_SYN; word_beg: PAnsiChar): PMYX_SYN_SUGGESTIONS; cdecl; external LIB_MYSQLX;
+function _myx_highlight(sql_highlighting: PMYX_SQL_HIGHLIGHTING; text: PAnsiChar; line_no: cuint): cint; cdecl; external LIB_MYSQLX name 'myx_highlight';
+function myx_highlight(sql_highlighting: PMYX_SQL_HIGHLIGHTING; const text: WideString; line_no: cuint): cint;
+function _myx_get_identifier_type(syn: PMYX_SYN; word: PAnsiChar): MYX_SYN_TYPE; cdecl; external LIB_MYSQLX name 'myx_get_identifier_type';
+function myx_get_identifier_type(syn: PMYX_SYN; const word: WideString): MYX_SYN_TYPE;
+function _myx_lookup_line(syn: PMYX_SYN; line: PAnsiChar): PMYX_SYN_SUGGESTIONS; cdecl; external LIB_MYSQLX name 'myx_lookup_line';
+function myx_lookup_line(syn: PMYX_SYN; const line: WideString): PMYX_SYN_SUGGESTIONS;
+function _myx_lookup_word(syn: PMYX_SYN; word_beg: PAnsiChar): PMYX_SYN_SUGGESTIONS; cdecl; external LIB_MYSQLX name 'myx_lookup_word';
+function myx_lookup_word(syn: PMYX_SYN; const word_beg: WideString): PMYX_SYN_SUGGESTIONS;
 function myx_free_syn_suggestions(s: PMYX_SYN_SUGGESTIONS): cint; cdecl; external LIB_MYSQLX;
 procedure myx_mysql_limit_resultset_size(mysql: PMYSQL; limitMB: cuint); cdecl; external LIB_MYSQLX;
 function myx_mysql_get_resultset_size_limit(mysql: PMYSQL): cuint; cdecl; external LIB_MYSQLX;
-function myx_identifier_needs_quotes(name: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_query_execute(mysql: PMYSQL; sql: PAnsiChar; enforce_editable: cint; params: PMYX_STRINGLIST; error_code: PMYX_LIB_ERROR; user_data: Pointer; progress_row_fetch: Pointer; resultset_realloc_before: Pointer; resultset_realloc_after: Pointer): PMYX_RESULTSET; cdecl; external LIB_MYSQLX;
+function _myx_identifier_needs_quotes(name: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_identifier_needs_quotes';
+function myx_identifier_needs_quotes(const name: WideString): cint;
+function _myx_query_execute(mysql: PMYSQL; sql: PAnsiChar; enforce_editable: cint; params: PMYX_STRINGLIST; error_code: PMYX_LIB_ERROR; user_data: Pointer; progress_row_fetch: Pointer; resultset_realloc_before: Pointer; resultset_realloc_after: Pointer): PMYX_RESULTSET; cdecl; external LIB_MYSQLX name 'myx_query_execute';
+function myx_query_execute(mysql: PMYSQL; const sql: WideString; enforce_editable: cint; params: PMYX_STRINGLIST; error_code: PMYX_LIB_ERROR; user_data: Pointer; progress_row_fetch: Pointer; resultset_realloc_before: Pointer; resultset_realloc_after: Pointer): PMYX_RESULTSET;
 function myx_query_free_resultset(resultset: PMYX_RESULTSET): cint; cdecl; external LIB_MYSQLX;
-procedure myx_query_execute_direct(mysql: PMYSQL; sql: PAnsiChar; error_code: PMYX_LIB_ERROR); cdecl; external LIB_MYSQLX;
-function myx_query_create_action(action: MYX_RS_ACTION_TYPE; row: cuint; column: PMYX_RS_COLUMN; new_value_length: cuint; new_value: PAnsiChar): PMYX_RS_ACTION; cdecl; external LIB_MYSQLX;
+procedure _myx_query_execute_direct(mysql: PMYSQL; sql: PAnsiChar; error_code: PMYX_LIB_ERROR); cdecl; external LIB_MYSQLX name 'myx_query_execute_direct';
+procedure myx_query_execute_direct(mysql: PMYSQL; const sql: WideString; error_code: PMYX_LIB_ERROR);
+function _myx_query_create_action(action: MYX_RS_ACTION_TYPE; row: cuint; column: PMYX_RS_COLUMN; new_value_length: cuint; new_value: PAnsiChar): PMYX_RS_ACTION; cdecl; external LIB_MYSQLX name 'myx_query_create_action';
+function myx_query_create_action(action: MYX_RS_ACTION_TYPE; row: cuint; column: PMYX_RS_COLUMN; new_value_length: cuint; const new_value: WideString): PMYX_RS_ACTION;
 function myx_query_free_action(action: PMYX_RS_ACTION): cint; cdecl; external LIB_MYSQLX;
 function myx_query_add_action(resultset: PMYX_RESULTSET; action: PMYX_RS_ACTION): cint; cdecl; external LIB_MYSQLX;
 function myx_query_delete_action(resultset: PMYX_RESULTSET; action: cuint): cint; cdecl; external LIB_MYSQLX;
@@ -1018,77 +1053,103 @@ function myx_query_update_resultset(resultset: PMYX_RESULTSET): cint; cdecl; ext
 function myx_query_pack_resultset(resultset: PMYX_RESULTSET): cint; cdecl; external LIB_MYSQLX;
 function myx_query_discard_actions(resultset: PMYX_RESULTSET): cint; cdecl; external LIB_MYSQLX;
 function myx_query_free_action_errors(errors: PMYX_RS_ACTION_ERRORS): cint; cdecl; external LIB_MYSQLX;
-function myx_get_unix_newline_count(str: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_query_type(sql: PAnsiChar): MYX_Q_TYPE; cdecl; external LIB_MYSQLX;
+function _myx_get_unix_newline_count(str: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_get_unix_newline_count';
+function myx_get_unix_newline_count(const str: WideString): cint;
+function _myx_query_type(sql: PAnsiChar): MYX_Q_TYPE; cdecl; external LIB_MYSQLX name 'myx_query_type';
+function myx_query_type(const sql: WideString): MYX_Q_TYPE;
 function _myx_query_add_column_to_sql(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; column: PAnsiChar; sqlcmd: PAnsiChar; clause_type: MYX_Q_CLAUSE_TYPE; cursor_pos: pcint): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_query_add_column_to_sql';
-function myx_query_add_column_to_sql(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; column: PAnsiChar; sqlcmd: PAnsiChar; clause_type: MYX_Q_CLAUSE_TYPE; cursor_pos: pcint): String;
+function myx_query_add_column_to_sql(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const table: WideString; const column: WideString; const sqlcmd: WideString; clause_type: MYX_Q_CLAUSE_TYPE; cursor_pos: pcint): String;
 function _myx_query_add_table_to_sql(mysql: PMYSQL; default_schema: PAnsiChar; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; sqlcmd: PAnsiChar; add_type: MYX_Q_TABLE_ADD_TYPE; cursor_pos: pcint; error: PMYX_Q_TABLE_ADD_ERROR): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_query_add_table_to_sql';
-function myx_query_add_table_to_sql(mysql: PMYSQL; default_schema: PAnsiChar; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; sqlcmd: PAnsiChar; add_type: MYX_Q_TABLE_ADD_TYPE; cursor_pos: pcint; error: PMYX_Q_TABLE_ADD_ERROR): String;
+function myx_query_add_table_to_sql(mysql: PMYSQL; const default_schema: WideString; const catalog: WideString; const schema: WideString; const table: WideString; const sqlcmd: WideString; add_type: MYX_Q_TABLE_ADD_TYPE; cursor_pos: pcint; error: PMYX_Q_TABLE_ADD_ERROR): String;
 function myx_get_resultset_as_int(mysql: PMYSQL; error_code: PMYX_LIB_ERROR): cint; cdecl; external LIB_MYSQLX;
 function myx_query_compare_possible(ra: PMYX_RESULTSET; rb: PMYX_RESULTSET): cint; cdecl; external LIB_MYSQLX;
 function myx_query_compare_results(ra: PMYX_RESULTSET; rb: PMYX_RESULTSET): cint; cdecl; external LIB_MYSQLX;
 function _myx_get_create_table_script(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_get_create_table_script';
-function myx_get_create_table_script(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar): String;
-function myx_check_whether_commits_transaction(mysql: PMYSQL; stmt: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function myx_get_create_table_script(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const table: WideString): String;
+function _myx_check_whether_commits_transaction(mysql: PMYSQL; stmt: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_check_whether_commits_transaction';
+function myx_check_whether_commits_transaction(mysql: PMYSQL; const stmt: WideString): cint;
 function myx_dbm_get_default_storage_engine(mysql: PMYSQL): MYX_DBM_TABLE_ENGINE; cdecl; external LIB_MYSQLX;
 function _myx_dbm_get_create_sql(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; name: PAnsiChar; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: cchar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_create_sql';
-function myx_dbm_get_create_sql(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; name: PAnsiChar; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: cchar): String;
+function myx_dbm_get_create_sql(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const name: WideString; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: cchar): String;
 function myx_dbm_retrieve_server_version(mysql: PMYSQL): PMYX_DBM_SERVER_VERSION; cdecl; external LIB_MYSQLX;
 procedure myx_dbm_free_server_version(version: PMYX_DBM_SERVER_VERSION); cdecl; external LIB_MYSQLX;
-function myx_dbm_retrieve_table_data(mysql: PMYSQL; datatypes: PMYX_DBM_DATATYPES; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_DBM_TABLE_DATA; cdecl; external LIB_MYSQLX;
+function _myx_dbm_retrieve_table_data(mysql: PMYSQL; datatypes: PMYX_DBM_DATATYPES; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_DBM_TABLE_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_retrieve_table_data';
+function myx_dbm_retrieve_table_data(mysql: PMYSQL; datatypes: PMYX_DBM_DATATYPES; const catalog: WideString; const schema: WideString; const table: WideString; error_code: PMYX_LIB_ERROR): PMYX_DBM_TABLE_DATA;
 procedure myx_dbm_free_table_data(table_data: PMYX_DBM_TABLE_DATA); cdecl; external LIB_MYSQLX;
 function _myx_dbm_get_table_sql_diff(existing_table: PMYX_DBM_TABLE_DATA; altered_table: PMYX_DBM_TABLE_DATA; version: PMYX_DBM_SERVER_VERSION; error_code: PMYX_LIB_ERROR): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_table_sql_diff';
 function myx_dbm_get_table_sql_diff(existing_table: PMYX_DBM_TABLE_DATA; altered_table: PMYX_DBM_TABLE_DATA; version: PMYX_DBM_SERVER_VERSION; error_code: PMYX_LIB_ERROR): String;
-function myx_dbm_get_sp_data(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; sp_name: PAnsiChar; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: cchar): PMYX_DBM_STORED_PROCEDURE_DATA; cdecl; external LIB_MYSQLX;
+function _myx_dbm_get_sp_data(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; sp_name: PAnsiChar; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: cchar): PMYX_DBM_STORED_PROCEDURE_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_sp_data';
+function myx_dbm_get_sp_data(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: cchar): PMYX_DBM_STORED_PROCEDURE_DATA;
 procedure myx_dbm_free_sp_data(sp_data: PMYX_DBM_STORED_PROCEDURE_DATA); cdecl; external LIB_MYSQLX;
 function _myx_dbm_make_script_from_sps(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: cchar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_make_script_from_sps';
-function myx_dbm_make_script_from_sps(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: cchar): String;
-function myx_dbm_create_view(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; view_name: PAnsiChar; select_sql: PAnsiChar): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX;
-function myx_dbm_drop_sp(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; sp_name: PAnsiChar; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX;
-function myx_dbm_drop_view(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; view_name: PAnsiChar): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX;
-function myx_dbm_get_view_data(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; view: PAnsiChar; quote_char: cchar): PMYX_DBM_VIEW_DATA; cdecl; external LIB_MYSQLX;
+function myx_dbm_make_script_from_sps(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: cchar): String;
+function _myx_dbm_create_view(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; view_name: PAnsiChar; select_sql: PAnsiChar): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX name 'myx_dbm_create_view';
+function myx_dbm_create_view(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view_name: WideString; const select_sql: WideString): MYX_LIB_ERROR;
+function _myx_dbm_drop_sp(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; sp_name: PAnsiChar; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX name 'myx_dbm_drop_sp';
+function myx_dbm_drop_sp(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE): MYX_LIB_ERROR;
+function _myx_dbm_drop_view(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; view_name: PAnsiChar): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX name 'myx_dbm_drop_view';
+function myx_dbm_drop_view(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const view_name: WideString): MYX_LIB_ERROR;
+function _myx_dbm_get_view_data(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; view: PAnsiChar; quote_char: cchar): PMYX_DBM_VIEW_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_view_data';
+function myx_dbm_get_view_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view: WideString; quote_char: cchar): PMYX_DBM_VIEW_DATA;
 procedure myx_dbm_free_view_data(vdata: PMYX_DBM_VIEW_DATA); cdecl; external LIB_MYSQLX;
 function _myx_dbm_get_view_name_from_query(create_view_query: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_view_name_from_query';
-function myx_dbm_get_view_name_from_query(create_view_query: PAnsiChar): String;
-function myx_dbm_get_trigger_data(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; trigger: PAnsiChar; quote_char: cchar): PMYX_DBM_TRIGGER_DATA; cdecl; external LIB_MYSQLX;
+function myx_dbm_get_view_name_from_query(const create_view_query: WideString): String;
+function _myx_dbm_get_trigger_data(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; trigger: PAnsiChar; quote_char: cchar): PMYX_DBM_TRIGGER_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_trigger_data';
+function myx_dbm_get_trigger_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const trigger: WideString; quote_char: cchar): PMYX_DBM_TRIGGER_DATA;
 procedure myx_dbm_free_trigger_data(trigger_data: PMYX_DBM_TRIGGER_DATA); cdecl; external LIB_MYSQLX;
-function myx_datatype_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_DBM_DATATYPES; cdecl; external LIB_MYSQLX;
-function myx_datatype_store(filename: PAnsiChar; obj: PMYX_DBM_DATATYPES): cint; cdecl; external LIB_MYSQLX;
+function _myx_datatype_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_DBM_DATATYPES; cdecl; external LIB_MYSQLX name 'myx_datatype_load';
+function myx_datatype_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_DBM_DATATYPES;
+function _myx_datatype_store(filename: PAnsiChar; obj: PMYX_DBM_DATATYPES): cint; cdecl; external LIB_MYSQLX name 'myx_datatype_store';
+function myx_datatype_store(const filename: WideString; obj: PMYX_DBM_DATATYPES): cint;
 function myx_free_datatype(obj: PMYX_DBM_DATATYPES): cint; cdecl; external LIB_MYSQLX;
 function myx_dbm_get_datatype(datatypes: PMYX_DBM_DATATYPES; dtype: PPAnsiChar): PMYX_DBM_DATATYPE; cdecl; external LIB_MYSQLX;
 function _myx_dbm_get_datatype_name(dtype: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_datatype_name';
-function myx_dbm_get_datatype_name(dtype: PAnsiChar): String;
+function myx_dbm_get_datatype_name(const dtype: WideString): String;
 function _myx_dbm_get_datatype_params(datatype_name: PAnsiChar; dtype: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_datatype_params';
-function myx_dbm_get_datatype_params(datatype_name: PAnsiChar; dtype: PAnsiChar): String;
+function myx_dbm_get_datatype_params(const datatype_name: WideString; const dtype: WideString): String;
 function myx_dbm_retrieve_charsets(mysql: PMYSQL; error_code: PMYX_LIB_ERROR): PMYX_DBM_CHARSETS; cdecl; external LIB_MYSQLX;
-function myx_charsets_store(filename: PAnsiChar; obj: PMYX_DBM_CHARSETS): cint; cdecl; external LIB_MYSQLX;
-function myx_charsets_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_DBM_CHARSETS; cdecl; external LIB_MYSQLX;
+function _myx_charsets_store(filename: PAnsiChar; obj: PMYX_DBM_CHARSETS): cint; cdecl; external LIB_MYSQLX name 'myx_charsets_store';
+function myx_charsets_store(const filename: WideString; obj: PMYX_DBM_CHARSETS): cint;
+function _myx_charsets_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_DBM_CHARSETS; cdecl; external LIB_MYSQLX name 'myx_charsets_load';
+function myx_charsets_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_DBM_CHARSETS;
 function myx_free_charsets(obj: PMYX_DBM_CHARSETS): cint; cdecl; external LIB_MYSQLX;
-function myx_guess_image_format(data: PAnsiChar; length: cuint): MYX_IMAGE_FORMAT; cdecl; external LIB_MYSQLX;
-function myx_export_resultset(mysql: PMYSQL; info: PMYX_TABLE_EXPORTER_INFO; filename: PAnsiChar; header_format: PAnsiChar; resultset: PMYX_RESULTSET; detail_query: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_get_table_exporter(format: PAnsiChar): PMYX_TABLE_EXPORTER; cdecl; external LIB_MYSQLX;
-function myx_get_table_exporter_info(format: PAnsiChar): PMYX_TABLE_EXPORTER_INFO; cdecl; external LIB_MYSQLX;
+function _myx_guess_image_format(data: PAnsiChar; length: cuint): MYX_IMAGE_FORMAT; cdecl; external LIB_MYSQLX name 'myx_guess_image_format';
+function myx_guess_image_format(const data: WideString; length: cuint): MYX_IMAGE_FORMAT;
+function _myx_export_resultset(mysql: PMYSQL; info: PMYX_TABLE_EXPORTER_INFO; filename: PAnsiChar; header_format: PAnsiChar; resultset: PMYX_RESULTSET; detail_query: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_export_resultset';
+function myx_export_resultset(mysql: PMYSQL; info: PMYX_TABLE_EXPORTER_INFO; const filename: WideString; const header_format: WideString; resultset: PMYX_RESULTSET; const detail_query: WideString): cint;
+function _myx_get_table_exporter(format: PAnsiChar): PMYX_TABLE_EXPORTER; cdecl; external LIB_MYSQLX name 'myx_get_table_exporter';
+function myx_get_table_exporter(const format: WideString): PMYX_TABLE_EXPORTER;
+function _myx_get_table_exporter_info(format: PAnsiChar): PMYX_TABLE_EXPORTER_INFO; cdecl; external LIB_MYSQLX name 'myx_get_table_exporter_info';
+function myx_get_table_exporter_info(const format: WideString): PMYX_TABLE_EXPORTER_INFO;
 function myx_free_table_exporter_info(info: PMYX_TABLE_EXPORTER_INFO): cint; cdecl; external LIB_MYSQLX;
 function myx_get_table_export_formats: PMYX_STRINGLIST; cdecl; external LIB_MYSQLX;
-function myx_set_table_exporter_option(info: PMYX_TABLE_EXPORTER_INFO; name: PAnsiChar; value: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function _myx_set_table_exporter_option(info: PMYX_TABLE_EXPORTER_INFO; name: PAnsiChar; value: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_set_table_exporter_option';
+function myx_set_table_exporter_option(info: PMYX_TABLE_EXPORTER_INFO; const name: WideString; const value: WideString): cint;
 function myx_init_text_shell(mysql: PMYSQL): PMYX_TEXT_SHELL; cdecl; external LIB_MYSQLX;
 procedure myx_finalize_text_shell(shell: PMYX_TEXT_SHELL); cdecl; external LIB_MYSQLX;
 procedure myx_ts_set_output_callback(shell: PMYX_TEXT_SHELL; user_data: Pointer; process_output_func: Pointer); cdecl; external LIB_MYSQLX;
-function myx_ts_execute_command(shell: PMYX_TEXT_SHELL; command: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-procedure myx_ts_display_help(shell: PMYX_TEXT_SHELL; command: PAnsiChar); cdecl; external LIB_MYSQLX;
+function _myx_ts_execute_command(shell: PMYX_TEXT_SHELL; command: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_ts_execute_command';
+function myx_ts_execute_command(shell: PMYX_TEXT_SHELL; const command: WideString): cint;
+procedure _myx_ts_display_help(shell: PMYX_TEXT_SHELL; command: PAnsiChar); cdecl; external LIB_MYSQLX name 'myx_ts_display_help';
+procedure myx_ts_display_help(shell: PMYX_TEXT_SHELL; const command: WideString);
 function _myx_parse_sqlmemo_command_use(command: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_parse_sqlmemo_command_use';
-function myx_parse_sqlmemo_command_use(command: PAnsiChar): String;
+function myx_parse_sqlmemo_command_use(const command: WideString): String;
 function _myx_parse_sqlmemo_command_load(command: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_parse_sqlmemo_command_load';
-function myx_parse_sqlmemo_command_load(command: PAnsiChar): String;
+function myx_parse_sqlmemo_command_load(const command: WideString): String;
 function _myx_parse_sqlmemo_command_delimiter(command: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_parse_sqlmemo_command_delimiter';
-function myx_parse_sqlmemo_command_delimiter(command: PAnsiChar): String;
-function myx_parse_sqlmemo_command_exit(command: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
+function myx_parse_sqlmemo_command_delimiter(const command: WideString): String;
+function _myx_parse_sqlmemo_command_exit(command: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_parse_sqlmemo_command_exit';
+function myx_parse_sqlmemo_command_exit(const command: WideString): cint;
 function _myx_parse_sqlmemo_command_help(command: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_parse_sqlmemo_command_help';
-function myx_parse_sqlmemo_command_help(command: PAnsiChar): String;
-function myx_parse_sqlmemo_command_transaction_start(command: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_parse_sqlmemo_command_transaction_commit(command: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_parse_sqlmemo_command_transaction_rollback(command: PAnsiChar): cint; cdecl; external LIB_MYSQLX;
-function myx_bit_to_int(value: PAnsiChar): QWord; cdecl; external LIB_MYSQLX;
+function myx_parse_sqlmemo_command_help(const command: WideString): String;
+function _myx_parse_sqlmemo_command_transaction_start(command: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_parse_sqlmemo_command_transaction_start';
+function myx_parse_sqlmemo_command_transaction_start(const command: WideString): cint;
+function _myx_parse_sqlmemo_command_transaction_commit(command: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_parse_sqlmemo_command_transaction_commit';
+function myx_parse_sqlmemo_command_transaction_commit(const command: WideString): cint;
+function _myx_parse_sqlmemo_command_transaction_rollback(command: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_parse_sqlmemo_command_transaction_rollback';
+function myx_parse_sqlmemo_command_transaction_rollback(const command: WideString): cint;
+function _myx_bit_to_int(value: PAnsiChar): QWord; cdecl; external LIB_MYSQLX name 'myx_bit_to_int';
+function myx_bit_to_int(const value: WideString): QWord;
 function _myx_int_to_bit(value: QWord): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_int_to_bit';
 function myx_int_to_bit(value: QWord): String;
 
@@ -2616,16 +2677,31 @@ type
 
 implementation
 
-function get_value_from_text_ex(txt: PAnsiChar; txt_length: cint; regexpr: PAnsiChar; substring_nr: cuint): String;
+function myx_str_in_stringlist(stringlist: PMYX_STRINGLIST; const src: WideString): cint;
+begin
+  Result := _myx_str_in_stringlist(stringlist, PAnsiChar(UTF8Encode(src)));
+end;
+
+function get_value_from_text_ex(const txt: WideString; txt_length: cint; const regexpr: WideString; substring_nr: cuint): String;
 var
   P: PAnsiChar;
 begin
-  P := _get_value_from_text_ex(txt, txt_length, regexpr, substring_nr);
+  P := _get_value_from_text_ex(PAnsiChar(UTF8Encode(txt)), txt_length, PAnsiChar(UTF8Encode(regexpr)), substring_nr);
   if P = nil then
     Result := ''
   else
     Result := String(P);
   g_free(P);
+end;
+
+function myx_init_library(const datadir: WideString): cint;
+begin
+  Result := _myx_init_library(PAnsiChar(UTF8Encode(datadir)));
+end;
+
+function myx_set_my_cnf_path(const path: WideString): cint;
+begin
+  Result := _myx_set_my_cnf_path(PAnsiChar(UTF8Encode(path)));
 end;
 
 function myx_get_my_cnf_path: String;
@@ -2639,6 +2715,16 @@ begin
     Result := String(P);
 end;
 
+function myx_use_schema(mysql: PMYSQL; const schema: WideString): cint;
+begin
+  Result := _myx_use_schema(mysql, PAnsiChar(UTF8Encode(schema)));
+end;
+
+function myx_push_schema(mysql: PMYSQL; const schema: WideString): cint;
+begin
+  Result := _myx_push_schema(mysql, PAnsiChar(UTF8Encode(schema)));
+end;
+
 function myx_get_default_schema(mysql: PMYSQL): String;
 var
   P: PAnsiChar;
@@ -2649,6 +2735,16 @@ begin
   else
     Result := String(P);
   g_free(P);
+end;
+
+function myx_mysql_query(mysql: PMYSQL; const cmd: WideString): cint;
+begin
+  Result := _myx_mysql_query(mysql, PAnsiChar(UTF8Encode(cmd)));
+end;
+
+function myx_mysql_real_query(mysql: PMYSQL; const cmd: WideString; len: cuint): cint;
+begin
+  Result := _myx_mysql_real_query(mysql, PAnsiChar(UTF8Encode(cmd)), len);
 end;
 
 function myx_get_mysql_charset(mysql: PMYSQL): String;
@@ -2674,11 +2770,11 @@ begin
   g_free(P);
 end;
 
-function myx_get_server_variable(mysql: PMYSQL; name: PAnsiChar): String;
+function myx_get_server_variable(mysql: PMYSQL; const name: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_get_server_variable(mysql, name);
+  P := _myx_get_server_variable(mysql, PAnsiChar(UTF8Encode(name)));
   if P = nil then
     Result := ''
   else
@@ -2686,11 +2782,11 @@ begin
   g_free(P);
 end;
 
-function myx_convert_dbstr_utf8(mysql: PMYSQL; str: PAnsiChar): String;
+function myx_convert_dbstr_utf8(mysql: PMYSQL; const str: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_convert_dbstr_utf8(mysql, str);
+  P := _myx_convert_dbstr_utf8(mysql, PAnsiChar(UTF8Encode(str)));
   if P = nil then
     Result := ''
   else
@@ -2698,11 +2794,11 @@ begin
   g_free(P);
 end;
 
-function myx_convert_utf8_dbstr(mysql: PMYSQL; str: PAnsiChar): String;
+function myx_convert_utf8_dbstr(mysql: PMYSQL; const str: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_convert_utf8_dbstr(mysql, str);
+  P := _myx_convert_utf8_dbstr(mysql, PAnsiChar(UTF8Encode(str)));
   if P = nil then
     Result := ''
   else
@@ -2722,11 +2818,161 @@ begin
   g_free(P);
 end;
 
-function myx_query_add_column_to_sql(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; column: PAnsiChar; sqlcmd: PAnsiChar; clause_type: MYX_Q_CLAUSE_TYPE; cursor_pos: pcint): String;
+procedure myx_set_mysql_error(const error: WideString; errn: cint);
+begin
+  _myx_set_mysql_error(PAnsiChar(UTF8Encode(error)), errn);
+end;
+
+function use_schema_store_old_one(mysql: PMYSQL; const schema_name: WideString; old_schema_name: PPAnsiChar): cint;
+begin
+  Result := _use_schema_store_old_one(mysql, PAnsiChar(UTF8Encode(schema_name)), old_schema_name);
+end;
+
+procedure restore_old_schema(mysql: PMYSQL; const old_schema_name: WideString);
+begin
+  _restore_old_schema(mysql, PAnsiChar(UTF8Encode(old_schema_name)));
+end;
+
+function myx_resolve_network_name(const hostname: WideString): culong;
+begin
+  Result := _myx_resolve_network_name(PAnsiChar(UTF8Encode(hostname)));
+end;
+
+function myx_is_localhost(const hostname: WideString): cint;
+begin
+  Result := _myx_is_localhost(PAnsiChar(UTF8Encode(hostname)));
+end;
+
+function myx_get_ip_as_string(const hostname: WideString; ip: PAnsiChar): cint;
+begin
+  Result := _myx_get_ip_as_string(PAnsiChar(UTF8Encode(hostname)), ip);
+end;
+
+function myx_load_user_connections(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_USER_CONNECTIONS;
+begin
+  Result := _myx_load_user_connections(PAnsiChar(UTF8Encode(filename)), error_code);
+end;
+
+function myx_store_user_connections(user_connections: PMYX_USER_CONNECTIONS; pwd_storage_type: MYX_PASSWORD_STORAGE_TYPE; const filename: WideString): cint;
+begin
+  Result := _myx_store_user_connections(user_connections, pwd_storage_type, PAnsiChar(UTF8Encode(filename)));
+end;
+
+function myx_load_im_connections(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_IM_CONNECTIONS;
+begin
+  Result := _myx_load_im_connections(PAnsiChar(UTF8Encode(filename)), error_code);
+end;
+
+function myx_store_im_connections(im_connections: PMYX_IM_CONNECTIONS; pwd_storage_type: MYX_PASSWORD_STORAGE_TYPE; const filename: WideString): cint;
+begin
+  Result := _myx_store_im_connections(im_connections, pwd_storage_type, PAnsiChar(UTF8Encode(filename)));
+end;
+
+function myx_get_schema_tables(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_TABLES;
+begin
+  Result := _myx_get_schema_tables(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)));
+end;
+
+function myx_get_schema_indices(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_INDICES;
+begin
+  Result := _myx_get_schema_indices(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)));
+end;
+
+function myx_get_schema_table_status(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_TABLE_STATUS;
+begin
+  Result := _myx_get_schema_table_status(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)));
+end;
+
+function myx_get_schema_view_status(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_VIEW_STATUS;
+begin
+  Result := _myx_get_schema_view_status(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)));
+end;
+
+function myx_get_schema_sps(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_STORED_PROCEDURES;
+begin
+  Result := _myx_get_schema_sps(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)));
+end;
+
+function myx_get_schema_entity_status(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString): PMYX_SCHEMA_ENTITY_STATUS;
+begin
+  Result := _myx_get_schema_entity_status(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)));
+end;
+
+function myx_store_application_options(options: PMYX_APPLICATION_OPTIONS; const filename: WideString): cint;
+begin
+  Result := _myx_store_application_options(options, PAnsiChar(UTF8Encode(filename)));
+end;
+
+function myx_get_application_options(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_APPLICATION_OPTIONS;
+begin
+  Result := _myx_get_application_options(PAnsiChar(UTF8Encode(filename)), error_code);
+end;
+
+function myx_match_pattern(const text: WideString; const search: WideString; case_insensitive: cint; strict: cint): cint;
+begin
+  Result := _myx_match_pattern(PAnsiChar(UTF8Encode(text)), PAnsiChar(UTF8Encode(search)), case_insensitive, strict);
+end;
+
+function myx_check_utf8_convertible(const str: WideString; const encoding: WideString): cint;
+begin
+  Result := _myx_check_utf8_convertible(PAnsiChar(UTF8Encode(str)), PAnsiChar(UTF8Encode(encoding)));
+end;
+
+function myx_highlight(sql_highlighting: PMYX_SQL_HIGHLIGHTING; const text: WideString; line_no: cuint): cint;
+begin
+  Result := _myx_highlight(sql_highlighting, PAnsiChar(UTF8Encode(text)), line_no);
+end;
+
+function myx_get_identifier_type(syn: PMYX_SYN; const word: WideString): MYX_SYN_TYPE;
+begin
+  Result := _myx_get_identifier_type(syn, PAnsiChar(UTF8Encode(word)));
+end;
+
+function myx_lookup_line(syn: PMYX_SYN; const line: WideString): PMYX_SYN_SUGGESTIONS;
+begin
+  Result := _myx_lookup_line(syn, PAnsiChar(UTF8Encode(line)));
+end;
+
+function myx_lookup_word(syn: PMYX_SYN; const word_beg: WideString): PMYX_SYN_SUGGESTIONS;
+begin
+  Result := _myx_lookup_word(syn, PAnsiChar(UTF8Encode(word_beg)));
+end;
+
+function myx_identifier_needs_quotes(const name: WideString): cint;
+begin
+  Result := _myx_identifier_needs_quotes(PAnsiChar(UTF8Encode(name)));
+end;
+
+function myx_query_execute(mysql: PMYSQL; const sql: WideString; enforce_editable: cint; params: PMYX_STRINGLIST; error_code: PMYX_LIB_ERROR; user_data: Pointer; progress_row_fetch: Pointer; resultset_realloc_before: Pointer; resultset_realloc_after: Pointer): PMYX_RESULTSET;
+begin
+  Result := _myx_query_execute(mysql, PAnsiChar(UTF8Encode(sql)), enforce_editable, params, error_code, user_data, progress_row_fetch, resultset_realloc_before, resultset_realloc_after);
+end;
+
+procedure myx_query_execute_direct(mysql: PMYSQL; const sql: WideString; error_code: PMYX_LIB_ERROR);
+begin
+  _myx_query_execute_direct(mysql, PAnsiChar(UTF8Encode(sql)), error_code);
+end;
+
+function myx_query_create_action(action: MYX_RS_ACTION_TYPE; row: cuint; column: PMYX_RS_COLUMN; new_value_length: cuint; const new_value: WideString): PMYX_RS_ACTION;
+begin
+  Result := _myx_query_create_action(action, row, column, new_value_length, PAnsiChar(UTF8Encode(new_value)));
+end;
+
+function myx_get_unix_newline_count(const str: WideString): cint;
+begin
+  Result := _myx_get_unix_newline_count(PAnsiChar(UTF8Encode(str)));
+end;
+
+function myx_query_type(const sql: WideString): MYX_Q_TYPE;
+begin
+  Result := _myx_query_type(PAnsiChar(UTF8Encode(sql)));
+end;
+
+function myx_query_add_column_to_sql(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const table: WideString; const column: WideString; const sqlcmd: WideString; clause_type: MYX_Q_CLAUSE_TYPE; cursor_pos: pcint): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_query_add_column_to_sql(mysql, catalog, schema, table, column, sqlcmd, clause_type, cursor_pos);
+  P := _myx_query_add_column_to_sql(mysql, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(table)), PAnsiChar(UTF8Encode(column)), PAnsiChar(UTF8Encode(sqlcmd)), clause_type, cursor_pos);
   if P = nil then
     Result := ''
   else
@@ -2734,11 +2980,11 @@ begin
   g_free(P);
 end;
 
-function myx_query_add_table_to_sql(mysql: PMYSQL; default_schema: PAnsiChar; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; sqlcmd: PAnsiChar; add_type: MYX_Q_TABLE_ADD_TYPE; cursor_pos: pcint; error: PMYX_Q_TABLE_ADD_ERROR): String;
+function myx_query_add_table_to_sql(mysql: PMYSQL; const default_schema: WideString; const catalog: WideString; const schema: WideString; const table: WideString; const sqlcmd: WideString; add_type: MYX_Q_TABLE_ADD_TYPE; cursor_pos: pcint; error: PMYX_Q_TABLE_ADD_ERROR): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_query_add_table_to_sql(mysql, default_schema, catalog, schema, table, sqlcmd, add_type, cursor_pos, error);
+  P := _myx_query_add_table_to_sql(mysql, PAnsiChar(UTF8Encode(default_schema)), PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(table)), PAnsiChar(UTF8Encode(sqlcmd)), add_type, cursor_pos, error);
   if P = nil then
     Result := ''
   else
@@ -2746,11 +2992,11 @@ begin
   g_free(P);
 end;
 
-function myx_get_create_table_script(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar): String;
+function myx_get_create_table_script(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const table: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_get_create_table_script(mysql, catalog, schema, table);
+  P := _myx_get_create_table_script(mysql, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(table)));
   if P = nil then
     Result := ''
   else
@@ -2758,16 +3004,26 @@ begin
   g_free(P);
 end;
 
-function myx_dbm_get_create_sql(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; name: PAnsiChar; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: cchar): String;
+function myx_check_whether_commits_transaction(mysql: PMYSQL; const stmt: WideString): cint;
+begin
+  Result := _myx_check_whether_commits_transaction(mysql, PAnsiChar(UTF8Encode(stmt)));
+end;
+
+function myx_dbm_get_create_sql(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const name: WideString; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: cchar): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_dbm_get_create_sql(mysql, catalog_name, schema_name, name, object_type, fully_qualified, quote_char);
+  P := _myx_dbm_get_create_sql(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)), PAnsiChar(UTF8Encode(name)), object_type, fully_qualified, quote_char);
   if P = nil then
     Result := ''
   else
     Result := String(P);
   g_free(P);
+end;
+
+function myx_dbm_retrieve_table_data(mysql: PMYSQL; datatypes: PMYX_DBM_DATATYPES; const catalog: WideString; const schema: WideString; const table: WideString; error_code: PMYX_LIB_ERROR): PMYX_DBM_TABLE_DATA;
+begin
+  Result := _myx_dbm_retrieve_table_data(mysql, datatypes, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(table)), error_code);
 end;
 
 function myx_dbm_get_table_sql_diff(existing_table: PMYX_DBM_TABLE_DATA; altered_table: PMYX_DBM_TABLE_DATA; version: PMYX_DBM_SERVER_VERSION; error_code: PMYX_LIB_ERROR): String;
@@ -2782,11 +3038,16 @@ begin
   g_free(P);
 end;
 
-function myx_dbm_make_script_from_sps(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: cchar): String;
+function myx_dbm_get_sp_data(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: cchar): PMYX_DBM_STORED_PROCEDURE_DATA;
+begin
+  Result := _myx_dbm_get_sp_data(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)), PAnsiChar(UTF8Encode(sp_name)), sp_type, quote_char);
+end;
+
+function myx_dbm_make_script_from_sps(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: cchar): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_dbm_make_script_from_sps(mysql, catalog_name, schema_name, splist, quote_char);
+  P := _myx_dbm_make_script_from_sps(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)), splist, quote_char);
   if P = nil then
     Result := ''
   else
@@ -2794,11 +3055,31 @@ begin
   g_free(P);
 end;
 
-function myx_dbm_get_view_name_from_query(create_view_query: PAnsiChar): String;
+function myx_dbm_create_view(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view_name: WideString; const select_sql: WideString): MYX_LIB_ERROR;
+begin
+  Result := _myx_dbm_create_view(mysql, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(view_name)), PAnsiChar(UTF8Encode(select_sql)));
+end;
+
+function myx_dbm_drop_sp(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE): MYX_LIB_ERROR;
+begin
+  Result := _myx_dbm_drop_sp(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)), PAnsiChar(UTF8Encode(sp_name)), sp_type);
+end;
+
+function myx_dbm_drop_view(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const view_name: WideString): MYX_LIB_ERROR;
+begin
+  Result := _myx_dbm_drop_view(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)), PAnsiChar(UTF8Encode(view_name)));
+end;
+
+function myx_dbm_get_view_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view: WideString; quote_char: cchar): PMYX_DBM_VIEW_DATA;
+begin
+  Result := _myx_dbm_get_view_data(mysql, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(view)), quote_char);
+end;
+
+function myx_dbm_get_view_name_from_query(const create_view_query: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_dbm_get_view_name_from_query(create_view_query);
+  P := _myx_dbm_get_view_name_from_query(PAnsiChar(UTF8Encode(create_view_query)));
   if P = nil then
     Result := ''
   else
@@ -2806,11 +3087,26 @@ begin
   g_free(P);
 end;
 
-function myx_dbm_get_datatype_name(dtype: PAnsiChar): String;
+function myx_dbm_get_trigger_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const trigger: WideString; quote_char: cchar): PMYX_DBM_TRIGGER_DATA;
+begin
+  Result := _myx_dbm_get_trigger_data(mysql, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(trigger)), quote_char);
+end;
+
+function myx_datatype_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_DBM_DATATYPES;
+begin
+  Result := _myx_datatype_load(PAnsiChar(UTF8Encode(filename)), error_code);
+end;
+
+function myx_datatype_store(const filename: WideString; obj: PMYX_DBM_DATATYPES): cint;
+begin
+  Result := _myx_datatype_store(PAnsiChar(UTF8Encode(filename)), obj);
+end;
+
+function myx_dbm_get_datatype_name(const dtype: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_dbm_get_datatype_name(dtype);
+  P := _myx_dbm_get_datatype_name(PAnsiChar(UTF8Encode(dtype)));
   if P = nil then
     Result := ''
   else
@@ -2818,11 +3114,11 @@ begin
   g_free(P);
 end;
 
-function myx_dbm_get_datatype_params(datatype_name: PAnsiChar; dtype: PAnsiChar): String;
+function myx_dbm_get_datatype_params(const datatype_name: WideString; const dtype: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_dbm_get_datatype_params(datatype_name, dtype);
+  P := _myx_dbm_get_datatype_params(PAnsiChar(UTF8Encode(datatype_name)), PAnsiChar(UTF8Encode(dtype)));
   if P = nil then
     Result := ''
   else
@@ -2830,11 +3126,56 @@ begin
   g_free(P);
 end;
 
-function myx_parse_sqlmemo_command_use(command: PAnsiChar): String;
+function myx_charsets_store(const filename: WideString; obj: PMYX_DBM_CHARSETS): cint;
+begin
+  Result := _myx_charsets_store(PAnsiChar(UTF8Encode(filename)), obj);
+end;
+
+function myx_charsets_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_DBM_CHARSETS;
+begin
+  Result := _myx_charsets_load(PAnsiChar(UTF8Encode(filename)), error_code);
+end;
+
+function myx_guess_image_format(const data: WideString; length: cuint): MYX_IMAGE_FORMAT;
+begin
+  Result := _myx_guess_image_format(PAnsiChar(UTF8Encode(data)), length);
+end;
+
+function myx_export_resultset(mysql: PMYSQL; info: PMYX_TABLE_EXPORTER_INFO; const filename: WideString; const header_format: WideString; resultset: PMYX_RESULTSET; const detail_query: WideString): cint;
+begin
+  Result := _myx_export_resultset(mysql, info, PAnsiChar(UTF8Encode(filename)), PAnsiChar(UTF8Encode(header_format)), resultset, PAnsiChar(UTF8Encode(detail_query)));
+end;
+
+function myx_get_table_exporter(const format: WideString): PMYX_TABLE_EXPORTER;
+begin
+  Result := _myx_get_table_exporter(PAnsiChar(UTF8Encode(format)));
+end;
+
+function myx_get_table_exporter_info(const format: WideString): PMYX_TABLE_EXPORTER_INFO;
+begin
+  Result := _myx_get_table_exporter_info(PAnsiChar(UTF8Encode(format)));
+end;
+
+function myx_set_table_exporter_option(info: PMYX_TABLE_EXPORTER_INFO; const name: WideString; const value: WideString): cint;
+begin
+  Result := _myx_set_table_exporter_option(info, PAnsiChar(UTF8Encode(name)), PAnsiChar(UTF8Encode(value)));
+end;
+
+function myx_ts_execute_command(shell: PMYX_TEXT_SHELL; const command: WideString): cint;
+begin
+  Result := _myx_ts_execute_command(shell, PAnsiChar(UTF8Encode(command)));
+end;
+
+procedure myx_ts_display_help(shell: PMYX_TEXT_SHELL; const command: WideString);
+begin
+  _myx_ts_display_help(shell, PAnsiChar(UTF8Encode(command)));
+end;
+
+function myx_parse_sqlmemo_command_use(const command: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_parse_sqlmemo_command_use(command);
+  P := _myx_parse_sqlmemo_command_use(PAnsiChar(UTF8Encode(command)));
   if P = nil then
     Result := ''
   else
@@ -2842,11 +3183,11 @@ begin
   g_free(P);
 end;
 
-function myx_parse_sqlmemo_command_load(command: PAnsiChar): String;
+function myx_parse_sqlmemo_command_load(const command: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_parse_sqlmemo_command_load(command);
+  P := _myx_parse_sqlmemo_command_load(PAnsiChar(UTF8Encode(command)));
   if P = nil then
     Result := ''
   else
@@ -2854,11 +3195,11 @@ begin
   g_free(P);
 end;
 
-function myx_parse_sqlmemo_command_delimiter(command: PAnsiChar): String;
+function myx_parse_sqlmemo_command_delimiter(const command: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_parse_sqlmemo_command_delimiter(command);
+  P := _myx_parse_sqlmemo_command_delimiter(PAnsiChar(UTF8Encode(command)));
   if P = nil then
     Result := ''
   else
@@ -2866,16 +3207,41 @@ begin
   g_free(P);
 end;
 
-function myx_parse_sqlmemo_command_help(command: PAnsiChar): String;
+function myx_parse_sqlmemo_command_exit(const command: WideString): cint;
+begin
+  Result := _myx_parse_sqlmemo_command_exit(PAnsiChar(UTF8Encode(command)));
+end;
+
+function myx_parse_sqlmemo_command_help(const command: WideString): String;
 var
   P: PAnsiChar;
 begin
-  P := _myx_parse_sqlmemo_command_help(command);
+  P := _myx_parse_sqlmemo_command_help(PAnsiChar(UTF8Encode(command)));
   if P = nil then
     Result := ''
   else
     Result := String(P);
   g_free(P);
+end;
+
+function myx_parse_sqlmemo_command_transaction_start(const command: WideString): cint;
+begin
+  Result := _myx_parse_sqlmemo_command_transaction_start(PAnsiChar(UTF8Encode(command)));
+end;
+
+function myx_parse_sqlmemo_command_transaction_commit(const command: WideString): cint;
+begin
+  Result := _myx_parse_sqlmemo_command_transaction_commit(PAnsiChar(UTF8Encode(command)));
+end;
+
+function myx_parse_sqlmemo_command_transaction_rollback(const command: WideString): cint;
+begin
+  Result := _myx_parse_sqlmemo_command_transaction_rollback(PAnsiChar(UTF8Encode(command)));
+end;
+
+function myx_bit_to_int(const value: WideString): QWord;
+begin
+  Result := _myx_bit_to_int(PAnsiChar(UTF8Encode(value)));
 end;
 
 function myx_int_to_bit(value: QWord): String;

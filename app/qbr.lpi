@@ -46,7 +46,7 @@
       <Filename Value="bin/qbr"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);src"/>
+      <IncludeFiles Value="$(ProjOutDir);src;forms"/>
       <OtherUnitFiles Value="compat;src;forms;../bindings"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
@@ -55,6 +55,10 @@
         <SyntaxMode Value="Delphi"/>
       </SyntaxOptions>
     </Parsing>
+    <Other>
+      <!-- String<->WideString conversions are intended: String is UTF-8 (ADR-0007) -->
+      <CustomOptions Value="-vm4104,4105"/>
+    </Other>
     <Linking>
       <Options>
         <Win32>

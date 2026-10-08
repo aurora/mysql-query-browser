@@ -8,7 +8,7 @@ unit TntComCtrls;
 interface
 
 uses
-  ComCtrls, StdCtrls;
+  Classes, Controls, ExtCtrls, ComCtrls, StdCtrls;
 
 type
   TTntListItem = TListItem;
@@ -23,6 +23,28 @@ type
   TTntTreeView = TTreeView;
   TTntUpDown = TUpDown;
 
+{ The VCL's ComCtrls.TAnimate plays an AVI resource (the busy indicator). The LCL has no
+  equivalent; this placeholder keeps the properties the ported code uses and shows nothing
+  yet. ROADMAP: rebuild the animation. Declared here because every ported unit that uses
+  TAnimate also uses TntComCtrls. }
+type
+  TAnimate = class(TPanel)
+  private
+    FResName: String;
+    FActive: Boolean;
+  public
+    constructor Create(AOwner: TComponent); override;
+    property ResName: String read FResName write FResName;
+    property Active: Boolean read FActive write FActive;
+  end;
+
 implementation
+
+constructor TAnimate.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  BevelOuter := bvNone;
+  Caption := '';
+end;
 
 end.

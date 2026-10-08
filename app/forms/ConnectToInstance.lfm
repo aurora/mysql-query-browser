@@ -423,7 +423,7 @@ object ConnectToInstanceForm: TConnectToInstanceForm
       end
     end
   end
-  object ConnectToInstanceAni: TPanel
+  object ConnectToInstanceAni: TAnimate
     Left = 250
     Top = 78
     Width = 130
