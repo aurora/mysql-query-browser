@@ -7,7 +7,7 @@ Lazarus .lfm files.
 
 What it does
   * parses the DFM into a tree and writes it back as LFM (same syntax),
-  * maps classes (TTntButton -> TButton, TUniCodeEdit -> TSynEdit, ...),
+  * maps classes (TTntButton -> TButton, TUniCodeEdit stays (compat class on SynEdit), ...),
   * drops properties the LCL does not have (see DROP_*),
   * converts strings to UTF-8 (the DFMs are Windows-1252 with #nnn escapes),
   * inlines frames (`inline X: TFooFrame`) as panels holding the frame's
@@ -261,18 +261,27 @@ def write_node(lines, node, level=0):
 # Classes that are 1:1 the LCL class after removing the "Tnt" prefix are handled
 # generically; these need something else.
 CLASS_MAP = {
-    "TUniCodeEdit": "TSynEdit",
-    "TUCESQLHighlighter": "TSynSQLSyn",
+    # TUniCodeEdit / TUniCodeConsole / TUCESQLHighlighter keep their names: app/compat provides
+    # compatible classes on top of SynEdit (ADR-0012).
     # TAnimate stays TAnimate: the LCL has none, app/compat/TntComCtrls declares a placeholder
 }
 
 # For these target classes only the listed properties survive; everything the
 # original control had beyond that has no LCL equivalent and is re-done in code.
-KEEP_ONLY = {
-    "TSynEdit": {"Left", "Top", "Width", "Height", "Align", "Anchors", "Visible", "TabOrder", "TabStop",
+_EDITOR_PROPS = {"Left", "Top", "Width", "Height", "Align", "Anchors", "Visible", "TabOrder", "TabStop",
                  "Color", "Font.Charset", "Font.Color", "Font.Height", "Font.Name", "Font.Style",
-                 "PopupMenu", "Constraints.MinHeight", "Constraints.MinWidth", "Cursor", "Hint", "ShowHint"},
-    "TSynSQLSyn": set(),
+                 "PopupMenu", "Constraints.MinHeight", "Constraints.MinWidth", "Cursor", "Hint", "ShowHint",
+                 "Name", "HighLighter", "Enabled", "ParentColor", "ParentFont", "TabOrder",
+                 # events the ported code handles
+                 "OnScroll", "OnKeyDown", "OnKeyUp", "OnKeyPress", "OnEnter", "OnExit", "OnClick",
+                 "OnDblClick", "OnDragDrop", "OnDragOver", "OnMouseDown", "OnMouseUp", "OnCaretChange",
+                 "OnExecuteCommand", "OnIsMultilineCommand", "OnProcessCommand", "OnProcessUserCommand"}
+KEEP_ONLY = {
+    # The remaining UniCodeEditor settings (Options, GutterWidth, Keystrokes, colours, ...) are applied
+    # by the compatibility classes and by the ported code at run time.
+    "TUniCodeEdit": _EDITOR_PROPS,
+    "TUniCodeConsole": _EDITOR_PROPS,
+    "TUCESQLHighlighter": set(),
     "TAnimate": {"Left", "Top", "Width", "Height", "Align", "Anchors", "Visible", "TabOrder",
                  "Constraints.MinHeight", "Constraints.MinWidth"},
 }

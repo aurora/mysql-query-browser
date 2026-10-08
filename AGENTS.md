@@ -96,6 +96,11 @@ not just on one server (version differences are where the bugs were).
 - **Licence:** GPL-2.0-or-later (ADR-0011). New files start with
   `SPDX-License-Identifier: GPL-2.0-or-later` in the file's comment syntax;
   ported files keep their original header; generators emit the line themselves.
+- **Copyright notices are never invented.** A file keeps the notice it has in `legacy/` (ported
+  units are copied with it, byte for byte). New files get only the SPDX line, not a
+  "Copyright ... MySQL AB" (or any other holder) line, even when they replace or are modelled on a
+  legacy file. Code that is a substantial derivative of third-party code (e.g. UniCodeEditor, MIT)
+  is credited in `NOTICE` instead.
 - **Never hand-edit `legacy/`.** Copy what you need and port the copy.
 - **Test credentials** (`QBR_TEST_*`, containers `qbr-*`) are for throw-away local
   servers only. Never put real credentials or hosts in the repo.

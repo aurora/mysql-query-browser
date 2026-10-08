@@ -47,6 +47,7 @@ FRAMES = {
     "AdvancedEdit": os.path.join(COMMON, "AdvancedEdit.dfm"),
     "TabHeader": os.path.join(COMMON, "TabHeader.dfm"),
     "SchemataTreeView": os.path.join(COMMON, "SchemataTreeView.dfm"),
+    "EditorTable": os.path.join(COMMON, "EditorTable.dfm"),
     "ApplicationDataModule": os.path.join(QB, "ApplicationDataModule.dfm"),
 }
 

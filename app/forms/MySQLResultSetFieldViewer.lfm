@@ -164,7 +164,7 @@ object MySQLResultSetFieldViewerForm: TMySQLResultSetFieldViewerForm
         Height = 306
         Align = alRight
       end
-      object HexUniCodeEd: TSynEdit
+      object HexUniCodeEd: TUniCodeEdit
         Left = 0
         Top = 0
         Width = 419
@@ -176,9 +176,12 @@ object MySQLResultSetFieldViewerForm: TMySQLResultSetFieldViewerForm
         Font.Height = -11
         Font.Name = 'Bitstream Vera Sans Mono'
         Font.Style = []
+        ParentColor = False
+        ParentFont = False
         TabOrder = 0
+        OnScroll = HexUniCodeEdScroll
       end
-      object PlainTextUniCodeEdit: TSynEdit
+      object PlainTextUniCodeEdit: TUniCodeEdit
         Left = 420
         Top = 0
         Width = 147
@@ -190,7 +193,10 @@ object MySQLResultSetFieldViewerForm: TMySQLResultSetFieldViewerForm
         Font.Height = -11
         Font.Name = 'Bitstream Vera Sans Mono'
         Font.Style = []
+        ParentColor = False
+        ParentFont = False
         TabOrder = 1
+        OnScroll = PlainTextUniCodeEditScroll
       end
       object TntPanel1: TPanel
         Left = 0

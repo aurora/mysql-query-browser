@@ -42,7 +42,9 @@ def classify(em, name, fields, classes):
         elif num is not None and stars == 1 and base == ("builtin", "cint"):
             intlists.append(f)
             hidden.add(n + "_num")
-        elif stars == 1 and cname in classes and (n + "_num") not in by_name:
+        elif stars == 1 and cname in classes and (n + "_num") not in by_name and not n.endswith("_pointer"):
+            # like the original mapper: a struct pointer is a nested object, except fields whose name
+            # ends in "_pointer", which stay raw record pointers (the code dereferences them directly)
             objects.append(f)
         else:
             plain.append(f)
@@ -106,7 +108,8 @@ def emit_class(em, n, fields, unit):
         d.append("    %s: TStringList;" % pn(f["name"]))
     for f in intlists:
         d.append("    %s: TIntegerList;" % pn(f["name"]))
-    params = "; ".join("%s: %s" % (pn(f["name"]), plain_type(em, f, unit)) for f in plain)
+    params = "; ".join(["%s: %s" % (pn(f["name"]), plain_type(em, f, unit)) for f in plain] +
+                       ["A%s: P%s" % (f["name"], em.lookup(f["base"])) for f in objects])
     d.append("    constructor Create(%s); overload;" % params if params else "    constructor Create; overload;")
     d.append("    constructor Create(ARecord: P%s); overload;" % rec)
     d.append("    destructor Destroy; override;")
@@ -121,13 +124,13 @@ def emit_class(em, n, fields, unit):
     d.append("    function GetItem(Index: Integer): %s;" % T)
     d.append("    procedure SetItem(Index: Integer; AObject: %s);" % T)
     d.append("  public")
-    d.append("    function Add(AObject: %s): Integer;" % T)
-    d.append("    function Extract(Item: %s): %s;" % (T, T))
-    d.append("    function Remove(AObject: %s): Integer;" % T)
-    d.append("    function IndexOf(AObject: %s): Integer;" % T)
-    d.append("    procedure Insert(Index: Integer; AObject: %s);" % T)
-    d.append("    function First: %s;" % T)
-    d.append("    function Last: %s;" % T)
+    d.append("    function Add(AObject: %s): Integer; overload;" % T)
+    d.append("    function Extract(Item: %s): %s; overload;" % (T, T))
+    d.append("    function Remove(AObject: %s): Integer; overload;" % T)
+    d.append("    function IndexOf(AObject: %s): Integer; overload;" % T)
+    d.append("    procedure Insert(Index: Integer; AObject: %s); overload;" % T)
+    d.append("    function First: %s; overload;" % T)
+    d.append("    function Last: %s; overload;" % T)
     d.append("    property Items[Index: Integer]: %s read GetItem write SetItem; default;" % T)
     d.append("  end;")
     d.append("")
@@ -145,7 +148,10 @@ def emit_class(em, n, fields, unit):
     for f in plain:
         w("  Self.F%s := %s;" % (f["name"], pn(f["name"])))
     for f in objects:
-        w("  Self.%s := nil;" % pn(f["name"]))
+        w("  if A%s <> nil then" % f["name"])
+        w("    Self.%s := T%s.Create(A%s)" % (pn(f["name"]), em.lookup(f["base"]), f["name"]))
+        w("  else")
+        w("    Self.%s := nil;" % pn(f["name"]))
     for f in nested:
         w("  Self.%s := T%s_List.Create;" % (pn(f["name"]), em.lookup(f["base"])))
     for f in strlists:
@@ -167,10 +173,13 @@ def emit_class(em, n, fields, unit):
     if needs_i:
         w("var\n  I: Integer;")
     w("begin")
+    for f in objects:
+        args.append("ARecord^.%s" % pn(f["name"]))
     if args:
         defaults = []
         for f in plain:
             defaults.append("''" if is_string(f) else "Default(%s)" % plain_type(em, f, unit))
+        defaults += ["P%s(nil)" % em.lookup(f["base"]) for f in objects]     # typed: the overloads take different pointer types
         w("  if ARecord <> nil then")
         w("    Create(%s)" % ", ".join(args))
         w("  else")
@@ -184,13 +193,10 @@ def emit_class(em, n, fields, unit):
         if is_string(f) and (f["name"] + "_length") in by_name:
             n_ = f["name"]
             w("    SetString(Self.F%s, ARecord^.%s, ARecord^.%s_length);" % (n_, pn(n_), n_))
-    for f in objects:
-        w("    if ARecord^.%s <> nil then" % pn(f["name"]))
-        w("      Self.%s := T%s.Create(ARecord^.%s);" % (pn(f["name"]), em.lookup(f["base"]), pn(f["name"])))
     for f in nested:
         n_ = f["name"]
         w("    for I := 0 to Integer(ARecord^.%s_num) - 1 do" % n_)
-        w("      Self.%s.Add(T%s.Create(@ARecord^.%s[I]));" % (pn(n_), em.lookup(f["base"]), pn(n_)))
+        w("      Self.%s.Add(T%s.Create(P%s(@ARecord^.%s[I])));" % (pn(n_), em.lookup(f["base"]), em.lookup(f["base"]), pn(n_)))
     for f in strlists:
         n_ = f["name"]
         w("    for I := 0 to Integer(ARecord^.%s_num) - 1 do" % n_)

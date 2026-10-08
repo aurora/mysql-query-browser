@@ -19,6 +19,7 @@ type
     procedure TestStringWrapperFreesResult;
     procedure TestListAssignIsDeep;
     procedure TestNonAsciiThroughWideStringWrappers;
+    procedure TestObjectFieldsAreConstructorParameters;
   end;
 
 implementation
@@ -191,6 +192,42 @@ begin
       AssertEquals('text survives the round trip', Text, Got);
     finally
       myx_query_free_resultset(Rs);
+    end;
+  finally
+    DisconnectTestServer(My);
+  end;
+end;
+
+procedure TClassesTest.TestObjectFieldsAreConstructorParameters;
+var
+  My: PMYSQL;
+  Tables: PMYX_SCHEMA_TABLES;
+  Schema, Empty: TMYX_SCHEMA;
+begin
+  // The original mapper made object fields constructor parameters (as record pointers), the way the
+  // schema tree calls TMYX_SCHEMA.Create(name, escaped_name, catalog, nil, nil, nil).
+  Empty := TMYX_SCHEMA.Create('s', 's', 'def', nil, nil, nil);
+  try
+    AssertEquals('name', 's', Empty.schema_name);
+    AssertNull('no tables object', Empty.schema_tables);
+  finally
+    Empty.Free;
+  end;
+
+  My := ConnectTestServer;
+  try
+    Tables := myx_get_schema_tables(My, '', 'mysql');
+    AssertNotNull('tables', Tables);
+    try
+      Schema := TMYX_SCHEMA.Create('mysql', 'mysql', 'def', Tables, nil, nil);   // copies from the pointer
+    finally
+      myx_free_schema_tables(Tables);
+    end;
+    try
+      AssertNotNull('tables object built from the pointer', Schema.schema_tables);
+      AssertTrue('the mysql schema has tables', Schema.schema_tables.schema_tables.Count > 0);
+    finally
+      Schema.Free;
     end;
   finally
     DisconnectTestServer(My);

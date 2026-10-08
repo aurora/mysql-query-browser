@@ -1399,7 +1399,7 @@ object QueryBrowserForm: TQueryBrowserForm
       end
     end
   end
-  object UCESQLHighlighter: TSynSQLSyn
+  object UCESQLHighlighter: TUCESQLHighlighter
   end
   object ScriptMemoPopupMenu: TPopupMenu
     Images = RSGridPopupImageList

@@ -1069,8 +1069,8 @@ function myx_get_create_table_script(mysql: PMYSQL; const catalog: WideString; c
 function _myx_check_whether_commits_transaction(mysql: PMYSQL; stmt: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_check_whether_commits_transaction';
 function myx_check_whether_commits_transaction(mysql: PMYSQL; const stmt: WideString): cint;
 function myx_dbm_get_default_storage_engine(mysql: PMYSQL): MYX_DBM_TABLE_ENGINE; cdecl; external LIB_MYSQLX;
-function _myx_dbm_get_create_sql(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; name: PAnsiChar; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: cchar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_create_sql';
-function myx_dbm_get_create_sql(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const name: WideString; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: cchar): String;
+function _myx_dbm_get_create_sql(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; name: PAnsiChar; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: AnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_create_sql';
+function myx_dbm_get_create_sql(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const name: WideString; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: AnsiChar): String;
 function myx_dbm_retrieve_server_version(mysql: PMYSQL): PMYX_DBM_SERVER_VERSION; cdecl; external LIB_MYSQLX;
 procedure myx_dbm_free_server_version(version: PMYX_DBM_SERVER_VERSION); cdecl; external LIB_MYSQLX;
 function _myx_dbm_retrieve_table_data(mysql: PMYSQL; datatypes: PMYX_DBM_DATATYPES; catalog: PAnsiChar; schema: PAnsiChar; table: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_DBM_TABLE_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_retrieve_table_data';
@@ -1078,24 +1078,24 @@ function myx_dbm_retrieve_table_data(mysql: PMYSQL; datatypes: PMYX_DBM_DATATYPE
 procedure myx_dbm_free_table_data(table_data: PMYX_DBM_TABLE_DATA); cdecl; external LIB_MYSQLX;
 function _myx_dbm_get_table_sql_diff(existing_table: PMYX_DBM_TABLE_DATA; altered_table: PMYX_DBM_TABLE_DATA; version: PMYX_DBM_SERVER_VERSION; error_code: PMYX_LIB_ERROR): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_table_sql_diff';
 function myx_dbm_get_table_sql_diff(existing_table: PMYX_DBM_TABLE_DATA; altered_table: PMYX_DBM_TABLE_DATA; version: PMYX_DBM_SERVER_VERSION; error_code: PMYX_LIB_ERROR): String;
-function _myx_dbm_get_sp_data(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; sp_name: PAnsiChar; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: cchar): PMYX_DBM_STORED_PROCEDURE_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_sp_data';
-function myx_dbm_get_sp_data(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: cchar): PMYX_DBM_STORED_PROCEDURE_DATA;
+function _myx_dbm_get_sp_data(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; sp_name: PAnsiChar; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: AnsiChar): PMYX_DBM_STORED_PROCEDURE_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_sp_data';
+function myx_dbm_get_sp_data(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: AnsiChar): PMYX_DBM_STORED_PROCEDURE_DATA;
 procedure myx_dbm_free_sp_data(sp_data: PMYX_DBM_STORED_PROCEDURE_DATA); cdecl; external LIB_MYSQLX;
-function _myx_dbm_make_script_from_sps(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: cchar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_make_script_from_sps';
-function myx_dbm_make_script_from_sps(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: cchar): String;
+function _myx_dbm_make_script_from_sps(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: AnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_make_script_from_sps';
+function myx_dbm_make_script_from_sps(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: AnsiChar): String;
 function _myx_dbm_create_view(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; view_name: PAnsiChar; select_sql: PAnsiChar): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX name 'myx_dbm_create_view';
 function myx_dbm_create_view(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view_name: WideString; const select_sql: WideString): MYX_LIB_ERROR;
 function _myx_dbm_drop_sp(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; sp_name: PAnsiChar; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX name 'myx_dbm_drop_sp';
 function myx_dbm_drop_sp(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE): MYX_LIB_ERROR;
 function _myx_dbm_drop_view(mysql: PMYSQL; catalog_name: PAnsiChar; schema_name: PAnsiChar; view_name: PAnsiChar): MYX_LIB_ERROR; cdecl; external LIB_MYSQLX name 'myx_dbm_drop_view';
 function myx_dbm_drop_view(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const view_name: WideString): MYX_LIB_ERROR;
-function _myx_dbm_get_view_data(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; view: PAnsiChar; quote_char: cchar): PMYX_DBM_VIEW_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_view_data';
-function myx_dbm_get_view_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view: WideString; quote_char: cchar): PMYX_DBM_VIEW_DATA;
+function _myx_dbm_get_view_data(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; view: PAnsiChar; quote_char: AnsiChar): PMYX_DBM_VIEW_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_view_data';
+function myx_dbm_get_view_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view: WideString; quote_char: AnsiChar): PMYX_DBM_VIEW_DATA;
 procedure myx_dbm_free_view_data(vdata: PMYX_DBM_VIEW_DATA); cdecl; external LIB_MYSQLX;
 function _myx_dbm_get_view_name_from_query(create_view_query: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_dbm_get_view_name_from_query';
 function myx_dbm_get_view_name_from_query(const create_view_query: WideString): String;
-function _myx_dbm_get_trigger_data(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; trigger: PAnsiChar; quote_char: cchar): PMYX_DBM_TRIGGER_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_trigger_data';
-function myx_dbm_get_trigger_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const trigger: WideString; quote_char: cchar): PMYX_DBM_TRIGGER_DATA;
+function _myx_dbm_get_trigger_data(mysql: PMYSQL; catalog: PAnsiChar; schema: PAnsiChar; trigger: PAnsiChar; quote_char: AnsiChar): PMYX_DBM_TRIGGER_DATA; cdecl; external LIB_MYSQLX name 'myx_dbm_get_trigger_data';
+function myx_dbm_get_trigger_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const trigger: WideString; quote_char: AnsiChar): PMYX_DBM_TRIGGER_DATA;
 procedure myx_dbm_free_trigger_data(trigger_data: PMYX_DBM_TRIGGER_DATA); cdecl; external LIB_MYSQLX;
 function _myx_datatype_load(filename: PAnsiChar; error_code: PMYX_LIB_ERROR): PMYX_DBM_DATATYPES; cdecl; external LIB_MYSQLX name 'myx_datatype_load';
 function myx_datatype_load(const filename: WideString; error_code: PMYX_LIB_ERROR): PMYX_DBM_DATATYPES;
@@ -1261,13 +1261,13 @@ type
     function GetItem(Index: Integer): TMYX_MYSQL_ERROR_MSG;
     procedure SetItem(Index: Integer; AObject: TMYX_MYSQL_ERROR_MSG);
   public
-    function Add(AObject: TMYX_MYSQL_ERROR_MSG): Integer;
-    function Extract(Item: TMYX_MYSQL_ERROR_MSG): TMYX_MYSQL_ERROR_MSG;
-    function Remove(AObject: TMYX_MYSQL_ERROR_MSG): Integer;
-    function IndexOf(AObject: TMYX_MYSQL_ERROR_MSG): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_MYSQL_ERROR_MSG);
-    function First: TMYX_MYSQL_ERROR_MSG;
-    function Last: TMYX_MYSQL_ERROR_MSG;
+    function Add(AObject: TMYX_MYSQL_ERROR_MSG): Integer; overload;
+    function Extract(Item: TMYX_MYSQL_ERROR_MSG): TMYX_MYSQL_ERROR_MSG; overload;
+    function Remove(AObject: TMYX_MYSQL_ERROR_MSG): Integer; overload;
+    function IndexOf(AObject: TMYX_MYSQL_ERROR_MSG): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_MYSQL_ERROR_MSG); overload;
+    function First: TMYX_MYSQL_ERROR_MSG; overload;
+    function Last: TMYX_MYSQL_ERROR_MSG; overload;
     property Items[Index: Integer]: TMYX_MYSQL_ERROR_MSG read GetItem write SetItem; default;
   end;
 
@@ -1288,13 +1288,13 @@ type
     function GetItem(Index: Integer): TMYX_MYSQL_ERROR_MSGS;
     procedure SetItem(Index: Integer; AObject: TMYX_MYSQL_ERROR_MSGS);
   public
-    function Add(AObject: TMYX_MYSQL_ERROR_MSGS): Integer;
-    function Extract(Item: TMYX_MYSQL_ERROR_MSGS): TMYX_MYSQL_ERROR_MSGS;
-    function Remove(AObject: TMYX_MYSQL_ERROR_MSGS): Integer;
-    function IndexOf(AObject: TMYX_MYSQL_ERROR_MSGS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_MYSQL_ERROR_MSGS);
-    function First: TMYX_MYSQL_ERROR_MSGS;
-    function Last: TMYX_MYSQL_ERROR_MSGS;
+    function Add(AObject: TMYX_MYSQL_ERROR_MSGS): Integer; overload;
+    function Extract(Item: TMYX_MYSQL_ERROR_MSGS): TMYX_MYSQL_ERROR_MSGS; overload;
+    function Remove(AObject: TMYX_MYSQL_ERROR_MSGS): Integer; overload;
+    function IndexOf(AObject: TMYX_MYSQL_ERROR_MSGS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_MYSQL_ERROR_MSGS); overload;
+    function First: TMYX_MYSQL_ERROR_MSGS; overload;
+    function Last: TMYX_MYSQL_ERROR_MSGS; overload;
     property Items[Index: Integer]: TMYX_MYSQL_ERROR_MSGS read GetItem write SetItem; default;
   end;
 
@@ -1335,13 +1335,13 @@ type
     function GetItem(Index: Integer): TMYX_USER_CONNECTION;
     procedure SetItem(Index: Integer; AObject: TMYX_USER_CONNECTION);
   public
-    function Add(AObject: TMYX_USER_CONNECTION): Integer;
-    function Extract(Item: TMYX_USER_CONNECTION): TMYX_USER_CONNECTION;
-    function Remove(AObject: TMYX_USER_CONNECTION): Integer;
-    function IndexOf(AObject: TMYX_USER_CONNECTION): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_USER_CONNECTION);
-    function First: TMYX_USER_CONNECTION;
-    function Last: TMYX_USER_CONNECTION;
+    function Add(AObject: TMYX_USER_CONNECTION): Integer; overload;
+    function Extract(Item: TMYX_USER_CONNECTION): TMYX_USER_CONNECTION; overload;
+    function Remove(AObject: TMYX_USER_CONNECTION): Integer; overload;
+    function IndexOf(AObject: TMYX_USER_CONNECTION): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_USER_CONNECTION); overload;
+    function First: TMYX_USER_CONNECTION; overload;
+    function Last: TMYX_USER_CONNECTION; overload;
     property Items[Index: Integer]: TMYX_USER_CONNECTION read GetItem write SetItem; default;
   end;
 
@@ -1364,13 +1364,13 @@ type
     function GetItem(Index: Integer): TMYX_USER_CONNECTIONS;
     procedure SetItem(Index: Integer; AObject: TMYX_USER_CONNECTIONS);
   public
-    function Add(AObject: TMYX_USER_CONNECTIONS): Integer;
-    function Extract(Item: TMYX_USER_CONNECTIONS): TMYX_USER_CONNECTIONS;
-    function Remove(AObject: TMYX_USER_CONNECTIONS): Integer;
-    function IndexOf(AObject: TMYX_USER_CONNECTIONS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_USER_CONNECTIONS);
-    function First: TMYX_USER_CONNECTIONS;
-    function Last: TMYX_USER_CONNECTIONS;
+    function Add(AObject: TMYX_USER_CONNECTIONS): Integer; overload;
+    function Extract(Item: TMYX_USER_CONNECTIONS): TMYX_USER_CONNECTIONS; overload;
+    function Remove(AObject: TMYX_USER_CONNECTIONS): Integer; overload;
+    function IndexOf(AObject: TMYX_USER_CONNECTIONS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_USER_CONNECTIONS); overload;
+    function First: TMYX_USER_CONNECTIONS; overload;
+    function Last: TMYX_USER_CONNECTIONS; overload;
     property Items[Index: Integer]: TMYX_USER_CONNECTIONS read GetItem write SetItem; default;
   end;
 
@@ -1379,7 +1379,7 @@ type
     record_pointer: PMYX_MYSQLD_CONNECTION;
   public
     connection: TMYX_USER_CONNECTION;
-    constructor Create; overload;
+    constructor Create(Aconnection: PMYX_USER_CONNECTION); overload;
     constructor Create(ARecord: PMYX_MYSQLD_CONNECTION); overload;
     destructor Destroy; override;
     function get_record_pointer: PMYX_MYSQLD_CONNECTION;
@@ -1391,13 +1391,13 @@ type
     function GetItem(Index: Integer): TMYX_MYSQLD_CONNECTION;
     procedure SetItem(Index: Integer; AObject: TMYX_MYSQLD_CONNECTION);
   public
-    function Add(AObject: TMYX_MYSQLD_CONNECTION): Integer;
-    function Extract(Item: TMYX_MYSQLD_CONNECTION): TMYX_MYSQLD_CONNECTION;
-    function Remove(AObject: TMYX_MYSQLD_CONNECTION): Integer;
-    function IndexOf(AObject: TMYX_MYSQLD_CONNECTION): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_MYSQLD_CONNECTION);
-    function First: TMYX_MYSQLD_CONNECTION;
-    function Last: TMYX_MYSQLD_CONNECTION;
+    function Add(AObject: TMYX_MYSQLD_CONNECTION): Integer; overload;
+    function Extract(Item: TMYX_MYSQLD_CONNECTION): TMYX_MYSQLD_CONNECTION; overload;
+    function Remove(AObject: TMYX_MYSQLD_CONNECTION): Integer; overload;
+    function IndexOf(AObject: TMYX_MYSQLD_CONNECTION): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_MYSQLD_CONNECTION); overload;
+    function First: TMYX_MYSQLD_CONNECTION; overload;
+    function Last: TMYX_MYSQLD_CONNECTION; overload;
     property Items[Index: Integer]: TMYX_MYSQLD_CONNECTION read GetItem write SetItem; default;
   end;
 
@@ -1420,13 +1420,13 @@ type
     function GetItem(Index: Integer): TMYX_MYSQLD_CONNECTIONS;
     procedure SetItem(Index: Integer; AObject: TMYX_MYSQLD_CONNECTIONS);
   public
-    function Add(AObject: TMYX_MYSQLD_CONNECTIONS): Integer;
-    function Extract(Item: TMYX_MYSQLD_CONNECTIONS): TMYX_MYSQLD_CONNECTIONS;
-    function Remove(AObject: TMYX_MYSQLD_CONNECTIONS): Integer;
-    function IndexOf(AObject: TMYX_MYSQLD_CONNECTIONS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_MYSQLD_CONNECTIONS);
-    function First: TMYX_MYSQLD_CONNECTIONS;
-    function Last: TMYX_MYSQLD_CONNECTIONS;
+    function Add(AObject: TMYX_MYSQLD_CONNECTIONS): Integer; overload;
+    function Extract(Item: TMYX_MYSQLD_CONNECTIONS): TMYX_MYSQLD_CONNECTIONS; overload;
+    function Remove(AObject: TMYX_MYSQLD_CONNECTIONS): Integer; overload;
+    function IndexOf(AObject: TMYX_MYSQLD_CONNECTIONS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_MYSQLD_CONNECTIONS); overload;
+    function First: TMYX_MYSQLD_CONNECTIONS; overload;
+    function Last: TMYX_MYSQLD_CONNECTIONS; overload;
     property Items[Index: Integer]: TMYX_MYSQLD_CONNECTIONS read GetItem write SetItem; default;
   end;
 
@@ -1436,7 +1436,7 @@ type
   public
     connection: TMYX_USER_CONNECTION;
     mysqlds: TMYX_MYSQLD_CONNECTIONS;
-    constructor Create; overload;
+    constructor Create(Aconnection: PMYX_USER_CONNECTION; Amysqlds: PMYX_MYSQLD_CONNECTIONS); overload;
     constructor Create(ARecord: PMYX_IM_CONNECTION); overload;
     destructor Destroy; override;
     function get_record_pointer: PMYX_IM_CONNECTION;
@@ -1448,13 +1448,13 @@ type
     function GetItem(Index: Integer): TMYX_IM_CONNECTION;
     procedure SetItem(Index: Integer; AObject: TMYX_IM_CONNECTION);
   public
-    function Add(AObject: TMYX_IM_CONNECTION): Integer;
-    function Extract(Item: TMYX_IM_CONNECTION): TMYX_IM_CONNECTION;
-    function Remove(AObject: TMYX_IM_CONNECTION): Integer;
-    function IndexOf(AObject: TMYX_IM_CONNECTION): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_IM_CONNECTION);
-    function First: TMYX_IM_CONNECTION;
-    function Last: TMYX_IM_CONNECTION;
+    function Add(AObject: TMYX_IM_CONNECTION): Integer; overload;
+    function Extract(Item: TMYX_IM_CONNECTION): TMYX_IM_CONNECTION; overload;
+    function Remove(AObject: TMYX_IM_CONNECTION): Integer; overload;
+    function IndexOf(AObject: TMYX_IM_CONNECTION): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_IM_CONNECTION); overload;
+    function First: TMYX_IM_CONNECTION; overload;
+    function Last: TMYX_IM_CONNECTION; overload;
     property Items[Index: Integer]: TMYX_IM_CONNECTION read GetItem write SetItem; default;
   end;
 
@@ -1477,13 +1477,13 @@ type
     function GetItem(Index: Integer): TMYX_IM_CONNECTIONS;
     procedure SetItem(Index: Integer; AObject: TMYX_IM_CONNECTIONS);
   public
-    function Add(AObject: TMYX_IM_CONNECTIONS): Integer;
-    function Extract(Item: TMYX_IM_CONNECTIONS): TMYX_IM_CONNECTIONS;
-    function Remove(AObject: TMYX_IM_CONNECTIONS): Integer;
-    function IndexOf(AObject: TMYX_IM_CONNECTIONS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_IM_CONNECTIONS);
-    function First: TMYX_IM_CONNECTIONS;
-    function Last: TMYX_IM_CONNECTIONS;
+    function Add(AObject: TMYX_IM_CONNECTIONS): Integer; overload;
+    function Extract(Item: TMYX_IM_CONNECTIONS): TMYX_IM_CONNECTIONS; overload;
+    function Remove(AObject: TMYX_IM_CONNECTIONS): Integer; overload;
+    function IndexOf(AObject: TMYX_IM_CONNECTIONS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_IM_CONNECTIONS); overload;
+    function First: TMYX_IM_CONNECTIONS; overload;
+    function Last: TMYX_IM_CONNECTIONS; overload;
     property Items[Index: Integer]: TMYX_IM_CONNECTIONS read GetItem write SetItem; default;
   end;
 
@@ -1506,13 +1506,13 @@ type
     function GetItem(Index: Integer): TMYX_OPTION_GROUP;
     procedure SetItem(Index: Integer; AObject: TMYX_OPTION_GROUP);
   public
-    function Add(AObject: TMYX_OPTION_GROUP): Integer;
-    function Extract(Item: TMYX_OPTION_GROUP): TMYX_OPTION_GROUP;
-    function Remove(AObject: TMYX_OPTION_GROUP): Integer;
-    function IndexOf(AObject: TMYX_OPTION_GROUP): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_OPTION_GROUP);
-    function First: TMYX_OPTION_GROUP;
-    function Last: TMYX_OPTION_GROUP;
+    function Add(AObject: TMYX_OPTION_GROUP): Integer; overload;
+    function Extract(Item: TMYX_OPTION_GROUP): TMYX_OPTION_GROUP; overload;
+    function Remove(AObject: TMYX_OPTION_GROUP): Integer; overload;
+    function IndexOf(AObject: TMYX_OPTION_GROUP): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_OPTION_GROUP); overload;
+    function First: TMYX_OPTION_GROUP; overload;
+    function Last: TMYX_OPTION_GROUP; overload;
     property Items[Index: Integer]: TMYX_OPTION_GROUP read GetItem write SetItem; default;
   end;
 
@@ -1533,13 +1533,13 @@ type
     function GetItem(Index: Integer): TMYX_APPLICATION_OPTIONS;
     procedure SetItem(Index: Integer; AObject: TMYX_APPLICATION_OPTIONS);
   public
-    function Add(AObject: TMYX_APPLICATION_OPTIONS): Integer;
-    function Extract(Item: TMYX_APPLICATION_OPTIONS): TMYX_APPLICATION_OPTIONS;
-    function Remove(AObject: TMYX_APPLICATION_OPTIONS): Integer;
-    function IndexOf(AObject: TMYX_APPLICATION_OPTIONS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_APPLICATION_OPTIONS);
-    function First: TMYX_APPLICATION_OPTIONS;
-    function Last: TMYX_APPLICATION_OPTIONS;
+    function Add(AObject: TMYX_APPLICATION_OPTIONS): Integer; overload;
+    function Extract(Item: TMYX_APPLICATION_OPTIONS): TMYX_APPLICATION_OPTIONS; overload;
+    function Remove(AObject: TMYX_APPLICATION_OPTIONS): Integer; overload;
+    function IndexOf(AObject: TMYX_APPLICATION_OPTIONS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_APPLICATION_OPTIONS); overload;
+    function First: TMYX_APPLICATION_OPTIONS; overload;
+    function Last: TMYX_APPLICATION_OPTIONS; overload;
     property Items[Index: Integer]: TMYX_APPLICATION_OPTIONS read GetItem write SetItem; default;
   end;
 
@@ -1571,13 +1571,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_TABLE_COLUMN;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_TABLE_COLUMN);
   public
-    function Add(AObject: TMYX_SCHEMA_TABLE_COLUMN): Integer;
-    function Extract(Item: TMYX_SCHEMA_TABLE_COLUMN): TMYX_SCHEMA_TABLE_COLUMN;
-    function Remove(AObject: TMYX_SCHEMA_TABLE_COLUMN): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_TABLE_COLUMN): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_TABLE_COLUMN);
-    function First: TMYX_SCHEMA_TABLE_COLUMN;
-    function Last: TMYX_SCHEMA_TABLE_COLUMN;
+    function Add(AObject: TMYX_SCHEMA_TABLE_COLUMN): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_TABLE_COLUMN): TMYX_SCHEMA_TABLE_COLUMN; overload;
+    function Remove(AObject: TMYX_SCHEMA_TABLE_COLUMN): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_TABLE_COLUMN): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_TABLE_COLUMN); overload;
+    function First: TMYX_SCHEMA_TABLE_COLUMN; overload;
+    function Last: TMYX_SCHEMA_TABLE_COLUMN; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_TABLE_COLUMN read GetItem write SetItem; default;
   end;
 
@@ -1603,13 +1603,13 @@ type
     function GetItem(Index: Integer): TMYX_TABLE_INDEX_COLUMN;
     procedure SetItem(Index: Integer; AObject: TMYX_TABLE_INDEX_COLUMN);
   public
-    function Add(AObject: TMYX_TABLE_INDEX_COLUMN): Integer;
-    function Extract(Item: TMYX_TABLE_INDEX_COLUMN): TMYX_TABLE_INDEX_COLUMN;
-    function Remove(AObject: TMYX_TABLE_INDEX_COLUMN): Integer;
-    function IndexOf(AObject: TMYX_TABLE_INDEX_COLUMN): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_TABLE_INDEX_COLUMN);
-    function First: TMYX_TABLE_INDEX_COLUMN;
-    function Last: TMYX_TABLE_INDEX_COLUMN;
+    function Add(AObject: TMYX_TABLE_INDEX_COLUMN): Integer; overload;
+    function Extract(Item: TMYX_TABLE_INDEX_COLUMN): TMYX_TABLE_INDEX_COLUMN; overload;
+    function Remove(AObject: TMYX_TABLE_INDEX_COLUMN): Integer; overload;
+    function IndexOf(AObject: TMYX_TABLE_INDEX_COLUMN): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_TABLE_INDEX_COLUMN); overload;
+    function First: TMYX_TABLE_INDEX_COLUMN; overload;
+    function Last: TMYX_TABLE_INDEX_COLUMN; overload;
     property Items[Index: Integer]: TMYX_TABLE_INDEX_COLUMN read GetItem write SetItem; default;
   end;
 
@@ -1640,13 +1640,13 @@ type
     function GetItem(Index: Integer): TMYX_TABLE_INDEX;
     procedure SetItem(Index: Integer; AObject: TMYX_TABLE_INDEX);
   public
-    function Add(AObject: TMYX_TABLE_INDEX): Integer;
-    function Extract(Item: TMYX_TABLE_INDEX): TMYX_TABLE_INDEX;
-    function Remove(AObject: TMYX_TABLE_INDEX): Integer;
-    function IndexOf(AObject: TMYX_TABLE_INDEX): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_TABLE_INDEX);
-    function First: TMYX_TABLE_INDEX;
-    function Last: TMYX_TABLE_INDEX;
+    function Add(AObject: TMYX_TABLE_INDEX): Integer; overload;
+    function Extract(Item: TMYX_TABLE_INDEX): TMYX_TABLE_INDEX; overload;
+    function Remove(AObject: TMYX_TABLE_INDEX): Integer; overload;
+    function IndexOf(AObject: TMYX_TABLE_INDEX): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_TABLE_INDEX); overload;
+    function First: TMYX_TABLE_INDEX; overload;
+    function Last: TMYX_TABLE_INDEX; overload;
     property Items[Index: Integer]: TMYX_TABLE_INDEX read GetItem write SetItem; default;
   end;
 
@@ -1700,13 +1700,13 @@ type
     function GetItem(Index: Integer): TMYX_TABLE_STATUS;
     procedure SetItem(Index: Integer; AObject: TMYX_TABLE_STATUS);
   public
-    function Add(AObject: TMYX_TABLE_STATUS): Integer;
-    function Extract(Item: TMYX_TABLE_STATUS): TMYX_TABLE_STATUS;
-    function Remove(AObject: TMYX_TABLE_STATUS): Integer;
-    function IndexOf(AObject: TMYX_TABLE_STATUS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_TABLE_STATUS);
-    function First: TMYX_TABLE_STATUS;
-    function Last: TMYX_TABLE_STATUS;
+    function Add(AObject: TMYX_TABLE_STATUS): Integer; overload;
+    function Extract(Item: TMYX_TABLE_STATUS): TMYX_TABLE_STATUS; overload;
+    function Remove(AObject: TMYX_TABLE_STATUS): Integer; overload;
+    function IndexOf(AObject: TMYX_TABLE_STATUS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_TABLE_STATUS); overload;
+    function First: TMYX_TABLE_STATUS; overload;
+    function Last: TMYX_TABLE_STATUS; overload;
     property Items[Index: Integer]: TMYX_TABLE_STATUS read GetItem write SetItem; default;
   end;
 
@@ -1727,13 +1727,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_TABLE_STATUS;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_TABLE_STATUS);
   public
-    function Add(AObject: TMYX_SCHEMA_TABLE_STATUS): Integer;
-    function Extract(Item: TMYX_SCHEMA_TABLE_STATUS): TMYX_SCHEMA_TABLE_STATUS;
-    function Remove(AObject: TMYX_SCHEMA_TABLE_STATUS): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_TABLE_STATUS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_TABLE_STATUS);
-    function First: TMYX_SCHEMA_TABLE_STATUS;
-    function Last: TMYX_SCHEMA_TABLE_STATUS;
+    function Add(AObject: TMYX_SCHEMA_TABLE_STATUS): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_TABLE_STATUS): TMYX_SCHEMA_TABLE_STATUS; overload;
+    function Remove(AObject: TMYX_SCHEMA_TABLE_STATUS): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_TABLE_STATUS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_TABLE_STATUS); overload;
+    function First: TMYX_SCHEMA_TABLE_STATUS; overload;
+    function Last: TMYX_SCHEMA_TABLE_STATUS; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_TABLE_STATUS read GetItem write SetItem; default;
   end;
 
@@ -1761,13 +1761,13 @@ type
     function GetItem(Index: Integer): TMYX_VIEW_STATUS;
     procedure SetItem(Index: Integer; AObject: TMYX_VIEW_STATUS);
   public
-    function Add(AObject: TMYX_VIEW_STATUS): Integer;
-    function Extract(Item: TMYX_VIEW_STATUS): TMYX_VIEW_STATUS;
-    function Remove(AObject: TMYX_VIEW_STATUS): Integer;
-    function IndexOf(AObject: TMYX_VIEW_STATUS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_VIEW_STATUS);
-    function First: TMYX_VIEW_STATUS;
-    function Last: TMYX_VIEW_STATUS;
+    function Add(AObject: TMYX_VIEW_STATUS): Integer; overload;
+    function Extract(Item: TMYX_VIEW_STATUS): TMYX_VIEW_STATUS; overload;
+    function Remove(AObject: TMYX_VIEW_STATUS): Integer; overload;
+    function IndexOf(AObject: TMYX_VIEW_STATUS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_VIEW_STATUS); overload;
+    function First: TMYX_VIEW_STATUS; overload;
+    function Last: TMYX_VIEW_STATUS; overload;
     property Items[Index: Integer]: TMYX_VIEW_STATUS read GetItem write SetItem; default;
   end;
 
@@ -1788,13 +1788,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_VIEW_STATUS;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_VIEW_STATUS);
   public
-    function Add(AObject: TMYX_SCHEMA_VIEW_STATUS): Integer;
-    function Extract(Item: TMYX_SCHEMA_VIEW_STATUS): TMYX_SCHEMA_VIEW_STATUS;
-    function Remove(AObject: TMYX_SCHEMA_VIEW_STATUS): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_VIEW_STATUS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_VIEW_STATUS);
-    function First: TMYX_SCHEMA_VIEW_STATUS;
-    function Last: TMYX_SCHEMA_VIEW_STATUS;
+    function Add(AObject: TMYX_SCHEMA_VIEW_STATUS): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_VIEW_STATUS): TMYX_SCHEMA_VIEW_STATUS; overload;
+    function Remove(AObject: TMYX_SCHEMA_VIEW_STATUS): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_VIEW_STATUS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_VIEW_STATUS); overload;
+    function First: TMYX_SCHEMA_VIEW_STATUS; overload;
+    function Last: TMYX_SCHEMA_VIEW_STATUS; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_VIEW_STATUS read GetItem write SetItem; default;
   end;
 
@@ -1818,13 +1818,13 @@ type
     function GetItem(Index: Integer): TMYX_ENTITY_STATUS;
     procedure SetItem(Index: Integer; AObject: TMYX_ENTITY_STATUS);
   public
-    function Add(AObject: TMYX_ENTITY_STATUS): Integer;
-    function Extract(Item: TMYX_ENTITY_STATUS): TMYX_ENTITY_STATUS;
-    function Remove(AObject: TMYX_ENTITY_STATUS): Integer;
-    function IndexOf(AObject: TMYX_ENTITY_STATUS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_ENTITY_STATUS);
-    function First: TMYX_ENTITY_STATUS;
-    function Last: TMYX_ENTITY_STATUS;
+    function Add(AObject: TMYX_ENTITY_STATUS): Integer; overload;
+    function Extract(Item: TMYX_ENTITY_STATUS): TMYX_ENTITY_STATUS; overload;
+    function Remove(AObject: TMYX_ENTITY_STATUS): Integer; overload;
+    function IndexOf(AObject: TMYX_ENTITY_STATUS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_ENTITY_STATUS); overload;
+    function First: TMYX_ENTITY_STATUS; overload;
+    function Last: TMYX_ENTITY_STATUS; overload;
     property Items[Index: Integer]: TMYX_ENTITY_STATUS read GetItem write SetItem; default;
   end;
 
@@ -1845,13 +1845,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_ENTITY_STATUS;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_ENTITY_STATUS);
   public
-    function Add(AObject: TMYX_SCHEMA_ENTITY_STATUS): Integer;
-    function Extract(Item: TMYX_SCHEMA_ENTITY_STATUS): TMYX_SCHEMA_ENTITY_STATUS;
-    function Remove(AObject: TMYX_SCHEMA_ENTITY_STATUS): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_ENTITY_STATUS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_ENTITY_STATUS);
-    function First: TMYX_SCHEMA_ENTITY_STATUS;
-    function Last: TMYX_SCHEMA_ENTITY_STATUS;
+    function Add(AObject: TMYX_SCHEMA_ENTITY_STATUS): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_ENTITY_STATUS): TMYX_SCHEMA_ENTITY_STATUS; overload;
+    function Remove(AObject: TMYX_SCHEMA_ENTITY_STATUS): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_ENTITY_STATUS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_ENTITY_STATUS); overload;
+    function First: TMYX_SCHEMA_ENTITY_STATUS; overload;
+    function Last: TMYX_SCHEMA_ENTITY_STATUS; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_ENTITY_STATUS read GetItem write SetItem; default;
   end;
 
@@ -1872,13 +1872,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_INDICES;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_INDICES);
   public
-    function Add(AObject: TMYX_SCHEMA_INDICES): Integer;
-    function Extract(Item: TMYX_SCHEMA_INDICES): TMYX_SCHEMA_INDICES;
-    function Remove(AObject: TMYX_SCHEMA_INDICES): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_INDICES): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_INDICES);
-    function First: TMYX_SCHEMA_INDICES;
-    function Last: TMYX_SCHEMA_INDICES;
+    function Add(AObject: TMYX_SCHEMA_INDICES): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_INDICES): TMYX_SCHEMA_INDICES; overload;
+    function Remove(AObject: TMYX_SCHEMA_INDICES): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_INDICES): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_INDICES); overload;
+    function First: TMYX_SCHEMA_INDICES; overload;
+    function Last: TMYX_SCHEMA_INDICES; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_INDICES read GetItem write SetItem; default;
   end;
 
@@ -1903,13 +1903,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_TABLE;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_TABLE);
   public
-    function Add(AObject: TMYX_SCHEMA_TABLE): Integer;
-    function Extract(Item: TMYX_SCHEMA_TABLE): TMYX_SCHEMA_TABLE;
-    function Remove(AObject: TMYX_SCHEMA_TABLE): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_TABLE): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_TABLE);
-    function First: TMYX_SCHEMA_TABLE;
-    function Last: TMYX_SCHEMA_TABLE;
+    function Add(AObject: TMYX_SCHEMA_TABLE): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_TABLE): TMYX_SCHEMA_TABLE; overload;
+    function Remove(AObject: TMYX_SCHEMA_TABLE): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_TABLE): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_TABLE); overload;
+    function First: TMYX_SCHEMA_TABLE; overload;
+    function Last: TMYX_SCHEMA_TABLE; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_TABLE read GetItem write SetItem; default;
   end;
 
@@ -1930,13 +1930,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_TABLES;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_TABLES);
   public
-    function Add(AObject: TMYX_SCHEMA_TABLES): Integer;
-    function Extract(Item: TMYX_SCHEMA_TABLES): TMYX_SCHEMA_TABLES;
-    function Remove(AObject: TMYX_SCHEMA_TABLES): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_TABLES): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_TABLES);
-    function First: TMYX_SCHEMA_TABLES;
-    function Last: TMYX_SCHEMA_TABLES;
+    function Add(AObject: TMYX_SCHEMA_TABLES): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_TABLES): TMYX_SCHEMA_TABLES; overload;
+    function Remove(AObject: TMYX_SCHEMA_TABLES): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_TABLES): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_TABLES); overload;
+    function First: TMYX_SCHEMA_TABLES; overload;
+    function Last: TMYX_SCHEMA_TABLES; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_TABLES read GetItem write SetItem; default;
   end;
 
@@ -1962,13 +1962,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_STORED_PROCEDURE_PARAM;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM);
   public
-    function Add(AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM): Integer;
-    function Extract(Item: TMYX_SCHEMA_STORED_PROCEDURE_PARAM): TMYX_SCHEMA_STORED_PROCEDURE_PARAM;
-    function Remove(AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM);
-    function First: TMYX_SCHEMA_STORED_PROCEDURE_PARAM;
-    function Last: TMYX_SCHEMA_STORED_PROCEDURE_PARAM;
+    function Add(AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_STORED_PROCEDURE_PARAM): TMYX_SCHEMA_STORED_PROCEDURE_PARAM; overload;
+    function Remove(AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURE_PARAM); overload;
+    function First: TMYX_SCHEMA_STORED_PROCEDURE_PARAM; overload;
+    function Last: TMYX_SCHEMA_STORED_PROCEDURE_PARAM; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_STORED_PROCEDURE_PARAM read GetItem write SetItem; default;
   end;
 
@@ -2005,13 +2005,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_STORED_PROCEDURE;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURE);
   public
-    function Add(AObject: TMYX_SCHEMA_STORED_PROCEDURE): Integer;
-    function Extract(Item: TMYX_SCHEMA_STORED_PROCEDURE): TMYX_SCHEMA_STORED_PROCEDURE;
-    function Remove(AObject: TMYX_SCHEMA_STORED_PROCEDURE): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_STORED_PROCEDURE): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURE);
-    function First: TMYX_SCHEMA_STORED_PROCEDURE;
-    function Last: TMYX_SCHEMA_STORED_PROCEDURE;
+    function Add(AObject: TMYX_SCHEMA_STORED_PROCEDURE): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_STORED_PROCEDURE): TMYX_SCHEMA_STORED_PROCEDURE; overload;
+    function Remove(AObject: TMYX_SCHEMA_STORED_PROCEDURE): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_STORED_PROCEDURE): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURE); overload;
+    function First: TMYX_SCHEMA_STORED_PROCEDURE; overload;
+    function Last: TMYX_SCHEMA_STORED_PROCEDURE; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_STORED_PROCEDURE read GetItem write SetItem; default;
   end;
 
@@ -2032,13 +2032,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA_STORED_PROCEDURES;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURES);
   public
-    function Add(AObject: TMYX_SCHEMA_STORED_PROCEDURES): Integer;
-    function Extract(Item: TMYX_SCHEMA_STORED_PROCEDURES): TMYX_SCHEMA_STORED_PROCEDURES;
-    function Remove(AObject: TMYX_SCHEMA_STORED_PROCEDURES): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA_STORED_PROCEDURES): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURES);
-    function First: TMYX_SCHEMA_STORED_PROCEDURES;
-    function Last: TMYX_SCHEMA_STORED_PROCEDURES;
+    function Add(AObject: TMYX_SCHEMA_STORED_PROCEDURES): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA_STORED_PROCEDURES): TMYX_SCHEMA_STORED_PROCEDURES; overload;
+    function Remove(AObject: TMYX_SCHEMA_STORED_PROCEDURES): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA_STORED_PROCEDURES): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA_STORED_PROCEDURES); overload;
+    function First: TMYX_SCHEMA_STORED_PROCEDURES; overload;
+    function Last: TMYX_SCHEMA_STORED_PROCEDURES; overload;
     property Items[Index: Integer]: TMYX_SCHEMA_STORED_PROCEDURES read GetItem write SetItem; default;
   end;
 
@@ -2052,7 +2052,7 @@ type
     schema_tables: TMYX_SCHEMA_TABLES;
     schema_indices: TMYX_SCHEMA_INDICES;
     schema_sps: TMYX_SCHEMA_STORED_PROCEDURES;
-    constructor Create(schema_name: String; escaped_schema_name: String; catalog_name: String); overload;
+    constructor Create(schema_name: String; escaped_schema_name: String; catalog_name: String; Aschema_tables: PMYX_SCHEMA_TABLES; Aschema_indices: PMYX_SCHEMA_INDICES; Aschema_sps: PMYX_SCHEMA_STORED_PROCEDURES); overload;
     constructor Create(ARecord: PMYX_SCHEMA); overload;
     destructor Destroy; override;
     function get_record_pointer: PMYX_SCHEMA;
@@ -2067,13 +2067,13 @@ type
     function GetItem(Index: Integer): TMYX_SCHEMA;
     procedure SetItem(Index: Integer; AObject: TMYX_SCHEMA);
   public
-    function Add(AObject: TMYX_SCHEMA): Integer;
-    function Extract(Item: TMYX_SCHEMA): TMYX_SCHEMA;
-    function Remove(AObject: TMYX_SCHEMA): Integer;
-    function IndexOf(AObject: TMYX_SCHEMA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA);
-    function First: TMYX_SCHEMA;
-    function Last: TMYX_SCHEMA;
+    function Add(AObject: TMYX_SCHEMA): Integer; overload;
+    function Extract(Item: TMYX_SCHEMA): TMYX_SCHEMA; overload;
+    function Remove(AObject: TMYX_SCHEMA): Integer; overload;
+    function IndexOf(AObject: TMYX_SCHEMA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SCHEMA); overload;
+    function First: TMYX_SCHEMA; overload;
+    function Last: TMYX_SCHEMA; overload;
     property Items[Index: Integer]: TMYX_SCHEMA read GetItem write SetItem; default;
   end;
 
@@ -2096,13 +2096,13 @@ type
     function GetItem(Index: Integer): TMYX_CATALOG;
     procedure SetItem(Index: Integer; AObject: TMYX_CATALOG);
   public
-    function Add(AObject: TMYX_CATALOG): Integer;
-    function Extract(Item: TMYX_CATALOG): TMYX_CATALOG;
-    function Remove(AObject: TMYX_CATALOG): Integer;
-    function IndexOf(AObject: TMYX_CATALOG): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_CATALOG);
-    function First: TMYX_CATALOG;
-    function Last: TMYX_CATALOG;
+    function Add(AObject: TMYX_CATALOG): Integer; overload;
+    function Extract(Item: TMYX_CATALOG): TMYX_CATALOG; overload;
+    function Remove(AObject: TMYX_CATALOG): Integer; overload;
+    function IndexOf(AObject: TMYX_CATALOG): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_CATALOG); overload;
+    function First: TMYX_CATALOG; overload;
+    function Last: TMYX_CATALOG; overload;
     property Items[Index: Integer]: TMYX_CATALOG read GetItem write SetItem; default;
   end;
 
@@ -2123,13 +2123,13 @@ type
     function GetItem(Index: Integer): TMYX_CATALOGS;
     procedure SetItem(Index: Integer; AObject: TMYX_CATALOGS);
   public
-    function Add(AObject: TMYX_CATALOGS): Integer;
-    function Extract(Item: TMYX_CATALOGS): TMYX_CATALOGS;
-    function Remove(AObject: TMYX_CATALOGS): Integer;
-    function IndexOf(AObject: TMYX_CATALOGS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_CATALOGS);
-    function First: TMYX_CATALOGS;
-    function Last: TMYX_CATALOGS;
+    function Add(AObject: TMYX_CATALOGS): Integer; overload;
+    function Extract(Item: TMYX_CATALOGS): TMYX_CATALOGS; overload;
+    function Remove(AObject: TMYX_CATALOGS): Integer; overload;
+    function IndexOf(AObject: TMYX_CATALOGS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_CATALOGS); overload;
+    function First: TMYX_CATALOGS; overload;
+    function Last: TMYX_CATALOGS; overload;
     property Items[Index: Integer]: TMYX_CATALOGS read GetItem write SetItem; default;
   end;
 
@@ -2153,13 +2153,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_SERVER_VERSION;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_SERVER_VERSION);
   public
-    function Add(AObject: TMYX_DBM_SERVER_VERSION): Integer;
-    function Extract(Item: TMYX_DBM_SERVER_VERSION): TMYX_DBM_SERVER_VERSION;
-    function Remove(AObject: TMYX_DBM_SERVER_VERSION): Integer;
-    function IndexOf(AObject: TMYX_DBM_SERVER_VERSION): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_SERVER_VERSION);
-    function First: TMYX_DBM_SERVER_VERSION;
-    function Last: TMYX_DBM_SERVER_VERSION;
+    function Add(AObject: TMYX_DBM_SERVER_VERSION): Integer; overload;
+    function Extract(Item: TMYX_DBM_SERVER_VERSION): TMYX_DBM_SERVER_VERSION; overload;
+    function Remove(AObject: TMYX_DBM_SERVER_VERSION): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_SERVER_VERSION): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_SERVER_VERSION); overload;
+    function First: TMYX_DBM_SERVER_VERSION; overload;
+    function Last: TMYX_DBM_SERVER_VERSION; overload;
     property Items[Index: Integer]: TMYX_DBM_SERVER_VERSION read GetItem write SetItem; default;
   end;
 
@@ -2173,7 +2173,7 @@ type
     Fsort_len: Integer;
   public
     charset: TMYX_DBM_CHARSET;
-    constructor Create(name: String; id: Integer; is_default: cuchar; is_compiled: cuchar; sort_len: Integer); overload;
+    constructor Create(name: String; id: Integer; is_default: cuchar; is_compiled: cuchar; sort_len: Integer; Acharset: PMYX_DBM_CHARSET); overload;
     constructor Create(ARecord: PMYX_DBM_COLLATION); overload;
     destructor Destroy; override;
     function get_record_pointer: PMYX_DBM_COLLATION;
@@ -2190,13 +2190,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_COLLATION;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_COLLATION);
   public
-    function Add(AObject: TMYX_DBM_COLLATION): Integer;
-    function Extract(Item: TMYX_DBM_COLLATION): TMYX_DBM_COLLATION;
-    function Remove(AObject: TMYX_DBM_COLLATION): Integer;
-    function IndexOf(AObject: TMYX_DBM_COLLATION): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_COLLATION);
-    function First: TMYX_DBM_COLLATION;
-    function Last: TMYX_DBM_COLLATION;
+    function Add(AObject: TMYX_DBM_COLLATION): Integer; overload;
+    function Extract(Item: TMYX_DBM_COLLATION): TMYX_DBM_COLLATION; overload;
+    function Remove(AObject: TMYX_DBM_COLLATION): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_COLLATION): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_COLLATION); overload;
+    function First: TMYX_DBM_COLLATION; overload;
+    function Last: TMYX_DBM_COLLATION; overload;
     property Items[Index: Integer]: TMYX_DBM_COLLATION read GetItem write SetItem; default;
   end;
 
@@ -2225,13 +2225,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_CHARSET;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_CHARSET);
   public
-    function Add(AObject: TMYX_DBM_CHARSET): Integer;
-    function Extract(Item: TMYX_DBM_CHARSET): TMYX_DBM_CHARSET;
-    function Remove(AObject: TMYX_DBM_CHARSET): Integer;
-    function IndexOf(AObject: TMYX_DBM_CHARSET): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_CHARSET);
-    function First: TMYX_DBM_CHARSET;
-    function Last: TMYX_DBM_CHARSET;
+    function Add(AObject: TMYX_DBM_CHARSET): Integer; overload;
+    function Extract(Item: TMYX_DBM_CHARSET): TMYX_DBM_CHARSET; overload;
+    function Remove(AObject: TMYX_DBM_CHARSET): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_CHARSET): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_CHARSET); overload;
+    function First: TMYX_DBM_CHARSET; overload;
+    function Last: TMYX_DBM_CHARSET; overload;
     property Items[Index: Integer]: TMYX_DBM_CHARSET read GetItem write SetItem; default;
   end;
 
@@ -2252,13 +2252,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_CHARSETS;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_CHARSETS);
   public
-    function Add(AObject: TMYX_DBM_CHARSETS): Integer;
-    function Extract(Item: TMYX_DBM_CHARSETS): TMYX_DBM_CHARSETS;
-    function Remove(AObject: TMYX_DBM_CHARSETS): Integer;
-    function IndexOf(AObject: TMYX_DBM_CHARSETS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_CHARSETS);
-    function First: TMYX_DBM_CHARSETS;
-    function Last: TMYX_DBM_CHARSETS;
+    function Add(AObject: TMYX_DBM_CHARSETS): Integer; overload;
+    function Extract(Item: TMYX_DBM_CHARSETS): TMYX_DBM_CHARSETS; overload;
+    function Remove(AObject: TMYX_DBM_CHARSETS): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_CHARSETS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_CHARSETS); overload;
+    function First: TMYX_DBM_CHARSETS; overload;
+    function Last: TMYX_DBM_CHARSETS; overload;
     property Items[Index: Integer]: TMYX_DBM_CHARSETS read GetItem write SetItem; default;
   end;
 
@@ -2293,13 +2293,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_DATATYPE;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_DATATYPE);
   public
-    function Add(AObject: TMYX_DBM_DATATYPE): Integer;
-    function Extract(Item: TMYX_DBM_DATATYPE): TMYX_DBM_DATATYPE;
-    function Remove(AObject: TMYX_DBM_DATATYPE): Integer;
-    function IndexOf(AObject: TMYX_DBM_DATATYPE): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_DATATYPE);
-    function First: TMYX_DBM_DATATYPE;
-    function Last: TMYX_DBM_DATATYPE;
+    function Add(AObject: TMYX_DBM_DATATYPE): Integer; overload;
+    function Extract(Item: TMYX_DBM_DATATYPE): TMYX_DBM_DATATYPE; overload;
+    function Remove(AObject: TMYX_DBM_DATATYPE): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_DATATYPE): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_DATATYPE); overload;
+    function First: TMYX_DBM_DATATYPE; overload;
+    function Last: TMYX_DBM_DATATYPE; overload;
     property Items[Index: Integer]: TMYX_DBM_DATATYPE read GetItem write SetItem; default;
   end;
 
@@ -2321,13 +2321,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_DATATYPES;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_DATATYPES);
   public
-    function Add(AObject: TMYX_DBM_DATATYPES): Integer;
-    function Extract(Item: TMYX_DBM_DATATYPES): TMYX_DBM_DATATYPES;
-    function Remove(AObject: TMYX_DBM_DATATYPES): Integer;
-    function IndexOf(AObject: TMYX_DBM_DATATYPES): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_DATATYPES);
-    function First: TMYX_DBM_DATATYPES;
-    function Last: TMYX_DBM_DATATYPES;
+    function Add(AObject: TMYX_DBM_DATATYPES): Integer; overload;
+    function Extract(Item: TMYX_DBM_DATATYPES): TMYX_DBM_DATATYPES; overload;
+    function Remove(AObject: TMYX_DBM_DATATYPES): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_DATATYPES): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_DATATYPES); overload;
+    function First: TMYX_DBM_DATATYPES; overload;
+    function Last: TMYX_DBM_DATATYPES; overload;
     property Items[Index: Integer]: TMYX_DBM_DATATYPES read GetItem write SetItem; default;
   end;
 
@@ -2336,6 +2336,7 @@ type
     record_pointer: PMYX_DBM_COLUMN_DATA;
     Fname: String;
     Foriginal_name: String;
+    Fdatatype_pointer: PMYX_DBM_DATATYPE;
     Fdatatype_name: String;
     Fdatatype_params: String;
     Fcharset: String;
@@ -2347,15 +2348,15 @@ type
     Fdefault_value_is_null: Integer;
     Fcomment: String;
   public
-    datatype_pointer: TMYX_DBM_DATATYPE;
     datatype_flags: TStringList;
-    constructor Create(name: String; original_name: String; datatype_name: String; datatype_params: String; charset: String; collation: String; primary_key: cuchar; not_null: cuchar; auto_inc: cuchar; default_value: String; default_value_is_null: Integer; comment: String); overload;
+    constructor Create(name: String; original_name: String; datatype_pointer: PMYX_DBM_DATATYPE; datatype_name: String; datatype_params: String; charset: String; collation: String; primary_key: cuchar; not_null: cuchar; auto_inc: cuchar; default_value: String; default_value_is_null: Integer; comment: String); overload;
     constructor Create(ARecord: PMYX_DBM_COLUMN_DATA); overload;
     destructor Destroy; override;
     function get_record_pointer: PMYX_DBM_COLUMN_DATA;
     procedure Assign(Source: TPersistent); override;
     property name: String read Fname write Fname;
     property original_name: String read Foriginal_name write Foriginal_name;
+    property datatype_pointer: PMYX_DBM_DATATYPE read Fdatatype_pointer write Fdatatype_pointer;
     property datatype_name: String read Fdatatype_name write Fdatatype_name;
     property datatype_params: String read Fdatatype_params write Fdatatype_params;
     property charset: String read Fcharset write Fcharset;
@@ -2373,13 +2374,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_COLUMN_DATA;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_COLUMN_DATA);
   public
-    function Add(AObject: TMYX_DBM_COLUMN_DATA): Integer;
-    function Extract(Item: TMYX_DBM_COLUMN_DATA): TMYX_DBM_COLUMN_DATA;
-    function Remove(AObject: TMYX_DBM_COLUMN_DATA): Integer;
-    function IndexOf(AObject: TMYX_DBM_COLUMN_DATA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_COLUMN_DATA);
-    function First: TMYX_DBM_COLUMN_DATA;
-    function Last: TMYX_DBM_COLUMN_DATA;
+    function Add(AObject: TMYX_DBM_COLUMN_DATA): Integer; overload;
+    function Extract(Item: TMYX_DBM_COLUMN_DATA): TMYX_DBM_COLUMN_DATA; overload;
+    function Remove(AObject: TMYX_DBM_COLUMN_DATA): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_COLUMN_DATA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_COLUMN_DATA); overload;
+    function First: TMYX_DBM_COLUMN_DATA; overload;
+    function Last: TMYX_DBM_COLUMN_DATA; overload;
     property Items[Index: Integer]: TMYX_DBM_COLUMN_DATA read GetItem write SetItem; default;
   end;
 
@@ -2405,13 +2406,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_INDEX_COLUMN_DATA;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_INDEX_COLUMN_DATA);
   public
-    function Add(AObject: TMYX_DBM_INDEX_COLUMN_DATA): Integer;
-    function Extract(Item: TMYX_DBM_INDEX_COLUMN_DATA): TMYX_DBM_INDEX_COLUMN_DATA;
-    function Remove(AObject: TMYX_DBM_INDEX_COLUMN_DATA): Integer;
-    function IndexOf(AObject: TMYX_DBM_INDEX_COLUMN_DATA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_INDEX_COLUMN_DATA);
-    function First: TMYX_DBM_INDEX_COLUMN_DATA;
-    function Last: TMYX_DBM_INDEX_COLUMN_DATA;
+    function Add(AObject: TMYX_DBM_INDEX_COLUMN_DATA): Integer; overload;
+    function Extract(Item: TMYX_DBM_INDEX_COLUMN_DATA): TMYX_DBM_INDEX_COLUMN_DATA; overload;
+    function Remove(AObject: TMYX_DBM_INDEX_COLUMN_DATA): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_INDEX_COLUMN_DATA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_INDEX_COLUMN_DATA); overload;
+    function First: TMYX_DBM_INDEX_COLUMN_DATA; overload;
+    function Last: TMYX_DBM_INDEX_COLUMN_DATA; overload;
     property Items[Index: Integer]: TMYX_DBM_INDEX_COLUMN_DATA read GetItem write SetItem; default;
   end;
 
@@ -2440,13 +2441,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_INDEX_DATA;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_INDEX_DATA);
   public
-    function Add(AObject: TMYX_DBM_INDEX_DATA): Integer;
-    function Extract(Item: TMYX_DBM_INDEX_DATA): TMYX_DBM_INDEX_DATA;
-    function Remove(AObject: TMYX_DBM_INDEX_DATA): Integer;
-    function IndexOf(AObject: TMYX_DBM_INDEX_DATA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_INDEX_DATA);
-    function First: TMYX_DBM_INDEX_DATA;
-    function Last: TMYX_DBM_INDEX_DATA;
+    function Add(AObject: TMYX_DBM_INDEX_DATA): Integer; overload;
+    function Extract(Item: TMYX_DBM_INDEX_DATA): TMYX_DBM_INDEX_DATA; overload;
+    function Remove(AObject: TMYX_DBM_INDEX_DATA): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_INDEX_DATA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_INDEX_DATA); overload;
+    function First: TMYX_DBM_INDEX_DATA; overload;
+    function Last: TMYX_DBM_INDEX_DATA; overload;
     property Items[Index: Integer]: TMYX_DBM_INDEX_DATA read GetItem write SetItem; default;
   end;
 
@@ -2479,13 +2480,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_FK_DATA;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_FK_DATA);
   public
-    function Add(AObject: TMYX_DBM_FK_DATA): Integer;
-    function Extract(Item: TMYX_DBM_FK_DATA): TMYX_DBM_FK_DATA;
-    function Remove(AObject: TMYX_DBM_FK_DATA): Integer;
-    function IndexOf(AObject: TMYX_DBM_FK_DATA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_FK_DATA);
-    function First: TMYX_DBM_FK_DATA;
-    function Last: TMYX_DBM_FK_DATA;
+    function Add(AObject: TMYX_DBM_FK_DATA): Integer; overload;
+    function Extract(Item: TMYX_DBM_FK_DATA): TMYX_DBM_FK_DATA; overload;
+    function Remove(AObject: TMYX_DBM_FK_DATA): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_FK_DATA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_FK_DATA); overload;
+    function First: TMYX_DBM_FK_DATA; overload;
+    function Last: TMYX_DBM_FK_DATA; overload;
     property Items[Index: Integer]: TMYX_DBM_FK_DATA read GetItem write SetItem; default;
   end;
 
@@ -2560,13 +2561,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_TABLE_DATA;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_TABLE_DATA);
   public
-    function Add(AObject: TMYX_DBM_TABLE_DATA): Integer;
-    function Extract(Item: TMYX_DBM_TABLE_DATA): TMYX_DBM_TABLE_DATA;
-    function Remove(AObject: TMYX_DBM_TABLE_DATA): Integer;
-    function IndexOf(AObject: TMYX_DBM_TABLE_DATA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_TABLE_DATA);
-    function First: TMYX_DBM_TABLE_DATA;
-    function Last: TMYX_DBM_TABLE_DATA;
+    function Add(AObject: TMYX_DBM_TABLE_DATA): Integer; overload;
+    function Extract(Item: TMYX_DBM_TABLE_DATA): TMYX_DBM_TABLE_DATA; overload;
+    function Remove(AObject: TMYX_DBM_TABLE_DATA): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_TABLE_DATA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_TABLE_DATA); overload;
+    function First: TMYX_DBM_TABLE_DATA; overload;
+    function Last: TMYX_DBM_TABLE_DATA; overload;
     property Items[Index: Integer]: TMYX_DBM_TABLE_DATA read GetItem write SetItem; default;
   end;
 
@@ -2596,13 +2597,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_STORED_PROCEDURE_DATA;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_STORED_PROCEDURE_DATA);
   public
-    function Add(AObject: TMYX_DBM_STORED_PROCEDURE_DATA): Integer;
-    function Extract(Item: TMYX_DBM_STORED_PROCEDURE_DATA): TMYX_DBM_STORED_PROCEDURE_DATA;
-    function Remove(AObject: TMYX_DBM_STORED_PROCEDURE_DATA): Integer;
-    function IndexOf(AObject: TMYX_DBM_STORED_PROCEDURE_DATA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_STORED_PROCEDURE_DATA);
-    function First: TMYX_DBM_STORED_PROCEDURE_DATA;
-    function Last: TMYX_DBM_STORED_PROCEDURE_DATA;
+    function Add(AObject: TMYX_DBM_STORED_PROCEDURE_DATA): Integer; overload;
+    function Extract(Item: TMYX_DBM_STORED_PROCEDURE_DATA): TMYX_DBM_STORED_PROCEDURE_DATA; overload;
+    function Remove(AObject: TMYX_DBM_STORED_PROCEDURE_DATA): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_STORED_PROCEDURE_DATA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_STORED_PROCEDURE_DATA); overload;
+    function First: TMYX_DBM_STORED_PROCEDURE_DATA; overload;
+    function Last: TMYX_DBM_STORED_PROCEDURE_DATA; overload;
     property Items[Index: Integer]: TMYX_DBM_STORED_PROCEDURE_DATA read GetItem write SetItem; default;
   end;
 
@@ -2630,13 +2631,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_VIEW_DATA;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_VIEW_DATA);
   public
-    function Add(AObject: TMYX_DBM_VIEW_DATA): Integer;
-    function Extract(Item: TMYX_DBM_VIEW_DATA): TMYX_DBM_VIEW_DATA;
-    function Remove(AObject: TMYX_DBM_VIEW_DATA): Integer;
-    function IndexOf(AObject: TMYX_DBM_VIEW_DATA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_VIEW_DATA);
-    function First: TMYX_DBM_VIEW_DATA;
-    function Last: TMYX_DBM_VIEW_DATA;
+    function Add(AObject: TMYX_DBM_VIEW_DATA): Integer; overload;
+    function Extract(Item: TMYX_DBM_VIEW_DATA): TMYX_DBM_VIEW_DATA; overload;
+    function Remove(AObject: TMYX_DBM_VIEW_DATA): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_VIEW_DATA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_VIEW_DATA); overload;
+    function First: TMYX_DBM_VIEW_DATA; overload;
+    function Last: TMYX_DBM_VIEW_DATA; overload;
     property Items[Index: Integer]: TMYX_DBM_VIEW_DATA read GetItem write SetItem; default;
   end;
 
@@ -2664,13 +2665,13 @@ type
     function GetItem(Index: Integer): TMYX_DBM_TRIGGER_DATA;
     procedure SetItem(Index: Integer; AObject: TMYX_DBM_TRIGGER_DATA);
   public
-    function Add(AObject: TMYX_DBM_TRIGGER_DATA): Integer;
-    function Extract(Item: TMYX_DBM_TRIGGER_DATA): TMYX_DBM_TRIGGER_DATA;
-    function Remove(AObject: TMYX_DBM_TRIGGER_DATA): Integer;
-    function IndexOf(AObject: TMYX_DBM_TRIGGER_DATA): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_DBM_TRIGGER_DATA);
-    function First: TMYX_DBM_TRIGGER_DATA;
-    function Last: TMYX_DBM_TRIGGER_DATA;
+    function Add(AObject: TMYX_DBM_TRIGGER_DATA): Integer; overload;
+    function Extract(Item: TMYX_DBM_TRIGGER_DATA): TMYX_DBM_TRIGGER_DATA; overload;
+    function Remove(AObject: TMYX_DBM_TRIGGER_DATA): Integer; overload;
+    function IndexOf(AObject: TMYX_DBM_TRIGGER_DATA): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_DBM_TRIGGER_DATA); overload;
+    function First: TMYX_DBM_TRIGGER_DATA; overload;
+    function Last: TMYX_DBM_TRIGGER_DATA; overload;
     property Items[Index: Integer]: TMYX_DBM_TRIGGER_DATA read GetItem write SetItem; default;
   end;
 
@@ -3009,7 +3010,7 @@ begin
   Result := _myx_check_whether_commits_transaction(mysql, PAnsiChar(UTF8Encode(stmt)));
 end;
 
-function myx_dbm_get_create_sql(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const name: WideString; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: cchar): String;
+function myx_dbm_get_create_sql(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const name: WideString; object_type: MYX_DBM_OBJECT_TYPE; fully_qualified: cint; quote_char: AnsiChar): String;
 var
   P: PAnsiChar;
 begin
@@ -3038,12 +3039,12 @@ begin
   g_free(P);
 end;
 
-function myx_dbm_get_sp_data(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: cchar): PMYX_DBM_STORED_PROCEDURE_DATA;
+function myx_dbm_get_sp_data(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; const sp_name: WideString; sp_type: MYX_SCHEMA_STORED_PROCEDURE_TYPE; quote_char: AnsiChar): PMYX_DBM_STORED_PROCEDURE_DATA;
 begin
   Result := _myx_dbm_get_sp_data(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)), PAnsiChar(UTF8Encode(sp_name)), sp_type, quote_char);
 end;
 
-function myx_dbm_make_script_from_sps(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: cchar): String;
+function myx_dbm_make_script_from_sps(mysql: PMYSQL; const catalog_name: WideString; const schema_name: WideString; splist: PMYX_SCHEMA_STORED_PROCEDURES; quote_char: AnsiChar): String;
 var
   P: PAnsiChar;
 begin
@@ -3070,7 +3071,7 @@ begin
   Result := _myx_dbm_drop_view(mysql, PAnsiChar(UTF8Encode(catalog_name)), PAnsiChar(UTF8Encode(schema_name)), PAnsiChar(UTF8Encode(view_name)));
 end;
 
-function myx_dbm_get_view_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view: WideString; quote_char: cchar): PMYX_DBM_VIEW_DATA;
+function myx_dbm_get_view_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const view: WideString; quote_char: AnsiChar): PMYX_DBM_VIEW_DATA;
 begin
   Result := _myx_dbm_get_view_data(mysql, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(view)), quote_char);
 end;
@@ -3087,7 +3088,7 @@ begin
   g_free(P);
 end;
 
-function myx_dbm_get_trigger_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const trigger: WideString; quote_char: cchar): PMYX_DBM_TRIGGER_DATA;
+function myx_dbm_get_trigger_data(mysql: PMYSQL; const catalog: WideString; const schema: WideString; const trigger: WideString; quote_char: AnsiChar): PMYX_DBM_TRIGGER_DATA;
 begin
   Result := _myx_dbm_get_trigger_data(mysql, PAnsiChar(UTF8Encode(catalog)), PAnsiChar(UTF8Encode(schema)), PAnsiChar(UTF8Encode(trigger)), quote_char);
 end;
@@ -3375,7 +3376,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.errors_num) - 1 do
-      Self.errors.Add(TMYX_MYSQL_ERROR_MSG.Create(@ARecord^.errors[I]));
+      Self.errors.Add(TMYX_MYSQL_ERROR_MSG.Create(PMYX_MYSQL_ERROR_MSG(@ARecord^.errors[I])));
   end;
 end;
 
@@ -3653,7 +3654,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.user_connections_num) - 1 do
-      Self.user_connections.Add(TMYX_USER_CONNECTION.Create(@ARecord^.user_connections[I]));
+      Self.user_connections.Add(TMYX_USER_CONNECTION.Create(PMYX_USER_CONNECTION(@ARecord^.user_connections[I])));
   end;
 end;
 
@@ -3770,20 +3771,24 @@ begin
   Result := TMYX_USER_CONNECTIONS(inherited Last);
 end;
 
-constructor TMYX_MYSQLD_CONNECTION.Create;
+constructor TMYX_MYSQLD_CONNECTION.Create(Aconnection: PMYX_USER_CONNECTION);
 begin
   inherited Create;
-  Self.connection := nil;
+  if Aconnection <> nil then
+    Self.connection := TMYX_USER_CONNECTION.Create(Aconnection)
+  else
+    Self.connection := nil;
 end;
 
 constructor TMYX_MYSQLD_CONNECTION.Create(ARecord: PMYX_MYSQLD_CONNECTION);
 begin
-  Create;
+  if ARecord <> nil then
+    Create(ARecord^.connection)
+  else
+    Create(PMYX_USER_CONNECTION(nil));
   Self.record_pointer := nil;
   if ARecord <> nil then
   begin
-    if ARecord^.connection <> nil then
-      Self.connection := TMYX_USER_CONNECTION.Create(ARecord^.connection);
   end;
 end;
 
@@ -3890,7 +3895,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.mysqld_connections_num) - 1 do
-      Self.mysqld_connections.Add(TMYX_MYSQLD_CONNECTION.Create(@ARecord^.mysqld_connections[I]));
+      Self.mysqld_connections.Add(TMYX_MYSQLD_CONNECTION.Create(PMYX_MYSQLD_CONNECTION(@ARecord^.mysqld_connections[I])));
   end;
 end;
 
@@ -4007,23 +4012,28 @@ begin
   Result := TMYX_MYSQLD_CONNECTIONS(inherited Last);
 end;
 
-constructor TMYX_IM_CONNECTION.Create;
+constructor TMYX_IM_CONNECTION.Create(Aconnection: PMYX_USER_CONNECTION; Amysqlds: PMYX_MYSQLD_CONNECTIONS);
 begin
   inherited Create;
-  Self.connection := nil;
-  Self.mysqlds := nil;
+  if Aconnection <> nil then
+    Self.connection := TMYX_USER_CONNECTION.Create(Aconnection)
+  else
+    Self.connection := nil;
+  if Amysqlds <> nil then
+    Self.mysqlds := TMYX_MYSQLD_CONNECTIONS.Create(Amysqlds)
+  else
+    Self.mysqlds := nil;
 end;
 
 constructor TMYX_IM_CONNECTION.Create(ARecord: PMYX_IM_CONNECTION);
 begin
-  Create;
+  if ARecord <> nil then
+    Create(ARecord^.connection, ARecord^.mysqlds)
+  else
+    Create(PMYX_USER_CONNECTION(nil), PMYX_MYSQLD_CONNECTIONS(nil));
   Self.record_pointer := nil;
   if ARecord <> nil then
   begin
-    if ARecord^.connection <> nil then
-      Self.connection := TMYX_USER_CONNECTION.Create(ARecord^.connection);
-    if ARecord^.mysqlds <> nil then
-      Self.mysqlds := TMYX_MYSQLD_CONNECTIONS.Create(ARecord^.mysqlds);
   end;
 end;
 
@@ -4137,7 +4147,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.im_connections_num) - 1 do
-      Self.im_connections.Add(TMYX_IM_CONNECTION.Create(@ARecord^.im_connections[I]));
+      Self.im_connections.Add(TMYX_IM_CONNECTION.Create(PMYX_IM_CONNECTION(@ARecord^.im_connections[I])));
   end;
 end;
 
@@ -4273,7 +4283,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.name_value_pairs_num) - 1 do
-      Self.name_value_pairs.Add(TMYX_NAME_VALUE_PAIR.Create(@ARecord^.name_value_pairs[I]));
+      Self.name_value_pairs.Add(TMYX_NAME_VALUE_PAIR.Create(PMYX_NAME_VALUE_PAIR(@ARecord^.name_value_pairs[I])));
   end;
 end;
 
@@ -4406,7 +4416,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.option_groups_num) - 1 do
-      Self.option_groups.Add(TMYX_OPTION_GROUP.Create(@ARecord^.option_groups[I]));
+      Self.option_groups.Add(TMYX_OPTION_GROUP.Create(PMYX_OPTION_GROUP(@ARecord^.option_groups[I])));
   end;
 end;
 
@@ -4766,7 +4776,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.index_columns_num) - 1 do
-      Self.index_columns.Add(TMYX_TABLE_INDEX_COLUMN.Create(@ARecord^.index_columns[I]));
+      Self.index_columns.Add(TMYX_TABLE_INDEX_COLUMN.Create(PMYX_TABLE_INDEX_COLUMN(@ARecord^.index_columns[I])));
   end;
 end;
 
@@ -4929,9 +4939,9 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.indexes_num) - 1 do
-      Self.indexes.Add(TMYX_TABLE_INDEX.Create(@ARecord^.indexes[I]));
+      Self.indexes.Add(TMYX_TABLE_INDEX.Create(PMYX_TABLE_INDEX(@ARecord^.indexes[I])));
     for I := 0 to Integer(ARecord^.columns_num) - 1 do
-      Self.columns.Add(TMYX_SCHEMA_TABLE_COLUMN.Create(@ARecord^.columns[I]));
+      Self.columns.Add(TMYX_SCHEMA_TABLE_COLUMN.Create(PMYX_SCHEMA_TABLE_COLUMN(@ARecord^.columns[I])));
   end;
 end;
 
@@ -5137,7 +5147,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.schema_tables_num) - 1 do
-      Self.schema_tables.Add(TMYX_TABLE_STATUS.Create(@ARecord^.schema_tables[I]));
+      Self.schema_tables.Add(TMYX_TABLE_STATUS.Create(PMYX_TABLE_STATUS(@ARecord^.schema_tables[I])));
   end;
 end;
 
@@ -5375,7 +5385,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.schema_views_num) - 1 do
-      Self.schema_views.Add(TMYX_VIEW_STATUS.Create(@ARecord^.schema_views[I]));
+      Self.schema_views.Add(TMYX_VIEW_STATUS.Create(PMYX_VIEW_STATUS(@ARecord^.schema_views[I])));
   end;
 end;
 
@@ -5605,7 +5615,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.schema_entities_num) - 1 do
-      Self.schema_entities.Add(TMYX_ENTITY_STATUS.Create(@ARecord^.schema_entities[I]));
+      Self.schema_entities.Add(TMYX_ENTITY_STATUS.Create(PMYX_ENTITY_STATUS(@ARecord^.schema_entities[I])));
   end;
 end;
 
@@ -5735,7 +5745,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.indices_num) - 1 do
-      Self.indices.Add(TMYX_TABLE_INDEX.Create(@ARecord^.indices[I]));
+      Self.indices.Add(TMYX_TABLE_INDEX.Create(PMYX_TABLE_INDEX(@ARecord^.indices[I])));
   end;
 end;
 
@@ -5870,7 +5880,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.columns_num) - 1 do
-      Self.columns.Add(TMYX_SCHEMA_TABLE_COLUMN.Create(@ARecord^.columns[I]));
+      Self.columns.Add(TMYX_SCHEMA_TABLE_COLUMN.Create(PMYX_SCHEMA_TABLE_COLUMN(@ARecord^.columns[I])));
   end;
 end;
 
@@ -6005,7 +6015,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.schema_tables_num) - 1 do
-      Self.schema_tables.Add(TMYX_SCHEMA_TABLE.Create(@ARecord^.schema_tables[I]));
+      Self.schema_tables.Add(TMYX_SCHEMA_TABLE.Create(PMYX_SCHEMA_TABLE(@ARecord^.schema_tables[I])));
   end;
 end;
 
@@ -6251,7 +6261,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.params_num) - 1 do
-      Self.params.Add(TMYX_SCHEMA_STORED_PROCEDURE_PARAM.Create(@ARecord^.params[I]));
+      Self.params.Add(TMYX_SCHEMA_STORED_PROCEDURE_PARAM.Create(PMYX_SCHEMA_STORED_PROCEDURE_PARAM(@ARecord^.params[I])));
   end;
 end;
 
@@ -6403,7 +6413,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.schema_sps_num) - 1 do
-      Self.schema_sps.Add(TMYX_SCHEMA_STORED_PROCEDURE.Create(@ARecord^.schema_sps[I]));
+      Self.schema_sps.Add(TMYX_SCHEMA_STORED_PROCEDURE.Create(PMYX_SCHEMA_STORED_PROCEDURE(@ARecord^.schema_sps[I])));
   end;
 end;
 
@@ -6518,32 +6528,35 @@ begin
   Result := TMYX_SCHEMA_STORED_PROCEDURES(inherited Last);
 end;
 
-constructor TMYX_SCHEMA.Create(schema_name: String; escaped_schema_name: String; catalog_name: String);
+constructor TMYX_SCHEMA.Create(schema_name: String; escaped_schema_name: String; catalog_name: String; Aschema_tables: PMYX_SCHEMA_TABLES; Aschema_indices: PMYX_SCHEMA_INDICES; Aschema_sps: PMYX_SCHEMA_STORED_PROCEDURES);
 begin
   inherited Create;
   Self.Fschema_name := schema_name;
   Self.Fescaped_schema_name := escaped_schema_name;
   Self.Fcatalog_name := catalog_name;
-  Self.schema_tables := nil;
-  Self.schema_indices := nil;
-  Self.schema_sps := nil;
+  if Aschema_tables <> nil then
+    Self.schema_tables := TMYX_SCHEMA_TABLES.Create(Aschema_tables)
+  else
+    Self.schema_tables := nil;
+  if Aschema_indices <> nil then
+    Self.schema_indices := TMYX_SCHEMA_INDICES.Create(Aschema_indices)
+  else
+    Self.schema_indices := nil;
+  if Aschema_sps <> nil then
+    Self.schema_sps := TMYX_SCHEMA_STORED_PROCEDURES.Create(Aschema_sps)
+  else
+    Self.schema_sps := nil;
 end;
 
 constructor TMYX_SCHEMA.Create(ARecord: PMYX_SCHEMA);
 begin
   if ARecord <> nil then
-    Create(ConvertString(ARecord^.schema_name), ConvertString(ARecord^.escaped_schema_name), ConvertString(ARecord^.catalog_name))
+    Create(ConvertString(ARecord^.schema_name), ConvertString(ARecord^.escaped_schema_name), ConvertString(ARecord^.catalog_name), ARecord^.schema_tables, ARecord^.schema_indices, ARecord^.schema_sps)
   else
-    Create('', '', '');
+    Create('', '', '', PMYX_SCHEMA_TABLES(nil), PMYX_SCHEMA_INDICES(nil), PMYX_SCHEMA_STORED_PROCEDURES(nil));
   Self.record_pointer := nil;
   if ARecord <> nil then
   begin
-    if ARecord^.schema_tables <> nil then
-      Self.schema_tables := TMYX_SCHEMA_TABLES.Create(ARecord^.schema_tables);
-    if ARecord^.schema_indices <> nil then
-      Self.schema_indices := TMYX_SCHEMA_INDICES.Create(ARecord^.schema_indices);
-    if ARecord^.schema_sps <> nil then
-      Self.schema_sps := TMYX_SCHEMA_STORED_PROCEDURES.Create(ARecord^.schema_sps);
   end;
 end;
 
@@ -6673,7 +6686,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.schemata_num) - 1 do
-      Self.schemata.Add(TMYX_SCHEMA.Create(@ARecord^.schemata[I]));
+      Self.schemata.Add(TMYX_SCHEMA.Create(PMYX_SCHEMA(@ARecord^.schemata[I])));
   end;
 end;
 
@@ -6806,7 +6819,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.catalogs_num) - 1 do
-      Self.catalogs.Add(TMYX_CATALOG.Create(@ARecord^.catalogs[I]));
+      Self.catalogs.Add(TMYX_CATALOG.Create(PMYX_CATALOG(@ARecord^.catalogs[I])));
   end;
 end;
 
@@ -7021,7 +7034,7 @@ begin
   Result := TMYX_DBM_SERVER_VERSION(inherited Last);
 end;
 
-constructor TMYX_DBM_COLLATION.Create(name: String; id: Integer; is_default: cuchar; is_compiled: cuchar; sort_len: Integer);
+constructor TMYX_DBM_COLLATION.Create(name: String; id: Integer; is_default: cuchar; is_compiled: cuchar; sort_len: Integer; Acharset: PMYX_DBM_CHARSET);
 begin
   inherited Create;
   Self.Fname := name;
@@ -7029,20 +7042,21 @@ begin
   Self.Fis_default := is_default;
   Self.Fis_compiled := is_compiled;
   Self.Fsort_len := sort_len;
-  Self.charset := nil;
+  if Acharset <> nil then
+    Self.charset := TMYX_DBM_CHARSET.Create(Acharset)
+  else
+    Self.charset := nil;
 end;
 
 constructor TMYX_DBM_COLLATION.Create(ARecord: PMYX_DBM_COLLATION);
 begin
   if ARecord <> nil then
-    Create(ConvertString(ARecord^.name), ARecord^.id, ARecord^.is_default, ARecord^.is_compiled, ARecord^.sort_len)
+    Create(ConvertString(ARecord^.name), ARecord^.id, ARecord^.is_default, ARecord^.is_compiled, ARecord^.sort_len, ARecord^.charset)
   else
-    Create('', Default(Integer), Default(cuchar), Default(cuchar), Default(Integer));
+    Create('', Default(Integer), Default(cuchar), Default(cuchar), Default(Integer), PMYX_DBM_CHARSET(nil));
   Self.record_pointer := nil;
   if ARecord <> nil then
   begin
-    if ARecord^.charset <> nil then
-      Self.charset := TMYX_DBM_CHARSET.Create(ARecord^.charset);
   end;
 end;
 
@@ -7163,7 +7177,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.collations_num) - 1 do
-      Self.collations.Add(TMYX_DBM_COLLATION.Create(@ARecord^.collations[I]));
+      Self.collations.Add(TMYX_DBM_COLLATION.Create(PMYX_DBM_COLLATION(@ARecord^.collations[I])));
   end;
 end;
 
@@ -7304,7 +7318,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.charsets_num) - 1 do
-      Self.charsets.Add(TMYX_DBM_CHARSET.Create(@ARecord^.charsets[I]));
+      Self.charsets.Add(TMYX_DBM_CHARSET.Create(PMYX_DBM_CHARSET(@ARecord^.charsets[I])));
   end;
 end;
 
@@ -7564,9 +7578,9 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.datatypes_num) - 1 do
-      Self.datatypes.Add(TMYX_DBM_DATATYPE.Create(@ARecord^.datatypes[I]));
+      Self.datatypes.Add(TMYX_DBM_DATATYPE.Create(PMYX_DBM_DATATYPE(@ARecord^.datatypes[I])));
     for I := 0 to Integer(ARecord^.substitutes_num) - 1 do
-      Self.substitutes.Add(TMYX_NAME_VALUE_PAIR.Create(@ARecord^.substitutes[I]));
+      Self.substitutes.Add(TMYX_NAME_VALUE_PAIR.Create(PMYX_NAME_VALUE_PAIR(@ARecord^.substitutes[I])));
   end;
 end;
 
@@ -7710,11 +7724,12 @@ begin
   Result := TMYX_DBM_DATATYPES(inherited Last);
 end;
 
-constructor TMYX_DBM_COLUMN_DATA.Create(name: String; original_name: String; datatype_name: String; datatype_params: String; charset: String; collation: String; primary_key: cuchar; not_null: cuchar; auto_inc: cuchar; default_value: String; default_value_is_null: Integer; comment: String);
+constructor TMYX_DBM_COLUMN_DATA.Create(name: String; original_name: String; datatype_pointer: PMYX_DBM_DATATYPE; datatype_name: String; datatype_params: String; charset: String; collation: String; primary_key: cuchar; not_null: cuchar; auto_inc: cuchar; default_value: String; default_value_is_null: Integer; comment: String);
 begin
   inherited Create;
   Self.Fname := name;
   Self.Foriginal_name := original_name;
+  Self.Fdatatype_pointer := datatype_pointer;
   Self.Fdatatype_name := datatype_name;
   Self.Fdatatype_params := datatype_params;
   Self.Fcharset := charset;
@@ -7725,7 +7740,6 @@ begin
   Self.Fdefault_value := default_value;
   Self.Fdefault_value_is_null := default_value_is_null;
   Self.Fcomment := comment;
-  Self.datatype_pointer := nil;
   Self.datatype_flags := TStringList.Create;
 end;
 
@@ -7734,14 +7748,12 @@ var
   I: Integer;
 begin
   if ARecord <> nil then
-    Create(ConvertString(ARecord^.name), ConvertString(ARecord^.original_name), ConvertString(ARecord^.datatype_name), ConvertString(ARecord^.datatype_params), ConvertString(ARecord^.charset), ConvertString(ARecord^.collation), ARecord^.primary_key, ARecord^.not_null, ARecord^.auto_inc, ConvertString(ARecord^.default_value), ARecord^.default_value_is_null, ConvertString(ARecord^.comment))
+    Create(ConvertString(ARecord^.name), ConvertString(ARecord^.original_name), ARecord^.datatype_pointer, ConvertString(ARecord^.datatype_name), ConvertString(ARecord^.datatype_params), ConvertString(ARecord^.charset), ConvertString(ARecord^.collation), ARecord^.primary_key, ARecord^.not_null, ARecord^.auto_inc, ConvertString(ARecord^.default_value), ARecord^.default_value_is_null, ConvertString(ARecord^.comment))
   else
-    Create('', '', '', '', '', '', Default(cuchar), Default(cuchar), Default(cuchar), '', Default(Integer), '');
+    Create('', '', Default(PMYX_DBM_DATATYPE), '', '', '', '', Default(cuchar), Default(cuchar), Default(cuchar), '', Default(Integer), '');
   Self.record_pointer := nil;
   if ARecord <> nil then
   begin
-    if ARecord^.datatype_pointer <> nil then
-      Self.datatype_pointer := TMYX_DBM_DATATYPE.Create(ARecord^.datatype_pointer);
     for I := 0 to Integer(ARecord^.datatype_flags_num) - 1 do
       Self.datatype_flags.Add(ConvertString(ARecord^.datatype_flags[I]));
   end;
@@ -7751,7 +7763,6 @@ destructor TMYX_DBM_COLUMN_DATA.Destroy;
 var
   I: Integer;
 begin
-  Self.datatype_pointer.Free;
   if record_pointer <> nil then
     FreeCStringArray(record_pointer^.datatype_flags, record_pointer^.datatype_flags_num);
   Self.datatype_flags.Free;
@@ -7783,6 +7794,7 @@ begin
   end;
   SetCString(record_pointer^.name, Self.Fname);
   SetCString(record_pointer^.original_name, Self.Foriginal_name);
+  record_pointer^.datatype_pointer := PMYX_DBM_DATATYPE(Self.Fdatatype_pointer);
   SetCString(record_pointer^.datatype_name, Self.Fdatatype_name);
   SetCString(record_pointer^.datatype_params, Self.Fdatatype_params);
   SetCString(record_pointer^.charset, Self.Fcharset);
@@ -7793,10 +7805,6 @@ begin
   SetCString(record_pointer^.default_value, Self.Fdefault_value);
   record_pointer^.default_value_is_null := cint(Self.Fdefault_value_is_null);
   SetCString(record_pointer^.comment, Self.Fcomment);
-  if Self.datatype_pointer <> nil then
-    record_pointer^.datatype_pointer := Self.datatype_pointer.get_record_pointer
-  else
-    record_pointer^.datatype_pointer := nil;
   SetCStringArray(record_pointer^.datatype_flags, record_pointer^.datatype_flags_num, Self.datatype_flags);
   Result := record_pointer;
 end;
@@ -7808,6 +7816,7 @@ begin
     begin
       Self.Fname := Fname;
       Self.Foriginal_name := Foriginal_name;
+      Self.Fdatatype_pointer := Fdatatype_pointer;
       Self.Fdatatype_name := Fdatatype_name;
       Self.Fdatatype_params := Fdatatype_params;
       Self.Fcharset := Fcharset;
@@ -7818,8 +7827,6 @@ begin
       Self.Fdefault_value := Fdefault_value;
       Self.Fdefault_value_is_null := Fdefault_value_is_null;
       Self.Fcomment := Fcomment;
-      if (Self.datatype_pointer <> nil) and (datatype_pointer <> nil) then
-        Self.datatype_pointer.Assign(datatype_pointer);
       Self.datatype_flags.Assign(datatype_flags);
     end
   else
@@ -7999,7 +8006,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.columns_num) - 1 do
-      Self.columns.Add(TMYX_DBM_INDEX_COLUMN_DATA.Create(@ARecord^.columns[I]));
+      Self.columns.Add(TMYX_DBM_INDEX_COLUMN_DATA.Create(PMYX_DBM_INDEX_COLUMN_DATA(@ARecord^.columns[I])));
   end;
 end;
 
@@ -8148,7 +8155,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.column_mapping_num) - 1 do
-      Self.column_mapping.Add(TMYX_NAME_VALUE_PAIR.Create(@ARecord^.column_mapping[I]));
+      Self.column_mapping.Add(TMYX_NAME_VALUE_PAIR.Create(PMYX_NAME_VALUE_PAIR(@ARecord^.column_mapping[I])));
   end;
 end;
 
@@ -8325,11 +8332,11 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.fks_num) - 1 do
-      Self.fks.Add(TMYX_DBM_FK_DATA.Create(@ARecord^.fks[I]));
+      Self.fks.Add(TMYX_DBM_FK_DATA.Create(PMYX_DBM_FK_DATA(@ARecord^.fks[I])));
     for I := 0 to Integer(ARecord^.columns_num) - 1 do
-      Self.columns.Add(TMYX_DBM_COLUMN_DATA.Create(@ARecord^.columns[I]));
+      Self.columns.Add(TMYX_DBM_COLUMN_DATA.Create(PMYX_DBM_COLUMN_DATA(@ARecord^.columns[I])));
     for I := 0 to Integer(ARecord^.indices_num) - 1 do
-      Self.indices.Add(TMYX_DBM_INDEX_DATA.Create(@ARecord^.indices[I]));
+      Self.indices.Add(TMYX_DBM_INDEX_DATA.Create(PMYX_DBM_INDEX_DATA(@ARecord^.indices[I])));
   end;
 end;
 

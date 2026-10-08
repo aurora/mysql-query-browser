@@ -14,7 +14,8 @@ uses
   MySQLConnection, ConnectToInstance, CommonFuncs, About, DevTools,
   CommonTypes, MySQLCommonFuncs, AppInstanceMgmt, TextSearch, AdvancedEdit, TabHeader,
   QueryBrowserOptionPages, ApplicationDataModule,
-  Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools;
+  Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
+  UniCodeEditor, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection;
 
 var
   I: Integer;

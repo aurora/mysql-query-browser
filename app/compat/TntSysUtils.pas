@@ -20,9 +20,11 @@ function WideExtractFileName(const FileName: WideString): WideString;
 function WideExtractFilePath(const FileName: WideString): WideString;
 function WideSameStr(const S1, S2: WideString): Boolean;
 function WideSameText(const S1, S2: WideString): Boolean;
-function WideCompareText(const S1, S2: WideString): Integer;
+function WideCompareText(const S1, S2: WideString): Integer; overload;
+function WideCompareText(const S1, S2: WideString; Locale: LongWord): Integer; overload;   // TNT's locale argument
 function WideUpperCase(const S: WideString): WideString;
 function WideStringReplace(const S, OldPattern, NewPattern: WideString; Flags: TReplaceFlags): WideString;
+function Tnt_WideStringReplace(const S, OldPattern, NewPattern: WideString; Flags: TReplaceFlags): WideString;
 
 { TNT: AdjustLineBreaks for WideStrings }
 function TntAdjustLineBreaks(const S: WideString): WideString;
@@ -87,6 +89,16 @@ end;
 function WideStringReplace(const S, OldPattern, NewPattern: WideString; Flags: TReplaceFlags): WideString;
 begin
   Result := UTF8Decode(StringReplace(UTF8Encode(S), UTF8Encode(OldPattern), UTF8Encode(NewPattern), Flags));
+end;
+
+function WideCompareText(const S1, S2: WideString; Locale: LongWord): Integer;
+begin
+  Result := WideCompareText(S1, S2);      // the RTL comparison is locale independent
+end;
+
+function Tnt_WideStringReplace(const S, OldPattern, NewPattern: WideString; Flags: TReplaceFlags): WideString;
+begin
+  Result := WideStringReplace(S, OldPattern, NewPattern, Flags);
 end;
 
 function TntAdjustLineBreaks(const S: WideString): WideString;

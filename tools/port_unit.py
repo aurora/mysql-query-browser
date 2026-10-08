@@ -6,7 +6,8 @@
 
 Does only what never needs a decision: Windows-1252 -> UTF-8, CRLF -> LF, adds
 `{$mode delphi}`, `{$R *.dfm}` -> `{$R ../forms/<Unit>.lfm}` (the generated forms live in app/forms),
-`VirtualTrees` -> `laz.VirtualTrees, VTCompat`. Everything else (uses clauses,
+`VirtualTrees` -> `laz.VirtualTrees, VTCompat`, drops the VCL-only `property OEMConvert;`.
+Units that use TCreateParams or TLM* messages need `LCLType`/`LMessages` added by hand. Everything else (uses clauses,
 Windows API calls, Delphi-only constructs) is fixed by hand while compiling, so the
 result stays close to the original. The original licence header is kept.
 
@@ -39,6 +40,16 @@ def port(name):
     text = re.sub(r"\{\$R\s+\*\.dfm\}", "{$R ../forms/%s.lfm}" % unit, text, flags=re.I)
     # VirtualTreeView: the Lazarus port has another unit name; VTCompat keeps the old class name
     text = re.sub(r"(?<![\w.])VirtualTrees(?![\w.])", "laz.VirtualTrees, VTCompat", text)
+    # TCreateParams lives in LCLType, window message records (TWM*) are TLM* in LMessages
+    if re.search(r"TCreateParams", text) and not re.search(r"LCLType", text):
+        text = re.sub(r"(?im)^uses", "uses
+  LCLType,", text, count=1)
+    # VCL-only property of TEdit
+    text = re.sub(r"(?m)^\s*property OEMConvert;\s*
+", "", text)
+    # the LCL has TJPEGImage in Graphics; there is no jpeg unit
+    text = re.sub(r"(?i)(?<![\w.])jpeg\s*,\s*", "", text)
+    text = re.sub(r"(?i),\s*jpeg(?=\s*;)", "", text)
     # TntMenus owner draw event -> LCL name (same parameter list)
     text = text.replace("OnAdvancedDrawItem", "OnDrawItem")
     os.makedirs(OUT, exist_ok=True)

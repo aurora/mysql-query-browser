@@ -95,13 +95,13 @@ type
     function GetItem(Index: Integer): TMYX_STRINGLIST;
     procedure SetItem(Index: Integer; AObject: TMYX_STRINGLIST);
   public
-    function Add(AObject: TMYX_STRINGLIST): Integer;
-    function Extract(Item: TMYX_STRINGLIST): TMYX_STRINGLIST;
-    function Remove(AObject: TMYX_STRINGLIST): Integer;
-    function IndexOf(AObject: TMYX_STRINGLIST): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_STRINGLIST);
-    function First: TMYX_STRINGLIST;
-    function Last: TMYX_STRINGLIST;
+    function Add(AObject: TMYX_STRINGLIST): Integer; overload;
+    function Extract(Item: TMYX_STRINGLIST): TMYX_STRINGLIST; overload;
+    function Remove(AObject: TMYX_STRINGLIST): Integer; overload;
+    function IndexOf(AObject: TMYX_STRINGLIST): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_STRINGLIST); overload;
+    function First: TMYX_STRINGLIST; overload;
+    function Last: TMYX_STRINGLIST; overload;
     property Items[Index: Integer]: TMYX_STRINGLIST read GetItem write SetItem; default;
   end;
 
@@ -125,13 +125,13 @@ type
     function GetItem(Index: Integer): TMYX_NAME_VALUE_PAIR;
     procedure SetItem(Index: Integer; AObject: TMYX_NAME_VALUE_PAIR);
   public
-    function Add(AObject: TMYX_NAME_VALUE_PAIR): Integer;
-    function Extract(Item: TMYX_NAME_VALUE_PAIR): TMYX_NAME_VALUE_PAIR;
-    function Remove(AObject: TMYX_NAME_VALUE_PAIR): Integer;
-    function IndexOf(AObject: TMYX_NAME_VALUE_PAIR): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_NAME_VALUE_PAIR);
-    function First: TMYX_NAME_VALUE_PAIR;
-    function Last: TMYX_NAME_VALUE_PAIR;
+    function Add(AObject: TMYX_NAME_VALUE_PAIR): Integer; overload;
+    function Extract(Item: TMYX_NAME_VALUE_PAIR): TMYX_NAME_VALUE_PAIR; overload;
+    function Remove(AObject: TMYX_NAME_VALUE_PAIR): Integer; overload;
+    function IndexOf(AObject: TMYX_NAME_VALUE_PAIR): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_NAME_VALUE_PAIR); overload;
+    function First: TMYX_NAME_VALUE_PAIR; overload;
+    function Last: TMYX_NAME_VALUE_PAIR; overload;
     property Items[Index: Integer]: TMYX_NAME_VALUE_PAIR read GetItem write SetItem; default;
   end;
 

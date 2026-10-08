@@ -392,7 +392,7 @@ CTYPE_PTR = {"cint": "pcint", "cuint": "pcuint", "clong": "pclong", "culong": "p
              "cshort": "pcshort", "cushort": "pcushort", "cdouble": "pcdouble", "cfloat": "pcfloat",
              "clonglong": "pclonglong", "culonglong": "pculonglong", "schar": "PShortInt",
              "uchar": "PByte"}
-CTYPE_VAL = {"char": "cchar", "schar": "cschar", "uchar": "cuchar"}
+CTYPE_VAL = {"char": "AnsiChar", "schar": "cschar", "uchar": "cuchar"}
 
 
 class Emitter:
@@ -419,7 +419,7 @@ class Emitter:
             if name == "void":
                 return {0: "Pointer", 1: "Pointer", 2: "PPointer"}.get(stars, "Pointer") if stars else "void"
             if name == "char":
-                return {0: "cchar", 1: "PAnsiChar", 2: "PPAnsiChar"}.get(stars, "Pointer")
+                return {0: "AnsiChar", 1: "PAnsiChar", 2: "PPAnsiChar"}.get(stars, "Pointer")
             if stars == 0:
                 return CTYPE_VAL.get(name, name)
             if stars == 1:

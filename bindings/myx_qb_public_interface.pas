@@ -300,13 +300,13 @@ type
     function GetItem(Index: Integer): TMYX_EXPLAIN_ROW;
     procedure SetItem(Index: Integer; AObject: TMYX_EXPLAIN_ROW);
   public
-    function Add(AObject: TMYX_EXPLAIN_ROW): Integer;
-    function Extract(Item: TMYX_EXPLAIN_ROW): TMYX_EXPLAIN_ROW;
-    function Remove(AObject: TMYX_EXPLAIN_ROW): Integer;
-    function IndexOf(AObject: TMYX_EXPLAIN_ROW): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_EXPLAIN_ROW);
-    function First: TMYX_EXPLAIN_ROW;
-    function Last: TMYX_EXPLAIN_ROW;
+    function Add(AObject: TMYX_EXPLAIN_ROW): Integer; overload;
+    function Extract(Item: TMYX_EXPLAIN_ROW): TMYX_EXPLAIN_ROW; overload;
+    function Remove(AObject: TMYX_EXPLAIN_ROW): Integer; overload;
+    function IndexOf(AObject: TMYX_EXPLAIN_ROW): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_EXPLAIN_ROW); overload;
+    function First: TMYX_EXPLAIN_ROW; overload;
+    function Last: TMYX_EXPLAIN_ROW; overload;
     property Items[Index: Integer]: TMYX_EXPLAIN_ROW read GetItem write SetItem; default;
   end;
 
@@ -327,13 +327,13 @@ type
     function GetItem(Index: Integer): TMYX_EXPLAIN_RESULT;
     procedure SetItem(Index: Integer; AObject: TMYX_EXPLAIN_RESULT);
   public
-    function Add(AObject: TMYX_EXPLAIN_RESULT): Integer;
-    function Extract(Item: TMYX_EXPLAIN_RESULT): TMYX_EXPLAIN_RESULT;
-    function Remove(AObject: TMYX_EXPLAIN_RESULT): Integer;
-    function IndexOf(AObject: TMYX_EXPLAIN_RESULT): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_EXPLAIN_RESULT);
-    function First: TMYX_EXPLAIN_RESULT;
-    function Last: TMYX_EXPLAIN_RESULT;
+    function Add(AObject: TMYX_EXPLAIN_RESULT): Integer; overload;
+    function Extract(Item: TMYX_EXPLAIN_RESULT): TMYX_EXPLAIN_RESULT; overload;
+    function Remove(AObject: TMYX_EXPLAIN_RESULT): Integer; overload;
+    function IndexOf(AObject: TMYX_EXPLAIN_RESULT): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_EXPLAIN_RESULT); overload;
+    function First: TMYX_EXPLAIN_RESULT; overload;
+    function Last: TMYX_EXPLAIN_RESULT; overload;
     property Items[Index: Integer]: TMYX_EXPLAIN_RESULT read GetItem write SetItem; default;
   end;
 
@@ -373,13 +373,13 @@ type
     function GetItem(Index: Integer): TMYX_BOOKMARK;
     procedure SetItem(Index: Integer; AObject: TMYX_BOOKMARK);
   public
-    function Add(AObject: TMYX_BOOKMARK): Integer;
-    function Extract(Item: TMYX_BOOKMARK): TMYX_BOOKMARK;
-    function Remove(AObject: TMYX_BOOKMARK): Integer;
-    function IndexOf(AObject: TMYX_BOOKMARK): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_BOOKMARK);
-    function First: TMYX_BOOKMARK;
-    function Last: TMYX_BOOKMARK;
+    function Add(AObject: TMYX_BOOKMARK): Integer; overload;
+    function Extract(Item: TMYX_BOOKMARK): TMYX_BOOKMARK; overload;
+    function Remove(AObject: TMYX_BOOKMARK): Integer; overload;
+    function IndexOf(AObject: TMYX_BOOKMARK): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_BOOKMARK); overload;
+    function First: TMYX_BOOKMARK; overload;
+    function Last: TMYX_BOOKMARK; overload;
     property Items[Index: Integer]: TMYX_BOOKMARK read GetItem write SetItem; default;
   end;
 
@@ -405,13 +405,13 @@ type
     function GetItem(Index: Integer): TMYX_BOOKMARK_GROUP;
     procedure SetItem(Index: Integer; AObject: TMYX_BOOKMARK_GROUP);
   public
-    function Add(AObject: TMYX_BOOKMARK_GROUP): Integer;
-    function Extract(Item: TMYX_BOOKMARK_GROUP): TMYX_BOOKMARK_GROUP;
-    function Remove(AObject: TMYX_BOOKMARK_GROUP): Integer;
-    function IndexOf(AObject: TMYX_BOOKMARK_GROUP): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_BOOKMARK_GROUP);
-    function First: TMYX_BOOKMARK_GROUP;
-    function Last: TMYX_BOOKMARK_GROUP;
+    function Add(AObject: TMYX_BOOKMARK_GROUP): Integer; overload;
+    function Extract(Item: TMYX_BOOKMARK_GROUP): TMYX_BOOKMARK_GROUP; overload;
+    function Remove(AObject: TMYX_BOOKMARK_GROUP): Integer; overload;
+    function IndexOf(AObject: TMYX_BOOKMARK_GROUP): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_BOOKMARK_GROUP); overload;
+    function First: TMYX_BOOKMARK_GROUP; overload;
+    function Last: TMYX_BOOKMARK_GROUP; overload;
     property Items[Index: Integer]: TMYX_BOOKMARK_GROUP read GetItem write SetItem; default;
   end;
 
@@ -432,13 +432,13 @@ type
     function GetItem(Index: Integer): TMYX_BOOKMARKS;
     procedure SetItem(Index: Integer; AObject: TMYX_BOOKMARKS);
   public
-    function Add(AObject: TMYX_BOOKMARKS): Integer;
-    function Extract(Item: TMYX_BOOKMARKS): TMYX_BOOKMARKS;
-    function Remove(AObject: TMYX_BOOKMARKS): Integer;
-    function IndexOf(AObject: TMYX_BOOKMARKS): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_BOOKMARKS);
-    function First: TMYX_BOOKMARKS;
-    function Last: TMYX_BOOKMARKS;
+    function Add(AObject: TMYX_BOOKMARKS): Integer; overload;
+    function Extract(Item: TMYX_BOOKMARKS): TMYX_BOOKMARKS; overload;
+    function Remove(AObject: TMYX_BOOKMARKS): Integer; overload;
+    function IndexOf(AObject: TMYX_BOOKMARKS): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_BOOKMARKS); overload;
+    function First: TMYX_BOOKMARKS; overload;
+    function Last: TMYX_BOOKMARKS; overload;
     property Items[Index: Integer]: TMYX_BOOKMARKS read GetItem write SetItem; default;
   end;
 
@@ -462,13 +462,13 @@ type
     function GetItem(Index: Integer): TMYX_SQL_FUNCTION;
     procedure SetItem(Index: Integer; AObject: TMYX_SQL_FUNCTION);
   public
-    function Add(AObject: TMYX_SQL_FUNCTION): Integer;
-    function Extract(Item: TMYX_SQL_FUNCTION): TMYX_SQL_FUNCTION;
-    function Remove(AObject: TMYX_SQL_FUNCTION): Integer;
-    function IndexOf(AObject: TMYX_SQL_FUNCTION): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SQL_FUNCTION);
-    function First: TMYX_SQL_FUNCTION;
-    function Last: TMYX_SQL_FUNCTION;
+    function Add(AObject: TMYX_SQL_FUNCTION): Integer; overload;
+    function Extract(Item: TMYX_SQL_FUNCTION): TMYX_SQL_FUNCTION; overload;
+    function Remove(AObject: TMYX_SQL_FUNCTION): Integer; overload;
+    function IndexOf(AObject: TMYX_SQL_FUNCTION): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SQL_FUNCTION); overload;
+    function First: TMYX_SQL_FUNCTION; overload;
+    function Last: TMYX_SQL_FUNCTION; overload;
     property Items[Index: Integer]: TMYX_SQL_FUNCTION read GetItem write SetItem; default;
   end;
 
@@ -491,13 +491,13 @@ type
     function GetItem(Index: Integer): TMYX_SQL_FUNCTIONGROUP;
     procedure SetItem(Index: Integer; AObject: TMYX_SQL_FUNCTIONGROUP);
   public
-    function Add(AObject: TMYX_SQL_FUNCTIONGROUP): Integer;
-    function Extract(Item: TMYX_SQL_FUNCTIONGROUP): TMYX_SQL_FUNCTIONGROUP;
-    function Remove(AObject: TMYX_SQL_FUNCTIONGROUP): Integer;
-    function IndexOf(AObject: TMYX_SQL_FUNCTIONGROUP): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SQL_FUNCTIONGROUP);
-    function First: TMYX_SQL_FUNCTIONGROUP;
-    function Last: TMYX_SQL_FUNCTIONGROUP;
+    function Add(AObject: TMYX_SQL_FUNCTIONGROUP): Integer; overload;
+    function Extract(Item: TMYX_SQL_FUNCTIONGROUP): TMYX_SQL_FUNCTIONGROUP; overload;
+    function Remove(AObject: TMYX_SQL_FUNCTIONGROUP): Integer; overload;
+    function IndexOf(AObject: TMYX_SQL_FUNCTIONGROUP): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SQL_FUNCTIONGROUP); overload;
+    function First: TMYX_SQL_FUNCTIONGROUP; overload;
+    function Last: TMYX_SQL_FUNCTIONGROUP; overload;
     property Items[Index: Integer]: TMYX_SQL_FUNCTIONGROUP read GetItem write SetItem; default;
   end;
 
@@ -518,13 +518,13 @@ type
     function GetItem(Index: Integer): TMYX_SQL_FUNCTIONINDEX;
     procedure SetItem(Index: Integer; AObject: TMYX_SQL_FUNCTIONINDEX);
   public
-    function Add(AObject: TMYX_SQL_FUNCTIONINDEX): Integer;
-    function Extract(Item: TMYX_SQL_FUNCTIONINDEX): TMYX_SQL_FUNCTIONINDEX;
-    function Remove(AObject: TMYX_SQL_FUNCTIONINDEX): Integer;
-    function IndexOf(AObject: TMYX_SQL_FUNCTIONINDEX): Integer;
-    procedure Insert(Index: Integer; AObject: TMYX_SQL_FUNCTIONINDEX);
-    function First: TMYX_SQL_FUNCTIONINDEX;
-    function Last: TMYX_SQL_FUNCTIONINDEX;
+    function Add(AObject: TMYX_SQL_FUNCTIONINDEX): Integer; overload;
+    function Extract(Item: TMYX_SQL_FUNCTIONINDEX): TMYX_SQL_FUNCTIONINDEX; overload;
+    function Remove(AObject: TMYX_SQL_FUNCTIONINDEX): Integer; overload;
+    function IndexOf(AObject: TMYX_SQL_FUNCTIONINDEX): Integer; overload;
+    procedure Insert(Index: Integer; AObject: TMYX_SQL_FUNCTIONINDEX); overload;
+    function First: TMYX_SQL_FUNCTIONINDEX; overload;
+    function Last: TMYX_SQL_FUNCTIONINDEX; overload;
     property Items[Index: Integer]: TMYX_SQL_FUNCTIONINDEX read GetItem write SetItem; default;
   end;
 
@@ -751,7 +751,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.rows_num) - 1 do
-      Self.rows.Add(TMYX_EXPLAIN_ROW.Create(@ARecord^.rows[I]));
+      Self.rows.Add(TMYX_EXPLAIN_ROW.Create(PMYX_EXPLAIN_ROW(@ARecord^.rows[I])));
   end;
 end;
 
@@ -1018,9 +1018,9 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.bookmarks_num) - 1 do
-      Self.bookmarks.Add(TMYX_BOOKMARK.Create(@ARecord^.bookmarks[I]));
+      Self.bookmarks.Add(TMYX_BOOKMARK.Create(PMYX_BOOKMARK(@ARecord^.bookmarks[I])));
     for I := 0 to Integer(ARecord^.bookmark_groups_num) - 1 do
-      Self.bookmark_groups.Add(TMYX_BOOKMARK_GROUP.Create(@ARecord^.bookmark_groups[I]));
+      Self.bookmark_groups.Add(TMYX_BOOKMARK_GROUP.Create(PMYX_BOOKMARK_GROUP(@ARecord^.bookmark_groups[I])));
   end;
 end;
 
@@ -1184,7 +1184,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.bookmark_groups_num) - 1 do
-      Self.bookmark_groups.Add(TMYX_BOOKMARK_GROUP.Create(@ARecord^.bookmark_groups[I]));
+      Self.bookmark_groups.Add(TMYX_BOOKMARK_GROUP.Create(PMYX_BOOKMARK_GROUP(@ARecord^.bookmark_groups[I])));
   end;
 end;
 
@@ -1420,7 +1420,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.functions_num) - 1 do
-      Self.functions.Add(TMYX_SQL_FUNCTION.Create(@ARecord^.functions[I]));
+      Self.functions.Add(TMYX_SQL_FUNCTION.Create(PMYX_SQL_FUNCTION(@ARecord^.functions[I])));
   end;
 end;
 
@@ -1553,7 +1553,7 @@ begin
   if ARecord <> nil then
   begin
     for I := 0 to Integer(ARecord^.groups_num) - 1 do
-      Self.groups.Add(TMYX_SQL_FUNCTIONGROUP.Create(@ARecord^.groups[I]));
+      Self.groups.Add(TMYX_SQL_FUNCTIONGROUP.Create(PMYX_SQL_FUNCTIONGROUP(@ARecord^.groups[I])));
   end;
 end;
 

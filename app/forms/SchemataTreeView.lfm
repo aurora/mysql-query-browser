@@ -89,6 +89,7 @@ object SchemataFrame: TSchemataFrame
       GroupIndex = 1
       RadioItem = True
       OnClick = SearchMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object SearchSchemataMI: TMenuItem
@@ -98,6 +99,7 @@ object SchemataFrame: TSchemataFrame
       GroupIndex = 1
       RadioItem = True
       OnClick = SearchMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object SearchAssetsMI: TMenuItem
@@ -107,6 +109,7 @@ object SchemataFrame: TSchemataFrame
       GroupIndex = 1
       RadioItem = True
       OnClick = SearchMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object SearchColumnsMI: TMenuItem
@@ -116,11 +119,13 @@ object SchemataFrame: TSchemataFrame
       GroupIndex = 1
       RadioItem = True
       OnClick = SearchMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object N3: TMenuItem
       Caption = '-'
       GroupIndex = 1
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object CustomMI: TMenuItem
@@ -128,11 +133,13 @@ object SchemataFrame: TSchemataFrame
       GroupIndex = 1
       RadioItem = True
       OnClick = SearchMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
       object SchemataSubMI: TMenuItem
         AutoCheck = True
         Caption = 'Schemata'
         OnClick = SearchMIClick
+        OnDrawItem = MenuDrawItem
         OnMeasureItem = MenuMeasureItem
       end
       object TableSubMI: TMenuItem
@@ -140,6 +147,7 @@ object SchemataFrame: TSchemataFrame
         AutoCheck = True
         Caption = 'Tables'
         OnClick = SearchMIClick
+        OnDrawItem = MenuDrawItem
         OnMeasureItem = MenuMeasureItem
       end
       object ColumnsSubMI: TMenuItem
@@ -147,6 +155,7 @@ object SchemataFrame: TSchemataFrame
         AutoCheck = True
         Caption = 'Columns'
         OnClick = SearchMIClick
+        OnDrawItem = MenuDrawItem
         OnMeasureItem = MenuMeasureItem
       end
       object IndicesSubMI: TMenuItem
@@ -154,6 +163,7 @@ object SchemataFrame: TSchemataFrame
         AutoCheck = True
         Caption = 'Indices'
         OnClick = SearchMIClick
+        OnDrawItem = MenuDrawItem
         OnMeasureItem = MenuMeasureItem
       end
       object SPSubMI: TMenuItem
@@ -161,6 +171,7 @@ object SchemataFrame: TSchemataFrame
         AutoCheck = True
         Caption = 'Stored Procedures/Functions'
         OnClick = SearchMIClick
+        OnDrawItem = MenuDrawItem
         OnMeasureItem = MenuMeasureItem
       end
       object ViewsSubMI: TMenuItem
@@ -168,6 +179,7 @@ object SchemataFrame: TSchemataFrame
         AutoCheck = True
         Caption = 'Views'
         OnClick = SearchMIClick
+        OnDrawItem = MenuDrawItem
         OnMeasureItem = MenuMeasureItem
       end
       object TriggersSubMI: TMenuItem
@@ -176,6 +188,7 @@ object SchemataFrame: TSchemataFrame
         Caption = 'Triggers'
         Enabled = False
         OnClick = SearchMIClick
+        OnDrawItem = MenuDrawItem
         OnMeasureItem = MenuMeasureItem
       end
     end
@@ -187,55 +200,66 @@ object SchemataFrame: TSchemataFrame
     object EditMI: TMenuItem
       Caption = 'Edit'
       OnClick = EditMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object RenameMI: TMenuItem
       Caption = 'Rename'
       Visible = False
       OnClick = RenameMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object DropMI: TMenuItem
       Caption = 'Drop'
       OnClick = DropMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object CopyAssetSQLMI: TMenuItem
       Caption = 'Copy SQL to Clipboard'
       OnClick = CopyAssetSQLMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object N1: TMenuItem
       Caption = '-'
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object CreateNewSchemaMI: TMenuItem
       Caption = 'Create New Schema'
       OnClick = CreateNewSchemaMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object CreateNewTableMI: TMenuItem
       Caption = 'Create New Table'
       OnClick = CreateNewTableMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object CreateNewViewMI: TMenuItem
       Caption = 'Create New View'
       OnClick = CreateNewViewMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object CreateNewStoredProcedureMI: TMenuItem
       Caption = 'Create New Procedure / Function'
       OnClick = CreateNewStoredProcedureMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object N2: TMenuItem
       Caption = '-'
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
     object RefreshCatalogsSchemataListMI: TMenuItem
       Caption = 'Refresh'
       OnClick = RefreshCatalogsSchemataListMIClick
+      OnDrawItem = MenuDrawItem
       OnMeasureItem = MenuMeasureItem
     end
   end
