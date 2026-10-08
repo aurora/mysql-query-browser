@@ -3,7 +3,9 @@
 Revival of the classic MySQL Query Browser: cross-platform (Windows, Linux, macOS),
 MySQL 8 compatible, with the original UX unchanged.
 
-Status: early planning / porting. Nothing builds yet.
+Status: porting in progress. The backend, tests, bindings and form conversion work;
+the application itself is not usable yet. See [ROADMAP.md](ROADMAP.md) for the plan and
+[docs/adr/](docs/adr/README.md) for the decisions behind it.
 
 ## Layout
 
