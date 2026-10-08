@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 <#
   Runs the FPCUnit tests against several server versions using throw-away
   Podman/Docker containers.

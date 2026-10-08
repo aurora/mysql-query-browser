@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Compile the original resource scripts (PNG images, cursors, icons, animations)
 into app/res/*.res, which qbr.lpr links in with {$R}.
 

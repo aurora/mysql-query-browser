@@ -1,0 +1,36 @@
+query-browser-revival
+=====================
+
+This project is licensed under the GNU General Public License, version 2 or (at
+your option) any later version; see LICENSE. New files carry the header
+"SPDX-License-Identifier: GPL-2.0-or-later" (ADR-0011).
+
+It is a continuation of the MySQL Query Browser and the MySQL GUI common
+library (Copyright (C) 2003-2005 MySQL AB). The original sources are kept
+unchanged in legacy/, and files ported from them keep their original headers.
+
+Additional permission inherited from the original distribution
+--------------------------------------------------------------
+
+The COPYING file of the original sources ends with the following exception.
+It is reproduced here word for word; it applies to the code that originates
+from MySQL AB. (PCRE itself is BSD licensed and GPL-compatible, so linking
+does not depend on it.)
+
+In addition, as a special exception, MySQL AB gives permission to link
+the code of this program with the PCRE library (or with modified
+versions of PCRE that use the same license as PCRE), and distribute
+linked combinations including the two. You must obey the GNU General
+Public License in all respects for all of the code used other than
+PCRE. If you modify this file, you may extend this exception to your
+version of the file, but you are not obligated to do so. If you do not
+wish to do so, delete this exception statement from your version.
+
+Third-party components
+----------------------
+
+Not part of this repository's own code and used under their own licences:
+MariaDB Connector/C (LGPL), glib (LGPL), libxml2 (MIT), PCRE (BSD), the
+Lazarus LCL, VirtualTreeView and SynEdit packages (see their licence files).
+legacy/ contains further third-party code (e.g. the TNT Unicode Controls)
+that is not carried into the new code base.

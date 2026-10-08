@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Convert all Query Browser forms from legacy/ to app/forms/*.lfm and render each
 one (and each tab page) to docs/reconstructed/ with tools/lfmview.
 

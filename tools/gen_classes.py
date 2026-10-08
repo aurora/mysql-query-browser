@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Wrapper classes for structs marked `-generate_classes` in the public headers.
 
 Replaces the class part of the original LibInterfaceMapper (templates in

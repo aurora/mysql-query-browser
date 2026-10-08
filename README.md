@@ -25,3 +25,9 @@ the application itself is not usable yet. See [ROADMAP.md](ROADMAP.md) for the p
 4. Packaging.
 
 A thin database-driver interface is planned so other RDBMS (e.g. PostgreSQL) can follow later.
+
+## License
+
+GPL-2.0-or-later, like the original MySQL Query Browser; see [LICENSE](LICENSE) and
+[NOTICE](NOTICE) (inherited PCRE exception, third-party components). "MySQL" is a trademark
+of Oracle; this project is not affiliated with it and needs its own name.

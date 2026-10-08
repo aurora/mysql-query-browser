@@ -1,3 +1,4 @@
+{ SPDX-License-Identifier: GPL-2.0-or-later }
 { Hand-written. Types from system and MySQL headers that the generated
   myx_*_public_interface.pas units refer to (opaque, only used behind pointers),
   and helpers for the C memory that the generated wrapper classes build.

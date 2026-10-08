@@ -1,3 +1,4 @@
+{ SPDX-License-Identifier: GPL-2.0-or-later }
 { Replaces the third-party PNGImage unit (Delphi had no PNG support).
   The LCL reads PNG with alpha natively; TPNGObject only adds the two drawing
   methods the sources use. }

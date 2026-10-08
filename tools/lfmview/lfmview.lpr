@@ -1,3 +1,4 @@
+{ SPDX-License-Identifier: GPL-2.0-or-later }
 program lfmview;
 
 { Loads a .lfm file into a plain TForm without any form class, logs everything

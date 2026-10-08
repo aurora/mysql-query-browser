@@ -1,3 +1,4 @@
+{ SPDX-License-Identifier: GPL-2.0-or-later }
 unit test_schema_info;
 
 {$mode objfpc}{$H+}

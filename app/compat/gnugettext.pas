@@ -1,3 +1,4 @@
+{ SPDX-License-Identifier: GPL-2.0-or-later }
 { Replaces dxgettext's gnugettext unit for the ported sources.
 
   The sources call _('English text') everywhere. This unit reads GNU .po files

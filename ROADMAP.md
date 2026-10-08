@@ -70,7 +70,7 @@ waits until after parity and gets its own decision.
 
 - **Name.** "MySQL" cannot be used. Working name `query-browser-revival`;
   candidates floated: SeaQuel, Querius, Plainbrowser. Needs a trademark check.
-- Where the project is hosted and under which GPL header policy (files carry
-  "(C) MySQL AB" headers; new files need a convention).
+- Where the project is hosted; copyright holder line and contribution policy
+  (licence is decided: ADR-0011).
 - Whether to ship an installer that bundles glib/libxml2/PCRE/Connector DLLs or
   link statically.

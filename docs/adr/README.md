@@ -19,6 +19,7 @@ Related.
 | [0008](0008-ui-fidelity-via-dfm-conversion-and-screenshots.md) | UI fidelity: convert the DFMs, review by screenshots | Accepted; reference screenshots outstanding |
 | [0009](0009-hidpi-and-vector-icons.md) | HiDPI scaling and vector icons come after functional parity | Proposed (deferred) |
 | [0010](0010-multi-database-support-via-driver-seam.md) | Other RDBMS (PostgreSQL) via a driver seam, after parity | Proposed (design seam only) |
+| [0011](0011-license-gpl-2-or-later.md) | License: GPL-2.0-or-later, as the original | Accepted |
 
 ## Numbering
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-or-later
 """Verify that the generated Pascal records have exactly the memory layout of the
 C structs: compiles a C and a Pascal program that print sizeof and offsetof of
 every struct field and compares the output.

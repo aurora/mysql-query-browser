@@ -1,3 +1,4 @@
+{ SPDX-License-Identifier: GPL-2.0-or-later }
 unit ResSelfTest;
 
 { Developer check: qbr --selftest-resources out.png
