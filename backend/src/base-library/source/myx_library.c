@@ -614,7 +614,8 @@ static void modify_sql_mode(MYSQL *mysql, int ansi_quotes)
 int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
 {
   static my_bool true= 1;
-  
+  int connected;
+
   MYSQL_REAL_CONNECT_PARAMETERS connect_options= { NULL, 0, 0, -1};
   char *unix_socket= NULL;
 
@@ -677,11 +678,31 @@ int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
       connect_options.ssl_ca, NULL, NULL);
   }
 
-  if (!mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
+  connected= mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
                           user_conn->password, user_conn->schema,
                           user_conn->port,
                           unix_socket ? unix_socket : connect_options.unix_socket,
-                          connect_options.client_flag | EXTRA_CONNECT_FLAGS))
+                          connect_options.client_flag | EXTRA_CONNECT_FLAGS) != NULL;
+
+#ifdef MARIADB_PACKAGE_VERSION
+  /* MariaDB Connector/C >= 3.4 verifies the server certificate by default, which
+     makes TLS mandatory: connecting to a server without TLS (e.g. MariaDB 10.x
+     without certificates) fails. Like the "preferred" mode of other clients,
+     try TLS first and fall back to an unencrypted connection only if the
+     server does not offer TLS. */
+  if (!connected && connect_options.use_ssl == 0 && mysql_errno(mysql) == 2026 /* CR_SSL_CONNECTION_ERROR */)
+  {
+    my_bool no_verify= 0;
+    mysql_optionsv(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &no_verify);
+    connected= mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
+                          user_conn->password, user_conn->schema,
+                          user_conn->port,
+                          unix_socket ? unix_socket : connect_options.unix_socket,
+                          connect_options.client_flag | EXTRA_CONNECT_FLAGS) != NULL;
+  }
+#endif
+
+  if (!connected)
   {
     if(!mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
                           user_conn->password, NULL,
