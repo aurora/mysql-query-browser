@@ -1,0 +1,240 @@
+object MySQLResultSetFieldViewerForm: TMySQLResultSetFieldViewerForm
+  Left = 411
+  Top = 274
+  Width = 595
+  Height = 426
+  ActiveControl = HexUniCodeEd
+  Caption = 'Field Viewer'
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  Scaled = False
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  object PageControl: TPageControl
+    Left = 6
+    Top = 6
+    Width = 575
+    Height = 381
+    ActivePage = BinarySheet
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    TabOrder = 0
+    object TextSheet: TTabSheet
+      Caption = 'Text'
+      object TextMemo: TMemo
+        Left = 0
+        Top = 0
+        Width = 567
+        Height = 306
+        Align = alClient
+        ScrollBars = ssBoth
+        TabOrder = 0
+      end
+      object TextSheetBtnPnl: TPanel
+        Left = 0
+        Top = 306
+        Width = 567
+        Height = 47
+        Align = alBottom
+        BevelOuter = bvNone
+        TabOrder = 1
+        object OKBtn: TButton
+          Left = 391
+          Top = 12
+          Width = 75
+          Height = 25
+          Anchors = [akRight, akBottom]
+          Caption = 'OK'
+          ModalResult = 1
+          TabOrder = 0
+        end
+        object CancelBtn: TButton
+          Left = 478
+          Top = 12
+          Width = 75
+          Height = 25
+          Anchors = [akRight, akBottom]
+          Caption = 'Cancel'
+          ModalResult = 2
+          TabOrder = 1
+        end
+      end
+    end
+    object ImageSheet: TTabSheet
+      Caption = 'Image'
+      object ImageScrollBox: TScrollBox
+        Left = 0
+        Top = 0
+        Width = 567
+        Height = 306
+        HorzScrollBar.Smooth = True
+        HorzScrollBar.Tracking = True
+        VertScrollBar.Smooth = True
+        VertScrollBar.Tracking = True
+        Align = alClient
+        BorderStyle = bsNone
+        Color = clWhite
+        ParentColor = False
+        TabOrder = 0
+        object FieldImage: TImage
+          Left = 0
+          Top = 0
+          Width = 155
+          Height = 119
+          AutoSize = True
+        end
+      end
+      object ImageSheetBtnPnl: TPanel
+        Left = 0
+        Top = 306
+        Width = 567
+        Height = 47
+        Align = alBottom
+        BevelOuter = bvNone
+        TabOrder = 1
+        object ImageFormatTitleLbl: TLabel
+          Left = 6
+          Top = 8
+          Width = 67
+          Height = 13
+          Caption = 'Image Format:'
+        end
+        object TntBevel1: TBevel
+          Left = 0
+          Top = 0
+          Width = 567
+          Height = 4
+          Align = alTop
+          Shape = bsTopLine
+        end
+        object ImageSizeTitleLbl: TLabel
+          Left = 6
+          Top = 24
+          Width = 23
+          Height = 13
+          Caption = 'Size:'
+        end
+        object ImageFormatLbl: TLabel
+          Left = 94
+          Top = 8
+          Width = 3
+          Height = 13
+          Caption = '-'
+        end
+        object ImageSizeLbl: TLabel
+          Left = 94
+          Top = 24
+          Width = 3
+          Height = 13
+          Caption = '-'
+        end
+        object Ok2Btn: TButton
+          Left = 391
+          Top = 12
+          Width = 75
+          Height = 25
+          Anchors = [akRight, akBottom]
+          Caption = 'OK'
+          ModalResult = 1
+          TabOrder = 0
+        end
+        object Cancel2Btn: TButton
+          Left = 478
+          Top = 12
+          Width = 75
+          Height = 25
+          Anchors = [akRight, akBottom]
+          Caption = 'Cancel'
+          ModalResult = 2
+          TabOrder = 1
+        end
+      end
+    end
+    object BinarySheet: TTabSheet
+      Caption = 'Binary'
+      object TntSplitter1: TSplitter
+        Left = 419
+        Top = 0
+        Width = 1
+        Height = 306
+        Align = alRight
+      end
+      object HexUniCodeEd: TSynEdit
+        Left = 0
+        Top = 0
+        Width = 419
+        Height = 306
+        Cursor = crIBeam
+        Align = alClient
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Bitstream Vera Sans Mono'
+        Font.Style = []
+        TabOrder = 0
+      end
+      object PlainTextUniCodeEdit: TSynEdit
+        Left = 420
+        Top = 0
+        Width = 147
+        Height = 306
+        Cursor = crIBeam
+        Align = alRight
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Bitstream Vera Sans Mono'
+        Font.Style = []
+        TabOrder = 1
+      end
+      object TntPanel1: TPanel
+        Left = 0
+        Top = 306
+        Width = 567
+        Height = 47
+        Align = alBottom
+        BevelOuter = bvNone
+        TabOrder = 2
+        object BinarySizeTitelLbl: TLabel
+          Left = 6
+          Top = 8
+          Width = 23
+          Height = 13
+          Caption = 'Size:'
+        end
+        object BinarySizeLbl: TLabel
+          Left = 52
+          Top = 8
+          Width = 3
+          Height = 13
+          Caption = '-'
+        end
+        object OK3Btn: TButton
+          Left = 391
+          Top = 12
+          Width = 75
+          Height = 25
+          Anchors = [akRight, akBottom]
+          Caption = 'OK'
+          ModalResult = 1
+          TabOrder = 0
+        end
+        object Cancel3Btn: TButton
+          Left = 478
+          Top = 12
+          Width = 75
+          Height = 25
+          Anchors = [akRight, akBottom]
+          Caption = 'Cancel'
+          ModalResult = 2
+          TabOrder = 1
+        end
+      end
+    end
+  end
+end

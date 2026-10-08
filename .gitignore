@@ -310,3 +310,6 @@ x86/
 /tests/lib/
 *.ppu
 *.o
+/tools/lfmview/bin/
+/tools/lfmview/lib/
+/docs/reconstructed/_flat/
