@@ -15,8 +15,10 @@ unit DevTools;
 interface
 
 procedure Trace(const Msg: String);
+procedure EnsureMainForm;
 procedure CaptureWindowToPng(Wnd: TObject; const FileName: String);
 procedure RunConnectDialogScreenshot(const FileName: String);
+procedure RunOptionsScreenshot(const FileBase: String);
 procedure RunConnectSelftest(const ReportFile: String);
 procedure RunDialogConnectSelftest(const ReportFile: String);
 
@@ -24,6 +26,7 @@ implementation
 
 uses
   Windows, Classes, SysUtils, Forms, Graphics, Controls, MySQLConnection, ConnectToInstance, Options,
+  OptionsEditor,
   myx_types, myx_public_interface;
 
 function PrintWindow(hwnd: HWND; hdcBlt: HDC; nFlags: UINT): BOOL; stdcall; external 'user32.dll';
@@ -41,6 +44,17 @@ begin
   if FileExists(Name) then Append(F) else Rewrite(F);
   WriteLn(F, FormatDateTime('hh:nn:ss.zzz', Now), ' ', Msg);
   CloseFile(F);
+end;
+
+var
+  DummyMainForm: TForm;
+
+procedure EnsureMainForm;
+begin
+  // Forms positioned relative to the main form (poMainFormCenter) need one in the LCL. The
+  // real program has it; the developer modes create a hidden stand-in.
+  if Application.MainForm = nil then
+    Application.CreateForm(TForm, DummyMainForm);
 end;
 
 function BlackColumn(B: TBitmap; X: Integer): Boolean;
@@ -118,6 +132,25 @@ begin
     Dlg.Position := poDesigned;
     Dlg.Show;
     CaptureWindowToPng(Dlg, FileName);
+  finally
+    Dlg.Free;
+  end;
+end;
+
+procedure RunOptionsScreenshot(const FileBase: String);
+var
+  Dlg: TOptionsForm;
+begin
+  EnsureMainForm;
+  Dlg := TOptionsForm.Create(nil, nil);
+  try
+    Dlg.Left := 40;
+    Dlg.Top := 40;
+    Dlg.Position := poDesigned;
+    Dlg.Show;
+    CaptureWindowToPng(Dlg, FileBase + '_default.png');
+    Dlg.ShowOptionPage(ConnectionsPage);
+    CaptureWindowToPng(Dlg, FileBase + '_connections.png');
   finally
     Dlg.Free;
   end;

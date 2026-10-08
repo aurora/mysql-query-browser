@@ -20,19 +20,40 @@ var
   Res: Integer;
 
 procedure LogUnhandled(E: Exception);
+var
+  I: Integer;
 begin
   // GUI program without console: write the problem next to the executable instead of
   // showing a modal error dialog that would block automated runs
   with TStringList.Create do
   try
     Add(E.ClassName + ': ' + E.Message);
+    Add(BackTraceStrFunc(ExceptAddr));
+    for I := 0 to ExceptFrameCount - 1 do
+      Add(BackTraceStrFunc(ExceptFrames[I]));
     SaveToFile(ChangeFileExt(ParamStr(0), '.error.txt'));
   finally
     Free;
   end;
 end;
 
+type
+  TExceptionLogger = class
+    procedure Handle(Sender: TObject; E: Exception);
+  end;
+
+procedure TExceptionLogger.Handle(Sender: TObject; E: Exception);
 begin
+  LogUnhandled(E);
+  Halt(3);                      // do not sit in a modal error dialog
+end;
+
+var
+  Logger: TExceptionLogger;
+
+begin
+  Logger := TExceptionLogger.Create;
+  Application.OnException := Logger.Handle;
   try
   if (ParamCount = 2) and (ParamStr(1) = '--selftest-resources') then
   begin
@@ -67,6 +88,11 @@ begin
     if ParamStr(I) = '--shot-connect' then
     begin
       RunConnectDialogScreenshot(ParamStr(I + 1));
+      Exit;
+    end
+    else if ParamStr(I) = '--shot-options' then
+    begin
+      RunOptionsScreenshot(ParamStr(I + 1));
       Exit;
     end
     else if ParamStr(I) = '--selftest-dialog' then

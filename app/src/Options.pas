@@ -435,6 +435,11 @@ var
   I: Integer;
 
 begin
+  // Port: a form that never got a window (e.g. its construction failed) has no position to store;
+  // the LCL's Monitor property raises an access violation for it
+  if not Win.HandleAllocated then
+    Exit;
+
   WinPos := GetWinPos(Win, WindowPosList);
 
   repeat
@@ -559,7 +564,14 @@ begin
 
   WinPos.Name := Win.Name;
   WinPos.State := Win.WindowState;
-  WinPos.MonitorNum := Win.Monitor.MonitorNum;
+  // Port: the LCL's Monitor property dereferences Application.MainForm for forms positioned
+  // relative to the main form; without a main form (yet) it fails where the VCL did not.
+  try
+    WinPos.MonitorNum := Win.Monitor.MonitorNum;
+  except
+    on EAccessViolation do
+      WinPos.MonitorNum := 0;
+  end;
 
   //P:=win.ClientToScreen(Point(0, 0));
 

@@ -57,7 +57,7 @@
     </Parsing>
     <Other>
       <!-- String<->WideString conversions are intended: String is UTF-8 (ADR-0007) -->
-      <CustomOptions Value="-vm4104,4105"/>
+      <CustomOptions Value="-vm4104,4105 -gl"/>
     </Other>
     <Linking>
       <Options>

@@ -74,6 +74,9 @@ python tools/drop_routines.py app/src/<Unit>.pas Name1 Name2   # remove unused r
 qbr.exe -datadir <tmp> --shot-connect out.png                     # screenshot of the dialog
 qbr.exe -datadir <tmp> -u root -p <pwd> -h 127.0.0.1 -P <port> --selftest-connect out.txt
 qbr.exe ... --selftest-dialog out.txt                              # drives the connect dialog
+qbr.exe -datadir <tmp> --shot-options <base>                        # options dialog -> <base>_default.png, _connections.png
+# unhandled exceptions are written with a stack trace to bin/qbr.error.txt (program exits with 3);
+# QBR_TRACE=1 adds a flow trace in bin/qbr.trace.txt
 ```
 
 A change is not done until the relevant tests pass **on the server matrix**,
@@ -137,5 +140,10 @@ choice that a future contributor would ask "why?" about, write the ADR.
   4 billion times; cast to `Integer` first.
 - **Window screenshots on Windows 10/11** include an invisible border that
   `PrintWindow` leaves black; `tools/lfmview` trims it.
+- **LCL forms with `Position = poMainFormCenter` need `Application.MainForm`.** Without one,
+  creating the form raises an access violation in `Monitor`. The developer modes in
+  `app/src/DevTools.pas` create a hidden stand-in (`EnsureMainForm`).
+- **A failing form constructor hides its exception** (the destructor runs and may fail again);
+  guard destroy-time code (e.g. `AddWindowPos`) so the original error shows.
 - **FPC does not allow a parameter with the same name as a field** (generated
   constructors use `ARecord`).
