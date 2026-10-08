@@ -1,0 +1,17 @@
+program qbr_tests;
+
+{$mode objfpc}{$H+}
+
+uses
+  Classes, consoletestrunner, test_connect;
+
+var
+  App: TTestRunner;
+
+begin
+  App := TTestRunner.Create(nil);
+  App.Initialize;
+  App.Title := 'Query Browser Revival tests';
+  App.Run;
+  App.Free;
+end.

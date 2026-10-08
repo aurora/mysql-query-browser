@@ -478,16 +478,16 @@ void Query::prepare_for_delphi()
   sql= (char*)m_sql.c_str();
 
   options_num= (unsigned int)m_options.size();
-  options= (char**)&m_options.front();
+  options= (char**)m_options.data();
 
   clauses_num= (unsigned int)m_clauses.size();
-  clauses= &m_clauses.front();
+  clauses= m_clauses.data();
 
   tables_num= (unsigned int)m_tables.size();
-  tables= &m_tables.front();
+  tables= m_tables.data();
 
   columns_num= (unsigned int)m_columns.size();
-  columns= &m_columns.front();
+  columns= m_columns.data();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
