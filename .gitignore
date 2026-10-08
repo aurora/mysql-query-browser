@@ -313,3 +313,5 @@ x86/
 /tools/lfmview/bin/
 /tools/lfmview/lib/
 /docs/reconstructed/_flat/
+/app/bin/
+/app/lib/
