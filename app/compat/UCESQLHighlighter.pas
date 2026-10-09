@@ -82,6 +82,10 @@ constructor TUCESQLHighlighter.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   SQLDialect := sqlMySQL;
+  // the original's attributes start without styles (SynEdit makes keywords bold)
+  KeyAttri.Style := [];
+  FunctionAttri.Style := [];
+  DataTypeAttri.Style := [];
   FCommentWithCommandAttributes := TSynHighlighterAttributes.Create('CommentWithCommand', 'CommentWithCommand');
   FEmbeddedCommandAttributes := TSynHighlighterAttributes.Create('EmbeddedCommand', 'EmbeddedCommand');
   FSystemVariableAttributes := TSynHighlighterAttributes.Create('SystemVariable', 'SystemVariable');

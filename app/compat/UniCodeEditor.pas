@@ -885,9 +885,20 @@ begin
   if Style <> nil then
   begin
     Special := True;
-    Markup.Foreground := Style.Foreground;
-    Markup.Background := Style.Background;
+    // clDefault means "leave the token's own colour" in the original, clNone in SynEdit
+    if Style.Foreground = clDefault then
+      Markup.Foreground := clNone
+    else
+      Markup.Foreground := Style.Foreground;
+    if Style.Background = clDefault then
+      Markup.Background := clNone
+    else
+      Markup.Background := Style.Background;
     Markup.Style := Style.FontStyles;
+    if Style.ForceFontStyles then
+      Markup.StyleMask := Style.FontStyles
+    else
+      Markup.StyleMask := [];
   end;
 end;
 

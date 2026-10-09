@@ -31,9 +31,10 @@ waits until after parity and gets its own decision.
   all units of the main window compile (`LexicalTools` without its x86 assembler, `ScriptPanel`,
   `SqlCmdPanel`, `QueryBrowser`, `Main`, `TableDrag`, `StringContainers`), the editor layer on SynEdit
   has per-line data/states/styles/gutter markers, and the schema tree, tabs, toolbar and help pane
-  placeholder show against a live server. Known visual gaps (see the screenshot): toolbar layout and
-  icons, query-area header, result grid empty state, line-number font and gutter width, SQL token
-  colours for embedded commands/variables.
+  placeholder show against a live server. Queries run and fill the result grid (`--sql "..."` dev mode);
+  toolbar icons/labels and SQL token colours work. Known gaps: line-number font and gutter width,
+  token colours for embedded commands/variables, bottom-right result buttons clipped, interactive
+  checks (editing, console, scripts, bookmarks, history) not done yet.
 
 ## Next (in this order)
 
