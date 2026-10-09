@@ -23,6 +23,7 @@ var
   ExeDir: String;
   Res: Integer;
   ShotFile: String;
+  K: Integer;
 
 procedure LogUnhandled(E: Exception);
 var
@@ -137,6 +138,15 @@ begin
       // developer mode: let the window settle, write a screenshot and quit
       Trace('shot: show');
       MainForm.Show;
+      for I := 1 to ParamCount - 1 do
+        if ParamStr(I) = '--sql' then
+        begin
+          for K := 1 to 10 do begin Application.ProcessMessages; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevSetText(UTF8Decode(ParamStr(I + 1)));
+          for K := 1 to 20 do begin Application.ProcessMessages; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevExecute;
+          for K := 1 to 60 do begin Application.ProcessMessages; Sleep(50); end;
+        end;
       for I := 1 to 40 do
       begin
         Application.ProcessMessages;

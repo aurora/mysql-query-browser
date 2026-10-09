@@ -656,6 +656,8 @@ type
     procedure SaveAs;
     procedure SaveQueryAs(Filename: WideString = '');
     procedure SaveScript;
+    procedure DevSetText(const SQL: WideString);   // developer mode (--sql): enter a query ...
+    procedure DevExecute;                          // ... and run it
     function SaveScriptAs(ScriptPanel: TScriptPanel): Boolean;
     procedure UpdateActions; override;
 
@@ -1782,6 +1784,23 @@ begin
       HandleEditorCommand(edBack);
     HandleEditorCommand(edRefresh);
   end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevSetText(const SQL: WideString);
+
+begin
+  CurrentCommand := SQL;
+  UpdateCommandDisplay(0, 0, True);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevExecute;
+
+begin
+  HandleEditorCommand(edExecute);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -8136,7 +8155,9 @@ procedure TSQLEditor.DeleteLine(Sender: TObject; Line: TUCELine);
 begin
   inherited;
 
-  (Owner as TQueryBrowserForm).LineDeleted(Line);
+  // Port: during destruction the owner is already gone (the editor's lines are cleared then)
+  if Owner is TQueryBrowserForm then
+    TQueryBrowserForm(Owner).LineDeleted(Line);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
