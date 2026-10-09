@@ -34,6 +34,8 @@ type
     FActive: Boolean;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure Play(FromFrame, ToFrame: Word; Count: Integer);
+    procedure Stop;
     property ResName: String read FResName write FResName;
     property Active: Boolean read FActive write FActive;
   end;
@@ -45,6 +47,16 @@ begin
   inherited Create(AOwner);
   BevelOuter := bvNone;
   Caption := '';
+end;
+
+procedure TAnimate.Play(FromFrame, ToFrame: Word; Count: Integer);
+begin
+  FActive := True;
+end;
+
+procedure TAnimate.Stop;
+begin
+  FActive := False;
 end;
 
 end.

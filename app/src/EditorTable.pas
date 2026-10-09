@@ -208,7 +208,7 @@ type
 
     procedure ColumnVSTGetText(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: WideString);
+      var CellText: String);
 
     procedure FreeTableData;
     procedure ColumnVSTGetImageIndex(Sender: TBaseVirtualTree;
@@ -229,7 +229,7 @@ type
       SelectCharset: WideString);
 
     procedure ColumnVSTNewText(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Column: TColumnIndex; NewText: WideString);
+      Node: PVirtualNode; Column: TColumnIndex; const NewText: String);
     procedure DoColumnGridEdit(var Message: TMessage); message WM_DoCellEdit;
 
     procedure ColumnVSTKeyDown(Sender: TObject; var Key: Word;
@@ -250,7 +250,7 @@ type
     procedure ShowHideDetails(StoreHeight: Boolean = True);
     procedure IndexVSTGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: WideString);
+      var CellText: String);
     procedure IndexVSTGetImageIndex(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
       var Ghosted: Boolean; var ImageIndex: Integer);
@@ -279,7 +279,7 @@ type
     procedure AddFKBtnClick(Sender: TObject);
     procedure FKColsVSTGetText(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: WideString);
+      var CellText: String);
     procedure FKColsVSTDragOver(Sender: TBaseVirtualTree; Source: TObject;
       Shift: TShiftState; State: TDragState; const Pt: TPoint; Mode: TDropMode;
       var Effect: LongWord; var Accept: Boolean);
@@ -288,7 +288,7 @@ type
     procedure FKDestTablesComboBoxCloseUp(Sender: TObject);
     procedure FKColsVSTDblClick(Sender: TObject);
     procedure FKColsVSTNewText(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Column: TColumnIndex; NewText: WideString);
+      Node: PVirtualNode; Column: TColumnIndex; const NewText: String);
     procedure ValueChanged(Sender: TObject);
     procedure ApplyChangesBtnClick(Sender: TObject);
     procedure DeleteSelectedColumns(Confirm: Boolean = True);
@@ -1402,7 +1402,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TEditorTableForm.ColumnVSTGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType; var CellText: WideString);
+  TextType: TVSTTextType; var CellText: String);
 
 var
   NodeData: PColumnNodeData;
@@ -1756,7 +1756,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TEditorTableForm.ColumnVSTNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-  NewText: WideString);
+  const NewText: String);
 
 var
   NodeData, NewNodeData: PColumnNodeData;
@@ -2334,7 +2334,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TEditorTableForm.IndexVSTGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType; var CellText: WideString);
+  TextType: TVSTTextType; var CellText: String);
 
 var
   NodeData: Pointer;
@@ -2829,7 +2829,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TEditorTableForm.FKColsVSTGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType; var CellText: WideString);
+  TextType: TVSTTextType; var CellText: String);
 
 var
   NodeData: ^TMYX_NAME_VALUE_PAIR;
@@ -2849,7 +2849,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TEditorTableForm.FKColsVSTNewText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-  NewText: WideString);
+  const NewText: String);
 
 var
   NodeData: ^TMYX_NAME_VALUE_PAIR;

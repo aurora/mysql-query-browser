@@ -152,3 +152,11 @@ choice that a future contributor would ask "why?" about, write the ADR.
   guard destroy-time code (e.g. `AddWindowPos`) so the original error shows.
 - **FPC does not allow a parameter with the same name as a field** (generated
   constructors use `ARecord`).
+- **Event handlers bound from `.lfm` files are not type checked.** The LCL binds `OnGetText = Handler`
+  by name at load time. A handler whose signature differs from the event type (e.g.
+  `var CellText: WideString` where laz.VirtualTrees declares `String`) compiles fine and corrupts the
+  heap at run time (`0xC0000374` in `SysFreeString`). Run `python tools/check_handlers.py` after porting
+  a unit; it lists handlers with string parameters so they can be compared with the event types.
+- **`TObject.ToString` shadows a constant named `toString`** inside methods (renamed `toStringLit` in
+  LexicalTools/ScriptPanel).
+- **`set of WideChar` is not allowed in FPC**; use `WideCharIn` from `compat/Unicode.pas`.

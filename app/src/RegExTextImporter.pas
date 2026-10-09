@@ -98,7 +98,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure StructureVTGetText(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: WideString);
+      var CellText: String);
     procedure ExecuteRegExBtnClick(Sender: TObject);
     procedure ExecuteNextRegExBtnClick(Sender: TObject);
 
@@ -155,7 +155,7 @@ type
     procedure StructureVTEditing(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
     procedure StructureVTNewText(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Column: TColumnIndex; NewText: WideString);
+      Node: PVirtualNode; Column: TColumnIndex; const NewText: String);
     procedure SourceMemoChange(Sender: TObject);
     procedure CaseInsensitiveCBoxClick(Sender: TObject);
 
@@ -413,7 +413,7 @@ end;
 
 procedure TRegExTextImporterForm.StructureVTGetText(
   Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType; var CellText: WideString);
+  TextType: TVSTTextType; var CellText: String);
 
 var NodeData: PStructuredRegExNodeData;
 
@@ -1696,7 +1696,7 @@ end;
 
 procedure TRegExTextImporterForm.StructureVTNewText(
   Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
-  NewText: WideString);
+  const NewText: String);
 
 var
   NodeData: PStructuredRegExNodeData;

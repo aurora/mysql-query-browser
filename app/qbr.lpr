@@ -15,13 +15,14 @@ uses
   CommonTypes, MySQLCommonFuncs, AppInstanceMgmt, TextSearch, AdvancedEdit, TabHeader,
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
-  UniCodeEditor, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection;
+  UCEShared, UCEHighlighter, UniCodeEditor, UCEEditorKeyCommands, UniCodeConsole,
+  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, Main;
 
 var
   I: Integer;
   ExeDir: String;
-  Conn: TMySQLConn;
   Res: Integer;
+  ShotFile: String;
 
 procedure LogUnhandled(E: Exception);
 var
@@ -110,14 +111,43 @@ begin
       Exit;
     end;
 
-  // normal start: connect (shows the dialog unless the command line says where to connect)
-  Conn := TMySQLConn.Create(nil);
-  try
-    Res := Conn.ConnectToServer(True, True, True);
-    if Res = 1 then
-      Application.MessageBox('Connected. The main window is not ported yet.', 'MySQL Query Browser', 0);
-  finally
-    Conn.Free;
+  // normal start, as the original program file
+  ApplicationDM := TApplicationDM.Create(nil);
+  ApplicationDM.LoadOptions;
+  ApplicationDM.CheckCommandlineParameter;
+
+  Application.CreateForm(TMainForm, MainForm);
+  Trace('main form created');
+  if ApplicationDM.Options.StartScriptFile <> '' then
+    Res := 1
+  else
+    Res := MainForm.MySQLConn.ConnectToServer(True, True, True);
+  Trace('connect result ' + IntToStr(Res));
+
+  if Res = 1 then
+  begin
+    MainForm.PrepareGUI;
+    Trace('gui prepared');
+    ShotFile := '';
+    for I := 1 to ParamCount - 1 do
+      if ParamStr(I) = '--shot-main' then
+        ShotFile := ParamStr(I + 1);
+    if ShotFile <> '' then
+    begin
+      // developer mode: let the window settle, write a screenshot and quit
+      Trace('shot: show');
+      MainForm.Show;
+      for I := 1 to 40 do
+      begin
+        Application.ProcessMessages;
+        Sleep(50);
+      end;
+      Trace('shot: capture');
+      CaptureWindowToPng(MainForm, ShotFile);
+      Trace('shot: done');
+      Exit;
+    end;
+    Application.Run;
   end;
   except
     on E: Exception do

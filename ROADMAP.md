@@ -27,6 +27,13 @@ waits until after parity and gets its own decision.
   `MyxError`, `AuxApplicationFuncs`. The dialog shows with the original banner and translations,
   and the original code path connects to all six matrix servers, both from the command line and by
   driving the dialog (`qbr --selftest-connect/--selftest-dialog`, part of `tests/run-matrix.ps1`).
+- **Main window ported and running** (`qbr -h ... --shot-main file.png` writes a screenshot):
+  all units of the main window compile (`LexicalTools` without its x86 assembler, `ScriptPanel`,
+  `SqlCmdPanel`, `QueryBrowser`, `Main`, `TableDrag`, `StringContainers`), the editor layer on SynEdit
+  has per-line data/states/styles/gutter markers, and the schema tree, tabs, toolbar and help pane
+  placeholder show against a live server. Known visual gaps (see the screenshot): toolbar layout and
+  icons, query-area header, result grid empty state, line-number font and gutter width, SQL token
+  colours for embedded commands/variables.
 
 ## Next (in this order)
 

@@ -120,7 +120,7 @@ type
       CellRect: TRect);
     procedure CatalogVSTGetText(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: WideString);
+      var CellText: String);
     procedure CatalogVSTGetImageIndex(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
       var Ghosted: Boolean; var ImageIndex: Integer);
@@ -547,7 +547,7 @@ procedure TSchemataFrame.DoSearch(Thread: TThread);
 
 var
   Node: PVirtualNode;
-  Text: WideString;
+  Text: String;
   NodeData: ^TObject;
   SchemaNode: TSchemaVirtualNode;
   
@@ -1716,7 +1716,7 @@ end;
 
 procedure TSchemataFrame.CatalogVSTGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: WideString);
+  var CellText: String);
 
 var
   NodeData: ^TObject;

@@ -106,7 +106,6 @@ var
   xpos: integer;
 
 begin
-  Canvas;
 
   with Canvas do
   begin
