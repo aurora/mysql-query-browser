@@ -1209,6 +1209,8 @@ constructor TToolbarItem.Create(ToolbarItemGroup: TToolbarItemGroup;
   OnLblClick: TNotifyEvent;
   CustomControl: TWinControl;
   NoSpace: Boolean);
+var
+  MeasureBmp: TBitmap;
 begin
   inherited Create;
 
@@ -1257,6 +1259,15 @@ begin
     FBtnLbl.Font.Height:=11;
     FBtnLbl.Caption:=Caption;
     FBtnLbl.Transparent:=True;
+    // Port: the LCL computes the auto size lazily, the code below needs the size now
+    MeasureBmp := TBitmap.Create;
+    try
+      MeasureBmp.Canvas.Font.Assign(FBtnLbl.Font);
+      FBtnLbl.Width := MeasureBmp.Canvas.TextWidth(UTF8Encode(Caption));
+      FBtnLbl.Height := MeasureBmp.Canvas.TextHeight('Wg');
+    finally
+      MeasureBmp.Free;
+    end;
 
     if(FPNGBtn<>nil)then
     begin
@@ -1518,6 +1529,9 @@ end;
 
 //----------------- TPNGButton -----------------------------------------------------------------------------------------
 
+type
+  TGraphicControlAccess = class(TGraphicControl);
+
 constructor TPNGButton.Create(Owner: TObject; ImgResourceName: WideString);
 
 begin
@@ -1578,45 +1592,46 @@ end;
 procedure TPNGButton.Paint;
 
 var
-  DC: HDC;
+  PaintCanvas: TCanvas;
 
 begin
   if(Parent<>nil)then
   begin
-    DC := GetDC(Parent.Handle);
+    // Port: draw on the control's own canvas (the original drew on the parent's window DC)
+    // TImage.Canvas is the picture's canvas; the control is painted on the graphic control's canvas
+    PaintCanvas := TGraphicControlAccess(Self).Canvas;
     try
       // TODO: Need to make this class so that it can directly access the content of its parent window.
       // PerformEraseBackground(Self, DC);
 
       if(Not(Enabled))then
-        FButtonImg.DrawPartialTrans(DC,
-          Rect(Left, Top, FButtonImg.Width, FButtonImg.Height),
+        FButtonImg.DrawPartialTrans(PaintCanvas,
+          Rect(0, 0, FButtonImg.Width, FButtonImg.Height),
           200, True)
       else if(FDown)or(FClicked)then
       begin
         if (Assigned(FButtonDownImg)) then
-          FButtonDownImg.DrawPartialTrans(DC,
-            Rect(Left, Top, FButtonDownImg.Width, FButtonDownImg.Height))
+          FButtonDownImg.DrawPartialTrans(PaintCanvas,
+            Rect(0, 0, FButtonDownImg.Width, FButtonDownImg.Height))
         else
-          FButtonImg.DrawPartialTrans(DC,
-            Rect(Left, Top, FButtonImg.Width, FButtonImg.Height),
+          FButtonImg.DrawPartialTrans(PaintCanvas,
+            Rect(0, 0, FButtonImg.Width, FButtonImg.Height),
             0, False, 50);
       end
       else if(FMouseOver)then
       begin
         if (Assigned(FButtonHighlightImg)) then
-          FButtonHighlightImg.DrawPartialTrans(DC,
-            Rect(Left, Top, FButtonHighlightImg.Width, FButtonHighlightImg.Height))
+          FButtonHighlightImg.DrawPartialTrans(PaintCanvas,
+            Rect(0, 0, FButtonHighlightImg.Width, FButtonHighlightImg.Height))
         else
-          FButtonImg.DrawPartialTrans(DC,
-            Rect(Left, Top, FButtonImg.Width, FButtonImg.Height),
+          FButtonImg.DrawPartialTrans(PaintCanvas,
+            Rect(0, 0, FButtonImg.Width, FButtonImg.Height),
             0, False, 0, 50)
       end
       else
-        FButtonImg.DrawPartialTrans(DC,
-          Rect(Left, Top, FButtonImg.Width, FButtonImg.Height));
+        FButtonImg.DrawPartialTrans(PaintCanvas,
+          Rect(0, 0, FButtonImg.Width, FButtonImg.Height));
     finally
-      ReleaseDC(Parent.Handle, DC);
     end;
   end;
 end;
