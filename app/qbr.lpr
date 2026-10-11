@@ -139,17 +139,26 @@ begin
       Trace('shot: show');
       MainForm.Show;
       for I := 1 to ParamCount - 1 do
+        if ParamStr(I) = '--expand' then
+        begin
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevExpandSchema(StrToIntDef(ParamStr(I + 1), 0));
+          for K := 1 to 60 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevDump;
+        end;
+      for I := 1 to ParamCount - 1 do
         if ParamStr(I) = '--sql' then
         begin
-          for K := 1 to 10 do begin Application.ProcessMessages; Sleep(50); end;
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
           TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevSetText(UTF8Decode(ParamStr(I + 1)));
-          for K := 1 to 20 do begin Application.ProcessMessages; Sleep(50); end;
+          for K := 1 to 20 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
           TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevExecute;
-          for K := 1 to 60 do begin Application.ProcessMessages; Sleep(50); end;
+          for K := 1 to 60 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
         end;
       for I := 1 to 40 do
       begin
         Application.ProcessMessages;
+        CheckSynchronize;
         Sleep(50);
       end;
       Trace('shot: capture');

@@ -657,7 +657,9 @@ type
     procedure SaveQueryAs(Filename: WideString = '');
     procedure SaveScript;
     procedure DevSetText(const SQL: WideString);   // developer mode (--sql): enter a query ...
+    procedure DevDump;
     procedure DevExecute;                          // ... and run it
+    procedure DevExpandSchema(Index: Integer);     // developer mode (--expand): open a schema node and its children
     function SaveScriptAs(ScriptPanel: TScriptPanel): Boolean;
     procedure UpdateActions; override;
 
@@ -1793,6 +1795,57 @@ procedure TQueryBrowserForm.DevSetText(const SQL: WideString);
 begin
   CurrentCommand := SQL;
   UpdateCommandDisplay(0, 0, True);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevExpandSchema(Index: Integer);
+
+var
+  Node, Child: PVirtualNode;
+  I: Integer;
+
+begin
+  Node := SchemataFrame.CatalogVST.GetFirst;
+  for I := 1 to Index do
+    if Node <> nil then
+      Node := SchemataFrame.CatalogVST.GetNextSibling(Node);
+  if Node = nil then
+    Exit;
+  SchemataFrame.CatalogVST.ToggleNode(Node);
+  Application.ProcessMessages;
+  Child := SchemataFrame.CatalogVST.GetFirstChild(Node);
+  while Child <> nil do
+  begin
+    SchemataFrame.CatalogVST.ToggleNode(Child);
+    Child := SchemataFrame.CatalogVST.GetNextSibling(Child);
+  end;
+  SchemataFrame.CatalogVST.Invalidate;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevDump;
+
+var
+  Node: PVirtualNode;
+  L: TStringList;
+
+begin
+  L := TStringList.Create;
+  try
+    Node := SchemataFrame.CatalogVST.GetFirst;
+    while Node <> nil do
+    begin
+      L.Add(IntToStr(SchemataFrame.CatalogVST.GetNodeLevel(Node)) + ' children=' + IntToStr(Node.ChildCount) +
+        ' exp=' + BoolToStr(SchemataFrame.CatalogVST.Expanded[Node], True));
+      Node := SchemataFrame.CatalogVST.GetNext(Node);
+    end;
+    L.Add('visible=' + IntToStr(SchemataFrame.CatalogVST.VisibleCount));
+    L.SaveToFile('dbg.txt');
+  finally
+    L.Free;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
