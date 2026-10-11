@@ -33,8 +33,10 @@ waits until after parity and gets its own decision.
   has per-line data/states/styles/gutter markers, and the schema tree, tabs, toolbar and help pane
   placeholder show against a live server. Queries run and fill the result grid (`--sql "..."` dev mode);
   toolbar icons/labels and SQL token colours work. Known gaps: line-number font and gutter width,
-  token colours for embedded commands/variables, bottom-right result buttons clipped, interactive
-  checks (editing, console, scripts, bookmarks, history) not done yet.
+  token colours for embedded commands/variables, bottom-right result buttons clipped. Checked by
+  screenshot: query run on 5.7 and 8.x, schema tree expansion, script tab with breakpoint stop and
+  progress bar (`--script`, `--expand`, `--sql` dev hooks). Not yet checked: real keyboard/mouse
+  interaction, bookmarks, history, the console tab (`SqlCmdPanel` is not used by the Query Browser).
 
 ## Next (in this order)
 
