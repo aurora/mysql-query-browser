@@ -64,6 +64,41 @@ const
   SectionLimit = 24000;
   FileLimit = 40000;
 
+function DecodePreEntities(const Html: String): String;
+// IpHtml does not decode entities inside <PRE>; do it here for the characters these pages use.
+var
+  Upper, Block: String;
+  P, Q: Integer;
+begin
+  Result := '';
+  Upper := UpperCase(Html);
+  P := 1;
+  while P <= Length(Html) do
+  begin
+    Q := Pos('<PRE>', Copy(Upper, P, MaxInt));
+    if Q = 0 then
+      Break;
+    Inc(Q, P - 1);
+    Result := Result + Copy(Html, P, Q - P);
+    P := Pos('</PRE>', Copy(Upper, Q, MaxInt));
+    if P = 0 then
+      P := Length(Html) + 1
+    else
+      P := Q + P - 1;
+    Block := Copy(Html, Q, P - Q);
+    Block := StringReplace(Block, '&#62;', '>', [rfReplaceAll]);
+    Block := StringReplace(Block, '&gt;', '>', [rfReplaceAll]);
+    Block := StringReplace(Block, '&#60; ', '< ', [rfReplaceAll]);
+    Block := StringReplace(Block, '&#60;=', '<=', [rfReplaceAll]);
+    Block := StringReplace(Block, '&lt; ', '< ', [rfReplaceAll]);
+    Block := StringReplace(Block, '&lt;=', '<=', [rfReplaceAll]);
+    Block := StringReplace(Block, '&#38;', '&', [rfReplaceAll]);
+    Block := StringReplace(Block, '&amp;', '&', [rfReplaceAll]);
+    Result := Result + Block;
+  end;
+  Result := Result + Copy(Html, P, MaxInt);
+end;
+
 function TDocFileProvider.CanHandle(const URL: string): Boolean;
 begin
   Result := (Pos('#', URL) = 0) and inherited CanHandle(URL);
@@ -184,9 +219,7 @@ begin
 
   Html := '<HTML><HEAD><TITLE></TITLE></HEAD><BODY>' + Copy(FFileText, StartPos, EndPos - StartPos) +
     '</BODY></HTML>';
-  // IpHtml shows numeric entities inside <PRE> literally; use the named ones
-  Html := StringReplace(Html, '&#62;', '&gt;', [rfReplaceAll]);
-  Html := StringReplace(Html, '&#60;', '&lt;', [rfReplaceAll]);
+  Html := DecodePreEntities(Html);
   Stream := TStringStream.Create(Html);
   try
     SetHtmlFromStream(Stream);
