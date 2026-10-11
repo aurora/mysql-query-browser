@@ -342,6 +342,7 @@ begin
   Lbl := TTntLabel.Create(SidebarScrollBox);
   Lbl.Parent := SidebarScrollBox;
   Lbl.Caption := ' ' + PageTitle + ' ';
+  SizeLabelToCaption(Lbl);
   Lbl.Left := (SidebarScrollBox.Width - Lbl.Width - 2) div 2;
   ;
   Lbl.Top := TopPos + 48 + 4;

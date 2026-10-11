@@ -150,6 +150,10 @@ function IsWinNTPlatform: Boolean;
 
 function IsConnectedToInternet: Boolean;
 
+// Port: the VCL sizes an auto-sizing label as soon as its caption is set, the LCL does it lazily. Code that
+// positions controls from Label.Width right after setting the caption calls this first.
+procedure SizeLabelToCaption(ALabel: TLabel);
+
 function FormatLibraryVersion(LibVersion: Integer): WideString;
 
 function GetCharFromVKey(vkey: Word): WideString;
@@ -980,6 +984,24 @@ begin
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT);
 end;
 
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure SizeLabelToCaption(ALabel: TLabel);
+
+var
+  Bmp: TBitmap;
+
+begin
+  Bmp := TBitmap.Create;
+  try
+    Bmp.Canvas.Font.Assign(ALabel.Font);
+    ALabel.Width := Bmp.Canvas.TextWidth(UTF8Encode(ALabel.Caption));
+    ALabel.Height := Bmp.Canvas.TextHeight('Wg');
+  finally
+    Bmp.Free;
+  end;
+end;
 
 //----------------------------------------------------------------------------------------------------------------------
 

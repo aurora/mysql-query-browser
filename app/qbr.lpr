@@ -7,7 +7,7 @@ program qbr;
 {$R res/mysqlqb.res}
 
 uses
-  Interfaces, Classes, Forms, SysUtils, Windows, Messages,
+  Interfaces, Classes, Forms, SysUtils, Windows, Messages, OptionsEditor,
   TntClasses, TntStdCtrls, TntCheckLst, TntExtCtrls, TntForms, TntComCtrls, TntButtons, TntGrids,
   TntMenus, TntActnList, TntDialogs, TntRegistry, TntSysUtils, TntSystem, TntClipBrd,
   gnugettext, PNGImage, PNGTools, ResSelfTest, AuxFuncs, Options, MyxError, AuxApplicationFuncs,
@@ -24,6 +24,7 @@ var
   Res: Integer;
   ShotFile: String;
   K, J: Integer;
+  Dlg: TForm;
 
 procedure LogUnhandled(E: Exception);
 var
@@ -100,7 +101,7 @@ begin
   Application.Title := 'MySQL Query Browser';
   Application.Initialize;
 
-  Trace('options loaded, command line checked');
+  Trace('options loaded, command line checked; ppi=' + IntToStr(Screen.PixelsPerInch));
   CheckCommonCommandlineParameter;
   Trace('user=' + MYXCommonOptions.ConnectionUsername + ' host=' + MYXCommonOptions.ConnectionHost);
 
@@ -230,7 +231,7 @@ begin
           // --dblclick-table <schema index> <table index>
           for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
           TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevDblClickTable(
-            StrToIntDef(ParamStr(I + 1), 0), StrToIntDef(ParamStr(I + 2), 0));
+            StrToIntDef(ParamStr(I + 1), 0), StrToIntDef(ParamStr(I + 2), 0), (I + 3 <= ParamCount) and (ParamStr(I + 3) = 'drop'));
           for K := 1 to 60 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
         end;
       for I := 1 to ParamCount - 1 do
@@ -249,6 +250,41 @@ begin
         CheckSynchronize;
         Sleep(50);
       end;
+      for I := 1 to ParamCount - 1 do
+        if ParamStr(I) = '--cmd' then
+        begin
+          // runs after --sql/--type; repeatable only once per run
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevCommand(ParamStr(I + 1));
+          if (I + 2 <= ParamCount) and (Copy(ParamStr(I + 2), 1, 5) = 'then:') then
+          begin
+            for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+            TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevCommand(Copy(ParamStr(I + 2), 6, MaxInt));
+          end;
+          for K := 1 to 60 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+        end;
+      for I := 1 to ParamCount - 2 do
+        if ParamStr(I) = '--dialog' then
+        begin
+          // --dialog textsearch|optionpages|regex|schemasel <png file>
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          Dlg := nil;
+          if ParamStr(I + 1) = 'textsearch' then
+            Dlg := TTextSearchForm.Create(MainForm, MYXCommonOptionProvider)
+          else if ParamStr(I + 1) = 'optionpages' then
+            Dlg := TOptionsForm.Create(MainForm, TQueryBrowserOptionPagesForm.Create(MainForm))
+          else if ParamStr(I + 1) = 'regex' then
+            Dlg := TRegExTextImporterForm.Create(MainForm)
+          else if ParamStr(I + 1) = 'schemasel' then
+            Dlg := TSchemaSelectionForm.Create(MainForm, MainForm.MySQLConn);
+          if Dlg <> nil then
+          begin
+            Dlg.Show;
+            for K := 1 to 20 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+            CaptureWindowToPng(Dlg, ParamStr(I + 2));
+            Dlg.Close;
+          end;
+        end;
       Trace('shot: capture');
       CaptureWindowToPng(MainForm, ShotFile);
       Trace('shot: done');

@@ -658,7 +658,8 @@ type
     procedure SaveScript;
     procedure DevSetText(const SQL: WideString);   // developer mode (--sql): enter a query ...
     procedure DevDump;
-    procedure DevDblClickTable(SchemaIndex, TableIndex: Integer);
+    procedure DevCommand(const Name: String);
+    procedure DevDblClickTable(SchemaIndex, TableIndex: Integer; DropInstead: Boolean = False);
     procedure DevTab(Upper: Boolean; Index: Integer);
     procedure DevHelp(const URL: WideString);
     procedure DevType(const SQL: String);
@@ -1872,7 +1873,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TQueryBrowserForm.DevDblClickTable(SchemaIndex, TableIndex: Integer);
+procedure TQueryBrowserForm.DevDblClickTable(SchemaIndex, TableIndex: Integer; DropInstead: Boolean);
 
 // Double clicks a table node (the schema must have been expanded before)
 
@@ -1895,7 +1896,58 @@ begin
     Exit;
   SchemataFrame.CatalogVST.FocusedNode := Node;
   SchemataFrame.CatalogVST.Selected[Node] := True;
-  SchemataFrameCatalogVSTDblClick(SchemataFrame.CatalogVST);
+  if DropInstead then
+    QueryEditorDragDrop(FSQLEditor, SchemataFrame.CatalogVST, 10, 10)
+  else
+    SchemataFrameCatalogVSTDblClick(SchemataFrame.CatalogVST);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+type
+  TGridAccess = class(TMySQLRSGrid);
+
+procedure TQueryBrowserForm.DevCommand(const Name: String);
+
+var
+  P: Integer;
+
+begin
+  P := Pos(',', Name);
+  if P > 0 then
+  begin
+    DevCommand(Copy(Name, 1, P - 1));
+    Application.ProcessMessages;
+    DevCommand(Copy(Name, P + 1, MaxInt));
+    Exit;
+  end;
+
+  if SameText(Name, 'explain') then
+    HandleEditorCommand(edExplain)
+  else
+    if SameText(Name, 'compare') then
+      HandleEditorCommand(edCompare)
+    else
+      if SameText(Name, 'newtab') then
+        HandleEditorCommand(edExecuteInNewTab)
+      else
+        if SameText(Name, 'edit') then
+          ActiveResultset.DoEdit
+        else
+        if SameText(Name, 'setcell') then
+          TGridAccess(ActiveResultsetPanel.RSGrid).DoNewText(ActiveResultsetPanel.RSGrid.GetFirst, 1, 'EDITED')
+        else
+        if SameText(Name, 'apply') then
+          ActiveResultset.DoApplyChanges
+        else
+        if SameText(Name, 'discard') then
+          ActiveResultset.DoDiscardChanges
+        else
+          if SameText(Name, 'search') then
+            ActiveResultset.DoDisplaySearch
+          else
+            if SameText(Name, 'last') then
+              ActiveResultset.GotoLastRow;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

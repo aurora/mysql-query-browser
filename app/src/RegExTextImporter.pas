@@ -396,6 +396,10 @@ end;
 procedure TRegExTextImporterForm.FormDestroy(Sender: TObject);
 
 begin
+  // Port: the tree frees its nodes later, when the owner destroys its components, and the FreeNode handler uses
+  // the lists freed below; so clear the tree first.
+  StructureVT.OnFreeNode := nil;
+  StructureVT.Clear;
   FRegExStructure.Free;
   FRegEx.Free;
   FParseRegEx.Free;
