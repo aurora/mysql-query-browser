@@ -26,11 +26,24 @@ const
 type
   TDocumentCompleteEvent = procedure(Sender: TObject; const pDisp: IDispatch; var URL: OleVariant) of object;
 
+  { Links with an anchor are not handled by the file provider but reported through OnHotClick, so that
+    TEmbeddedWB can show just the addressed section (see Navigate) }
+  TDocFileProvider = class(TIpFileDataProvider)
+  public
+    function CanHandle(const URL: string): Boolean; override;
+  end;
+
   TEmbeddedWB = class(TIpHtmlPanel)
+  private
+    FCurFile: String;
+    FFileText: String;
+    FFileName: String;
+    procedure ShowSection(const FileName, Anchor: String);
+    procedure DoLinkClick(Sender: TObject);
   private
     FOnDocumentComplete: TDocumentCompleteEvent;
     FUserInterfaceOptions: TUserInterfaceOptions;
-    FProvider: TIpFileDataProvider;
+    FProvider: TDocFileProvider;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -45,12 +58,24 @@ type
 
 implementation
 
+const
+  // IpHtml lays out roughly 10 KB of these pages per second; the reference files are 280-380 KB, so
+  // only the addressed section is shown.
+  SectionLimit = 24000;
+  FileLimit = 40000;
+
+function TDocFileProvider.CanHandle(const URL: string): Boolean;
+begin
+  Result := (Pos('#', URL) = 0) and inherited CanHandle(URL);
+end;
+
 constructor TEmbeddedWB.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FProvider := TIpFileDataProvider.Create(Self);
+  FProvider := TDocFileProvider.Create(Self);
   DataProvider := FProvider;
   BorderStyle := bsNone;
+  OnHotClick := DoLinkClick;
 end;
 
 destructor TEmbeddedWB.Destroy;
@@ -70,6 +95,8 @@ var
   S: String;
   Anchor: String;
   P: Integer;
+  Info: TSearchRec;
+  Big: Boolean;
 begin
   S := VarToStr(URL);
   if Pos('file://', LowerCase(S)) = 1 then
@@ -78,11 +105,116 @@ begin
   P := Pos('#', S);
   if P > 0 then
   begin
-    Anchor := Copy(S, P, MaxInt);
+    Anchor := Copy(S, P + 1, MaxInt);
     S := Copy(S, 1, P - 1);
   end;
   S := StringReplace(S, '\', '/', [rfReplaceAll]);
-  OpenURL(S + Anchor);
+  FCurFile := S;
+
+  Big := False;
+  if FindFirst(S, faAnyFile, Info) = 0 then
+  begin
+    Big := Info.Size > FileLimit;
+    FindClose(Info);
+  end;
+  if Big and (Anchor <> '') then
+    ShowSection(S, Anchor)
+  else
+  begin
+    if Anchor <> '' then
+      Anchor := '#' + Anchor;
+    OpenURL(S + Anchor);
+  end;
+end;
+
+procedure TEmbeddedWB.ShowSection(const FileName, Anchor: String);
+var
+  Upper: String;
+  A, StartPos, EndPos, Q: Integer;
+  Stream: TStringStream;
+  Html: String;
+  FS: TFileStream;
+begin
+  if FFileName <> FileName then
+  begin
+    FS := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+    try
+      SetLength(FFileText, FS.Size);
+      if FS.Size > 0 then
+        FS.ReadBuffer(FFileText[1], FS.Size);
+    finally
+      FS.Free;
+    end;
+    FFileName := FileName;
+  end;
+
+  Upper := UpperCase(FFileText);
+  A := Pos('NAME="' + UpperCase(Anchor) + '"', Upper);
+  if A = 0 then
+    A := 1;
+
+  // start at the closest heading before the anchor, or a little before the anchor
+  StartPos := A;
+  while (StartPos > 1) and (A - StartPos < SectionLimit) and
+    not ((Copy(Upper, StartPos, 2) = '<H') and (Upper[StartPos + 2] in ['1'..'6'])) do
+    Dec(StartPos);
+  if A - StartPos >= SectionLimit then
+  begin
+    StartPos := A - 4000;
+    if StartPos < 1 then
+      StartPos := 1;
+    Q := StartPos;
+    while (Q < A) and (Copy(Upper, Q, 3) <> '<P>') do
+      Inc(Q);
+    if Q < A then
+      StartPos := Q;
+  end;
+
+  // end at the next heading, at most SectionLimit characters later (on a paragraph end)
+  EndPos := A + 1;
+  while (EndPos < Length(Upper)) and (EndPos - A < SectionLimit) and
+    not ((Copy(Upper, EndPos, 2) = '<H') and (Upper[EndPos + 2] in ['1'..'6'])) do
+    Inc(EndPos);
+  if (EndPos < Length(Upper)) and (EndPos - A >= SectionLimit) then
+  begin
+    Q := Pos('</P>', Copy(Upper, EndPos, MaxInt));
+    if (Q > 0) and (Q < 4000) then
+      Inc(EndPos, Q + 3);
+  end;
+
+  Html := '<HTML><HEAD><TITLE></TITLE></HEAD><BODY>' + Copy(FFileText, StartPos, EndPos - StartPos) +
+    '</BODY></HTML>';
+  // IpHtml shows numeric entities inside <PRE> literally; use the named ones
+  Html := StringReplace(Html, '&#62;', '&gt;', [rfReplaceAll]);
+  Html := StringReplace(Html, '&#60;', '&lt;', [rfReplaceAll]);
+  Stream := TStringStream.Create(Html);
+  try
+    SetHtmlFromStream(Stream);
+  finally
+    Stream.Free;
+  end;
+end;
+
+procedure TEmbeddedWB.DoLinkClick(Sender: TObject);
+var
+  U, FileName: String;
+  P: Integer;
+begin
+  U := HotURL;
+  P := Pos('#', U);
+  if P = 0 then
+    Exit;
+  FileName := Copy(U, 1, P - 1);
+  // keep the file part's name only; the pages live in one folder
+  P := LastDelimiter('/\', FileName);
+  if P > 0 then
+    FileName := Copy(FileName, P + 1, MaxInt);
+  if FileName <> '' then
+    FileName := ExtractFilePath(FCurFile) + FileName
+  else
+    FileName := FCurFile;
+  if FileExists(FileName) then
+    Navigate(FileName + Copy(U, Pos('#', U), MaxInt));
 end;
 
 function TEmbeddedWB.OleObject: Variant;
