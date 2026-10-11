@@ -162,3 +162,9 @@ choice that a future contributor would ask "why?" about, write the ADR.
 - **`TObject.ToString` shadows a constant named `toString`** inside methods (renamed `toStringLit` in
   LexicalTools/ScriptPanel).
 - **`set of WideChar` is not allowed in FPC**; use `WideCharIn` from `compat/Unicode.pas`.
+- **`Width`/`Height` inside `with Canvas do` are the canvas's, not the control's.** The VCL's `TCanvas` has
+  no such properties, the LCL's has (and they are not the control's size). Ported paint code that
+  worked in the VCL draws in the wrong place (e.g. the result navigation bar lost its right-hand
+  buttons). Write `Self.Width`/`Self.Height`.
+- **`TImage.Canvas` is the picture's canvas,** not the control's: drawing on it changes the picture and
+  repaints forever. A `TImage`-derived control that paints itself uses the graphic control's canvas.

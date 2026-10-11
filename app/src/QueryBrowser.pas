@@ -1887,6 +1887,12 @@ begin
       Node := SchemataFrame.CatalogVST.GetNext(Node);
     end;
     L.Add('visible=' + IntToStr(SchemataFrame.CatalogVST.VisibleCount));
+    if ActiveResultsetPanel <> nil then
+      with ActiveResultsetPanel do
+      begin
+        L.Add(Format('panel %d,%d %dx%d parent %s %dx%d', [Left, Top, Width, Height, Parent.ClassName, Parent.Width, Parent.Height]));
+        L.Add(Format('nav %d,%d %dx%d align=%d', [RSNav.Left, RSNav.Top, RSNav.Width, RSNav.Height, Ord(RSNav.Align)]));
+      end;
     L.SaveToFile('dbg.txt');
   finally
     L.Free;

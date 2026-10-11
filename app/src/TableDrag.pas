@@ -115,10 +115,10 @@ begin
     Pen.Color:=$009C9B91;
     Brush.Color:=clWhite;
     Rectangle(Rect(0, 0,
-      Width,
-      Height));
+      Self.Width,
+      Self.Height));
 
-    xpos:=Width;
+    xpos:=Self.Width;
 
     if (FDragTarget = TMYX_SCHEMA_TABLE) then
     begin

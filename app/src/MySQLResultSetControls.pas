@@ -3497,9 +3497,9 @@ begin
       Brush.Color := clWhite
     else
       Brush.Color := $00EEEEEE;
-    Rectangle(Rect(0, -1, Width, Height));
+    Rectangle(Rect(0, -1, Self.Width, Self.Height));
 
-    xpos := Width;
+    xpos := Self.Width;
 
     RSSearchXPos := PaintEditButton(_('Search'), xpos, RSSearchPNGImg,
       RSSearchDisabledPNGImg, MySQLRS.AtLeastOneRecord);
@@ -3554,7 +3554,7 @@ var
 begin
   with Canvas do
   begin
-    if (Width > 550) then
+    if (Self.Width > 550) then
     begin
       s := _(Caption);
 

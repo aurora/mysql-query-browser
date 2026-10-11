@@ -789,7 +789,7 @@ begin
 
     // Bottom white line
     Brush.Color := clWhite;
-    FillRect(Rect(1, 23 - 4 + TopSpace, Width - 1, Height));
+    FillRect(Rect(1, 23 - 4 + TopSpace, Self.Width - 1, Self.Height));
 
     CurrentLeft := SeparatorWidth;
     Bottom := Tabheight - 7 - BottomSpace + TopSpace;
@@ -822,7 +822,7 @@ begin
     begin
       Tab := TTab(FTabs[I]);
 
-      if Tab.FBounds.Right > (Width - SeparatorWidth) then
+      if Tab.FBounds.Right > (Self.Width - SeparatorWidth) then
       begin
         // Stop painting if we filled up the client area.
         DrawListButton := True;
@@ -917,8 +917,8 @@ begin
     end;
 
     // Draw border line from last tab to the right and then down.
-    LineTo(Width - 1, Bottom - 1);
-    LineTo(Width - 1, Tabheight - BottomSpace + TopSpace);
+    LineTo(Self.Width - 1, Bottom - 1);
+    LineTo(Self.Width - 1, Tabheight - BottomSpace + TopSpace);
 
     if FShowButtons then
     begin
@@ -926,10 +926,10 @@ begin
       begin
         if (FHighlightedButton = 2) then
           FListTabPNGImg.Draw(FPaintBoxBufferedImage.Canvas,
-            Rect(Width - SeparatorWidth - FListTabPNGImg.Width, 0, Width - SeparatorWidth, FListTabPNGImg.Height))
+            Rect(Self.Width - SeparatorWidth - FListTabPNGImg.Width, 0, Self.Width - SeparatorWidth, FListTabPNGImg.Height))
         else
           FListTabPNGImg.DrawFaded(FPaintBoxBufferedImage.Canvas,
-            Rect(Width - SeparatorWidth - FListTabPNGImg.Width, 0, Width - SeparatorWidth, FListTabPNGImg.Height), 60);
+            Rect(Self.Width - SeparatorWidth - FListTabPNGImg.Width, 0, Self.Width - SeparatorWidth, FListTabPNGImg.Height), 60);
 
         FTabListBtnShown := True;
       end
@@ -939,9 +939,9 @@ begin
 
     if FDrawBottom then
     begin
-      MoveTo(Width - 1, TabHeight - 4 + TopSpace);
-      LineTo(Width - 1, Height - 1);
-      LineTo(0, Height - 1);
+      MoveTo(Self.Width - 1, TabHeight - 4 + TopSpace);
+      LineTo(Self.Width - 1, Self.Height - 1);
+      LineTo(0, Self.Height - 1);
       LineTo(0, TabHeight - 4 + TopSpace);
     end;
   end;
