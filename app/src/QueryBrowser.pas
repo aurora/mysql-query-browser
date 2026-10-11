@@ -658,6 +658,8 @@ type
     procedure SaveScript;
     procedure DevSetText(const SQL: WideString);   // developer mode (--sql): enter a query ...
     procedure DevDump;
+    procedure DevDblClickTable(SchemaIndex, TableIndex: Integer);
+    procedure DevTab(Upper: Boolean; Index: Integer);
     procedure DevHelp(const URL: WideString);
     procedure DevType(const SQL: String);
     procedure DevScript(const Text: WideString; BreakLine: Integer; Run: Boolean);
@@ -1866,6 +1868,45 @@ procedure TQueryBrowserForm.DevHelp(const URL: WideString);
 
 begin
   ShowHelpTabSheet(URL);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevDblClickTable(SchemaIndex, TableIndex: Integer);
+
+// Double clicks a table node (the schema must have been expanded before)
+
+var
+  Node: PVirtualNode;
+  I: Integer;
+
+begin
+  Node := SchemataFrame.CatalogVST.GetFirst;
+  for I := 1 to SchemaIndex do
+    if Node <> nil then
+      Node := SchemataFrame.CatalogVST.GetNextSibling(Node);
+  if Node = nil then
+    Exit;
+  Node := SchemataFrame.CatalogVST.GetFirstChild(Node);
+  for I := 1 to TableIndex do
+    if Node <> nil then
+      Node := SchemataFrame.CatalogVST.GetNextSibling(Node);
+  if Node = nil then
+    Exit;
+  SchemataFrame.CatalogVST.FocusedNode := Node;
+  SchemataFrame.CatalogVST.Selected[Node] := True;
+  SchemataFrameCatalogVSTDblClick(SchemataFrame.CatalogVST);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevTab(Upper: Boolean; Index: Integer);
+
+begin
+  if Upper then
+    UpperTabHeaderFrame.SelectedTab := Index
+  else
+    LowerTabHeaderFrame.SelectedTab := Index;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

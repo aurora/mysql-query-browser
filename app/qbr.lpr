@@ -217,6 +217,23 @@ begin
           for K := 1 to 40 do begin Application.ProcessMessages; CheckSynchronize; MainForm.DevIdle; Sleep(50); end;
         end;
       for I := 1 to ParamCount - 1 do
+        if (ParamStr(I) = '--upper-tab') or (ParamStr(I) = '--lower-tab') then
+        begin
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevTab(
+            ParamStr(I) = '--upper-tab', StrToIntDef(ParamStr(I + 1), 0));
+          for K := 1 to 20 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+        end;
+      for I := 1 to ParamCount - 1 do
+        if ParamStr(I) = '--dblclick-table' then
+        begin
+          // --dblclick-table <schema index> <table index>
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevDblClickTable(
+            StrToIntDef(ParamStr(I + 1), 0), StrToIntDef(ParamStr(I + 2), 0));
+          for K := 1 to 60 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+        end;
+      for I := 1 to ParamCount - 1 do
         if ParamStr(I) = '--sql' then
         begin
           for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
