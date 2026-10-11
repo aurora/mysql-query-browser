@@ -35,7 +35,7 @@ waits until after parity and gets its own decision.
   toolbar icons/labels and SQL token colours work. Known gaps: line-number font and gutter width,
   token colours for embedded commands/variables, script toolbar labels touch each other with the German texts (probably as in the original). Checked by
   screenshot: query run on 5.7 and 8.x, schema tree expansion, script tab with breakpoint stop and
-  progress bar (`--script`, `--expand`, `--sql` dev hooks). Not yet checked: real keyboard/mouse
+  progress bar (`--script`, `--expand`, `--sql` dev hooks). Also checked by screenshot or file output: EXPLAIN panel, edit/apply with server error, all five result exporters (CSV, HTML, XML, Excel, PLIST), table double click and drop, the edit/error message dialogs, options pages, text search, schema selection, RegEx importer. Not yet checked: real keyboard/mouse
   interaction, bookmarks, history, the console tab (`SqlCmdPanel` is not used by the Query Browser).
 
 ## Next (in this order)

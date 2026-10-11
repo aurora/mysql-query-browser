@@ -1911,6 +1911,8 @@ procedure TQueryBrowserForm.DevCommand(const Name: String);
 
 var
   P: Integer;
+  PMyxList: PMYX_STRINGLIST;
+  MyxList: TMYX_STRINGLIST;
 
 begin
   P := Pos(',', Name);
@@ -1933,6 +1935,32 @@ begin
       else
         if SameText(Name, 'edit') then
           ActiveResultset.DoEdit
+        else
+        if Name = 'bookmark' then
+          AddBookmark('select 1')
+        else
+        if Name = 'bad' then
+          ShowError('Error', _('The file %s cannot be written.'), ['x.txt'])
+        else
+        if Name = 'formats' then
+        begin
+          with TStringList.Create do
+          try
+            PMyxList := myx_get_table_export_formats;
+            MyxList := TMYX_STRINGLIST.create(PMyxList);
+            for P := 0 to MyxList.strings.Count - 1 do
+              Add(MyxList.strings[P]);
+            SaveToFile('dbg.txt');
+          finally
+            Free;
+          end;
+        end
+        else
+        if Copy(Name, 1, 7) = 'export:' then
+        begin
+          // export:<format>=<file>
+          SaveResultsetAs(Copy(Name, 8, Pos('=', Name) - 8), Copy(Name, Pos('=', Name) + 1, MaxInt));
+        end
         else
         if SameText(Name, 'setcell') then
           TGridAccess(ActiveResultsetPanel.RSGrid).DoNewText(ActiveResultsetPanel.RSGrid.GetFirst, 1, 'EDITED')

@@ -7,7 +7,7 @@ program qbr;
 {$R res/mysqlqb.res}
 
 uses
-  Interfaces, Classes, Forms, SysUtils, Windows, Messages, OptionsEditor,
+  Interfaces, Classes, Forms, SysUtils, Windows, Messages, OptionsEditor, ExtCtrls, Controls,
   TntClasses, TntStdCtrls, TntCheckLst, TntExtCtrls, TntForms, TntComCtrls, TntButtons, TntGrids,
   TntMenus, TntActnList, TntDialogs, TntRegistry, TntSysUtils, TntSystem, TntClipBrd,
   gnugettext, PNGImage, PNGTools, ResSelfTest, AuxFuncs, Options, MyxError, AuxApplicationFuncs,
@@ -69,7 +69,28 @@ begin
   Old(Msg);
 end;
 
+type
+  // developer mode: modal dialogs block, so a timer photographs and closes the active one
+  TModalShooter = class
+    FileName: String;
+    Timer: TTimer;
+    procedure Fire(Sender: TObject);
+  end;
+
+procedure TModalShooter.Fire(Sender: TObject);
+begin
+  Timer.Enabled := False;
+  if (Screen.ActiveForm <> nil) and (Screen.ActiveForm <> Application.MainForm) then
+  begin
+    CaptureWindowToPng(Screen.ActiveForm, FileName);
+    Screen.ActiveForm.ModalResult := mrCancel;
+  end
+  else
+    Timer.Enabled := True;
+end;
+
 var
+  Shooter: TModalShooter;
   Logger: TExceptionLogger;
   Counter: TMsgCounter;
 
@@ -253,6 +274,14 @@ begin
       for I := 1 to ParamCount - 1 do
         if ParamStr(I) = '--cmd' then
         begin
+          if (I + 3 <= ParamCount) and (ParamStr(I + 2) = '--modal-shot') then
+          begin
+            Shooter := TModalShooter.Create;
+            Shooter.FileName := ParamStr(I + 3);
+            Shooter.Timer := TTimer.Create(nil);
+            Shooter.Timer.Interval := 1500;
+            Shooter.Timer.OnTimer := Shooter.Fire;
+          end;
           // runs after --sql/--type; repeatable only once per run
           for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
           TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevCommand(ParamStr(I + 1));
