@@ -7,7 +7,7 @@ program qbr;
 {$R res/mysqlqb.res}
 
 uses
-  Interfaces, Classes, Forms, SysUtils,
+  Interfaces, Classes, Forms, SysUtils, Windows, Messages,
   TntClasses, TntStdCtrls, TntCheckLst, TntExtCtrls, TntForms, TntComCtrls, TntButtons, TntGrids,
   TntMenus, TntActnList, TntDialogs, TntRegistry, TntSysUtils, TntSystem, TntClipBrd,
   gnugettext, PNGImage, PNGTools, ResSelfTest, AuxFuncs, Options, MyxError, AuxApplicationFuncs,
@@ -23,7 +23,7 @@ var
   ExeDir: String;
   Res: Integer;
   ShotFile: String;
-  K: Integer;
+  K, J: Integer;
 
 procedure LogUnhandled(E: Exception);
 var
@@ -54,8 +54,23 @@ begin
   Halt(3);                      // do not sit in a modal error dialog
 end;
 
+type
+  TMsgCounter = class
+    Counts: array[0..2047] of Integer;
+    Old: TWndMethod;
+    procedure Hook(var Msg: TMessage);
+  end;
+
+procedure TMsgCounter.Hook(var Msg: TMessage);
+begin
+  if Msg.Msg < 2048 then
+    Inc(Counts[Msg.Msg]);
+  Old(Msg);
+end;
+
 var
   Logger: TExceptionLogger;
+  Counter: TMsgCounter;
 
 begin
   Logger := TExceptionLogger.Create;
@@ -165,11 +180,39 @@ begin
           for K := 1 to 40 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
         end;
       for I := 1 to ParamCount - 1 do
+        if ParamStr(I) = '--mouse-test' then
+        begin
+          // posts WM_MOUSEMOVE to our own main window over several areas and reports paint-related messages
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          Counter := TMsgCounter.Create;
+          Counter.Old := MainForm.WindowProc;
+          MainForm.WindowProc := Counter.Hook;
+          with TStringList.Create do
+          try
+            for J := 0 to 4 do
+            begin
+              FillChar(Counter.Counts, SizeOf(Counter.Counts), 0);
+              for K := 1 to 100 do
+              begin
+                PostMessage(MainForm.Handle, $0200, 0, ((70 + J * 150) shl 16) or (60 + K * 5 + J * 100));
+                Application.ProcessMessages;
+                MainForm.DevIdle;
+              end;
+              Add(Format('area %d: paint=%d ncpaint=%d erase=%d mousemove=%d setcursor=%d timer=%d',
+                [J, Counter.Counts[$000F], Counter.Counts[$0085], Counter.Counts[$0014], Counter.Counts[$0200],
+                 Counter.Counts[$0020], Counter.Counts[$0113]]));
+            end;
+            SaveToFile('mousetest.txt');
+          finally
+            Free;
+          end;
+        end;
+      for I := 1 to ParamCount - 1 do
         if ParamStr(I) = '--help-page' then
         begin
           for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
           TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevHelp(UTF8Decode(ParamStr(I + 1)));
-          for K := 1 to 40 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          for K := 1 to 40 do begin Application.ProcessMessages; CheckSynchronize; MainForm.DevIdle; Sleep(50); end;
         end;
       for I := 1 to ParamCount - 1 do
         if ParamStr(I) = '--sql' then

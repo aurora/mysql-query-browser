@@ -122,6 +122,8 @@ type
     procedure OnlineDocsPHPAPIMIClick(Sender: TObject);
 
     procedure HandleIdle(Sender: TObject; var Done: Boolean);
+    procedure DevMenuChanged(Sender: TObject; Source: TMenuItem; Rebuild: Boolean);
+    procedure DevIdle;
     procedure CutMIClick(Sender: TObject);
     procedure CopyMIClick(Sender: TObject);
     procedure PasteMIClick(Sender: TObject);
@@ -192,10 +194,39 @@ uses
 
 //----------------------------------------------------------------------------------------------------------------------
 
+var
+  DevMenuLog: TStringList;
+
+procedure TMainForm.DevMenuChanged(Sender: TObject; Source: TMenuItem; Rebuild: Boolean);
+
+begin
+  if DevMenuLog.Count < 300 then
+    DevMenuLog.Add(FormatDateTime('hh:nn:ss.zzz', Now) + ' ' + Source.Name + ' "' + Source.Caption + '" en=' +
+      BoolToStr(Source.Enabled, True) + ' rebuild=' + BoolToStr(Rebuild, True));
+  DevMenuLog.SaveToFile('menulog.txt');
+end;
+
+procedure TMainForm.DevIdle;
+
+var
+  Done: Boolean;
+
+begin
+  HandleIdle(Self, Done);
+  if GetEnvironmentVariable('QBR_MENUPROBE') <> '' then
+    CutMI.Enabled := not CutMI.Enabled;
+end;
+
 procedure TMainForm.FormCreate(Sender: TObject);
 
 begin
   InitForm(self);
+
+  if GetEnvironmentVariable('QBR_MENULOG') <> '' then
+  begin
+    DevMenuLog := TStringList.Create;
+    MainMenu.OnChange := DevMenuChanged;
+  end;
 
   if (Not(MYXCommonOptions.NoRegistry)) then
     RegisterMySQLApplication(Application.Title,
