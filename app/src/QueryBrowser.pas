@@ -658,6 +658,7 @@ type
     procedure SaveScript;
     procedure DevSetText(const SQL: WideString);   // developer mode (--sql): enter a query ...
     procedure DevDump;
+    procedure DevScript(const Text: WideString; BreakLine: Integer; Run: Boolean);
     procedure DevExecute;                          // ... and run it
     procedure DevExpandSchema(Index: Integer);     // developer mode (--expand): open a schema node and its children
     function SaveScriptAs(ScriptPanel: TScriptPanel): Boolean;
@@ -1821,6 +1822,20 @@ begin
     Child := SchemataFrame.CatalogVST.GetNextSibling(Child);
   end;
   SchemataFrame.CatalogVST.Invalidate;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevScript(const Text: WideString; BreakLine: Integer; Run: Boolean);
+
+begin
+  FActiveScriptTabSheet := AddNewScriptTabSheet;
+  ActiveScriptPanel.ScriptEditor.Content.Text := Text;
+  Application.ProcessMessages;
+  if BreakLine >= 0 then
+    ActiveScriptPanel.ScriptEditor.ToggleBreakpoint(BreakLine);
+  if Run then
+    ScriptExecute([exoStartOver, exoStopOnBreakpoints]);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

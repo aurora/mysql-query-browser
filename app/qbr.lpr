@@ -147,6 +147,15 @@ begin
           TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevDump;
         end;
       for I := 1 to ParamCount - 1 do
+        if ParamStr(I) = '--script' then
+        begin
+          // --script "<sql separated by |>" <breakline or -1>
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevScript(
+            UTF8Decode(StringReplace(ParamStr(I + 1), '|', #13#10, [rfReplaceAll])), StrToIntDef(ParamStr(I + 2), -1), True);
+          for K := 1 to 40 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+        end;
+      for I := 1 to ParamCount - 1 do
         if ParamStr(I) = '--sql' then
         begin
           for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
