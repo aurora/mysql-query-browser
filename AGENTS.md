@@ -44,6 +44,8 @@ If you need a different generated result, change the generator, not its output.
 ## Everyday commands
 
 ```bash
+./build.sh [--backend] [--runtime] [--run args]   # build the application (see the script header)
+
 # backend (needs C:\msys64\mingw64\bin on PATH)
 cmake -S backend -B backend/build -G Ninja && cmake --build backend/build
 
