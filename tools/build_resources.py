@@ -23,8 +23,45 @@ SCRIPTS = {
 }
 
 
+def make_app_rc():
+    """Icon and version information of qbr.exe, from the VERSION file. No copyright holder is
+    invented: that string is left out."""
+    ver = open(os.path.join(ROOT, "VERSION"), encoding="utf-8").read().strip()
+    nums = (re.findall(r"[0-9]+", ver) + ["0", "0", "0", "0"])[:4]
+    icon = os.path.join(ROOT, "legacy", "mysql-query-browser", "images", "icons", "MySQLQueryBrowser.ico")
+    rc = os.path.join(OUT, "qbr.rc")
+    strings = (("FileDescription", "Query Browser (revival of the MySQL Query Browser)"),
+               ("FileVersion", ver), ("InternalName", "qbr"), ("OriginalFilename", "qbr.exe"),
+               ("ProductName", "MySQL Query Browser"), ("ProductVersion", ver))
+    lines = ['MAINICON ICON "%s"' % icon.replace("\\", "/"),
+             "1 VERSIONINFO",
+             "FILEVERSION %s" % ",".join(nums),
+             "PRODUCTVERSION %s" % ",".join(nums),
+             "FILEOS 0x00040004L",
+             "FILETYPE 0x00000001L",
+             "{",
+             ' BLOCK "StringFileInfo"',
+             " {",
+             '  BLOCK "040904E4"',
+             "  {"]
+    lines += ['   VALUE "%s", "%s\\000"' % kv for kv in strings]
+    lines += ["  }", " }", ' BLOCK "VarFileInfo"', " {", '  VALUE "Translation", 1033, 1252', " }", "}"]
+    with open(rc, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("\n".join(lines) + "\n")
+    return rc
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
+    rc = make_app_rc()
+    env = dict(os.environ)
+    env["PATH"] = os.path.dirname(WINDRES) + os.pathsep + env["PATH"]
+    r = subprocess.run([WINDRES, "--input", rc, "--output", os.path.join(OUT, "qbr.res"),
+                        "--output-format=res"], capture_output=True, text=True, env=env)
+    if r.returncode != 0:
+        sys.stderr.write("windres failed for qbr.rc:\n%s%s\n" % (r.stdout, r.stderr))
+        return 1
+    print("qbr: icon and version %s" % open(os.path.join(ROOT, "VERSION")).read().strip())
     for name, rc in SCRIPTS.items():
         res = os.path.join(OUT, name + ".res")
         env = dict(os.environ)

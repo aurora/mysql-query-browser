@@ -45,6 +45,7 @@ If you need a different generated result, change the generator, not its output.
 
 ```bash
 ./build.sh [--backend] [--runtime] [--run args]   # build the application (see the script header)
+tools/package.sh [--velopack] [--no-build]       # release package in dist/ (version from VERSION, ADR-0014)
 
 # backend (needs C:\msys64\mingw64\bin on PATH)
 cmake -S backend -B backend/build -G Ninja && cmake --build backend/build

@@ -22,6 +22,7 @@ Related.
 | [0011](0011-license-gpl-2-or-later.md) | License: GPL-2.0-or-later, as the original | Accepted |
 | [0012](0012-sql-editor-compatibility-layer-over-synedit.md) | SQL editor: a UniCodeEditor-compatible layer over SynEdit | Accepted; visual review outstanding |
 | [0013](0013-inline-help-reference-and-multiple-servers.md) | Inline help (reference) with several servers and versions | Proposed (parity step done; content open) |
+| [0014](0014-release-packaging-and-updates-with-velopack.md) | Release packaging and updates with Velopack | Proposed (packaging implemented) |
 
 ## Numbering
 

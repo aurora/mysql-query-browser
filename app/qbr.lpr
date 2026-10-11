@@ -5,6 +5,7 @@ program qbr;
 
 {$R res/mysqlcommon.res}
 {$R res/mysqlqb.res}
+{$R res/qbr.res}
 
 uses
   Interfaces, Classes, Forms, SysUtils, Windows, Messages, OptionsEditor, ExtCtrls, Controls,
