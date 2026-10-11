@@ -658,6 +658,7 @@ type
     procedure SaveScript;
     procedure DevSetText(const SQL: WideString);   // developer mode (--sql): enter a query ...
     procedure DevDump;
+    procedure DevHelp(const URL: WideString);
     procedure DevType(const SQL: String);
     procedure DevScript(const Text: WideString; BreakLine: Integer; Run: Boolean);
     procedure DevExecute;                          // ... and run it
@@ -1857,6 +1858,14 @@ begin
     FSQLEditor.CommandProcessor(SynEditKeyCmds.ecChar, Ch, nil);
     Application.ProcessMessages;
   end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevHelp(const URL: WideString);
+
+begin
+  ShowHelpTabSheet(URL);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -4775,6 +4784,10 @@ var
   Name: WideString;
 
 begin
+  // Port: while the form is destroyed the tab panels (owned by the form) are already gone
+  if csDestroying in ComponentState then
+    Exit;
+
   if (Sender <> nil) then
     if (Sender is TTab) then
     begin
@@ -4842,6 +4855,10 @@ procedure TQueryBrowserForm.DoMainTabPageDelete(Sender: TObject);
 var
   i, TabCount: Integer;
 begin
+  // Port: while the form is destroyed its components (panels, help browser) are freed by the owner
+  if csDestroying in ComponentState then
+    Exit;
+
   if (Sender <> nil) then
     if (Sender is TTab) then
     begin

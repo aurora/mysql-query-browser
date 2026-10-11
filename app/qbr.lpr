@@ -165,6 +165,13 @@ begin
           for K := 1 to 40 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
         end;
       for I := 1 to ParamCount - 1 do
+        if ParamStr(I) = '--help-page' then
+        begin
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevHelp(UTF8Decode(ParamStr(I + 1)));
+          for K := 1 to 40 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+        end;
+      for I := 1 to ParamCount - 1 do
         if ParamStr(I) = '--sql' then
         begin
           for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;

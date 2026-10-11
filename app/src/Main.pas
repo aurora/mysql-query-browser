@@ -775,6 +775,7 @@ procedure TMainForm.HandleIdle(Sender: TObject; var Done: Boolean);
 
 var
   Enable: Boolean;
+  EnableSave, EnableSaveAs, EnableCloseTab: Boolean;
   i: integer;
 
 begin
@@ -824,9 +825,10 @@ begin
       ReconnectMI.Caption := _('Connect');
   end;
 
-  SaveMI.Enabled := False;
-  SaveAsMI.Enabled := False;
-  CloseTabMI.Enabled := False;
+  // Port: collect the states and assign once; flipping the items False/True on every idle redraws the menu bar
+  EnableSave := False;
+  EnableSaveAs := False;
+  EnableCloseTab := False;
   if (SectionControls <> nil) then
     if (SectionControls.CurrentSidebarSection <> nil) then
       if (SectionControls.CurrentSidebarSection.SectionForm is TQueryBrowserForm) then
@@ -835,14 +837,14 @@ begin
         begin
           if (CurrentPerspective = apScript) and Assigned(ActiveScriptPanel) then
           begin
-            SaveMI.Enabled := True;
-            SaveAsMI.Enabled := True;
+            EnableSave := True;
+            EnableSaveAs := True;
           end
           else
             if (CurrentPerspective = apResultset) then
             begin
               if (SQLEditor.Content.Count > 0) then
-                SaveAsMI.Enabled := True;
+                EnableSaveAs := True;
 
               if Assigned(ActiveResultset) then
               begin
@@ -854,7 +856,7 @@ begin
                   self.ExportResultsetMI.Items[i].Enabled := False;
             end;
 
-          CloseTabMI.Enabled := (MainTabHeaderFrame.TabCount > 1);
+          EnableCloseTab := (MainTabHeaderFrame.TabCount > 1);
 
           for i := 0 to ScriptMI.Count - 1 do
             if (ScriptMI.Items[i].Tag = 1) then
@@ -873,6 +875,10 @@ begin
             end;
         end;
       end;
+
+  SaveMI.Enabled := EnableSave;
+  SaveAsMI.Enabled := EnableSaveAs;
+  CloseTabMI.Enabled := EnableCloseTab;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -21,6 +21,7 @@ Related.
 | [0010](0010-multi-database-support-via-driver-seam.md) | Other RDBMS (PostgreSQL) via a driver seam, after parity | Proposed (design seam only) |
 | [0011](0011-license-gpl-2-or-later.md) | License: GPL-2.0-or-later, as the original | Accepted |
 | [0012](0012-sql-editor-compatibility-layer-over-synedit.md) | SQL editor: a UniCodeEditor-compatible layer over SynEdit | Accepted; visual review outstanding |
+| [0013](0013-inline-help-reference-and-multiple-servers.md) | Inline help (reference) with several servers and versions | Proposed (parity step done; content open) |
 
 ## Numbering
 

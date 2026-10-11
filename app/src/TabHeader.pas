@@ -999,7 +999,9 @@ begin
 
     // Determine usage count to know if the object can be freed or not (same for the panel).
     Tab := TTab(FTabs[TabIndex]);
-    if Assigned(Tab.Obj) and (foFreeObject in Tab.FFreeOptions) then
+    // Port: when the header itself is destroyed (the form is going down) the panels and objects are freed
+    // by their owners; freeing them here would hit already destroyed instances.
+    if Assigned(Tab.Obj) and (foFreeObject in Tab.FFreeOptions) and not (csDestroying in ComponentState) then
     begin
       Count := 0;
       Reference := Tab.Obj;
@@ -1009,7 +1011,7 @@ begin
       if Count = 1 then
         TTab(FTabs[TabIndex]).Obj.Free;
     end;
-    if Assigned(Tab.TabPanel)  and (foFreePanel in Tab.FFreeOptions) then
+    if Assigned(Tab.TabPanel)  and (foFreePanel in Tab.FFreeOptions) and not (csDestroying in ComponentState) then
     begin
       Count := 0;
       Reference := Tab.TabPanel;
