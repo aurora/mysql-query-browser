@@ -3807,6 +3807,7 @@ procedure TMySQLRSErrorGrid.DoMessagesChanged;
 var
   Node: PVirtualNode;
   Nodedata: PRSMsg;
+  NodesHeight: Integer;
 
 begin
   if FMySQLRS.ErrorMessages.Count = 0 then
@@ -3828,9 +3829,16 @@ begin
       Node := GetNext(Node);
     end;
 
-    if RootNodeCount = 1 then
-      ClientHeight := 1; // Client height bug. The first setting seems not to be honoured.
-    ClientHeight := Min(RootNode.TotalHeight - DefaultNodeHeight, 200);
+    // Port: RootNode.TotalHeight is not up to date here with the LCL's VirtualTrees, so sum the node
+    // heights (plus the header) explicitly.
+    NodesHeight := Header.Height;
+    Node := GetFirst;
+    while Assigned(Node) do
+    begin
+      Inc(NodesHeight, NodeHeight[Node]);
+      Node := GetNext(Node);
+    end;
+    ClientHeight := Min(NodesHeight, 200);
 
     Top := 2000;
   end;

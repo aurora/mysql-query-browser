@@ -658,6 +658,7 @@ type
     procedure SaveScript;
     procedure DevSetText(const SQL: WideString);   // developer mode (--sql): enter a query ...
     procedure DevDump;
+    procedure DevType(const SQL: String);
     procedure DevScript(const Text: WideString; BreakLine: Integer; Run: Boolean);
     procedure DevExecute;                          // ... and run it
     procedure DevExpandSchema(Index: Integer);     // developer mode (--expand): open a schema node and its children
@@ -741,7 +742,7 @@ implementation
 
 uses
   ApplicationDataModule, Math, PNGTools,
-  TntSysUtils, UCEEditorKeyCommands;
+  TntSysUtils, UCEEditorKeyCommands, SynEditKeyCmds;
 
 const
   // Some values that likely never going to change.
@@ -1836,6 +1837,26 @@ begin
     ActiveScriptPanel.ScriptEditor.ToggleBreakpoint(BreakLine);
   if Run then
     ScriptExecute([exoStartOver, exoStopOnBreakpoints]);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevType(const SQL: String);
+
+// Types into the SQL editor like a user (character commands through the editor's command processor).
+
+var
+  I: Integer;
+  Ch: String[7];
+
+begin
+  FSQLEditor.SetFocus;
+  for I := 1 to Length(SQL) do
+  begin
+    Ch := SQL[I];
+    FSQLEditor.CommandProcessor(SynEditKeyCmds.ecChar, Ch, nil);
+    Application.ProcessMessages;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
