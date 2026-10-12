@@ -37,6 +37,7 @@ type
     FServerVersion: String;
     FTopicCount: Integer;
     function FindCategory(const Name: String): TServerHelpCategory;
+    function IsInCategory(CategoryId, AncestorId: Integer): Boolean;
     function GroupFor(Category: TServerHelpCategory): TMYX_SQL_FUNCTIONGROUP;
     function ReadTable(Conn: TMySQLConn; const SQL: String; Columns: Integer; Rows: TObjectList;
       Make: Integer): Boolean;
@@ -155,6 +156,36 @@ begin
   Result := nil;
 end;
 
+function TServerHelp.IsInCategory(CategoryId, AncestorId: Integer): Boolean;
+
+// True if the category is the ancestor or lies below it (MariaDB nests e.g. the geographic features and operators).
+
+var
+  I, Depth: Integer;
+  Cat: TServerHelpCategory;
+begin
+  Result := False;
+  Depth := 0;
+  while Depth < 10 do
+  begin
+    if CategoryId = AncestorId then
+      Exit(True);
+    Cat := nil;
+    for I := 0 to FCategories.Count - 1 do
+      if TServerHelpCategory(FCategories[I]).Id = CategoryId then
+      begin
+        Cat := TServerHelpCategory(FCategories[I]);
+        Break;
+      end;
+    if (Cat = nil) or (Cat.ParentId = CategoryId) then
+      Exit;
+    CategoryId := Cat.ParentId;
+    Inc(Depth);
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 function TServerHelp.GroupFor(Category: TServerHelpCategory): TMYX_SQL_FUNCTIONGROUP;
 var
   I: Integer;
@@ -169,7 +200,7 @@ begin
     for I := 0 to FTopics.Count - 1 do
     begin
       Topic := TServerHelpTopic(FTopics[I]);
-      if Topic.CategoryId = Category.Id then
+      if IsInCategory(Topic.CategoryId, Category.Id) then
         Names.AddObject(Topic.Name, Topic);
     end;
     if Names.Count = 0 then
@@ -188,19 +219,26 @@ end;
 procedure TServerHelp.BuildIndexes(out SyntaxIndex, FunctionsIndex: TMYX_SQL_FUNCTIONINDEX);
 var
   I: Integer;
-  Cat, FuncRoot: TServerHelpCategory;
+  Cat, FuncRoot, Root: TServerHelpCategory;
+  RootId: Integer;
   Group: TMYX_SQL_FUNCTIONGROUP;
 begin
   SyntaxIndex := TMYX_SQL_FUNCTIONINDEX.Create;
   FunctionsIndex := TMYX_SQL_FUNCTIONINDEX.Create;
   FuncRoot := FindCategory('Functions');
+  // the root is "Contents": id 0 on MySQL, id 1 on MariaDB
+  Root := FindCategory('Contents');
+  if Root <> nil then
+    RootId := Root.Id
+  else
+    RootId := 0;
 
   // statements: the top level categories (children of "Contents") other than the functions container;
   // functions: the children of "Functions"
   for I := 0 to FCategories.Count - 1 do
   begin
     Cat := TServerHelpCategory(FCategories[I]);
-    if Cat.Id = 0 then
+    if (Cat = Root) or ((Root = nil) and (Cat.Id = 0)) then
       Continue;
     if (FuncRoot <> nil) and (Cat.ParentId = FuncRoot.Id) then
     begin
@@ -209,7 +247,7 @@ begin
         FunctionsIndex.groups.Add(Group);
     end
     else
-      if (Cat.ParentId = 0) and (Cat <> FuncRoot) and not SameText(Cat.Name, 'Help Metadata') then
+      if (Cat.ParentId = RootId) and (Cat <> FuncRoot) and not SameText(Cat.Name, 'Help Metadata') then
       begin
         Group := GroupFor(Cat);
         if Group <> nil then
