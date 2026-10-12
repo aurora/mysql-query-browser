@@ -21,7 +21,7 @@ uses
   Classes, SysUtils, Graphics, SynEditHighlighter, SynEditTypes;
 
 type
-  THelpLineKind = (hlProse, hlHeading, hlCode, hlLink, hlExample);
+  THelpLineKind = (hlProse, hlHeading, hlCode, hlLink, hlExample, hlSql, hlTable);
 
   THelpLineKindEvent = function(LineIndex: Integer): THelpLineKind of object;
 
@@ -43,6 +43,7 @@ type
     FSqlLine: String;
     FPhase: Integer;                   // 2: the rest of an example line is scanned by FSql
     FSqlFresh: Boolean;
+    FSqlOffset: Integer;               // where the SQL part of the line starts (7 after a "mysql> " prompt)
     procedure ScanCode;
     procedure ScanProse;
     function IsWordChar(C: Char): Boolean;
@@ -264,7 +265,7 @@ begin
       FTokenPos := FRun;
       Exit;
     end;
-    FTokenPos := 7 + FSql.GetTokenPos;
+    FTokenPos := FSqlOffset + FSql.GetTokenPos;
     FToken := tkSql;
     FRun := FTokenPos + FSql.GetTokenLen;
     Exit;
@@ -282,13 +283,31 @@ begin
     if FRun > Length(FLineStr) then
       FRun := Length(FLineStr);
     FSqlLine := Copy(FLineStr, 8, MaxInt);
+    FSqlOffset := 7;
     FSql.ResetRange;
     FSql.SetLine(FSqlLine, FLineNo);
     FPhase := 2;
     FSqlFresh := True;
     Exit;
   end;
+  if (FKind = hlSql) and (FSql <> nil) and (FRun = 0) then
+  begin
+    // a whole line of SQL (statements in the MariaDB texts have no prompt)
+    FSqlLine := FLineStr;
+    FSqlOffset := 0;
+    FSql.ResetRange;
+    FSql.SetLine(FSqlLine, FLineNo);
+    FPhase := 2;
+    FSqlFresh := True;
+    Next;
+    Exit;
+  end;
   case FKind of
+    hlTable:
+      begin
+        FToken := tkText;
+        FRun := Length(FLineStr);
+      end;
     hlHeading:
       begin
         FToken := tkHeading;
@@ -299,7 +318,7 @@ begin
         FToken := tkLink;
         FRun := Length(FLineStr);
       end;
-    hlCode, hlExample:
+    hlCode, hlExample, hlSql:
       ScanCode;
   else
     ScanProse;

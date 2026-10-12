@@ -51,6 +51,8 @@ type
     function FindTopic(const Id: String): TServerHelpTopic;
     function FindTopicByName(const Name: String): Integer;
     property ServerVersion: String read FServerVersion;
+    { where the vendor's documentation of this server is online }
+    function DocsURL: String;
     property TopicCount: Integer read FTopicCount;
   end;
 
@@ -107,6 +109,9 @@ begin
         else
           SetString(Values[C], Field.value, Field.value_length);
       end;
+      if Make = 2 then
+        FServerVersion := Values[0]
+      else
       if Make = 0 then
       begin
         Cat := TServerHelpCategory.Create;
@@ -133,11 +138,21 @@ begin
   end;
 end;
 
+function TServerHelp.DocsURL: String;
+begin
+  if Pos('mariadb', LowerCase(FServerVersion)) > 0 then
+    Result := 'https://mariadb.com/kb/en/documentation/'
+  else
+    Result := 'https://dev.mysql.com/doc/';
+end;
+
 function TServerHelp.Load(Conn: TMySQLConn): Boolean;
 begin
+  FServerVersion := '';
   FCategories.Clear;
   FTopics.Clear;
   FTopicCount := 0;
+  ReadTable(Conn, 'SELECT VERSION()', 1, nil, 2);
   Result := ReadTable(Conn, 'SELECT help_category_id, parent_category_id, name FROM mysql.help_category', 3,
     FCategories, 0) and
     ReadTable(Conn, 'SELECT help_topic_id, help_category_id, name, description, example, url FROM mysql.help_topic',

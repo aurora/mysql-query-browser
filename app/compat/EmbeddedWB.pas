@@ -34,12 +34,14 @@ type
     FOnDocumentComplete: TDocumentCompleteEvent;
     FUserInterfaceOptions: TUserInterfaceOptions;
     FHighlighter: THelpHighlighter;
+    FVendorDocs: String;
     function LineKind(LineIndex: Integer): THelpLineKind;
     function GetSql: TSynCustomHighlighter;
     procedure SetSql(Value: TSynCustomHighlighter);
     procedure AddLine(const S: String; Kind: THelpLineKind; const URL: String = '');
     procedure Reset;
     procedure ShowNote(const Title, Text: String);
+    procedure AddMarkupText(const Description: String);
   protected
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
@@ -54,6 +56,8 @@ type
     function OleObject: Variant;
     { the SQL editor's highlighter: the examples are coloured by it }
     property SqlHighlighter: TSynCustomHighlighter read GetSql write SetSql;
+    { where the vendor documentation of the connected server is online (named in the "no reference text" note) }
+    property VendorDocs: String read FVendorDocs write FVendorDocs;
     property OnDocumentComplete: TDocumentCompleteEvent read FOnDocumentComplete write FOnDocumentComplete;
     property UserInterfaceOptions: TUserInterfaceOptions read FUserInterfaceOptions write FUserInterfaceOptions;
   end;
@@ -298,6 +302,118 @@ begin
   end;
 end;
 
+function IsUnderline(const S: String): Boolean;
+// the "-----" line below a heading (MariaDB's texts are written like that)
+var
+  I: Integer;
+begin
+  Result := Length(Trim(S)) >= 3;
+  for I := 1 to Length(S) do
+    if S[I] <> '-' then
+      Exit(False);
+end;
+
+function IsTableLine(const S: String): Boolean;
+begin
+  Result := (Copy(S, 1, 2) = '+-') or (Copy(S, 1, 2) = '| ') or (Copy(S, 1, 2) = '|-');
+end;
+
+function StartsStatement(const S: String): Boolean;
+const
+  Words: array[0..17] of String = ('SELECT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER', 'SET', 'SHOW',
+    'WITH', 'CALL', 'USE', 'EXPLAIN', 'REPLACE', 'GRANT', 'TRUNCATE', 'DESC', 'LOAD');
+var
+  I, P: Integer;
+  W: String;
+begin
+  P := Pos(' ', S);
+  if P = 0 then
+    P := Length(S) + 1;
+  W := Copy(S, 1, P - 1);
+  Result := False;
+  for I := Low(Words) to High(Words) do
+    if W = Words[I] then
+      Exit(True);
+end;
+
+procedure TEmbeddedWB.AddMarkupText(const Description: String);
+
+// MariaDB's help texts are small documents: "Title" lines underlined with dashes, SQL statements with their
+// result tables, prose paragraphs.
+
+var
+  L: TStringList;
+  I, J: Integer;
+  Section: String;
+  InSql, ParaStart, Found: Boolean;
+begin
+  L := TStringList.Create;
+  try
+    L.Text := StringReplace(Description, #13#10, #10, [rfReplaceAll]);
+    Section := '';
+    InSql := False;
+    ParaStart := True;
+    I := 0;
+    while I < L.Count do
+    begin
+      if (Trim(L[I]) <> '') and (I + 1 < L.Count) and IsUnderline(L[I + 1]) and not IsTableLine(L[I]) then
+      begin
+        AddLine(L[I], hlHeading);
+        Section := Trim(L[I]);
+        Inc(I, 2);
+        InSql := False;
+        ParaStart := False;
+        Continue;
+      end;
+      if Trim(L[I]) = '' then
+      begin
+        AddLine('', hlProse);
+        InSql := False;
+        ParaStart := True;
+      end
+      else
+        if Copy(L[I], 1, 5) = 'URL: ' then
+          // shown as a link at the end instead
+        else
+          if IsTableLine(L[I]) then
+          begin
+            AddLine(L[I], hlTable);
+            InSql := False;
+            ParaStart := False;
+          end
+          else
+          begin
+            if SameText(Section, 'Syntax') then
+              AddLine(L[I], hlCode)
+            else
+            begin
+              if ParaStart and StartsStatement(L[I]) then
+              begin
+                // a statement if some line of the paragraph ends with the delimiter
+                Found := False;
+                J := I;
+                while (J < L.Count) and (Trim(L[J]) <> '') and not IsTableLine(L[J]) do
+                begin
+                  if Copy(TrimRight(L[J]), Length(TrimRight(L[J])), 1) = ';' then
+                    Found := True;
+                  Inc(J);
+                end;
+                InSql := Found;
+              end;
+              if InSql then
+                AddLine(L[I], hlSql)
+              else
+                AddLine(L[I], hlProse);
+            end;
+            ParaStart := False;
+          end;
+      Inc(I);
+    end;
+  finally
+    L.Free;
+  end;
+end;
+
 procedure TEmbeddedWB.ShowTopic(const Name, Description, Example, URL: String);
 var
   Para: TStringList;
@@ -310,6 +426,10 @@ begin
     AddLine(Name, hlHeading);
     AddLine('', hlProse);
 
+    if (Pos(#10 + '------', Description) > 0) or (Pos('Syntax' + #10 + '---', Description) = 1) then
+      AddMarkupText(Description)
+    else
+    begin
     // The server texts are hard wrapped plain text. The first paragraph is the syntax; later paragraphs
     // that start with an indent (grammar continuation, tables) are shown as code, the rest as prose.
     Para := TStringList.Create;
@@ -351,6 +471,7 @@ begin
       end;
     finally
       Para.Free;
+    end;
     end;
 
     if Trim(Example) <> '' then
@@ -425,8 +546,8 @@ begin
   if not FileExists(S) then
   begin
     ShowNote('No reference text', 'The reference text for this entry is not available. It comes from the' + #10 +
-      'help tables of the connected server; this server has none.' + #10#10 +
-      'The vendor documentation is online, for MySQL at https://dev.mysql.com/doc/');
+      'help tables of the connected server; this server has none or does not allow reading them.' + #10#10 +
+      'The vendor documentation is online: ' + FVendorDocs);
     Exit;
   end;
   FS := TFileStream.Create(S, fmOpenRead or fmShareDenyWrite);

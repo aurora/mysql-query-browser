@@ -645,6 +645,7 @@ type
 
     Bookmarks: TMYX_BOOKMARKS;
     FunctionsOverviewTree: TMYX_SQL_FUNCTIONINDEX;
+    FDocsURL: String;               // where the vendor's documentation is online (for the help pane's note)
     FServerHelp: TServerHelp;       // help from the connected server's help tables, nil if it has none
     SyntaxOverviewTree: TMYX_SQL_FUNCTIONINDEX;
 
@@ -3950,9 +3951,11 @@ begin
   Help := TServerHelp.Create;
   if not Help.Load(MySQLConn) then
   begin
+    FDocsURL := Help.DocsURL;
     Help.Free;
     Exit;
   end;
+  FDocsURL := Help.DocsURL;
   Help.BuildIndexes(SyntaxIndex, FunctionsIndex);
   FreeAndNil(FServerHelp);
   FServerHelp := Help;
@@ -4092,6 +4095,7 @@ begin
     TWinControl(HelpWebBrowser).Parent := HelpPnl;
     HelpWebBrowser.Align := alClient;
     HelpWebBrowser.Loaded;
+    HelpWebBrowser.VendorDocs := FDocsURL;
     HelpWebBrowser.SqlHighlighter := UCESQLHighlighter;   // the examples get the editor's colours
     HelpWebBrowser.OnDocumentComplete := DoHelpDocCompleted;
     HelpWebBrowser.UserInterfaceOptions := [{SCROLL_NO, }NO3DBORDER];
