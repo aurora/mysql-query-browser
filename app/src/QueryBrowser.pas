@@ -4092,6 +4092,7 @@ begin
     TWinControl(HelpWebBrowser).Parent := HelpPnl;
     HelpWebBrowser.Align := alClient;
     HelpWebBrowser.Loaded;
+    HelpWebBrowser.SqlHighlighter := UCESQLHighlighter;   // the examples get the editor's colours
     HelpWebBrowser.OnDocumentComplete := DoHelpDocCompleted;
     HelpWebBrowser.UserInterfaceOptions := [{SCROLL_NO, }NO3DBORDER];
 

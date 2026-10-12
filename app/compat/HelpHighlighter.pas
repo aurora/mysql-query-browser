@@ -21,12 +21,12 @@ uses
   Classes, SysUtils, Graphics, SynEditHighlighter, SynEditTypes;
 
 type
-  THelpLineKind = (hlProse, hlHeading, hlCode, hlLink);
+  THelpLineKind = (hlProse, hlHeading, hlCode, hlLink, hlExample);
 
   THelpLineKindEvent = function(LineIndex: Integer): THelpLineKind of object;
 
   TTokenKind = (tkNull, tkText, tkHeading, tkLink, tkKeyword, tkPlaceholder, tkString, tkNumber, tkSymbol,
-    tkPrompt, tkEmphasis);
+    tkPrompt, tkEmphasis, tkSql);
 
   THelpHighlighter = class(TSynCustomHighlighter)
   private
@@ -36,8 +36,13 @@ type
     FTokenPos: Integer;
     FToken: TTokenKind;
     FKind: THelpLineKind;
+    FLineNo: Integer;
     FOnGetLineKind: THelpLineKindEvent;
     FAttri: array[TTokenKind] of TSynHighlighterAttributes;
+    FSql: TSynCustomHighlighter;       // the editor's SQL highlighter, used for the examples
+    FSqlLine: String;
+    FPhase: Integer;                   // 2: the rest of an example line is scanned by FSql
+    FSqlFresh: Boolean;
     procedure ScanCode;
     procedure ScanProse;
     function IsWordChar(C: Char): Boolean;
@@ -54,13 +59,15 @@ type
     function GetTokenKind: Integer; override;
     function GetTokenPos: Integer; override;
     property OnGetLineKind: THelpLineKindEvent read FOnGetLineKind write FOnGetLineKind;
+    { highlighter (and so the colours) of the SQL editor; examples ("mysql> ...") are handed to it }
+    property SqlHighlighter: TSynCustomHighlighter read FSql write FSql;
   end;
 
 implementation
 
 const
   AttrNames: array[TTokenKind] of String = ('Null', 'Text', 'Heading', 'Link', 'Keyword', 'Placeholder', 'String',
-    'Number', 'Symbol', 'Prompt', 'Emphasis');
+    'Number', 'Symbol', 'Prompt', 'Emphasis', 'Sql');
 
 constructor THelpHighlighter.Create(AOwner: TComponent);
 var
@@ -102,6 +109,8 @@ begin
   FLineStr := NewValue;
   FLine := PChar(FLineStr);
   FRun := 0;
+  FPhase := 0;
+  FLineNo := LineNumber;
   if Assigned(FOnGetLineKind) then
     FKind := FOnGetLineKind(LineNumber)
   else
@@ -159,7 +168,7 @@ begin
         if (Len >= 2) and HasUpper and not HasLower then
           FToken := tkKeyword
         else
-          if HasLower and (HasUnderscore or (Len > 1)) and (FKind = hlCode) then
+          if HasLower and (HasUnderscore or (Len > 1)) and (FKind in [hlCode, hlExample]) then
             FToken := tkPlaceholder
           else
             FToken := tkText;
@@ -241,10 +250,42 @@ end;
 
 procedure THelpHighlighter.Next;
 begin
+  if FPhase = 2 then
+  begin
+    // the statement after the prompt belongs to the SQL highlighter
+    if FSqlFresh then
+      FSqlFresh := False
+    else
+      FSql.Next;
+    if FSql.GetEol then
+    begin
+      FToken := tkNull;
+      FRun := Length(FLineStr);
+      FTokenPos := FRun;
+      Exit;
+    end;
+    FTokenPos := 7 + FSql.GetTokenPos;
+    FToken := tkSql;
+    FRun := FTokenPos + FSql.GetTokenLen;
+    Exit;
+  end;
   FTokenPos := FRun;
   if FLine[FRun] = #0 then
   begin
     FToken := tkNull;
+    Exit;
+  end;
+  if (FKind = hlExample) and (FRun = 0) and (FSql <> nil) and (Copy(FLineStr, 1, 6) = 'mysql>') then
+  begin
+    FToken := tkPrompt;
+    FRun := 7;
+    if FRun > Length(FLineStr) then
+      FRun := Length(FLineStr);
+    FSqlLine := Copy(FLineStr, 8, MaxInt);
+    FSql.ResetRange;
+    FSql.SetLine(FSqlLine, FLineNo);
+    FPhase := 2;
+    FSqlFresh := True;
     Exit;
   end;
   case FKind of
@@ -258,7 +299,7 @@ begin
         FToken := tkLink;
         FRun := Length(FLineStr);
       end;
-    hlCode:
+    hlCode, hlExample:
       ScanCode;
   else
     ScanProse;
@@ -283,12 +324,17 @@ end;
 
 function THelpHighlighter.GetTokenAttribute: TSynHighlighterAttributes;
 begin
-  Result := FAttri[FToken];
+  if (FToken = tkSql) and (FSql <> nil) then
+    Result := FSql.GetTokenAttribute
+  else
+    Result := FAttri[FToken];
 end;
 
 function THelpHighlighter.GetTokenKind: Integer;
 begin
   Result := Ord(FToken);
+  if (FToken = tkSql) and (FSql <> nil) then
+    Result := 100 + FSql.GetTokenKind;
 end;
 
 function THelpHighlighter.GetTokenPos: Integer;

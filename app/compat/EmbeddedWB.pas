@@ -13,7 +13,7 @@ unit EmbeddedWB;
 interface
 
 uses
-  Classes, SysUtils, Variants, Controls, Graphics, StdCtrls, LCLIntf, SynEdit, SynEditTypes, SynEditMiscClasses,
+  Classes, SysUtils, Variants, Controls, Graphics, StdCtrls, LCLIntf, SynEdit, SynEditHighlighter, SynEditTypes, SynEditMiscClasses,
   HelpHighlighter;
 
 type
@@ -35,6 +35,8 @@ type
     FUserInterfaceOptions: TUserInterfaceOptions;
     FHighlighter: THelpHighlighter;
     function LineKind(LineIndex: Integer): THelpLineKind;
+    function GetSql: TSynCustomHighlighter;
+    procedure SetSql(Value: TSynCustomHighlighter);
     procedure AddLine(const S: String; Kind: THelpLineKind; const URL: String = '');
     procedure Reset;
     procedure ShowNote(const Title, Text: String);
@@ -50,6 +52,8 @@ type
     procedure ShowTopic(const Name, Description, Example, URL: String);
     { the original returned the IE automation object; nothing to automate here }
     function OleObject: Variant;
+    { the SQL editor's highlighter: the examples are coloured by it }
+    property SqlHighlighter: TSynCustomHighlighter read GetSql write SetSql;
     property OnDocumentComplete: TDocumentCompleteEvent read FOnDocumentComplete write FOnDocumentComplete;
     property UserInterfaceOptions: TUserInterfaceOptions read FUserInterfaceOptions write FUserInterfaceOptions;
   end;
@@ -258,6 +262,17 @@ begin
     FLinkURLs.Values[IntToStr(High(FKinds))] := URL;
 end;
 
+function TEmbeddedWB.GetSql: TSynCustomHighlighter;
+begin
+  Result := FHighlighter.SqlHighlighter;
+end;
+
+procedure TEmbeddedWB.SetSql(Value: TSynCustomHighlighter);
+begin
+  FHighlighter.SqlHighlighter := Value;
+  Invalidate;
+end;
+
 function TEmbeddedWB.LineKind(LineIndex: Integer): THelpLineKind;
 begin
   if (LineIndex >= 0) and (LineIndex < Length(FKinds)) then
@@ -346,7 +361,7 @@ begin
       try
         Para.Text := StringReplace(Example, #13#10, #10, [rfReplaceAll]);
         for I := 0 to Para.Count - 1 do
-          AddLine(Para[I], hlCode);
+          AddLine(Para[I], hlExample);
       finally
         Para.Free;
       end;
