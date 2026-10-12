@@ -104,6 +104,9 @@ not just on one server (version differences are where the bugs were).
   "Copyright ... MySQL AB" (or any other holder) line, even when they replace or are modelled on a
   legacy file. Code that is a substantial derivative of third-party code (e.g. UniCodeEditor, MIT)
   is credited in `NOTICE` instead.
+- **Third-party code and content:** before adding a library, unit, font, image or document, check its licence
+  against `docs/licenses.md` (GPL-2.0-or-later program; MPL-1.1-only is a problem) and add it there and to
+  `NOTICE` where needed.
 - **Never hand-edit `legacy/`.** Copy what you need and port the copy.
 - **Test credentials** (`QBR_TEST_*`, containers `qbr-*`) are for throw-away local
   servers only. Never put real credentials or hosts in the repo.

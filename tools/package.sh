@@ -13,7 +13,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MINGW="${MINGW_BIN:-/c/msys64/mingw64/bin}"
-export PATH="$MINGW:$ROOT/backend/build:$PATH"
+export PATH="$MINGW:/c/msys64/usr/bin:$ROOT/backend/build:$PATH"
 
 do_build=1 do_velopack=0
 for a in "$@"; do
@@ -65,12 +65,41 @@ for d in XML doc fonts locale; do
 done
 cp "$ROOT/LICENSE" "$ROOT/NOTICE" "$APP/"
 
+# Licence information for what is shipped: per DLL the MSYS2 package, version and SPDX licence expression,
+# plus the licence files those packages carry. docs/licenses.md has the review behind this.
+mkdir -p "$APP/licenses/msys2" "$APP/licenses/lazarus"
 {
-  echo "Runtime libraries shipped next to qbr.exe (built or provided by MSYS2 mingw-w64 packages;"
-  echo "each keeps its own licence, see the MSYS2 package pages for the exact terms):"
+  echo "Runtime libraries shipped next to qbr.exe, taken from MSYS2 mingw-w64 packages (the backend DLLs"
+  echo "libmysql*.dll are built from this repository). Licence expressions are the packages' own; the"
+  echo "licence texts that the packages carry are in licenses/msys2/. See docs/licenses.md for the review."
   echo
-  (cd "$APP" && ls *.dll | sort)
+  for f in "$APP"/*.dll; do
+    n=$(basename "$f")
+    case "$n" in libmysql*) echo "$n | this project (GPL-2.0-or-later / LGPL-2.1-or-later parts, see NOTICE)"; continue ;; esac
+    pkg=$(pacman -Qoq "/mingw64/bin/$n" 2>/dev/null || true)
+    if [ -z "$pkg" ]; then echo "$n | unknown package"; continue; fi
+    info=$(pacman -Qi "$pkg")
+    ver=$(echo "$info" | awk -F': ' '/^Version/ {print $2}')
+    lic=$(echo "$info" | awk -F': ' '/^Licenses/ {print $2}')
+    echo "$n | $pkg $ver | $lic"
+    { pacman -Ql "$pkg" | awk '{print $2}' | grep "^/mingw64/share/licenses/.*[^/]$" || true; } | while read -r lf; do
+      d="$APP/licenses/msys2/${pkg#mingw-w64-x86_64-}"
+      mkdir -p "$d"
+      cp "/c/msys64$lf" "$d/" 2>/dev/null || true
+    done
+  done
 } > "$APP/THIRD-PARTY-DLLS.txt"
+
+# Lazarus/FPC (statically linked): modified LGPL with linking exception for LCL, RTL and LazUtils; the
+# SynEdit, VirtualTrees and IpHtml units carry their own terms (docs/licenses.md).
+for f in COPYING.modifiedLGPL.txt COPYING.LGPL.txt COPYING.GPL.txt; do
+  cp "/c/lazarus/$f" "$APP/licenses/lazarus/" 2>/dev/null || true
+done
+mkdir -p "$APP/licenses/fonts"
+cp "$ROOT/docs/third-party/Bitstream-Vera-fonts.txt" "$APP/licenses/fonts/"
+cp "$ROOT/docs/licenses.md" "$APP/licenses/README-licenses.md"
+
+echo "note: doc/ contains an extract of the MySQL 5.0 manual, which is not GPL licensed; see docs/licenses.md section 4 before a public release" >&2
 
 # the exe must start without the development PATH: run it with a minimal one
 if ! (cd "$APP" && PATH="/c/Windows/System32:/c/Windows" ./qbr.exe --selftest-resources "$DIST/selftest.txt" ); then

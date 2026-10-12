@@ -36,6 +36,28 @@ in legacy/mysql-gui-common/source/windows/UniCodeEditor/ and is to be reproduced
 derived file. The authors ask for credit in the product documentation or about box, which this
 notice records for the time being.
 
+Other MIT-licensed units
+------------------------
+
+ColorTools.pas, StringContainers.pas and UniCodeConsole.pas are Copyright (c) 1999-2005 Mike Lischke
+(and, for UniCodeConsole, Mike Zinner), released under the MIT licence; the licence text is in each
+file's header, which is kept. The authors ask to be credited in the product documentation or about
+box; this notice records that for the time being.
+
+Components under the Mozilla Public License
+-------------------------------------------
+
+The Lazarus components SynEdit (dual MPL-1.1 / GPL-2.0-or-later, used under the GPL), VirtualTreeView
+(dual MPL-1.1 / LGPL-2.1-or-later, used under the LGPL) and IpHtml (MPL-1.1 only) are linked into the
+program. Their licence terms and the open question about the MPL-1.1-only units are described in
+docs/licenses.md. Their source is part of the Lazarus distribution.
+
+Documentation
+-------------
+
+doc/mysqlqb_statements.html and doc/mysqlqb_functions.html are an extract of the MySQL 5.0 reference
+manual, which is not distributed under the GPL; see docs/licenses.md, section 4.
+
 Third-party components
 ----------------------
 
