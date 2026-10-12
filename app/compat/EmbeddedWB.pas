@@ -13,7 +13,7 @@ unit EmbeddedWB;
 interface
 
 uses
-  Classes, SysUtils, Variants, Controls, ExtCtrls, IpHtml, IpFileBroker;
+  Classes, SysUtils, Variants, Controls, ExtCtrls, IpHtml, IpFileBroker, LCLIntf;
 
 type
   TUserInterfaceOption = (uioNo3DBorder, uioScrollNo);
@@ -50,6 +50,8 @@ type
     procedure Loaded; override;
     { accepts file:// URLs (with #anchor) and plain file names }
     procedure Navigate(const URL: OleVariant);
+    { shows HTML text (UTF-8) that the program made itself }
+    procedure ShowHtml(const Html: String);
     { the original returned the IE automation object; nothing to automate here }
     function OleObject: Variant;
     property OnDocumentComplete: TDocumentCompleteEvent read FOnDocumentComplete write FOnDocumentComplete;
@@ -234,6 +236,11 @@ var
   P: Integer;
 begin
   U := HotURL;
+  if (Pos('http://', LowerCase(U)) = 1) or (Pos('https://', LowerCase(U)) = 1) then
+  begin
+    LCLIntf.OpenURL(U);      // the system browser
+    Exit;
+  end;
   P := Pos('#', U);
   if P = 0 then
     Exit;
@@ -248,6 +255,18 @@ begin
     FileName := FCurFile;
   if FileExists(FileName) then
     Navigate(FileName + Copy(U, Pos('#', U), MaxInt));
+end;
+
+procedure TEmbeddedWB.ShowHtml(const Html: String);
+var
+  Stream: TStringStream;
+begin
+  Stream := TStringStream.Create(DecodePreEntities(Html));
+  try
+    SetHtmlFromStream(Stream);
+  finally
+    Stream.Free;
+  end;
 end;
 
 function TEmbeddedWB.OleObject: Variant;

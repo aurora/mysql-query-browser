@@ -29,7 +29,7 @@ uses
   ImgList, Options, ActiveX,
   EmbeddedWB, Sections, TableDrag, TntMenus,
   myx_public_interface, myx_qb_public_interface, TntControls,
-  UniCodeEditor, UCEHighlighter, UCESQLHighlighter, UCEShared,
+  UniCodeEditor, UCEHighlighter, UCESQLHighlighter, UCEShared, ServerHelp,
   ScriptPanel, TntDialogs, AuxApplicationFuncs,
   StrUtils, UnicodeConsole, CommonTypes, MySQLResultSet,
   TntClipbrd, Unicode, myx_util_public_interface;
@@ -390,6 +390,7 @@ type
 
     //SQL Functions handling
     function LoadFunctions(filename: WideString): TMYX_SQL_FUNCTIONINDEX;
+    procedure LoadServerHelp;
     procedure BuildFunctionTree(Tree: TVirtualStringTree; Functions: TMYX_SQL_FUNCTIONINDEX);
     procedure FunctionsVTGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: String);
@@ -644,6 +645,7 @@ type
 
     Bookmarks: TMYX_BOOKMARKS;
     FunctionsOverviewTree: TMYX_SQL_FUNCTIONINDEX;
+    FServerHelp: TServerHelp;       // help from the connected server's help tables, nil if it has none
     SyntaxOverviewTree: TMYX_SQL_FUNCTIONINDEX;
 
     PSQLStripped: PMYX_Q_SQL_STRIPPED;
@@ -939,6 +941,7 @@ begin
   BuildFunctionTree(FunctionsVT, FunctionsOverviewTree);
   SyntaxOverviewTree := LoadFunctions(MYXCommonOptions.XMLDir + 'mysqlqb_statements.xml');
   BuildFunctionTree(SyntaxVT, SyntaxOverviewTree);
+  LoadServerHelp;
 
   //Register global CopySQL Hotkey
   IdCopySQLHotKey := GlobalAddAtom('CopySQLHotkey');
@@ -1244,6 +1247,7 @@ begin
     StoreHistory;
 
     FreeAndNil(Toolbars);
+    FreeAndNil(FServerHelp);
 
     ApplicationDM.Options.GlobalParametersAsStrings := FGlobalParams.Text;
   except
@@ -1868,7 +1872,11 @@ end;
 procedure TQueryBrowserForm.DevHelp(const URL: WideString);
 
 begin
-  ShowHelpTabSheet(URL);
+  // 'topic:<name>' opens the server help topic of that name
+  if (Copy(URL, 1, 6) = 'topic:') and Assigned(FServerHelp) then
+    ShowHelpTabSheet('server:' + IntToStr(FServerHelp.FindTopicByName(Copy(URL, 7, MaxInt))))
+  else
+    ShowHelpTabSheet(URL);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -3927,6 +3935,37 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+procedure TQueryBrowserForm.LoadServerHelp;
+
+// Prototype: the help trees come from the server's own help tables when it has them (the shipped XML index is the
+// fallback). See ServerHelp.pas.
+
+var
+  Help: TServerHelp;
+  SyntaxIndex, FunctionsIndex: TMYX_SQL_FUNCTIONINDEX;
+
+begin
+  if (MySQLConn = nil) or not MySQLConn.Connected then
+    Exit;
+  Help := TServerHelp.Create;
+  if not Help.Load(MySQLConn) then
+  begin
+    Help.Free;
+    Exit;
+  end;
+  Help.BuildIndexes(SyntaxIndex, FunctionsIndex);
+  FreeAndNil(FServerHelp);
+  FServerHelp := Help;
+  FreeAndNil(SyntaxOverviewTree);
+  FreeAndNil(FunctionsOverviewTree);
+  SyntaxOverviewTree := SyntaxIndex;
+  FunctionsOverviewTree := FunctionsIndex;
+  BuildFunctionTree(SyntaxVT, SyntaxOverviewTree);
+  BuildFunctionTree(FunctionsVT, FunctionsOverviewTree);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 procedure TQueryBrowserForm.BuildFunctionTree(Tree: TVirtualStringTree; Functions: TMYX_SQL_FUNCTIONINDEX);
 
 var
@@ -4017,6 +4056,10 @@ begin
   if (Sender is TVirtualStringTree) and Assigned((TVirtualStringTree(Sender).FocusedNode)) then
   begin
     NodeData := TVirtualStringTree(Sender).GetNodeData(TVirtualStringTree(Sender).FocusedNode);
+    if Assigned(NodeData.func) and Assigned(FServerHelp) and
+      ((LowerTabHeaderFrame.SelectedTab = 0) or (LowerTabHeaderFrame.SelectedTab = 1)) then
+      ShowHelpTabSheet('server:' + NodeData.func.id)
+    else
     if Assigned(NodeData.func) then
     begin
       if (LowerTabHeaderFrame.SelectedTab = 0) then
@@ -4062,6 +4105,12 @@ begin
   //Set ActiveRSTabSheet nil
   DoActiveRSPanelChanged(nil, nil);
 
+  if (Pos('server:', url) = 1) and Assigned(FServerHelp) then
+  begin
+    if Assigned(FServerHelp.FindTopic(Copy(url, 8, MaxInt))) then
+      HelpWebBrowser.ShowHtml(FServerHelp.TopicHtml(FServerHelp.FindTopic(Copy(url, 8, MaxInt))));
+  end
+  else
   if Pos('http://', url) = 1 then
     HelpWebBrowser.Navigate(url)
   else
