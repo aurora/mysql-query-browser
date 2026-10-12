@@ -1,7 +1,7 @@
 unit AuxFuncs;
 
 // Not ported (not used by the Query Browser, code from the MySQL Administrator):
-//   AddListViewItem, AddToFile, BreakLine, ClearListView, ClearTreeView, ColorToHtmlColor, CreateShortcut, CreateVaList, DeleteComponentWithChildren, DisableEnablePages, ExecuteShellAppl, ExtractNumber, ExtractString, ExtractText, FetchHttpRequest, FormatFileSize, GetApplDir, GetCommonProgFilesDir, GetComputerNetName, GetDefaultBrowser, GetDriveInfo, GetDrives, GetExeByExtension, GetFileDate, GetFileSize, GetFileVersion, GetGlobalEnvironment, GetLocalHostName, GetNewGUID, GetShellLinkFileName, GetSubstringCount, GetTempDir, HtmlColorToColor, InitGlobalVars, IsAcrobatInstalled, IsKeyDown, LoadRtfTextFromResource, LoadTextFromFile, LocalTimeToUTC, ParseCommandLine, PrintPDF, RemoveService, RescaleFontSize, SaveAnsiTextToFile, SendToEventLog, ServiceStart, ServiceStatus, ServiceStop, SetDataFont, SetGlobalEnvironment, ShortPathToLongPath, ShowPDF, StringAlignLeft, StringAlignRight, UTCtoLocalTime
+//   AddListViewItem, AddToFile, BreakLine, ClearListView, ClearTreeView, ColorToHtmlColor, CreateShortcut, CreateVaList, DeleteComponentWithChildren, DisableEnablePages, ExecuteShellAppl, ExtractNumber, ExtractString, ExtractText, FetchHttpRequest, FormatFileSize, GetApplDir, GetCommonProgFilesDir, GetComputerNetName, GetDefaultBrowser, GetDriveInfo, GetDrives, GetExeByExtension, GetFileDate, GetFileSize, GetFileVersion, GetGlobalEnvironment, GetLocalHostName, GetNewGUID, GetShellLinkFileName, GetSubstringCount, GetTempDir, HtmlColorToColor, IsAcrobatInstalled, IsKeyDown, LoadRtfTextFromResource, LoadTextFromFile, LocalTimeToUTC, ParseCommandLine, PrintPDF, RemoveService, RescaleFontSize, SaveAnsiTextToFile, SendToEventLog, ServiceStart, ServiceStatus, ServiceStop, SetDataFont, SetGlobalEnvironment, ShortPathToLongPath, ShowPDF, StringAlignLeft, StringAlignRight, UTCtoLocalTime
 
 {$mode delphi}
 
@@ -76,6 +76,7 @@ type
 
 
 procedure InitForm(Form: TTntForm);
+procedure InitGlobalVars;
 procedure InitFrame(Frame: TTntFrame);
 
 function getXPStyleEnabled: Boolean;
@@ -187,6 +188,23 @@ implementation
 uses
   TntWindows, Types, PNGTools;
 
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure InitGlobalVars;
+
+// Whether ClearType is on and Tahoma exists decides which font InitForm gives the forms (the .lfm files say
+// "MS Sans Serif", which the LCL does not map to the narrow bitmap font the original layouts were made for).
+
+var
+  Parameter: UINT;
+
+begin
+  Parameter := 0;
+  SystemParametersInfo(SPI_GETFONTSMOOTHINGTYPE, 0, @Parameter, 0);
+  ClearTypeOn := (Parameter and FE_FONTSMOOTHINGCLEARTYPE) <> 0;
+  TahomaFontAvailable := Screen.Fonts.IndexOf('Tahoma') > -1;
+end;
 
 //----------------------------------------------------------------------------------------------------------------------
 

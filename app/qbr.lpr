@@ -122,6 +122,7 @@ begin
 
   Application.Title := 'MySQL Query Browser';
   Application.Initialize;
+  InitGlobalVars;
 
   Trace('options loaded, command line checked; ppi=' + IntToStr(Screen.PixelsPerInch));
   CheckCommonCommandlineParameter;
