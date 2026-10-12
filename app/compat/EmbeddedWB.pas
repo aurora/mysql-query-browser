@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils, Variants, Controls, Graphics, StdCtrls, LCLIntf, SynEdit, SynEditTypes, SynEditMiscClasses,
-  SynEditMarkupSpecialLine;
+  HelpHighlighter;
 
 type
   TUserInterfaceOption = (uioNo3DBorder, uioScrollNo);
@@ -27,15 +27,14 @@ const
 type
   TDocumentCompleteEvent = procedure(Sender: TObject; const pDisp: IDispatch; var URL: OleVariant) of object;
 
-  THelpLineKind = (hlProse, hlHeading, hlCode, hlLink);
-
   TEmbeddedWB = class(TSynEdit)
   private
     FKinds: array of THelpLineKind;
     FLinkURLs: TStringList;            // "line index=URL"
     FOnDocumentComplete: TDocumentCompleteEvent;
     FUserInterfaceOptions: TUserInterfaceOptions;
-    procedure SpecialLine(Sender: TObject; Line: Integer; var Special: Boolean; Markup: TSynSelectedColor);
+    FHighlighter: THelpHighlighter;
+    function LineKind(LineIndex: Integer): THelpLineKind;
     procedure AddLine(const S: String; Kind: THelpLineKind; const URL: String = '');
     procedure Reset;
     procedure ShowNote(const Title, Text: String);
@@ -227,7 +226,9 @@ begin
   Font.Name := 'Courier New';
   Font.Height := -13;
   ScrollBars := ssAutoBoth;
-  OnSpecialLineMarkup := SpecialLine;
+  FHighlighter := THelpHighlighter.Create(Self);
+  FHighlighter.OnGetLineKind := LineKind;
+  Highlighter := FHighlighter;
 end;
 
 destructor TEmbeddedWB.Destroy;
@@ -257,35 +258,12 @@ begin
     FLinkURLs.Values[IntToStr(High(FKinds))] := URL;
 end;
 
-procedure TEmbeddedWB.SpecialLine(Sender: TObject; Line: Integer; var Special: Boolean;
-  Markup: TSynSelectedColor);
+function TEmbeddedWB.LineKind(LineIndex: Integer): THelpLineKind;
 begin
-  if (Line < 1) or (Line > Length(FKinds)) then
-    Exit;
-  case FKinds[Line - 1] of
-    hlHeading:
-      begin
-        Special := True;
-        Markup.Foreground := clWindowText;
-        Markup.Background := clWindow;
-        Markup.Style := [fsBold];
-        Markup.StyleMask := [];
-      end;
-    hlCode:
-      begin
-        Special := True;
-        Markup.Foreground := clNavy;
-        Markup.Background := clWindow;
-      end;
-    hlLink:
-      begin
-        Special := True;
-        Markup.Foreground := clBlue;
-        Markup.Background := clWindow;
-        Markup.Style := [fsUnderline];
-        Markup.StyleMask := [];
-      end;
-  end;
+  if (LineIndex >= 0) and (LineIndex < Length(FKinds)) then
+    Result := FKinds[LineIndex]
+  else
+    Result := hlProse;
 end;
 
 procedure TEmbeddedWB.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -337,12 +315,21 @@ begin
               Kind := hlCode
             else
               Kind := hlProse;
-          while I < J do
+          // the server appends its own "URL: ..." line; the link is shown at the end instead
+          if (J = I + 1) and (Copy(Para[I], 1, 5) = 'URL: ') then
+            I := J
+          else
           begin
-            AddLine(Para[I], Kind);
-            Inc(I);
+            while I < J do
+            begin
+              if Trim(Para[I]) = 'Syntax:' then
+                AddLine(Para[I], hlHeading)
+              else
+                AddLine(Para[I], Kind);
+              Inc(I);
+            end;
+            AddLine('', hlProse);
           end;
-          AddLine('', hlProse);
         end;
         while (I < Para.Count) and (Trim(Para[I]) = '') do
           Inc(I);
