@@ -23,6 +23,7 @@ Related.
 | [0012](0012-sql-editor-compatibility-layer-over-synedit.md) | SQL editor: a UniCodeEditor-compatible layer over SynEdit | Accepted; visual review outstanding |
 | [0013](0013-inline-help-reference-and-multiple-servers.md) | Inline help (reference) with several servers and versions | Proposed (parity step done; content open) |
 | [0014](0014-release-packaging-and-updates-with-velopack.md) | Release packaging and updates with Velopack | Proposed (packaging implemented) |
+| [0015](0015-mpl-1-1-only-components-and-the-help-viewer.md) | MPL-1.1-only components and the help viewer | Proposed (decision before first public release) |
 
 ## Numbering
 
