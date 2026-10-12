@@ -1,6 +1,6 @@
 # ADR-0013 — Inline help (reference) with several servers and versions
 
-- Status: Proposed (parity step done; reference content still open)
+- Status: Superseded in part by ADR-0016 (content now comes from the server; the IpHtml viewer was removed)
 - Date: 2026-10-11
 - Deciders: Harald Lapp (project owner)
 

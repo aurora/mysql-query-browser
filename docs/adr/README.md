@@ -21,10 +21,10 @@ Related.
 | [0010](0010-multi-database-support-via-driver-seam.md) | Other RDBMS (PostgreSQL) via a driver seam, after parity | Proposed (design seam only) |
 | [0011](0011-license-gpl-2-or-later.md) | License: GPL-2.0-or-later, as the original | Accepted |
 | [0012](0012-sql-editor-compatibility-layer-over-synedit.md) | SQL editor: a UniCodeEditor-compatible layer over SynEdit | Accepted; visual review outstanding |
-| [0013](0013-inline-help-reference-and-multiple-servers.md) | Inline help (reference) with several servers and versions | Proposed (parity step done; content open) |
+| [0013](0013-inline-help-reference-and-multiple-servers.md) | Inline help (reference) with several servers and versions | Superseded in part by ADR-0016 |
 | [0014](0014-release-packaging-and-updates-with-velopack.md) | Release packaging and updates with Velopack | Proposed (packaging implemented) |
-| [0015](0015-mpl-1-1-only-components-and-the-help-viewer.md) | MPL-1.1-only components and the help viewer | Proposed (decision before first public release) |
-| [0016](0016-help-from-the-connected-server.md) | Help reference from the connected server | Proposed (prototype running) |
+| [0015](0015-mpl-1-1-only-components-and-the-help-viewer.md) | MPL-1.1-only components and the help viewer | Proposed (IpHtml part resolved by ADR-0016; SynEdit part open) |
+| [0016](0016-help-from-the-connected-server.md) | Help reference from the connected server | Accepted by implementation (to confirm) |
 
 ## Numbering
 

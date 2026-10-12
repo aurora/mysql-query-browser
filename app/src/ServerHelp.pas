@@ -5,8 +5,8 @@
   mysql.help_topic, matching the server's version. This unit reads them and builds the same
   group/entry structure that the original program loaded from mysqlqb_statements.xml and
   mysqlqb_functions.xml, so the "Syntax" and "Functions" trees and their double click keep working.
-  An entry's id is the topic id; the page for it is made here (plain text in <PRE>, which is what
-  the server texts are: hard wrapped, with syntax and example blocks). Nothing of this text is
+  An entry's id is the topic id; the page for it is made here (plain text: hard wrapped, with syntax and
+  example blocks; the view lives in EmbeddedWB.pas). Nothing of this text is
   shipped with the program. }
 unit ServerHelp;
 
@@ -49,19 +49,12 @@ type
     procedure BuildIndexes(out SyntaxIndex, FunctionsIndex: TMYX_SQL_FUNCTIONINDEX);
     function FindTopic(const Id: String): TServerHelpTopic;
     function FindTopicByName(const Name: String): Integer;
-    function TopicHtml(Topic: TServerHelpTopic): String;
     property ServerVersion: String read FServerVersion;
     property TopicCount: Integer read FTopicCount;
   end;
 
 implementation
 
-function HtmlEscape(const S: String): String;
-begin
-  Result := StringReplace(S, '&', '&amp;', [rfReplaceAll]);
-  Result := StringReplace(Result, '<', '&lt;', [rfReplaceAll]);
-  Result := StringReplace(Result, '>', '&gt;', [rfReplaceAll]);
-end;
 
 constructor TServerHelp.Create;
 begin
@@ -246,17 +239,5 @@ begin
   Result := -1;
 end;
 
-function TServerHelp.TopicHtml(Topic: TServerHelpTopic): String;
-begin
-  Result := '<HTML><HEAD><TITLE>' + HtmlEscape(Topic.Name) + '</TITLE></HEAD><BODY>' +
-    '<H2>' + HtmlEscape(Topic.Name) + '</H2>' +
-    '<PRE>' + HtmlEscape(Topic.Description) + '</PRE>';
-  if Trim(Topic.Example) <> '' then
-    Result := Result + '<H4>Examples</H4><PRE>' + HtmlEscape(Topic.Example) + '</PRE>';
-  if Topic.URL <> '' then
-    Result := Result + '<P>Full documentation: <A HREF="' + HtmlEscape(Topic.URL) + '">' +
-      HtmlEscape(Topic.URL) + '</A></P>';
-  Result := Result + '</BODY></HTML>';
-end;
 
 end.

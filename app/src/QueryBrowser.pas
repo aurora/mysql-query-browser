@@ -4075,6 +4075,9 @@ end;
 
 procedure TQueryBrowserForm.ShowHelpTabSheet(url: WideString);
 
+var
+  Topic: TServerHelpTopic;
+
 begin
   if (HelpTabSheetIndex = -1) then
   begin
@@ -4107,8 +4110,9 @@ begin
 
   if (Pos('server:', url) = 1) and Assigned(FServerHelp) then
   begin
-    if Assigned(FServerHelp.FindTopic(Copy(url, 8, MaxInt))) then
-      HelpWebBrowser.ShowHtml(FServerHelp.TopicHtml(FServerHelp.FindTopic(Copy(url, 8, MaxInt))));
+    Topic := FServerHelp.FindTopic(Copy(url, 8, MaxInt));
+    if Assigned(Topic) then
+      HelpWebBrowser.ShowTopic(Topic.Name, Topic.Description, Topic.Example, Topic.URL);
   end
   else
   if Pos('http://', url) = 1 then

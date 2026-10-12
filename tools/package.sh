@@ -99,8 +99,6 @@ mkdir -p "$APP/licenses/fonts"
 cp "$ROOT/docs/third-party/Bitstream-Vera-fonts.txt" "$APP/licenses/fonts/"
 cp "$ROOT/docs/licenses.md" "$APP/licenses/README-licenses.md"
 
-echo "note: doc/ contains an extract of the MySQL 5.0 manual, which is not GPL licensed; see docs/licenses.md section 4 before a public release" >&2
-
 # the exe must start without the development PATH: run it with a minimal one
 if ! (cd "$APP" && PATH="/c/Windows/System32:/c/Windows" ./qbr.exe --selftest-resources "$DIST/selftest.txt" ); then
   echo "warning: the staged qbr.exe did not start cleanly with a minimal PATH (missing DLL?)" >&2

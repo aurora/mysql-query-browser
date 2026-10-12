@@ -1,6 +1,6 @@
 # ADR-0015 — MPL-1.1-only components and the help viewer
 
-- Status: Proposed (decision needed before the first public release)
+- Status: Proposed; the IpHtml part was resolved by ADR-0016 (viewer removed); the SynEdit part is still open
 - Date: 2026-10-12
 - Deciders: Harald Lapp (project owner)
 

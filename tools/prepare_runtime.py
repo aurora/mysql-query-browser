@@ -34,9 +34,9 @@ def main():
         copy(os.path.join(COMMON, "res", f), os.path.join(out, "XML")); n += 1
     for f in ("mysqlqb_functions.xml", "mysqlqb_statements.xml"):
         copy(os.path.join(QB, "res", f), os.path.join(out, "XML")); n += 1
-    for f in glob.glob(os.path.join(QB, "res", "doc", "*")):
-        if os.path.isfile(f):
-            copy(f, os.path.join(out, "doc")); n += 1
+    # Only the program's own quick start guide. The MySQL 5.0 manual extract (statements/functions pages) is not
+    # shipped any more: the reference comes from the server's help tables (ADR-0016, docs/licenses.md section 4).
+    copy(os.path.join(QB, "res", "doc", "mysqlqb_quickstart.html"), os.path.join(out, "doc")); n += 1
     for f in glob.glob(os.path.join(COMMON, "res", "fonts", "*.ttf")):
         copy(f, os.path.join(out, "fonts")); n += 1
     for f in ("languages_list.txt", "how_to_translate.txt"):

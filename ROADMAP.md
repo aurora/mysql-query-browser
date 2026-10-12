@@ -100,7 +100,6 @@ waits until after parity and gets its own decision.
   (licence is decided: ADR-0011).
 - Whether to ship an installer that bundles glib/libxml2/PCRE/Connector DLLs or
   link statically.
-- **Licence decisions before a public release** (`docs/licenses.md`): IpHtml and three SynEdit units are
-  MPL-1.1 only (not GPL-compatible by the FSF's reading); the MySQL 5.0 manual extract in `doc/` is not
-  GPL licensed; "or later" in GPL-2.0-or-later must stay (OpenSSL is Apache-2.0); legal review and code
+- **Licence decisions before a public release** (`docs/licenses.md`): three SynEdit units are MPL-1.1 only
+  (not GPL-compatible by the FSF's reading; ask the Lazarus maintainers); "or later" in GPL-2.0-or-later must stay (OpenSSL is Apache-2.0); legal review and code
   signing.

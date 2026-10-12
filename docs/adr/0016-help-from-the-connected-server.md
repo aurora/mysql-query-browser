@@ -1,6 +1,6 @@
 # ADR-0016 — Help reference from the connected server
 
-- Status: Proposed (prototype running; supersedes the content plan of ADR-0013 if accepted)
+- Status: Accepted by implementation 2026-10-12 (to be confirmed); supersedes the content plan of ADR-0013
 - Date: 2026-10-12
 - Deciders: Harald Lapp (project owner)
 

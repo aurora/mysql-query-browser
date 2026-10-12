@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: GPL-2.0-or-later -->
 # Licence review
 
-Status: 2026-10-12. This is an engineering review of what the project contains and ships, done
+Status: 2026-10-12 (updated the same day: IpHtml and the manual extract are no longer part of the program, ADR-0016). This is an engineering review of what the project contains and ships, done
 from the sources and the package metadata on the development machine. **It is not legal advice**;
 the items marked *open* need a decision, and a public release should be checked by someone
 qualified.
@@ -55,9 +55,9 @@ Found by listing the units in the executable and reading their headers.
 | laz.VirtualTrees (VirtualTreeView) | MPL-1.1 **or** LGPL-2.1-or-later | OK: use it under the LGPL alternative. |
 | SynEdit (29 linked units with the dual statement; 9 more units carry no licence header at all) | MPL-1.1 **or** GPL-2.0-or-later | OK: use it under the GPL alternative. The header-less units are part of the same package and are taken to follow it. |
 | **SynEdit units `SynEditHighlighter`, `SynEditHighlighterFoldBase`, `SynTextDrawer`** | **MPL-1.1 only** in the headers of the Lazarus copy (the upstream "alternatively GPL" paragraph is missing in these files) | *Open.* See below. |
-| **IpHtml (TurboPower Internet Professional: `IpHtml`, `IpFileBroker`, `IpMsg`, `IpStrms`, `IpUtils`, `IpAnim`)** | **MPL-1.1 only** | *Open.* See below. |
+| IpHtml (TurboPower Internet Professional) | MPL-1.1 only | *Resolved:* not linked any more; the help pane is a read-only SynEdit (ADR-0016). |
 
-**The MPL-1.1 question.** The FSF classes MPL-1.1 as free but *not compatible with the GPL*
+**The MPL-1.1 question** (now only for the three SynEdit units; IpHtml was removed). The FSF classes MPL-1.1 as free but *not compatible with the GPL*
 (MPL-2.0 is). A GPL program that statically links MPL-1.1-only units is, by the FSF's reading, a
 combination the GPL cannot cover. Counter-points: the Lazarus IDE (GPL) itself ships SynEdit and
 IpHtml, and MPL-1.1's "Larger Work" clause allows combination as long as the MPL parts stay under the
@@ -66,23 +66,18 @@ question; this is a risk to decide on, not a verified problem.
 
 Options:
 
-1. **IpHtml: stop linking it.** Open the reference pages in the system browser instead of the inline
-   pane. Removes six units; changes behaviour (against ADR-0001) and needs an ADR.
-2. **IpHtml: replace it** by a viewer under a compatible licence (candidates not evaluated).
-3. **Keep both, accept the risk,** document it here and in `NOTICE` (done for the documentation part
-   below), and ask the Lazarus/SynEdit and IpHtml maintainers whether a GPL-compatible grant exists
-   (copyright holders can add one).
-4. **SynEdit's three units:** same questions; the file-level headers are what counts, so asking
-   the Lazarus maintainers is the way to clear it.
+1. ~~IpHtml~~ removed (ADR-0016).
+2. **SynEdit's three units:** the file-level headers are what counts, so asking the Lazarus maintainers
+   whether the missing "alternatively GPL" paragraph is intended is the way to clear it; there is no
+   technical alternative short of replacing the editor (ADR-0015 E).
 
-Recommendation: keep the current state for development builds, decide between 1 and 3 before the first
-public release. Option 1 is the only one that removes the IpHtml question completely.
+Recommendation: ask the Lazarus maintainers before the first public release.
 
 ## 4. Data and content that is shipped
 
 | What | Finding |
 |---|---|
-| `doc/mysqlqb_statements.html`, `mysqlqb_functions.html` (extract of the **MySQL 5.0 reference manual**) | The MySQL reference manual is **not** GPL. The Oracle-hosted copy of the 5.0 manual states that the documentation is not distributed under a GPL licence; copies of 1997-2008 (MySQL AB) allow conversion to other formats if the content is not altered and do not allow redistribution except in the way MySQL disseminates it. The original GPL product shipped these files (MySQL AB was the rightsholder); that does not give this fork the same permission. *Open:* do not ship them in a public release until cleared; ADR-0013 (reference packs, online links as fallback) is the way out. The `mysqlqb_quickstart.html` is the Query Browser's own guide (GPL, original product). |
+| ~~`doc/mysqlqb_statements.html`, `mysqlqb_functions.html`~~ (extract of the **MySQL 5.0 reference manual**) — **no longer shipped** (ADR-0016; the reference comes from the connected server). Earlier finding: | The MySQL reference manual is **not** GPL. The Oracle-hosted copy of the 5.0 manual states that the documentation is not distributed under a GPL licence; copies of 1997-2008 (MySQL AB) allow conversion to other formats if the content is not altered and do not allow redistribution except in the way MySQL disseminates it. The original GPL product shipped these files (MySQL AB was the rightsholder); that does not give this fork the same permission. Resolved by not shipping them. The `mysqlqb_quickstart.html` is the Query Browser's own guide (GPL, original product). |
 | `XML/*.xml` (function and statement index, charsets, datatypes) | Part of the original GPL product. OK. |
 | `fonts/Vera*.ttf` (Bitstream Vera Mono) | Bitstream Vera licence: free to use, copy and redistribute, with the licence text accompanying; names may not be used for modified fonts. The text is embedded in the font; `docs/third-party/Bitstream-Vera-fonts.txt` holds it and the package includes it (`licenses/fonts/`). |
 | Icons, images, resources compiled from `legacy/` | Part of the original GPL product (Copyright MySQL AB). OK; trademark aspects are separate (see below). |
@@ -106,8 +101,8 @@ copyright one, and must be resolved before a public release.
 
 ## 7. Open decisions (for the project owner)
 
-1. IpHtml and the three SynEdit units (MPL-1.1 only): remove, replace, or ask the copyright holders (§3).
-2. The MySQL 5.0 manual extract: ship, replace or drop for public releases (§4).
+1. The three SynEdit units (MPL-1.1 only): ask the Lazarus maintainers (§3). (IpHtml and the manual extract are gone.)
+2. What the server's help tables contain is the vendor's content shown at run time; nothing is redistributed.
 3. Name and trademark (§5).
 4. Code signing and legal review before a public release.
 
