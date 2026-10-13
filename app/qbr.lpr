@@ -24,7 +24,8 @@ var
   ExeDir: String;
   Res: Integer;
   ShotFile: String;
-  K, J: Integer;
+  K, J, P: Integer;
+  PageList: TStringList;
   Dlg: TForm;
 
 procedure LogUnhandled(E: Exception);
@@ -302,7 +303,7 @@ begin
           Dlg := nil;
           if ParamStr(I + 1) = 'textsearch' then
             Dlg := TTextSearchForm.Create(MainForm, MYXCommonOptionProvider)
-          else if ParamStr(I + 1) = 'optionpages' then
+          else if Copy(ParamStr(I + 1), 1, 11) = 'optionpages' then
             Dlg := TOptionsForm.Create(MainForm, TQueryBrowserOptionPagesForm.Create(MainForm))
           else if ParamStr(I + 1) = 'regex' then
             Dlg := TRegExTextImporterForm.Create(MainForm)
@@ -313,6 +314,19 @@ begin
             Dlg.Show;
             for K := 1 to 20 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
             CaptureWindowToPng(Dlg, ParamStr(I + 2));
+            // optionpages:N,... also photographs those pages (<png base>_N.png)
+            if (Dlg is TOptionsForm) and (Length(ParamStr(I + 1)) > 12) then
+            begin
+              PageList := TStringList.Create;
+              PageList.CommaText := Copy(ParamStr(I + 1), 13, MaxInt);
+              for P := 0 to PageList.Count - 1 do
+              begin
+                TOptionsForm(Dlg).ShowOptionPage(StrToIntDef(PageList[P], 0));
+                for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+                CaptureWindowToPng(Dlg, ChangeFileExt(ParamStr(I + 2), '') + '_' + PageList[P] + '.png');
+              end;
+              PageList.Free;
+            end;
             Dlg.Close;
           end;
         end;

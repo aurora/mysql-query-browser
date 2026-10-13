@@ -208,6 +208,82 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+procedure AdjustGroupBoxes(Form: TTntForm);
+
+// The VCL's group box has no client area of its own: the children's coordinates count from the top left corner of
+// the frame, so the original layouts put the first row 16 pixels down, below the caption. The LCL's client area
+// starts below the caption already, which moved everything down by that much and pushed the last rows over the
+// frame. The children are moved back by the difference.
+
+var
+  I, J: Integer;
+  Box: TGroupBox;
+  Client: TPoint;
+  Child: TControl;
+
+begin
+  for I := 0 to Form.ComponentCount - 1 do
+    if Form.Components[I] is TGroupBox then
+    begin
+      Box := TGroupBox(Form.Components[I]);
+      if (Box.Parent = nil) or (Box.ControlCount = 0) then
+        Continue;
+      Box.HandleNeeded;
+      Client := Box.ClientToParent(Point(0, 0), Box.Parent);
+      Dec(Client.X, Box.Left);
+      Dec(Client.Y, Box.Top);
+      if (Client.X = 0) and (Client.Y = 0) then
+        Continue;
+      for J := 0 to Box.ControlCount - 1 do
+      begin
+        Child := Box.Controls[J];
+        if Child.Align = alNone then
+        begin
+          Child.Left := Child.Left - Client.X;
+          Child.Top := Child.Top - Client.Y;
+        end;
+      end;
+    end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure KeepRightEdgeOfLabels(Form: TTntForm);
+
+// The VCL keeps the right edge of an auto sizing, right aligned label when a (translated) caption changes its
+// width; the LCL keeps the left edge and the label runs under the edit field next to it.
+
+var
+  I: Integer;
+  ALabel: TLabel;
+  Right, W: Integer;
+  Bmp: TBitmap;
+
+begin
+  Bmp := TBitmap.Create;
+  try
+    for I := 0 to Form.ComponentCount - 1 do
+      if Form.Components[I] is TLabel then
+      begin
+        ALabel := TLabel(Form.Components[I]);
+        if (ALabel.Alignment <> taRightJustify) or ALabel.WordWrap or (ALabel.Align <> alNone) then
+          Continue;
+        Bmp.Canvas.Font.Assign(ALabel.Font);
+        W := Bmp.Canvas.TextWidth(ALabel.Caption);
+        Right := ALabel.Left + ALabel.Width;
+        if ALabel.AutoSize and (W <> ALabel.Width) then
+        begin
+          ALabel.Left := Right - W;
+          ALabel.Width := W;
+        end;
+      end;
+  finally
+    Bmp.Free;
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 procedure InitForm(Form: TTntForm);
 
 var
@@ -270,6 +346,9 @@ begin
         TLabel(Form.Components[i]).Font.Size := Form.Font.Size;
       end;
   end;
+
+  AdjustGroupBoxes(Form);
+  KeepRightEdgeOfLabels(Form);
 end;
 
 
