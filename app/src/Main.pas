@@ -180,6 +180,9 @@ uses
 
 {$R ../forms/Main.lfm}
 
+function AddFontResourceExW(lpszFilename: PWideChar; fl: LongWord; pdv: Pointer): Integer; stdcall;
+  external 'gdi32.dll' name 'AddFontResourceExW';
+
 //----------------------------------------------------------------------------------------------------------------------
 
 var
@@ -901,9 +904,14 @@ end;
 
 procedure TMainForm.CheckFonts;
 
+const
+  FR_PRIVATE = $10;
+  FontFiles: array[0..3] of string = ('VeraMono.ttf', 'VeraMoBd.ttf', 'VeraMoIt.ttf', 'VeraMoBI.ttf');
+
 var
   I: integer;
   FontsInstalled: Boolean;
+  FontDir: WideString;
 
 begin
   FontsInstalled := False;
@@ -911,43 +919,22 @@ begin
     if (CompareText(Screen.Fonts[I], 'Bitstream Vera Sans Mono') = 0) then
       FontsInstalled := True;
 
-  if not FontsInstalled then
-  begin
-    if (not (FileExists(ExtractFilePath(Application.ExeName) + 'fonts\VeraMoBd.ttf'))) then
-      raise EInOutError.Create(Format(_('The Bitstream Vera Sans Mono fonts cannot be found. Please download ' +
-        'the font files from http://www.gnome.org/fonts and copy them into the fonts directory %s. The following files are needed: VeraMoBd.ttf, ' +
-        'VeraMoBI.ttf, VeraMoIt.ttf, VeraMono.ttf.'),
-        [ExtractFilePath(Application.ExeName) + 'fonts\']));
+  FontDir := ExtractFilePath(Application.ExeName) + 'fonts\';
 
-    if not FileExists(GetWindowsDir + 'fonts\VeraMoBd.ttf') then
-    begin
-      CopyDiskFile(ExtractFilePath(Application.ExeName) + 'fonts\VeraMoBd.ttf', GetWindowsDir + 'fonts\VeraMoBd.ttf',
-        False);
-      AddFontResourceW(PWideChar(GetWindowsDir + 'fonts\VeraMoBd.ttf'));
-    end;
+  if (not FontsInstalled) and (not (FileExists(FontDir + 'VeraMoBd.ttf'))) then
+    raise EInOutError.Create(Format(_('The Bitstream Vera Sans Mono fonts cannot be found. Please download ' +
+      'the font files from http://www.gnome.org/fonts and copy them into the fonts directory %s. The following files are needed: VeraMoBd.ttf, ' +
+      'VeraMoBI.ttf, VeraMoIt.ttf, VeraMono.ttf.'),
+      [FontDir]));
 
-    if not FileExists(GetWindowsDir + 'fonts\VeraMoBI.ttf') then
-    begin
-      CopyDiskFile(ExtractFilePath(Application.ExeName) + 'fonts\VeraMoBI.ttf', GetWindowsDir + 'fonts\VeraMoBI.ttf',
-      False);
-    end;
-
-    if not FileExists(GetWindowsDir + 'fonts\VeraMoIt.ttf') then
-    begin
-      CopyDiskFile(ExtractFilePath(Application.ExeName) + 'fonts\VeraMoIt.ttf', GetWindowsDir + 'fonts\VeraMoIt.ttf',
-      False);
-    end;
-
-    if not FileExists(GetWindowsDir + 'fonts\VeraMono.ttf') then
-    begin
-      CopyDiskFile(ExtractFilePath(Application.ExeName) + 'fonts\VeraMono.ttf', GetWindowsDir + 'fonts\VeraMono.ttf',
-      False);
-    end;
-
-    PostMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
-
-    // Port: the LCL has no Screen.ResetFonts.
-  end;
+  // Port: the original copied the files into the Windows font folder and registered only VeraMoBd.ttf for
+  // the running session; the other three stayed unregistered, so the family could exist with a single style
+  // and the editor fell back to another font in its fixed character grid. All four are now loaded privately
+  // for this process, always (also when the family is installed): no administrator rights, nothing left
+  // behind in the system, and a complete family.
+  for I := Low(FontFiles) to High(FontFiles) do
+    if FileExists(FontDir + FontFiles[I]) then
+      AddFontResourceExW(PWideChar(FontDir + FontFiles[I]), FR_PRIVATE, nil);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
