@@ -310,6 +310,13 @@ RENAME_ITEM_PROP = {"WideText": "Text", "WideHint": "Hint"}
 DROP_SUFFIXES = ("_UTF7",)
 DROP_EVENTS = set()
 
+# Components removed from the converted forms for the first release (ADR-0017): the menu entries
+# that start other MySQL GUI tools or open online documentation. The separators next to them go too.
+DROP_OBJECTS = {
+    "MySQLAdministratorMI", "MySQLCommandLineClientMI", "N11",
+    "OnlineDocsMI", "OnlineReferenceCAPIMI", "OnlineDocsPHPAPIMI", "N6", "VisitMySQLcomMI", "N13",
+}
+
 
 def lcl_class(cls):
     if cls in CLASS_MAP:
@@ -376,7 +383,7 @@ class Converter:
                 v = Value("coll", [[[RENAME_ITEM_PROP.get(n, n), x] for n, x in item] for item in v.data])
             new_props.append([name, v])
         node.props = new_props
-        node.children = [self.convert(c) for c in node.children]
+        node.children = [self.convert(c) for c in node.children if c.name not in DROP_OBJECTS]
         return node
 
     def inline_frame(self, node):

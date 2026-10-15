@@ -55,13 +55,9 @@ type
     OptionsMI: TTntMenuItem;
     LaunchHelpMI: TTntMenuItem;
     N6: TTntMenuItem;
-    VisitMySQLcomMI: TTntMenuItem;
     ReportBugMI: TTntMenuItem;
     N7: TTntMenuItem;
     AboutMI: TTntMenuItem;
-    OnlineDocsMI: TTntMenuItem;
-    OnlineReferenceCAPIMI: TTntMenuItem;
-    OnlineDocsPHPAPIMI: TTntMenuItem;
     SelectAllMI: TTntMenuItem;
     NewResultsetTabMI: TTntMenuItem;
     NewSQLScriptTabMI: TTntMenuItem;
@@ -70,8 +66,6 @@ type
     N10: TTntMenuItem;
     PrintMI: TTntMenuItem;
     PrinttoPDFMI: TTntMenuItem;
-    MySQLAdministratorMI: TTntMenuItem;
-    MySQLCommandLineClientMI: TTntMenuItem;
     N11: TTntMenuItem;
     WindowsCommandLineMI: TTntMenuItem;
     OpenSQLScriptMI: TTntMenuItem;
@@ -115,11 +109,7 @@ type
       Shift: TShiftState);
 
     procedure ReportBugMIClick(Sender: TObject);
-    procedure VisitMySQLcomMIClick(Sender: TObject);
     procedure ActivateQueryBrowserSection;
-    procedure OnlineDocsMIClick(Sender: TObject);
-    procedure OnlineReferenceCAPIMIClick(Sender: TObject);
-    procedure OnlineDocsPHPAPIMIClick(Sender: TObject);
 
     procedure HandleIdle(Sender: TObject; var Done: Boolean);
     procedure DevMenuChanged(Sender: TObject; Source: TMenuItem; Rebuild: Boolean);
@@ -137,8 +127,6 @@ type
     procedure NewResultsetTabMIClick(Sender: TObject);
     procedure NewSQLScriptTabMIClick(Sender: TObject);
 
-    procedure MySQLAdministratorMIClick(Sender: TObject);
-    procedure MySQLCommandLineClientMIClick(Sender: TObject);
     procedure WindowsCommandLineMIClick(Sender: TObject);
     procedure ChangeDefaultSchemaMIClick(Sender: TObject);
     procedure OpenSQLScriptMIClick(Sender: TObject);
@@ -281,8 +269,6 @@ begin
   CheckFonts;
 
   // Enable Tools Menu Items
-  MySQLAdministratorMI.Enabled := (GetMySQLAdministratorCmd <> '');
-  MySQLCommandlineclientMI.Enabled := (GetMySQLCommandLineClientPath <> '');
   WindowsCommandLineMI.Enabled := FileExists(GetSystemDir + 'cmd.exe');
 
   FTextToClear := False;
@@ -696,15 +682,6 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TMainForm.VisitMySQLcomMIClick(Sender: TObject);
-
-begin
-  BrowseWebPage('http://www.mysql.com');
-  //CreateSubProcess(GetDefaultBrowser+' http://www.mysql.com', '');
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
 procedure TMainForm.ActivateQueryBrowserSection;
 
 var
@@ -720,42 +697,6 @@ begin
         break;
       end;
   end;
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.OnlineDocsMIClick(Sender: TObject);
-
-begin
-  ActivateQueryBrowserSection;
-
-  if (SectionControls.CurrentSidebarSection.SidebarSectionType = SSTQB_QueryBrowser) then
-    TQueryBrowserForm(SectionControls.CurrentSidebarSection.SectionForm).ShowHelpTabSheet(
-      'http://dev.mysql.com/doc/mysql/en/index.html');
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.OnlineReferenceCAPIMIClick(Sender: TObject);
-
-begin
-  ActivateQueryBrowserSection;
-
-  if (SectionControls.CurrentSidebarSection.SidebarSectionType = SSTQB_QueryBrowser) then
-    TQueryBrowserForm(SectionControls.CurrentSidebarSection.SectionForm).ShowHelpTabSheet(
-      'http://dev.mysql.com/doc/mysql/en/C.html');
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.OnlineDocsPHPAPIMIClick(Sender: TObject);
-
-begin
-  ActivateQueryBrowserSection;
-
-  if (SectionControls.CurrentSidebarSection.SidebarSectionType = SSTQB_QueryBrowser) then
-    TQueryBrowserForm(SectionControls.CurrentSidebarSection.SectionForm).ShowHelpTabSheet(
-      'http://www.php.net/manual/en/ref.mysqli.php');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -839,11 +780,7 @@ begin
     end;
 
   Enable := IsConnectedToInternet;
-  OnlineDocsMI.Enabled := Enable;
-  OnlineReferenceCAPIMI.Enabled := Enable;
-  OnlineDocsPHPAPIMI.Enabled := Enable;
   ReportBugMI.Enabled := Enable;
-  VisitMySQLcomMI.Enabled := Enable;
 
   if (MySQLConn.Connected) then
   begin
@@ -1038,61 +975,6 @@ begin
   if (SectionControls.CurrentSidebarSection.SidebarSectionType = SSTQB_QueryBrowser) then
     TQueryBrowserForm(
       SectionControls.CurrentSidebarSection.SectionForm).AddNewScriptTabMIClick(self);
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.MySQLAdministratorMIClick(Sender: TObject);
-
-  //---------------------------------------------------------------------------
-
-  function ConvertToHex(const S: WideString): string;
-
-  var
-    Utf8String: string;
-    
-  begin
-    Utf8String := Utf8Encode(S);
-    SetLength(Result, 2 * Length(Utf8String));
-    BinToHex(PChar(Utf8String), PChar(Result), Length(Utf8String));
-  end;
-
-  //---------------------------------------------------------------------------
-
-var
-  cmd: WideString;
-
-begin
-  cmd := GetMySQLAdministratorCmd;
-  if cmd <> '' then
-  begin
-    if (MySQLConn.UserConnection <> nil) then
-    begin
-      cmd := cmd + ' "-u' + MySQLConn.UserConnection.username + '"';
-      if MySQLConn.UserConnection.password <> '' then
-        cmd := cmd + ' -x' + ConvertToHex(MySQLConn.UserConnection.password);
-      cmd := cmd + ' "-h' + MySQLConn.UserConnection.hostname + '"';
-      cmd := cmd + ' "-P' + IntToStr(MySQLConn.UserConnection.port) + '"';
-    end;
-
-    CreateSubProcess(cmd, '');
-  end;
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.MySQLCommandLineClientMIClick(Sender: TObject);
-
-var
-  cmd: WideString;
-
-begin
-  cmd := GetMySQLCommandLineClientPath;
-  if (cmd <> '') then
-    CreateSubProcess(cmd + ' -h' + MySQLConn.UserConnection.hostname +
-      ' -u' + MySQLConn.UserConnection.username +
-      ' -p' + MySQLConn.UserConnection.password +
-      ' -P' + IntToStr(MySQLConn.UserConnection.port), '');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
