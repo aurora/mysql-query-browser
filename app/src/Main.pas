@@ -676,8 +676,7 @@ end;
 procedure TMainForm.ReportBugMIClick(Sender: TObject);
 
 begin
-  BrowseWebPage('http://bugs.mysql.com');
-  //CreateSubProcess(GetDefaultBrowser+' http://bugs.mysql.com', '');
+  BrowseWebPage('https://github.com/aurora/mysql-query-browser/issues/new');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1060,7 +1059,7 @@ end;
 procedure TMainForm.ListreportedBugsMIClick(Sender: TObject);
 
 begin
-  BrowseWebPage('http://bugs.mysql.com/search.php?search_for=&limit=All&order_by=&direction=ASC&cmd=display&status=Active&severity=&showstopper=&bug_type=MySQL+Query+Browser&php_os=&phpver=&assign=&bug_age=0');
+  BrowseWebPage('https://github.com/aurora/mysql-query-browser/issues');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

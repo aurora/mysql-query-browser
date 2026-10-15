@@ -251,7 +251,7 @@ object MainForm: TMainForm
         OnClick = ListreportedBugsMIClick
       end
       object ReportBugMI: TMenuItem
-        Caption = 'Report a New Bug to MySQL'
+        Caption = 'Report a new bug'
         OnClick = ReportBugMIClick
       end
       object N7: TMenuItem

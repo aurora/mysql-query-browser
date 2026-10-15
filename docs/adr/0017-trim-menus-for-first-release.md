@@ -25,6 +25,12 @@ These entries are removed, together with the separators that only delimited them
 - Help: `Online Docs`, `Online Docs - C API`, `Online Docs - PHP API`, `Launch MySQL.com Site`
   (and the two separators around that group).
 
+Two bug entries point to the project instead of `bugs.mysql.com`:
+
+- Help > `List Reported Bugs` opens `https://github.com/aurora/mysql-query-browser/issues`.
+- Help > `Report a New Bug to MySQL` is renamed `Report a new bug` and opens
+  `https://github.com/aurora/mysql-query-browser/issues/new`.
+
 All other entries stay. This is a deliberate exception to ADR-0001.
 
 `app/forms/Main.lfm` is generated, so the removal is done in the converter (`DROP_OBJECTS` in

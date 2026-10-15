@@ -330,6 +330,10 @@ def is_event(name):
     return re.match(r"On[A-Z]", name) is not None
 
 
+# Captions changed for the first release (ADR-0017): component name -> new Caption.
+CAPTION_OVERRIDES = {"ReportBugMI": "Report a new bug"}
+
+
 class Converter:
     def __init__(self, search, flatten=False):
         self.search = search
@@ -382,6 +386,10 @@ class Converter:
             if v.kind == "coll":
                 v = Value("coll", [[[RENAME_ITEM_PROP.get(n, n), x] for n, x in item] for item in v.data])
             new_props.append([name, v])
+        if node.name in CAPTION_OVERRIDES:
+            for prop in new_props:
+                if prop[0] == "Caption":
+                    prop[1] = Value("str", CAPTION_OVERRIDES[node.name])
         node.props = new_props
         node.children = [self.convert(c) for c in node.children if c.name not in DROP_OBJECTS]
         return node
