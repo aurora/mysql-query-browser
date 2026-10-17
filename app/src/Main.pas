@@ -55,13 +55,10 @@ type
     OptionsMI: TTntMenuItem;
     LaunchHelpMI: TTntMenuItem;
     N6: TTntMenuItem;
-    VisitMySQLcomMI: TTntMenuItem;
     ReportBugMI: TTntMenuItem;
+    CheckForUpdatesMI: TTntMenuItem;
     N7: TTntMenuItem;
     AboutMI: TTntMenuItem;
-    OnlineDocsMI: TTntMenuItem;
-    OnlineReferenceCAPIMI: TTntMenuItem;
-    OnlineDocsPHPAPIMI: TTntMenuItem;
     SelectAllMI: TTntMenuItem;
     NewResultsetTabMI: TTntMenuItem;
     NewSQLScriptTabMI: TTntMenuItem;
@@ -70,8 +67,6 @@ type
     N10: TTntMenuItem;
     PrintMI: TTntMenuItem;
     PrinttoPDFMI: TTntMenuItem;
-    MySQLAdministratorMI: TTntMenuItem;
-    MySQLCommandLineClientMI: TTntMenuItem;
     N11: TTntMenuItem;
     WindowsCommandLineMI: TTntMenuItem;
     OpenSQLScriptMI: TTntMenuItem;
@@ -115,11 +110,8 @@ type
       Shift: TShiftState);
 
     procedure ReportBugMIClick(Sender: TObject);
-    procedure VisitMySQLcomMIClick(Sender: TObject);
+    procedure CheckForUpdatesMIClick(Sender: TObject);
     procedure ActivateQueryBrowserSection;
-    procedure OnlineDocsMIClick(Sender: TObject);
-    procedure OnlineReferenceCAPIMIClick(Sender: TObject);
-    procedure OnlineDocsPHPAPIMIClick(Sender: TObject);
 
     procedure HandleIdle(Sender: TObject; var Done: Boolean);
     procedure DevMenuChanged(Sender: TObject; Source: TMenuItem; Rebuild: Boolean);
@@ -137,8 +129,6 @@ type
     procedure NewResultsetTabMIClick(Sender: TObject);
     procedure NewSQLScriptTabMIClick(Sender: TObject);
 
-    procedure MySQLAdministratorMIClick(Sender: TObject);
-    procedure MySQLCommandLineClientMIClick(Sender: TObject);
     procedure WindowsCommandLineMIClick(Sender: TObject);
     procedure ChangeDefaultSchemaMIClick(Sender: TObject);
     procedure OpenSQLScriptMIClick(Sender: TObject);
@@ -188,9 +178,12 @@ var
 implementation
 
 uses
-  ApplicationDataModule, MyxError, PNGTools;
+  ApplicationDataModule, MyxError, PNGTools, UpdateCheck;
 
 {$R ../forms/Main.lfm}
+
+function AddFontResourceExW(lpszFilename: PWideChar; fl: LongWord; pdv: Pointer): Integer; stdcall;
+  external 'gdi32.dll' name 'AddFontResourceExW';
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -281,8 +274,6 @@ begin
   CheckFonts;
 
   // Enable Tools Menu Items
-  MySQLAdministratorMI.Enabled := (GetMySQLAdministratorCmd <> '');
-  MySQLCommandlineclientMI.Enabled := (GetMySQLCommandLineClientPath <> '');
   WindowsCommandLineMI.Enabled := FileExists(GetSystemDir + 'cmd.exe');
 
   FTextToClear := False;
@@ -690,17 +681,15 @@ end;
 procedure TMainForm.ReportBugMIClick(Sender: TObject);
 
 begin
-  BrowseWebPage('http://bugs.mysql.com');
-  //CreateSubProcess(GetDefaultBrowser+' http://bugs.mysql.com', '');
+  BrowseWebPage('https://github.com/aurora/mysql-query-browser/issues/new');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TMainForm.VisitMySQLcomMIClick(Sender: TObject);
+procedure TMainForm.CheckForUpdatesMIClick(Sender: TObject);
 
 begin
-  BrowseWebPage('http://www.mysql.com');
-  //CreateSubProcess(GetDefaultBrowser+' http://www.mysql.com', '');
+  CheckForUpdatesInteractive;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -720,42 +709,6 @@ begin
         break;
       end;
   end;
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.OnlineDocsMIClick(Sender: TObject);
-
-begin
-  ActivateQueryBrowserSection;
-
-  if (SectionControls.CurrentSidebarSection.SidebarSectionType = SSTQB_QueryBrowser) then
-    TQueryBrowserForm(SectionControls.CurrentSidebarSection.SectionForm).ShowHelpTabSheet(
-      'http://dev.mysql.com/doc/mysql/en/index.html');
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.OnlineReferenceCAPIMIClick(Sender: TObject);
-
-begin
-  ActivateQueryBrowserSection;
-
-  if (SectionControls.CurrentSidebarSection.SidebarSectionType = SSTQB_QueryBrowser) then
-    TQueryBrowserForm(SectionControls.CurrentSidebarSection.SectionForm).ShowHelpTabSheet(
-      'http://dev.mysql.com/doc/mysql/en/C.html');
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.OnlineDocsPHPAPIMIClick(Sender: TObject);
-
-begin
-  ActivateQueryBrowserSection;
-
-  if (SectionControls.CurrentSidebarSection.SidebarSectionType = SSTQB_QueryBrowser) then
-    TQueryBrowserForm(SectionControls.CurrentSidebarSection.SectionForm).ShowHelpTabSheet(
-      'http://www.php.net/manual/en/ref.mysqli.php');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -839,11 +792,8 @@ begin
     end;
 
   Enable := IsConnectedToInternet;
-  OnlineDocsMI.Enabled := Enable;
-  OnlineReferenceCAPIMI.Enabled := Enable;
-  OnlineDocsPHPAPIMI.Enabled := Enable;
   ReportBugMI.Enabled := Enable;
-  VisitMySQLcomMI.Enabled := Enable;
+  CheckForUpdatesMI.Enabled := Enable and UpdatesAvailable;
 
   if (MySQLConn.Connected) then
   begin
@@ -965,9 +915,14 @@ end;
 
 procedure TMainForm.CheckFonts;
 
+const
+  FR_PRIVATE = $10;
+  FontFiles: array[0..3] of string = ('VeraMono.ttf', 'VeraMoBd.ttf', 'VeraMoIt.ttf', 'VeraMoBI.ttf');
+
 var
   I: integer;
   FontsInstalled: Boolean;
+  FontDir: WideString;
 
 begin
   FontsInstalled := False;
@@ -975,43 +930,22 @@ begin
     if (CompareText(Screen.Fonts[I], 'Bitstream Vera Sans Mono') = 0) then
       FontsInstalled := True;
 
-  if not FontsInstalled then
-  begin
-    if (not (FileExists(ExtractFilePath(Application.ExeName) + 'fonts\VeraMoBd.ttf'))) then
-      raise EInOutError.Create(Format(_('The Bitstream Vera Sans Mono fonts cannot be found. Please download ' +
-        'the font files from http://www.gnome.org/fonts and copy them into the fonts directory %s. The following files are needed: VeraMoBd.ttf, ' +
-        'VeraMoBI.ttf, VeraMoIt.ttf, VeraMono.ttf.'),
-        [ExtractFilePath(Application.ExeName) + 'fonts\']));
+  FontDir := ExtractFilePath(Application.ExeName) + 'fonts\';
 
-    if not FileExists(GetWindowsDir + 'fonts\VeraMoBd.ttf') then
-    begin
-      CopyDiskFile(ExtractFilePath(Application.ExeName) + 'fonts\VeraMoBd.ttf', GetWindowsDir + 'fonts\VeraMoBd.ttf',
-        False);
-      AddFontResourceW(PWideChar(GetWindowsDir + 'fonts\VeraMoBd.ttf'));
-    end;
+  if (not FontsInstalled) and (not (FileExists(FontDir + 'VeraMoBd.ttf'))) then
+    raise EInOutError.Create(Format(_('The Bitstream Vera Sans Mono fonts cannot be found. Please download ' +
+      'the font files from http://www.gnome.org/fonts and copy them into the fonts directory %s. The following files are needed: VeraMoBd.ttf, ' +
+      'VeraMoBI.ttf, VeraMoIt.ttf, VeraMono.ttf.'),
+      [FontDir]));
 
-    if not FileExists(GetWindowsDir + 'fonts\VeraMoBI.ttf') then
-    begin
-      CopyDiskFile(ExtractFilePath(Application.ExeName) + 'fonts\VeraMoBI.ttf', GetWindowsDir + 'fonts\VeraMoBI.ttf',
-      False);
-    end;
-
-    if not FileExists(GetWindowsDir + 'fonts\VeraMoIt.ttf') then
-    begin
-      CopyDiskFile(ExtractFilePath(Application.ExeName) + 'fonts\VeraMoIt.ttf', GetWindowsDir + 'fonts\VeraMoIt.ttf',
-      False);
-    end;
-
-    if not FileExists(GetWindowsDir + 'fonts\VeraMono.ttf') then
-    begin
-      CopyDiskFile(ExtractFilePath(Application.ExeName) + 'fonts\VeraMono.ttf', GetWindowsDir + 'fonts\VeraMono.ttf',
-      False);
-    end;
-
-    PostMessage(HWND_BROADCAST, WM_FONTCHANGE, 0, 0);
-
-    // Port: the LCL has no Screen.ResetFonts.
-  end;
+  // Port: the original copied the files into the Windows font folder and registered only VeraMoBd.ttf for
+  // the running session; the other three stayed unregistered, so the family could exist with a single style
+  // and the editor fell back to another font in its fixed character grid. All four are now loaded privately
+  // for this process, always (also when the family is installed): no administrator rights, nothing left
+  // behind in the system, and a complete family.
+  for I := Low(FontFiles) to High(FontFiles) do
+    if FileExists(FontDir + FontFiles[I]) then
+      AddFontResourceExW(PWideChar(FontDir + FontFiles[I]), FR_PRIVATE, nil);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1038,61 +972,6 @@ begin
   if (SectionControls.CurrentSidebarSection.SidebarSectionType = SSTQB_QueryBrowser) then
     TQueryBrowserForm(
       SectionControls.CurrentSidebarSection.SectionForm).AddNewScriptTabMIClick(self);
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.MySQLAdministratorMIClick(Sender: TObject);
-
-  //---------------------------------------------------------------------------
-
-  function ConvertToHex(const S: WideString): string;
-
-  var
-    Utf8String: string;
-    
-  begin
-    Utf8String := Utf8Encode(S);
-    SetLength(Result, 2 * Length(Utf8String));
-    BinToHex(PChar(Utf8String), PChar(Result), Length(Utf8String));
-  end;
-
-  //---------------------------------------------------------------------------
-
-var
-  cmd: WideString;
-
-begin
-  cmd := GetMySQLAdministratorCmd;
-  if cmd <> '' then
-  begin
-    if (MySQLConn.UserConnection <> nil) then
-    begin
-      cmd := cmd + ' "-u' + MySQLConn.UserConnection.username + '"';
-      if MySQLConn.UserConnection.password <> '' then
-        cmd := cmd + ' -x' + ConvertToHex(MySQLConn.UserConnection.password);
-      cmd := cmd + ' "-h' + MySQLConn.UserConnection.hostname + '"';
-      cmd := cmd + ' "-P' + IntToStr(MySQLConn.UserConnection.port) + '"';
-    end;
-
-    CreateSubProcess(cmd, '');
-  end;
-end;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-procedure TMainForm.MySQLCommandLineClientMIClick(Sender: TObject);
-
-var
-  cmd: WideString;
-
-begin
-  cmd := GetMySQLCommandLineClientPath;
-  if (cmd <> '') then
-    CreateSubProcess(cmd + ' -h' + MySQLConn.UserConnection.hostname +
-      ' -u' + MySQLConn.UserConnection.username +
-      ' -p' + MySQLConn.UserConnection.password +
-      ' -P' + IntToStr(MySQLConn.UserConnection.port), '');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1178,7 +1057,7 @@ end;
 procedure TMainForm.ListreportedBugsMIClick(Sender: TObject);
 
 begin
-  BrowseWebPage('http://bugs.mysql.com/search.php?search_for=&limit=All&order_by=&direction=ASC&cmd=display&status=Active&severity=&showstopper=&bug_type=MySQL+Query+Browser&php_os=&phpver=&assign=&bug_age=0');
+  BrowseWebPage('https://github.com/aurora/mysql-query-browser/issues');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

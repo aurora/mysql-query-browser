@@ -188,17 +188,6 @@ object MainForm: TMainForm
     object ToolsMI: TMenuItem
       Caption = '&Tools'
       GroupIndex = 200
-      object MySQLAdministratorMI: TMenuItem
-        Caption = 'MySQL Administrator'
-        OnClick = MySQLAdministratorMIClick
-      end
-      object MySQLCommandLineClientMI: TMenuItem
-        Caption = 'MySQL Command Line Client'
-        OnClick = MySQLCommandLineClientMIClick
-      end
-      object N11: TMenuItem
-        Caption = '-'
-      end
       object WindowsCommandLineMI: TMenuItem
         Caption = 'Windows Command Line'
         OnClick = WindowsCommandLineMIClick
@@ -257,35 +246,17 @@ object MainForm: TMainForm
       object N8: TMenuItem
         Caption = '-'
       end
-      object OnlineDocsMI: TMenuItem
-        Caption = 'Online Docs'
-        OnClick = OnlineDocsMIClick
-      end
-      object OnlineReferenceCAPIMI: TMenuItem
-        Caption = 'Online Docs - C API'
-        OnClick = OnlineReferenceCAPIMIClick
-      end
-      object OnlineDocsPHPAPIMI: TMenuItem
-        Caption = 'Online Docs - PHP API'
-        OnClick = OnlineDocsPHPAPIMIClick
-      end
-      object N6: TMenuItem
-        Caption = '-'
-      end
-      object VisitMySQLcomMI: TMenuItem
-        Caption = 'Launch MySQL.com Site'
-        OnClick = VisitMySQLcomMIClick
-      end
-      object N13: TMenuItem
-        Caption = '-'
-      end
       object ListreportedBugsMI: TMenuItem
         Caption = 'List Reported Bugs'
         OnClick = ListreportedBugsMIClick
       end
       object ReportBugMI: TMenuItem
-        Caption = 'Report a New Bug to MySQL'
+        Caption = 'Report a new bug'
         OnClick = ReportBugMIClick
+      end
+      object CheckForUpdatesMI: TMenuItem
+        Caption = 'Check for Updates ...'
+        OnClick = CheckForUpdatesMIClick
       end
       object N7: TMenuItem
         Caption = '-'

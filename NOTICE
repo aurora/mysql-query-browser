@@ -52,6 +52,12 @@ carry only the MPL-1.1 text) and VirtualTreeView (dual MPL-1.1 / LGPL-2.1-or-lat
 are linked into the program. Their licence terms and the open question about the MPL-1.1-only units are
 described in docs/licenses.md. Their source is part of the Lazarus distribution.
 
+Update mechanism
+----------------
+
+Velopack (https://velopack.io, MIT) provides the installer and the update client library, used through
+velopack-pas (MIT, third_party/velopack-pas, a git submodule). See ADR-0018 and docs/licenses.md.
+
 Documentation
 -------------
 

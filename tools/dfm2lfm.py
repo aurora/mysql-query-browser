@@ -310,6 +310,13 @@ RENAME_ITEM_PROP = {"WideText": "Text", "WideHint": "Hint"}
 DROP_SUFFIXES = ("_UTF7",)
 DROP_EVENTS = set()
 
+# Components removed from the converted forms for the first release (ADR-0017): the menu entries
+# that start other MySQL GUI tools or open online documentation. The separators next to them go too.
+DROP_OBJECTS = {
+    "MySQLAdministratorMI", "MySQLCommandLineClientMI", "N11",
+    "OnlineDocsMI", "OnlineReferenceCAPIMI", "OnlineDocsPHPAPIMI", "N6", "VisitMySQLcomMI", "N13",
+}
+
 
 def lcl_class(cls):
     if cls in CLASS_MAP:
@@ -321,6 +328,16 @@ def lcl_class(cls):
 
 def is_event(name):
     return re.match(r"On[A-Z]", name) is not None
+
+
+# Components added to the converted forms (ADR-0018): parent name -> (insert before this child, name, caption,
+# OnClick handler). The program code declares the field and the handler.
+ADD_MENU_ITEMS = {
+    "HelpMI": ("N7", "CheckForUpdatesMI", "Check for Updates ...", "CheckForUpdatesMIClick"),
+}
+
+# Captions changed for the first release (ADR-0017): component name -> new Caption.
+CAPTION_OVERRIDES = {"ReportBugMI": "Report a new bug"}
 
 
 class Converter:
@@ -375,8 +392,18 @@ class Converter:
             if v.kind == "coll":
                 v = Value("coll", [[[RENAME_ITEM_PROP.get(n, n), x] for n, x in item] for item in v.data])
             new_props.append([name, v])
+        if node.name in CAPTION_OVERRIDES:
+            for prop in new_props:
+                if prop[0] == "Caption":
+                    prop[1] = Value("str", CAPTION_OVERRIDES[node.name])
         node.props = new_props
-        node.children = [self.convert(c) for c in node.children]
+        node.children = [self.convert(c) for c in node.children if c.name not in DROP_OBJECTS]
+        if node.name in ADD_MENU_ITEMS:
+            before, name, caption, handler = ADD_MENU_ITEMS[node.name]
+            item = Node("object", name, "TMenuItem")
+            item.props = [["Caption", Value("str", caption)], ["OnClick", Value("raw", handler)]]
+            at = [c.name for c in node.children].index(before)
+            node.children.insert(at, item)
         return node
 
     def inline_frame(self, node):
