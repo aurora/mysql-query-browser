@@ -254,6 +254,10 @@ object MainForm: TMainForm
         Caption = 'Report a new bug'
         OnClick = ReportBugMIClick
       end
+      object CheckForUpdatesMI: TMenuItem
+        Caption = 'Check for Updates ...'
+        OnClick = CheckForUpdatesMIClick
+      end
       object N7: TMenuItem
         Caption = '-'
       end

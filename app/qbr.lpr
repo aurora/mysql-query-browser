@@ -17,7 +17,7 @@ uses
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
   UCEShared, UCEHighlighter, UniCodeEditor, UCEEditorKeyCommands, UniCodeConsole,
-  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, Main;
+  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main;
 
 var
   I: Integer;
@@ -96,6 +96,9 @@ var
   Counter: TMsgCounter;
 
 begin
+  // before anything else: Velopack handles the install/update/uninstall launches here (ADR-0018)
+  StartupVelopack;
+
   Logger := TExceptionLogger.Create;
   Application.OnException := Logger.Handle;
   try

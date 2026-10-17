@@ -38,6 +38,7 @@ contain.
 | libgcc, libstdc++ | GPL-3.0-or-later WITH GCC-exception-3.1 | OK: the runtime library exception covers programs compiled with GCC. |
 | libidn2 | GPL-2.0-or-later and LGPL-3.0-or-later | OK. The package carries **no licence file**; texts are in `licenses/lazarus/` (GPL/LGPL). |
 | libunistring | LGPL-3.0-or-later OR GPL-3.0-or-later | OK. |
+| velopack_libc (Velopack native library, optional) | MIT | OK. Added with ADR-0018. `package.sh` ships velopack-pas's licence; Velopack's own licence text (`LICENSE-velopack.txt` in the velopack-pas native archive) is not extracted by `fetch-native.py` yet: *open*, needed before a release that includes the library. |
 | **OpenSSL 3 (libssl, libcrypto)** | **Apache-2.0** | Apache-2.0 is compatible with GPL **version 3**, not with GPL-2.0-only. Because the project is "2 or later", the combined binary can be distributed under GPL-3.0-or-later. This is why the "or later" must not be dropped (a `GPL-2.0-only` relicensing would break it). |
 | Backend DLLs `libmysql*.dll` | built from this repository (GPL/LGPL, see §1) | OK. |
 

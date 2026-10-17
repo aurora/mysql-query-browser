@@ -47,7 +47,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);src;forms"/>
-      <OtherUnitFiles Value="compat;src;forms;../bindings"/>
+      <OtherUnitFiles Value="compat;src;forms;../bindings;../third_party/velopack-pas/src"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

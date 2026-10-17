@@ -25,6 +25,7 @@ Anything that changes what a user sees needs an ADR first.
 | `app/` | Lazarus project (`qbr.lpi`), `src/` ported units, `compat/` replacement units, `forms/` `.lfm` files, `res/` compiled resources | see below |
 | `app/forms/*.lfm`, `app/compat/Tnt*.pas` (aliases) | converted forms / generated aliases | **No, generated** (`tools/convert_forms.py`, `tools/gen_tnt_shims.py`) |
 | `app/res/` | compiled `.res` files (git-ignored) | no, `tools/build_resources.py` |
+| `third_party/velopack-pas` | git submodule: the Velopack binding (MIT, own project); `src/` is on the unit path (ADR-0018) | **No**, change it in its own repository |
 | `tools/` | generators, converter, `lfmview` (form viewer), analysis scripts | yes |
 | `tests/` | FPCUnit tests that run against real servers | yes |
 | `docs/adr/`, `ROADMAP.md` | decisions and plan | yes, see "Decisions" |
@@ -44,6 +45,7 @@ If you need a different generated result, change the generator, not its output.
 ## Everyday commands
 
 ```bash
+git submodule update --init                      # once after cloning (third_party/velopack-pas)
 ./build.sh [--backend] [--runtime] [--run args]   # build the application (see the script header)
 tools/package.sh [--velopack] [--no-build]       # release package in dist/ (version from VERSION, ADR-0014)
 

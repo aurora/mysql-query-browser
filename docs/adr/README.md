@@ -26,6 +26,7 @@ Related.
 | [0015](0015-mpl-1-1-only-components-and-the-help-viewer.md) | MPL-1.1-only components and the help viewer | Proposed (IpHtml part resolved by ADR-0016; SynEdit part open) |
 | [0016](0016-help-from-the-connected-server.md) | Help reference from the connected server | Accepted by implementation (to confirm) |
 | [0017](0017-trim-menus-for-first-release.md) | Trim the menus for the first release | Accepted |
+| [0018](0018-update-check-with-velopack-pas.md) | Update check with velopack-pas and GitHub releases | Accepted (implemented, not yet built) |
 
 ## Numbering
 

@@ -56,6 +56,7 @@ type
     LaunchHelpMI: TTntMenuItem;
     N6: TTntMenuItem;
     ReportBugMI: TTntMenuItem;
+    CheckForUpdatesMI: TTntMenuItem;
     N7: TTntMenuItem;
     AboutMI: TTntMenuItem;
     SelectAllMI: TTntMenuItem;
@@ -109,6 +110,7 @@ type
       Shift: TShiftState);
 
     procedure ReportBugMIClick(Sender: TObject);
+    procedure CheckForUpdatesMIClick(Sender: TObject);
     procedure ActivateQueryBrowserSection;
 
     procedure HandleIdle(Sender: TObject; var Done: Boolean);
@@ -176,7 +178,7 @@ var
 implementation
 
 uses
-  ApplicationDataModule, MyxError, PNGTools;
+  ApplicationDataModule, MyxError, PNGTools, UpdateCheck;
 
 {$R ../forms/Main.lfm}
 
@@ -684,6 +686,14 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+procedure TMainForm.CheckForUpdatesMIClick(Sender: TObject);
+
+begin
+  CheckForUpdatesInteractive;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 procedure TMainForm.ActivateQueryBrowserSection;
 
 var
@@ -783,6 +793,7 @@ begin
 
   Enable := IsConnectedToInternet;
   ReportBugMI.Enabled := Enable;
+  CheckForUpdatesMI.Enabled := Enable and UpdatesAvailable;
 
   if (MySQLConn.Connected) then
   begin

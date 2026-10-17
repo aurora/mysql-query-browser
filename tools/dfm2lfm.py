@@ -330,6 +330,12 @@ def is_event(name):
     return re.match(r"On[A-Z]", name) is not None
 
 
+# Components added to the converted forms (ADR-0018): parent name -> (insert before this child, name, caption,
+# OnClick handler). The program code declares the field and the handler.
+ADD_MENU_ITEMS = {
+    "HelpMI": ("N7", "CheckForUpdatesMI", "Check for Updates ...", "CheckForUpdatesMIClick"),
+}
+
 # Captions changed for the first release (ADR-0017): component name -> new Caption.
 CAPTION_OVERRIDES = {"ReportBugMI": "Report a new bug"}
 
@@ -392,6 +398,12 @@ class Converter:
                     prop[1] = Value("str", CAPTION_OVERRIDES[node.name])
         node.props = new_props
         node.children = [self.convert(c) for c in node.children if c.name not in DROP_OBJECTS]
+        if node.name in ADD_MENU_ITEMS:
+            before, name, caption, handler = ADD_MENU_ITEMS[node.name]
+            item = Node("object", name, "TMenuItem")
+            item.props = [["Caption", Value("str", caption)], ["OnClick", Value("raw", handler)]]
+            at = [c.name for c in node.children].index(before)
+            node.children.insert(at, item)
         return node
 
     def inline_frame(self, node):
