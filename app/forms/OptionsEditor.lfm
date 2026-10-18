@@ -493,7 +493,14 @@ object OptionsForm: TOptionsForm
           Text = '8'
           OnChange = DoPageContentChanged
           Items.Strings = (
-            '7891011121314')
+            '7'
+            '8'
+            '9'
+            '10'
+            '11'
+            '12'
+            '13'
+            '14')
         end
         object DataFontSizeLU: TComboBox
           Left = 368
@@ -505,7 +512,14 @@ object OptionsForm: TOptionsForm
           Text = '8'
           OnChange = DoPageContentChanged
           Items.Strings = (
-            '7891011121314')
+            '7'
+            '8'
+            '9'
+            '10'
+            '11'
+            '12'
+            '13'
+            '14')
         end
         object DataFontLU: TComboBox
           Left = 88
@@ -539,7 +553,14 @@ object OptionsForm: TOptionsForm
           Text = '8'
           OnChange = DoPageContentChanged
           Items.Strings = (
-            '7891011121314')
+            '7'
+            '8'
+            '9'
+            '10'
+            '11'
+            '12'
+            '13'
+            '14')
         end
         object CodeFontWidthLU: TComboBox
           Left = 268
@@ -551,7 +572,15 @@ object OptionsForm: TOptionsForm
           Text = '8'
           OnChange = DoPageContentChanged
           Items.Strings = (
-            '67891011121314')
+            '6'
+            '7'
+            '8'
+            '9'
+            '10'
+            '11'
+            '12'
+            '13'
+            '14')
         end
       end
       object TntGroupBox1: TGroupBox
@@ -749,7 +778,9 @@ object OptionsForm: TOptionsForm
             TabOrder = 4
             OnChange = DoPageContentChanged
             Items.Strings = (
-              'MySQLOracleODBC')
+              'MySQL'
+              'Oracle'
+              'ODBC')
           end
           object SchemataEd: TEdit
             Left = 92
@@ -814,7 +845,8 @@ object OptionsForm: TOptionsForm
             ScrollBars = ssVertical
             TabOrder = 0
             TitleCaptions.Strings = (
-              'ParameterValue')
+              'Parameter'
+              'Value')
             OnStringsChange = DoPageContentChanged
             ColWidths = (146 145)
           end
@@ -941,7 +973,10 @@ object OptionsForm: TOptionsForm
           Text = 'id%tablename%'
           OnChange = DoPageContentChanged
           Items.Strings = (
-            'id%tablename%id_%tablename%%tablename%id%tablename%_id')
+            'id%tablename%'
+            'id_%tablename%'
+            '%tablename%id'
+            '%tablename%_id')
         end
         object EdTblAllIntUnsignedCBox: TCheckBox
           Left = 16
@@ -964,7 +999,9 @@ object OptionsForm: TOptionsForm
           Text = 'index_%nr%'
           OnChange = DoPageContentChanged
           Items.Strings = (
-            'index_%nr%index%nr%ind_%tablename%_%nr%')
+            'index_%nr%'
+            'index%nr%'
+            'ind_%tablename%_%nr%')
         end
         object EdTblFKNamingEd: TComboBox
           Left = 104
@@ -977,7 +1014,8 @@ object OptionsForm: TOptionsForm
           Text = 'FK_%tablename%_%nr%'
           OnChange = DoPageContentChanged
           Items.Strings = (
-            'FK_%tablename%_%nr%FK%tablename%%nr%')
+            'FK_%tablename%_%nr%'
+            'FK%tablename%%nr%')
         end
         object EdTblPKDatatypeEd: TComboBox
           Left = 384
@@ -1013,7 +1051,13 @@ object OptionsForm: TOptionsForm
           Text = 'InnoDB'
           OnChange = DoPageContentChanged
           Items.Strings = (
-            'InnoDBMyISAMNDBMemoryMergeBDBISAM')
+            'InnoDB'
+            'MyISAM'
+            'NDB'
+            'Memory'
+            'Merge'
+            'BDB'
+            'ISAM')
         end
       end
       object GroupBox3: TGroupBox

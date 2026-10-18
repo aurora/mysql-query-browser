@@ -53,8 +53,12 @@ class DfmError(Exception):
     pass
 
 
+class LineStart(str):
+    """Token text that was the first on its line: separates the items of a string list."""
+
+
 def tokenize(text):
-    pos, out = 0, []
+    pos, out, newline = 0, [], False
     while pos < len(text):
         m = TOKEN.match(text, pos)
         if not m:
@@ -62,8 +66,10 @@ def tokenize(text):
         pos = m.end()
         kind = m.lastgroup
         if kind == "ws":
+            newline = "\n" in m.group()
             continue
-        out.append((kind, m.group()))
+        out.append((kind, LineStart(m.group()) if newline else m.group()))
+        newline = False
     return out
 
 
@@ -179,14 +185,18 @@ class Parser:
         return Value("raw", text)
 
     def parse_string(self):
-        s = ""
+        s, first = "", True
         while True:
             kind, val = self.peek()
             if kind in ("str", "chr"):
+                if not first and isinstance(val, LineStart):   # next item of a string list
+                    return s
+                first = False
                 self.next()
                 s += decode_piece(kind, val)
             elif val == "+" and self.peek(1)[0] in ("str", "chr"):
                 self.next()
+                first = True                                   # continuation, even on the next line
             else:
                 return s
 

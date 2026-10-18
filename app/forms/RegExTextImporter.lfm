@@ -313,7 +313,8 @@ object RegExTextImporterForm: TRegExTextImporterForm
           Font.Style = []
           HideSelection = False
           Lines.Strings = (
-            'INSERT INTO fooVALUES ();')
+            'INSERT INTO foo'
+            'VALUES ();')
           ParentFont = False
           ScrollBars = ssVertical
           TabOrder = 1

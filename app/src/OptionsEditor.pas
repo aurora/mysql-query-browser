@@ -834,6 +834,12 @@ begin
       CodeFontLU.Items.Assign(Screen.Fonts);
 
       // VCL: Screen.ResetFonts; the LCL builds the font list on demand
+      // Port: the LCL caches Screen.Fonts at the first access, which happens before TMainForm.CheckFonts loads
+      // the Bitstream Vera Sans Mono files privately, so the family is missing from the list. Without it the
+      // code font fell back to "MS Sans Serif" here and was saved that way.
+      if FileExists(ExtractFilePath(Application.ExeName) + 'fonts\VeraMono.ttf') and
+        (CodeFontLU.Items.IndexOf('Bitstream Vera Sans Mono') = -1) then
+        CodeFontLU.Items.Add('Bitstream Vera Sans Mono');
 
       DefaultFontLU.ItemIndex := DefaultFontLU.Items.IndexOf(
         MYXCommonOptions.DefaultFontName);

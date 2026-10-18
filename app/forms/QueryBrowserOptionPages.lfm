@@ -146,7 +146,9 @@ object QueryBrowserOptionPagesForm: TQueryBrowserOptionPagesForm
           TabOrder = 3
           OnChange = DoChange
           Items.Strings = (
-            '¶¬¦')
+            '¶'
+            '¬'
+            '¦')
         end
         object SubstCRLU: TComboBox
           Left = 336
@@ -158,7 +160,9 @@ object QueryBrowserOptionPagesForm: TQueryBrowserOptionPagesForm
           TabOrder = 4
           OnChange = DoChange
           Items.Strings = (
-            '·¬»')
+            '·'
+            '¬'
+            '»')
         end
         object CreateWindowsStyleLineBreaksCBox: TCheckBox
           Left = 16
