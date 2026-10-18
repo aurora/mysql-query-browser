@@ -156,6 +156,10 @@ choice that a future contributor would ask "why?" about, write the ADR.
 - **LCL forms with `Position = poMainFormCenter` need `Application.MainForm`.** Without one,
   creating the form raises an access violation in `Monitor`. The developer modes in
   `app/src/DevTools.pas` create a hidden stand-in (`EnsureMainForm`).
+- **Changed `.lfm` files are not rebuilt by `lazbuild`.** `{$R ../forms/X.lfm}` embeds the form when the unit is
+  compiled, and the unit is only recompiled if its `.pas` changed. After regenerating forms, `touch` the matching
+  `app/src/<Unit>.pas` files, otherwise the program keeps the old form (stale combo box items looked like a converter bug
+  that was not fixed).
 - **A failing form constructor hides its exception** (the destructor runs and may fail again);
   guard destroy-time code (e.g. `AddWindowPos`) so the original error shows.
 - **FPC does not allow a parameter with the same name as a field** (generated
