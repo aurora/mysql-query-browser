@@ -755,6 +755,10 @@ begin
 
 
   AdvancedOptionsGBox.Visible := Not(AdvancedOptionsGBox.Visible);
+  {$IFNDEF MSWINDOWS}
+  if (AdvancedOptionsGBox.Visible) then
+    HidePageControlTabs(Self, AdvancedOptionsPageControl);   // Port: see AuxFuncs
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

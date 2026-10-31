@@ -155,6 +155,15 @@ function IsConnectedToInternet: Boolean;
 // positions controls from Label.Width right after setting the caption calls this first.
 procedure SizeLabelToCaption(ALabel: TLabel);
 
+{$IFNDEF MSWINDOWS}
+// Port: the original hides the tab strip of a page control by covering it with a panel (TabHeight is 1 to 16
+// there). GTK2 tabs are taller and show through, so the tabs are switched off and the control moved down by the
+// height of the strip, which keeps the pages where the original has them. GTK2 knows the height of the strip only
+// when the control is shown: this is done after the form's first OnShow, or at once if the form is visible already
+// (the control must be visible, so a hidden group box needs the call when it is opened).
+procedure HidePageControlTabs(Form: TCustomForm; PC: TPageControl);
+{$ENDIF}
+
 function FormatLibraryVersion(LibVersion: Integer): WideString;
 
 function GetCharFromVKey(vkey: Word): WideString;
@@ -186,7 +195,7 @@ var
 implementation
 
 uses
-  TntWindows, Types, PNGTools{$IFNDEF MSWINDOWS}, Process{$ENDIF};
+  TntWindows, Types, PNGTools{$IFNDEF MSWINDOWS}, Process{$ENDIF}{$IFDEF LCLGTK2}, gtk2{$ENDIF};
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1224,6 +1233,77 @@ begin
     Bmp.Free;
   end;
 end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+{$IFNDEF MSWINDOWS}
+type
+  TPageControlTabHider = class(TComponent)
+  private
+    FPageControl: TPageControl;
+    procedure FormShow(Sender: TObject);
+    procedure Run(Data: PtrInt);
+  public
+    destructor Destroy; override;
+  end;
+
+destructor TPageControlTabHider.Destroy;
+
+begin
+  Application.RemoveAsyncCalls(Self);
+  inherited;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TPageControlTabHider.FormShow(Sender: TObject);
+
+begin
+  Application.QueueAsyncCall(Run, 0);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TPageControlTabHider.Run(Data: PtrInt);
+
+var
+  Strip: Integer;
+
+begin
+  // The page widget starts below the tab strip and the border of the notebook; without tabs only the border is left.
+  {$IFDEF LCLGTK2}
+  Strip := PGtkWidget(FPageControl.ActivePage.Handle)^.allocation.y - PGtkWidget(FPageControl.Handle)^.allocation.y - 2;
+  {$ELSE}
+  Strip := 0;
+  {$ENDIF}
+  FPageControl.ShowTabs := False;
+  if Strip > 0 then
+  begin
+    FPageControl.Top := FPageControl.Top + Strip;
+    FPageControl.Height := FPageControl.Height - Strip;
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure HidePageControlTabs(Form: TCustomForm; PC: TPageControl);
+
+var
+  Hider: TPageControlTabHider;
+
+begin
+  if Form.FindComponent('TabHider' + PC.Name) <> nil then
+    Exit;
+
+  Hider := TPageControlTabHider.Create(Form);
+  Hider.Name := 'TabHider' + PC.Name;
+  Hider.FPageControl := PC;
+  if Form.Visible then
+    Application.QueueAsyncCall(Hider.Run, 0)
+  else
+    Form.AddHandlerFirstShow(Hider.FormShow);
+end;
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 

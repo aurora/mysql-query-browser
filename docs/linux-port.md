@@ -96,8 +96,7 @@ Fixes:
    (Win32 shows it as a child window anyway), and the page that takes over index 0 is not switched to.
    `OptionsEditor.BuildOptionSideBar` sets `TabVisible` again and selects another page first (non-Windows).
 
-Still open, cosmetic: in the options dialog a few pixels of the hidden notebook tabs show above
-`HeaderPnl` (GTK2 tabs are taller than the 16 pixels the original hides). Not checked yet: real
+Not checked yet: real
 keyboard/mouse interaction, drag and drop, bookmarks, the field viewer, the Qt5 widgetset
 (checklist: `docs/linux-manual-test.md`).
 
@@ -106,8 +105,10 @@ the window: GTK sized its own text from the desktop's dpi while the forms are fi
 setting is now pinned to 96 (ADR-0023); KDE's "Legacy applications: scaled by the system" scales the window
 as a whole. The result bar's status text was cut off at its lower edge because the LCL clips `DrawText` to the
 given rectangle while the Windows code clips to the text height (`DrawWideStringText`, fixed, Win64 build
-unchanged). Still open, cosmetic: the page control tab strips that the VCL leaves invisible show in the connect
-dialog ("Advanced Connection Options", caption `MySQLOptionsTabSheet`) and in the options dialog.
+unchanged). The tab strips of the page controls that the VCL hides behind a panel (connect dialog "Advanced Connection Options",
+options dialog) showed through under GTK2; they are switched off and the control is moved down by the height of
+the strip (`HidePageControlTabs` in `AuxFuncs`, done when the control is visible, because GTK2 knows the strip's
+height only then). Checked by screenshot; the Win64 build is unchanged.
 
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with

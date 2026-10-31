@@ -84,7 +84,7 @@ Mark each row `ok`, `bug` (what happened) or `n/a`.
 | # | Step | Expected | Result |
 |---|---|---|---|
 | 26 | Options: every page, change a font, Apply/Discard | changes take effect | |
-| 27 | Options: the strip above the page header (cosmetic, open) | note how many pixels of the hidden tabs show | |
+| 27 | Options and connect dialog (Details >>): no tab strip above the pages | no tabs, no `MySQLOptionsTabSheet` text | |
 | 28 | Text search, RegEx importer, schema selection | | |
 | 29 | Help: inline help for a keyword; online links open the default browser | | |
 | 30 | Copy from another program, paste into the editor and back (also non-ASCII) | text identical; no global hot keys (ADR-0022) | |
