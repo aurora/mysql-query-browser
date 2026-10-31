@@ -855,6 +855,7 @@ begin
   {$IFDEF DARWIN}
   folder := UTF8Decode(GetUserDir) + 'Library/Application Support';
   {$ELSE}
+  folder := '';
   Result := '';
   Exit;
   {$ENDIF}
@@ -978,7 +979,32 @@ procedure DrawWideStringText(DC: HDC; lpString: PWideChar; nCount: Integer; lpRe
 // is no GetTextAlign/SetTextAlign there.
 
 {$IFNDEF MSWINDOWS}
+var
+  TM: TTextMetric;
+  Head: PWideChar;
+  I: Integer;
+  HasLineBreak: Boolean;
+
 begin
+  // The Windows code above clips each line to the height of the text, not to the height of the rectangle the
+  // caller gives (the callers pass rectangles that fit Tahoma, e.g. 10 pixels). The LCL clips to the rectangle,
+  // so a taller substitute font loses its lower part. Text without line breaks gets the same clip height.
+  if (uFormat and (DT_SINGLELINE or DT_CALCRECT or DT_NOCLIP) = 0) and (nCount > 0) then
+  begin
+    HasLineBreak := False;
+    Head := lpString;
+    for I := 0 to nCount - 1 do
+      if (Head[I] = WideChar(#0)) or (Head[I] = WideChar(#10)) or (Head[I] = WideChar(#13)) or
+        (Head[I] = WideChar(#2028)) then
+      begin
+        HasLineBreak := True;
+        Break;
+      end;
+
+    if (not HasLineBreak) and GetTextMetrics(DC, TM) and (lpRect.Bottom - lpRect.Top < TM.tmHeight) then
+      lpRect.Bottom := lpRect.Top + TM.tmHeight;
+  end;
+
   DrawTextW(DC, lpString, nCount, lpRect, uFormat);
 end;
 {$ELSE}
