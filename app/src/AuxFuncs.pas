@@ -160,8 +160,10 @@ procedure SizeLabelToCaption(ALabel: TLabel);
 // there). GTK2 tabs are taller and show through, so the tabs are switched off and the control moved down by the
 // height of the strip, which keeps the pages where the original has them. GTK2 knows the height of the strip only
 // when the control is shown: this is done after the form's first OnShow, or at once if the form is visible already
-// (the control must be visible, so a hidden group box needs the call when it is opened).
-procedure HidePageControlTabs(Form: TCustomForm; PC: TPageControl);
+// (the control must be visible, so a hidden group box needs the call when it is opened). A given Strip is the
+// height to move the control down by, and is applied at once; the original's strip is thin (TabHeight 1 to 3)
+// where its page starts right below the control.
+procedure HidePageControlTabs(Form: TCustomForm; PC: TPageControl; Strip: Integer = -1);
 {$ENDIF}
 
 function FormatLibraryVersion(LibVersion: Integer): WideString;
@@ -1286,12 +1288,20 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure HidePageControlTabs(Form: TCustomForm; PC: TPageControl);
+procedure HidePageControlTabs(Form: TCustomForm; PC: TPageControl; Strip: Integer);
 
 var
   Hider: TPageControlTabHider;
 
 begin
+  if Strip >= 0 then
+  begin
+    PC.ShowTabs := False;
+    PC.Top := PC.Top + Strip;
+    PC.Height := PC.Height - Strip;
+    Exit;
+  end;
+
   if Form.FindComponent('TabHider' + PC.Name) <> nil then
     Exit;
 

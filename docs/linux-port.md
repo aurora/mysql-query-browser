@@ -108,7 +108,9 @@ given rectangle while the Windows code clips to the text height (`DrawWideString
 unchanged). The tab strips of the page controls that the VCL hides behind a panel (connect dialog "Advanced Connection Options",
 options dialog) showed through under GTK2; they are switched off and the control is moved down by the height of
 the strip (`HidePageControlTabs` in `AuxFuncs`, done when the control is visible, because GTK2 knows the strip's
-height only then). Checked by screenshot; the Win64 build is unchanged.
+height only then). In the connect dialog the original's strip is only 1 pixel high, so the control moves down by
+that plus the 3D border, and the covering panel is hidden (it would cut into the taller GTK2 group caption).
+Checked by screenshot; the Win64 build is unchanged.
 
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with

@@ -215,6 +215,11 @@ begin
     ord(Not(SelectSchemata))*34;
   AdvancedOptionsGBox.Visible := False;
   AdvancedOptionsHidePageControlHeaderPnl.BringToFront;
+  {$IFNDEF MSWINDOWS}
+  // Port: the panel only covers the tab strip, which is switched off here (HidePageControlTabs); GTK2 draws the group
+  // caption taller than the VCL, so the panel would cut into it
+  AdvancedOptionsHidePageControlHeaderPnl.Visible := False;
+  {$ENDIF}
 
   if(SelectSchemata)then
   begin
@@ -244,6 +249,10 @@ begin
   SkipConnecting := False;
 
   AdvancedOptionsPageControl.TabHeight := 1;
+  {$IFNDEF MSWINDOWS}
+  // Port: see AuxFuncs; the original's strip is 1 pixel high plus the 3D border of the tab control
+  HidePageControlTabs(Self, AdvancedOptionsPageControl, AdvancedOptionsPageControl.TabHeight + 4);
+  {$ENDIF}
 
   FAllowConnectionSkip := True;
 end;
@@ -755,10 +764,6 @@ begin
 
 
   AdvancedOptionsGBox.Visible := Not(AdvancedOptionsGBox.Visible);
-  {$IFNDEF MSWINDOWS}
-  if (AdvancedOptionsGBox.Visible) then
-    HidePageControlTabs(Self, AdvancedOptionsPageControl);   // Port: see AuxFuncs
-  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
