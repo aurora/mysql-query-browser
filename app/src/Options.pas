@@ -732,8 +732,11 @@ begin
 
   GetAvailableLanguages(AvailableLanguages, AvailableLanguageCodes);
   AvailablePasswordStorageTypes := 'Plaintext'#13#10'Obscured';
+  // Port: DPAPI exists only on Windows; the backend has no OS store elsewhere (ADR-0021)
+  {$IFDEF MSWINDOWS}
   if (not (IsWinNT)) then
     AvailablePasswordStorageTypes := AvailablePasswordStorageTypes + #13#10'OS Specific';
+  {$ENDIF}
 
   XMLDir := ExtractFilePath(Application.ExeName) + ('XML' + PathDelim);
 

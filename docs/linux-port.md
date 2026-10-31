@@ -173,11 +173,11 @@ are listed so that each guard is a deliberate choice.
    system-wide and sends keystrokes to the foreground application (`RegisterHotKey`, `keybd_event`,
    `AttachThreadInput`). X11 can do something similar, Wayland cannot. Probably Windows-only; the
    related option ("copy SQL mode") would then do nothing on Linux.
-4. **"OS specific" password storage.** Windows uses DPAPI in the backend
-   (`myx_xml_user_connections.c`); elsewhere the backend calls `os_password_store_function` /
-   `os_password_retrieve_function` hooks, which the original Linux UI filled with GNOME Keyring.
-   Either implement them (libsecret) or hide the choice. Note that `Options` adds the choice when
-   `IsWinNT` returns False, so a Linux build that answers False would offer it.
+4. **"OS specific" password storage (decided: ADR-0021, not offered outside Windows).** Windows uses DPAPI in the
+   backend (`myx_xml_user_connections.c`); elsewhere the backend calls `os_password_store_function` /
+   `os_password_retrieve_function` hooks, which the original Linux UI filled with GNOME Keyring and which the
+   port never sets (a Linux build would have stored clear text). `Options` now lists the choice on Windows
+   only; libsecret / Keychain are deferred.
 
 ## 5. Not visible to the script
 
@@ -218,4 +218,4 @@ x86_64-w64-mingw32-objdump -d --no-addresses <lib-a>/Unit.o > a.dis   # same for
 2. ~~The 64-bit pointer arithmetic, so that results show.~~ ~~Check the main window's features by
    screenshot under GTK2.~~ Done (see "State"); interactive use on a real desktop is next.
 3. ~~Decide 4.1 (data directory).~~ Done, ADR-0019.
-4. Decide and implement 4.2–4.4.
+4. Decide and implement 4.2 and 4.3; ~~4.4~~ (ADR-0021).
