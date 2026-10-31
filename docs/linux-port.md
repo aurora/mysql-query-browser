@@ -101,6 +101,18 @@ Still open, cosmetic: in the options dialog a few pixels of the hidden notebook 
 keyboard/mouse interaction, drag and drop, bookmarks, the field viewer, the Qt5 widgetset
 (checklist: `docs/linux-manual-test.md`).
 
+Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
+values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with
+`double free or corruption (out)`. The core dump shows `g_free` called from
+`gdk_window_process_updates_internal` in the GTK idle handler, i.e. the C heap was already corrupted
+earlier; the program also printed `gtk_window_realize_icon: assertion 'info->icon_pixmap == NULL'`, which
+appears on every start of the main window and is probably unrelated. Not reproducible since (same steps
+under Xvfb at 1280x1024 and 3840x2160, at 192 dpi, with gdb; valgrind did not get past the dialog). A run
+with `MALLOC_CHECK_=3` failed to connect with "MySQL Error Number 0" when no default schema was given; this
+was not isolated further and may point at an uninitialised value in the connect code. If it happens
+again: save the core (`coredumpctl dump <pid> -o core`), start with `QBR_TRACE=1` (flow trace in
+`app/bin/qbr.trace.txt`) and note what was done in the last seconds.
+
 ## Summary before the port (2026-10-30)
 
 - 40 files have Windows units in their `uses` clauses.
