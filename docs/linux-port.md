@@ -52,7 +52,7 @@ Interim behaviour until the decisions in section 4:
 - Long statements are cancelled on the server with `KILL QUERY` over a second connection, guarded so
   that no other statement can be hit (ADR-0020, decision 4.2), on Linux and Windows. The connect and
   ping threads of the connect dialog are still not killed outside Windows; freeing them waits.
-- No global hot keys outside Windows (4.3).
+- No global hot keys outside Windows (ADR-0022, decision 4.3).
 
 **64-bit pointer arithmetic (fixed).** Query results stayed empty on Linux: the ported code walked
 the C arrays with `Integer(Pointer) + n`, which keeps only the low 32 bits of an address (sign
@@ -173,10 +173,11 @@ are listed so that each guard is a deliberate choice.
    libmysql can leave locks held). Implemented for the `MySQLConnection` threads and the query Stop
    button (`app/src/QueryCancel.pas`, tests in `tests/test_cancel.pas`); the `ConnectToInstance`
    threads run no statement and are unchanged.
-3. **Global copy/paste hotkeys.** `QueryBrowser.FormCreate`/`WMHotKey` registers Ctrl+Alt+Shift+C/V
-   system-wide and sends keystrokes to the foreground application (`RegisterHotKey`, `keybd_event`,
-   `AttachThreadInput`). X11 can do something similar, Wayland cannot. Probably Windows-only; the
-   related option ("copy SQL mode") would then do nothing on Linux.
+3. **Global copy/paste hotkeys (decided: ADR-0022, Windows only).** `QueryBrowser.FormCreate`/`WMHotKey` registers
+   Ctrl+Alt+Shift+C/V system-wide and sends keystrokes to the foreground application (`RegisterHotKey`,
+   `keybd_event`, `AttachThreadInput`). X11 can do something similar, Wayland cannot; the code is guarded
+   and not compiled elsewhere. There is no option for it (the mode follows the foreign window).
+
 4. **"OS specific" password storage (decided: ADR-0021, not offered outside Windows).** Windows uses DPAPI in the
    backend (`myx_xml_user_connections.c`); elsewhere the backend calls `os_password_store_function` /
    `os_password_retrieve_function` hooks, which the original Linux UI filled with GNOME Keyring and which the

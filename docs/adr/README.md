@@ -30,6 +30,7 @@ Related.
 | [0019](0019-user-data-directory-of-the-original.md) | User data directory: the original's folder on each platform | Accepted (implemented and checked on Linux) |
 | [0020](0020-cancel-queries-on-the-server.md) | Cancel queries on the server, never the wrong one | Accepted (implemented; Windows cross-built only) |
 | [0021](0021-no-os-specific-password-storage-outside-windows.md) | No "OS Specific" password storage outside Windows (for now) | Accepted (implemented on Linux) |
+| [0022](0022-global-copy-paste-hotkeys-on-windows-only.md) | Global copy/paste hot keys on Windows only | Accepted |
 
 ## Numbering
 
