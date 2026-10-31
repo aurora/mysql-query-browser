@@ -46,7 +46,7 @@ interface
 {$I Compilers.inc}
 
 uses
-  Windows, Classes;
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Classes;
 
 const
   BufferIncrement = 1024; // Size by which the buffer in the buffered string is incremented
@@ -79,19 +79,20 @@ const
   BucketSize = 8;
 
 type
+  // Port: the trie keeps a PChar in Value; it was a Cardinal, which cuts 64-bit pointers to 32 bits.
   THashLinkedItem = class(TObject)
   private
-    FValue: Cardinal;
+    FValue: PtrUInt;
     FData: Pointer;
     FNext: THashLinkedItem;
   public
-    constructor Create(Value: Cardinal; Data: Pointer; Next: THashLinkedItem);
+    constructor Create(Value: PtrUInt; Data: Pointer; Next: THashLinkedItem);
     destructor Destroy; override;
   end;
 
   THashTrie = class;
 
-  TTraverseProc = procedure(UserData, UserProc: Pointer; Value: Cardinal; Data: Pointer; var Done: Boolean) of object;
+  TTraverseProc = procedure(UserData, UserProc: Pointer; Value: PtrUInt; Data: Pointer; var Done: Boolean) of object;
 
   THashTreeItem = class(TObject)
   private
@@ -100,11 +101,11 @@ type
     FFilled: Integer;
     FItems: array of TObject; // This will be at most LeafSize entries.
   protected
-    procedure AddDown(Value, Hash: Cardinal; const Data: Pointer);
-    procedure Delete(Value, Hash: Cardinal);
-    function Find(Value, Hash: Cardinal; var Data: Pointer): Boolean;
+    procedure AddDown(Value: PtrUInt; Hash: Cardinal; const Data: Pointer);
+    procedure Delete(Value: PtrUInt; Hash: Cardinal);
+    function Find(Value: PtrUInt; Hash: Cardinal; var Data: Pointer): Boolean;
     function GetFilled: Integer;
-    function Modify(Value, Hash: Cardinal; const Data: Pointer): Boolean;
+    function Modify(Value: PtrUInt; Hash: Cardinal; const Data: Pointer): Boolean;
     function ROR(Value: Cardinal): Cardinal;
     function RORN(Value: Cardinal; Level: Integer): Cardinal;
     function Traverse(UserData, UserProc: Pointer; TraverseProc: TTraverseProc): Boolean;
@@ -120,18 +121,18 @@ type
     FRoot: THashTreeItem;
     function GetCount: Integer;
   protected
-    procedure AddDown(Value, Hash: Cardinal; const Data: Pointer);
-    function CompareValue(Value1, Value2: Cardinal): Boolean; virtual; abstract;
-    procedure Delete(Value, Hash: Cardinal);
-    procedure DestroyItem(var Value: Cardinal; var Data: Pointer); virtual; abstract;
-    function HashValue(Value: Cardinal): Cardinal; virtual; abstract;
+    procedure AddDown(Value: PtrUInt; Hash: Cardinal; const Data: Pointer);
+    function CompareValue(Value1, Value2: PtrUInt): Boolean; virtual; abstract;
+    procedure Delete(Value: PtrUInt; Hash: Cardinal);
+    procedure DestroyItem(var Value: PtrUInt; var Data: Pointer); virtual; abstract;
+    function HashValue(Value: PtrUInt): Cardinal; virtual; abstract;
     procedure Traverse(UserData, UserProc: Pointer; TraverseProc: TTraverseProc);
   public
     constructor Create; virtual;
     destructor Destroy; override;
 
     procedure Clear;
-    function Find(Value, Hash: Cardinal; var Data: Pointer): Boolean; overload;
+    function Find(Value: PtrUInt; Hash: Cardinal; var Data: Pointer): Boolean; overload;
 
     property Count: Integer read GetCount;
   end;
@@ -148,12 +149,12 @@ type
     FCaseSensitive: Boolean;
     FOnFreeItem: TSHTFreeItemEvent;
   protected
-    function HashValue(Value: Cardinal): Cardinal; override;
-    procedure DestroyItem(var Value: Cardinal; var Data: Pointer); override;
-    function CompareValue(Value1, Value2: Cardinal): Boolean; override;
+    function HashValue(Value: PtrUInt): Cardinal; override;
+    procedure DestroyItem(var Value: PtrUInt; var Data: Pointer); override;
+    function CompareValue(Value1, Value2: PtrUInt): Boolean; override;
     function HashStr(const S: string): Cardinal;
-    procedure TraverseProc(UserData, UserProc: Pointer; Value: Cardinal; Data: Pointer; var Done: Boolean);
-    procedure TraverseMeth(UserData, UserProc: Pointer; Value: Cardinal; Data: Pointer; var Done: Boolean);
+    procedure TraverseProc(UserData, UserProc: Pointer; Value: PtrUInt; Data: Pointer; var Done: Boolean);
+    procedure TraverseMeth(UserData, UserProc: Pointer; Value: PtrUInt; Data: Pointer; var Done: Boolean);
   public
     procedure Add(const S: string; const Data: Pointer);
     procedure Delete(const S: string);
@@ -518,7 +519,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure THashTreeItem.AddDown(Value, Hash: Cardinal; const Data: Pointer);
+procedure THashTreeItem.AddDown(Value: PtrUInt; Hash: Cardinal; const Data: Pointer);
 
 var
   I, J: Integer;
@@ -575,7 +576,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure THashTreeItem.Delete(Value, Hash: Cardinal);
+procedure THashTreeItem.Delete(Value: PtrUInt; Hash: Cardinal);
 
 var
   I: Integer;
@@ -628,7 +629,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function THashTreeItem.Find(Value, Hash: Cardinal; var Data: Pointer): Boolean;
+function THashTreeItem.Find(Value: PtrUInt; Hash: Cardinal; var Data: Pointer): Boolean;
 
 var
   I: Integer;
@@ -687,7 +688,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function THashTreeItem.Modify(Value, Hash: Cardinal; const Data: Pointer): Boolean;
+function THashTreeItem.Modify(Value: PtrUInt; Hash: Cardinal; const Data: Pointer): Boolean;
 
 var
   I: Integer;
@@ -772,7 +773,7 @@ end;
 
 //----------------- THashLinkedItem ------------------------------------------------------------------------------------
 
-constructor THashLinkedItem.Create(Value: Cardinal; Data: Pointer; Next: THashLinkedItem);
+constructor THashLinkedItem.Create(Value: PtrUInt; Data: Pointer; Next: THashLinkedItem);
 
 begin
   FValue := Value;
@@ -818,7 +819,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function THashTrie.Find(Value, Hash: Cardinal; var Data: Pointer): Boolean;
+function THashTrie.Find(Value: PtrUInt; Hash: Cardinal; var Data: Pointer): Boolean;
 
 begin
   Result := FRoot.Find(Value, Hash, Data);
@@ -834,7 +835,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure THashTrie.AddDown(Value, Hash: Cardinal; const Data: Pointer);
+procedure THashTrie.AddDown(Value: PtrUInt; Hash: Cardinal; const Data: Pointer);
 
 begin
   FRoot.AddDown(Value, Hash, Data);
@@ -842,7 +843,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure THashTrie.Delete(Value, Hash: Cardinal);
+procedure THashTrie.Delete(Value: PtrUInt; Hash: Cardinal);
 
 begin
   FRoot.Delete(Value, Hash);
@@ -865,12 +866,12 @@ var
 
 begin
   Value := StrNew(PChar(S));
-  AddDown(Cardinal(Value), HashStr(S), Data);
+  AddDown(PtrUInt(Value), HashStr(S), Data);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TStringHashTrie.CompareValue(Value1, Value2: Cardinal): Boolean;
+function TStringHashTrie.CompareValue(Value1, Value2: PtrUInt): Boolean;
 
 begin
   if FCaseSensitive then
@@ -884,12 +885,12 @@ end;
 procedure TStringHashTrie.Delete(const S: string);
 
 begin
-  inherited Delete(Cardinal(@S), HashStr(S));
+  inherited Delete(PtrUInt(@S), HashStr(S));
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TStringHashTrie.DestroyItem(var Value: Cardinal; var Data: Pointer);
+procedure TStringHashTrie.DestroyItem(var Value: PtrUInt; var Data: Pointer);
 
 begin
   if Assigned(FOnFreeItem) then
@@ -906,7 +907,7 @@ end;
 function TStringHashTrie.Find(const S: string; var Data: Pointer): Boolean;
 
 begin
-  Result := Find(Cardinal(PChar(S)), HashStr(S), Data);
+  Result := Find(PtrUInt(PChar(S)), HashStr(S), Data);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -922,7 +923,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TStringHashTrie.HashValue(Value: Cardinal): Cardinal;
+function TStringHashTrie.HashValue(Value: PtrUInt): Cardinal;
 
 begin
   Result := HashStr(PChar(Value));
@@ -938,7 +939,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TStringHashTrie.TraverseProc(UserData, UserProc: Pointer; Value: Cardinal; Data: Pointer; var Done: Boolean);
+procedure TStringHashTrie.TraverseProc(UserData, UserProc: Pointer; Value: PtrUInt; Data: Pointer; var Done: Boolean);
 
 begin
   TStrHashTraverseProc(UserProc)(UserData, PChar(Value), Data, Done);
@@ -954,7 +955,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TStringHashTrie.TraverseMeth(UserData, UserProc: Pointer; Value: Cardinal; Data: Pointer; var Done: Boolean);
+procedure TStringHashTrie.TraverseMeth(UserData, UserProc: Pointer; Value: PtrUInt; Data: Pointer; var Done: Boolean);
 
 type
   PTStrHashTraverseMeth = ^TStrHashTraverseMeth;

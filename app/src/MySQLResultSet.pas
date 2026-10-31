@@ -5,7 +5,7 @@ unit MySQLResultSet;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Contnrs, Controls,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Classes, Contnrs, Controls,
   TntExtCtrls, TntComCtrls, TntClasses, TntStdCtrls, SyncObjs,
   myx_types, myx_public_interface, myx_util_public_interface, gnugettext, auxfuncs, MyxError,
   MySQLConnection, laz.VirtualTrees, VTCompat, Graphics, StrUtils,
@@ -616,15 +616,15 @@ begin
      (ResultSet<>nil) and
      (FCurrentRow<Integer(ResultSet.rows_num))then
   begin
-    Row := PMYX_RS_ROW(integer(ResultSet.rows)+sizeof(MYX_RS_ROW)*FCurrentRow);
+    Row := PMYX_RS_ROW(PtrUInt(ResultSet.rows)+sizeof(MYX_RS_ROW)*FCurrentRow);
 
     for I := 0 to ResultSet.columns_num-1 do
     begin
-      col := PMYX_RS_COLUMN(integer(ResultSet.columns)+(sizeof(MYX_RS_COLUMN)*I));
+      col := PMYX_RS_COLUMN(PtrUInt(ResultSet.columns)+(sizeof(MYX_RS_COLUMN)*I));
       Column := Copy(Utf8Decode(col.name), 1, 28);
       if Assigned(Row.fields) then
       begin
-        Field := (PMYX_RS_FIELD(integer(Row.fields) + (sizeof(MYX_RS_FIELD) * I)))^;
+        Field := (PMYX_RS_FIELD(PtrUInt(Row.fields) + (sizeof(MYX_RS_FIELD) * I)))^;
 
         // Only take first 128 chars.
         Value := Utf8Decode(Field.value);
@@ -813,7 +813,7 @@ begin
     begin
       for I := 0 to ResultSet.actions.actions_num-1 do
       begin
-        RSAction := PMYX_RS_ACTION(Integer(ResultSet.actions.actions) + sizeof(MYX_RS_ACTION) * I);
+        RSAction := PMYX_RS_ACTION(PtrUInt(ResultSet.actions.actions) + sizeof(MYX_RS_ACTION) * I);
         if RSAction.status <> MYX_RSAS_NEW then
           RSAction.status:=MYX_RSAS_NEW;
       end;
@@ -826,7 +826,7 @@ begin
 
         for I:=0 to errors.errors_num-1 do
         begin
-          error := PMYX_RS_ACTION_ERROR(Integer(errors.errors) + sizeof(MYX_RS_ACTION_ERROR) * I);
+          error := PMYX_RS_ACTION_ERROR(PtrUInt(errors.errors) + sizeof(MYX_RS_ACTION_ERROR) * I);
           AddRSMessage(UTF8Decode(error.error_text), error.level, error.error);
 
           if error.error = 2006 then
@@ -1290,7 +1290,7 @@ begin
   begin
     for I := 0 to PMsgs.errors_num - 1 do
     begin
-      PMsg := PMYX_MYSQL_ERROR_MSG(Integer(PMsgs.errors) +
+      PMsg := PMYX_MYSQL_ERROR_MSG(PtrUInt(PMsgs.errors) +
         sizeof(MYX_MYSQL_ERROR_MSG) * I);
 
       MySQLRS.AddRSMessage(UTF8Decode(PMsg.text), PMsg.level,

@@ -22,7 +22,7 @@ QB = os.path.join(ROOT, "legacy", "mysql-query-browser", "source", "windows")
 OUT = os.path.join(ROOT, "app", "forms")
 SHOTS = os.path.join(ROOT, "docs", "reconstructed")
 FLAT = os.path.join(ROOT, "docs", "reconstructed", "_flat")
-VIEWER = os.path.join(ROOT, "tools", "lfmview", "bin", "lfmview.exe")
+VIEWER = os.path.join(ROOT, "tools", "lfmview", "bin", "lfmview" + (".exe" if sys.platform == "win32" else ""))
 
 # name -> source .dfm. The Query Browser's own files win over common/ ones.
 FORMS = {

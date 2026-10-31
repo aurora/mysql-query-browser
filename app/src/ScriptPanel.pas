@@ -21,7 +21,7 @@ unit ScriptPanel;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Contnrs, Graphics, Controls, SyncObjs,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Classes, Contnrs, Graphics, Controls, SyncObjs,
   laz.VirtualTrees, VTCompat, TntExtCtrls, TntComCtrls, TntClasses, TntStdCtrls,
   gnugettext, auxfuncs, PNGImage,
   MySQLConnection, MySQLResultSet, AuxLists, TntMenus, Forms,

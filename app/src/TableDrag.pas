@@ -5,7 +5,7 @@ unit TableDrag;
 interface
 
 uses
-  gnugettext, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, TntStdCtrls, ExtCtrls, PNGImage, AuxFuncs, TntForms,
   TntExtCtrls, myx_public_interface, laz.VirtualTrees, VTCompat,
   MySQLConnection, Options;

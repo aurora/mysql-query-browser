@@ -5,7 +5,7 @@ unit SchemaSelection;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, PNGImage, AuxFuncs, ExtCtrls, TntExtCtrls, StdCtrls,
   SchemataTreeView, TntStdCtrls, TntForms, MySQLConnection,
   myx_public_interface, Menus, TntMenus;

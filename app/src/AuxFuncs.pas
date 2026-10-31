@@ -1,7 +1,7 @@
 unit AuxFuncs;
 
 // Not ported (not used by the Query Browser, code from the MySQL Administrator):
-//   AddListViewItem, AddToFile, BreakLine, ClearListView, ClearTreeView, ColorToHtmlColor, CreateShortcut, CreateVaList, DeleteComponentWithChildren, DisableEnablePages, ExecuteShellAppl, ExtractNumber, ExtractString, ExtractText, FetchHttpRequest, FormatFileSize, GetApplDir, GetCommonProgFilesDir, GetComputerNetName, GetDefaultBrowser, GetDriveInfo, GetDrives, GetExeByExtension, GetFileDate, GetFileSize, GetFileVersion, GetGlobalEnvironment, GetLocalHostName, GetNewGUID, GetShellLinkFileName, GetSubstringCount, GetTempDir, HtmlColorToColor, IsAcrobatInstalled, IsKeyDown, LoadRtfTextFromResource, LoadTextFromFile, LocalTimeToUTC, ParseCommandLine, PrintPDF, RemoveService, RescaleFontSize, SaveAnsiTextToFile, SendToEventLog, ServiceStart, ServiceStatus, ServiceStop, SetDataFont, SetGlobalEnvironment, ShortPathToLongPath, ShowPDF, StringAlignLeft, StringAlignRight, UTCtoLocalTime
+//   AddListViewItem, AddToFile, BreakLine, ClearListView, ClearTreeView, ColorToHtmlColor, CreateShortcut, CreateVaList, DeleteComponentWithChildren, DisableEnablePages, ExecuteShellAppl, ExtractNumber, ExtractString, ExtractText, FetchHttpRequest, FormatFileSize, GetApplDir, GetCommonProgFilesDir, GetComputerNetName, GetDefaultBrowser, GetDriveInfo, GetDrives, GetExeByExtension, GetFileDate, GetFileSize, GetFileVersion, GetGlobalEnvironment, GetLocalHostName, GetNewGUID, GetShellLinkFileName, GetSubstringCount, GetTempDir, GetTimeBias, HtmlColorToColor, IsAcrobatInstalled, IsKeyDown, LoadRtfTextFromResource, LoadTextFromFile, LocalTimeToUTC, ParseCommandLine, PrintPDF, RemoveService, RescaleFontSize, SaveAnsiTextToFile, SendToEventLog, ServiceStart, ServiceStatus, ServiceStop, SetDataFont, SetGlobalEnvironment, ShortPathToLongPath, ShowPDF, StringAlignLeft, StringAlignRight, UTCtoLocalTime
 
 {$mode delphi}
 
@@ -24,10 +24,10 @@ unit AuxFuncs;
 interface
 
 uses
-  Classes, TntClasses, TntExtCtrls, Windows, Winsock, TntRegistry,
+  Classes, TntClasses, TntExtCtrls, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Registry{$ENDIF}, {$IFDEF MSWINDOWS}Winsock,{$ENDIF} TntRegistry,
   TntComCtrls, ComCtrls, Forms, Messages,
-  StdCtrls, Controls, Dialogs, ShlObj, Contnrs, Graphics,
-  SysUtils, ShellAPI, ActiveX, WinInet,
+  StdCtrls, Controls, Dialogs, {$IFDEF MSWINDOWS}ShlObj,{$ENDIF} Contnrs, Graphics,
+  SysUtils, {$IFDEF MSWINDOWS}ShellAPI, ActiveX, WinInet,{$ENDIF}
   gnugettext, StrUtils, TntForms, TntStdCtrls,
   Clipbrd, ExtCtrls, TntSysUtils;
 
@@ -137,7 +137,7 @@ procedure CopyDiskFile(sourcefile, destinationfile: WideString; PromtBeforeOverw
 
 procedure ShowHelp;
 
-function GetWideStringTextWidth(DC: THandle; Text: WideString): Integer; overload;
+function GetWideStringTextWidth(DC: HDC; Text: WideString): Integer; overload;
 function GetWideStringTextWidth(Canvas: TCanvas; Text: WideString): Integer; overload;
 
 procedure DrawWideStringText(DC: HDC; lpString: PWideChar; nCount: Integer;
@@ -186,7 +186,7 @@ var
 implementation
 
 uses
-  TntWindows, Types, PNGTools;
+  TntWindows, Types, PNGTools{$IFNDEF MSWINDOWS}, Process{$ENDIF};
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -200,9 +200,14 @@ var
   Parameter: UINT;
 
 begin
+  {$IFDEF MSWINDOWS}
   Parameter := 0;
   SystemParametersInfo(SPI_GETFONTSMOOTHINGTYPE, 0, @Parameter, 0);
   ClearTypeOn := (Parameter and FE_FONTSMOOTHINGCLEARTYPE) <> 0;
+  {$ELSE}
+  // Port: a Windows setting; elsewhere the forms keep the fonts of their .lfm files
+  ClearTypeOn := False;
+  {$ENDIF}
   TahomaFontAvailable := Screen.Fonts.IndexOf('Tahoma') > -1;
 end;
 
@@ -229,9 +234,16 @@ begin
       if (Box.Parent = nil) or (Box.ControlCount = 0) then
         Continue;
       Box.HandleNeeded;
+      {$IFDEF MSWINDOWS}
       Client := Box.ClientToParent(Point(0, 0), Box.Parent);
       Dec(Client.X, Box.Left);
       Dec(Client.Y, Box.Top);
+      {$ELSE}
+      // GTK places the client area only when the form is shown, so ClientToParent is wrong here; the client
+      // size is known: equal borders left, right and bottom, the rest is the caption.
+      Client.X := (Box.Width - Box.ClientWidth) div 2;
+      Client.Y := Box.Height - Box.ClientHeight - Client.X;
+      {$ENDIF}
       if (Client.X = 0) and (Client.Y = 0) then
         Continue;
       for J := 0 to Box.ControlCount - 1 do
@@ -375,12 +387,15 @@ end;
 
 function getXPStyleEnabled: Boolean;
 
+{$IFDEF MSWINDOWS}
 var
   VersionInfo: TOSVersionInfo;
   Registry: TTntRegistry;
+{$ENDIF}
 
 begin
   getXPStyleEnabled := False;
+  {$IFDEF MSWINDOWS}
 
   VersionInfo.dwOSVersionInfoSize := Sizeof(TOSVersionInfo);
   GetVersionEx(VersionInfo);
@@ -398,6 +413,7 @@ begin
   finally
     Registry.Free;
   end;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -481,10 +497,8 @@ var
   StartupInfo: Windows.TStartupInfoW;
   wdir: PWideChar;
   ProcessInfo: TProcessInformation;
-{$ENDIF}
-
-{$IFDEF LINUX}
-  FCmdThread: TCmdExecThread;
+{$ELSE}
+  Proc: TProcess;
 {$ENDIF}
 
 begin
@@ -515,29 +529,39 @@ begin
 
     ProcessInfo.hProcess := 0;
   end;
-{$ENDIF}
-
-{$IFDEF LINUX}
-  {if FCmdThread <> nil then
-  begin
-    if not FCmdThread.Done
-      then raise Exception.Create('A command is already running')
-    else FCmdThread.Free;
-  end;}
-  FCmdThread := TCmdExecThread.Create;
-  //FCmdThread.OnComplete := InternalComplete;
-  FCmdThread.Command := command;
-  FCmdThread.Resume;
-
-  //Wenn erwünscht, warten bis Programm beendet wird.
-  if (wait4proz = 1) then
-  begin
-    while (not (FCmdThread.Done)) do
+{$ELSE}
+  // Port: the original's Kylix branch (TCmdExecThread) is replaced by FCL's TProcess. `show` has no
+  // meaning for a program started without a console.
+  Proc := TProcess.Create(nil);
+  try
+    // callers pass a bare (unquoted) program path, e.g. Application.ExeName, or a command line
+    if FileExists(UTF8Encode(command)) then
+      Proc.Executable := UTF8Encode(command)
+    else
     begin
-      Sleep(500);
-      //Do drawing and stuff
-      Application.ProcessMessages;
+      CommandToList(UTF8Encode(command), Proc.Parameters);
+      if Proc.Parameters.Count = 0 then
+        Exit;
+      Proc.Executable := Proc.Parameters[0];
+      Proc.Parameters.Delete(0);
     end;
+    Proc.CurrentDirectory := UTF8Encode(workingdir);
+    try
+      Proc.Execute;
+    except
+      on E: Exception do
+        raise Exception.Create(command + ': '#13#10 + 'The Program could not be launched.'#13#10 + E.Message);
+    end;
+
+    //If requested, wait for the programm to end
+    if (wait4proz) then
+      while Proc.Running do
+      begin
+        Sleep(50);
+        Application.ProcessMessages;
+      end;
+  finally
+    Proc.Free;
   end;
 {$ENDIF}
 end;
@@ -657,10 +681,16 @@ end;
 
 procedure WriteToReg(theRoot: HKEY; Key, Name: WideString; Typ: Integer; Val: WideString);
 
+// Port: outside Windows there is no registry (FPC's TRegistry would write an XML file instead); the
+// Windows-only callers then do nothing.
+
+{$IFDEF MSWINDOWS}
 var
   MyReg: TTntRegistry;
+{$ENDIF}
 
 begin
+  {$IFDEF MSWINDOWS}
   try
     MyReg := TTntRegistry.Create(KEY_WRITE);
     MyReg.RootKey := theRoot;
@@ -676,6 +706,7 @@ begin
     end;
   except
   end;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -683,10 +714,15 @@ end;
 function ReadFromReg(theRoot: HKEY; Key, Name: WideString; Typ: Integer; DefaultVal: WideString;
   CanCreate: Boolean): WideString;
 
+{$IFDEF MSWINDOWS}
 var
   MyReg: TTntRegistry;
+{$ENDIF}
 
 begin
+  {$IFNDEF MSWINDOWS}
+  Result := DefaultVal;
+  {$ELSE}
   try
     MyReg := TTntRegistry.Create(KEY_READ);
     MyReg.RootKey := theRoot;
@@ -703,32 +739,45 @@ begin
   except
     ReadFromReg := DefaultVal;
   end;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 function GetSystemDir: WideString;
 
+{$IFDEF MSWINDOWS}
 var
   SysDir: array[0..MAX_PATH] of Char;
+{$ENDIF}
 
 begin
+  {$IFDEF MSWINDOWS}
   GetSystemDirectory(SysDir, MAX_PATH);
 
   GetSystemDir := IncludeTrailingPathDelimiter(SysDir);
+  {$ELSE}
+  Result := '';                         // Port: Windows only
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 function GetWindowsDir: WideString;
 
+{$IFDEF MSWINDOWS}
 var
   WinDir: array[0..MAX_PATH] of Char;
+{$ENDIF}
 
 begin
+  {$IFDEF MSWINDOWS}
   GetWindowsDirectory(WinDir, MAX_PATH);
 
   GetWindowsDir := IncludeTrailingPathDelimiter(WinDir);
+  {$ELSE}
+  Result := '';                         // Port: Windows only
+  {$ENDIF}
 end;
 
 
@@ -737,13 +786,20 @@ end;
 function GetSpecialFolder(Folder: Integer): WideString;
 
 // Reads the file name of the special (system) folder given by the id in Folder.
+// Port: the CSIDL folders are a Windows concept; elsewhere the result is empty and the callers below
+// use the platform's own folders.
 
+{$IFDEF MSWINDOWS}
 var
   pMalloc: IMalloc;
   pidl: PItemIDList;
   Buffer: array[0..MAX_PATH] of WideChar;
+{$ENDIF}
 
 begin
+  {$IFNDEF MSWINDOWS}
+  Result := '';
+  {$ELSE}
   // We need the IMalloc interface pointer to free memory allocated by the shell.
   if (SHGetMalloc(pMalloc) <> S_OK) then
     raise EInOutError.Create('Couldn''t get pointer to IMalloc interface.')
@@ -756,6 +812,7 @@ begin
     // Free memory allocated by SHGetSpecialFolderLocation.
     pMalloc.Free(pidl);
   end;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -785,12 +842,23 @@ var
   folder: WideString;
 
 begin
+  {$IFDEF MSWINDOWS}
   folder := GetSpecialFolder(CSIDL_APPDATA);
 
   if (folder = '') then
     folder := ReadFromReg(HKEY_CURRENT_USER,
       'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders',
       'AppData', 0, '');
+  {$ELSE}
+  // Port: macOS keeps it in ~/Library/Application Support as the original does. Linux has no such folder
+  // (the original used ~/.mysqlgui, see Options.TMyxOptions.Create), so nothing is answered there.
+  {$IFDEF DARWIN}
+  folder := UTF8Decode(GetUserDir) + 'Library/Application Support';
+  {$ELSE}
+  Result := '';
+  Exit;
+  {$ENDIF}
+  {$ENDIF}
 
   Result := IncludeTrailingPathDelimiter(folder);
 end;
@@ -803,21 +871,20 @@ var
   folder: WideString;
 
 begin
+  {$IFDEF MSWINDOWS}
   folder := GetSpecialFolder(CSIDL_PERSONAL);
 
   if (folder = '') then
     folder := ReadFromReg(HKEY_CURRENT_USER,
       'Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders',
       'Personal', 0, '');
+  {$ELSE}
+  folder := UTF8Decode(GetUserDir);   // Port: the home directory takes the place of "My Documents"
+  {$ENDIF}
 
   Result := IncludeTrailingPathDelimiter(folder);
 end;
 
-
-//----------------------------------------------------------------------------------------------------------------------
-
-// Not defined in Windows.pas
-function GetLongPathNameW(lpszLongPath: PWideChar; lpszShortPath: PWideChar; cchBuffer: DWORD): DWORD; stdcall; external 'Kernel32.dll';
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -876,7 +943,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function GetWideStringTextWidth(DC: THandle; Text: WideString): Integer;
+function GetWideStringTextWidth(DC: HDC; Text: WideString): Integer;
 
 var
   Size: TSize;
@@ -907,7 +974,14 @@ procedure DrawWideStringText(DC: HDC; lpString: PWideChar; nCount: Integer; lpRe
 // Differences to the DrawTextW Windows API:
 //   - The additional parameter AdjustRight determines whether to adjust the right border of the given rectangle to
 //     accomodate the largest line in the text. It has only a meaning if also DT_CALCRECT is specified.
+// Port: outside Windows the LCL's DrawText (UTF-8) does the work: it supports these flags, and there
+// is no GetTextAlign/SetTextAlign there.
 
+{$IFNDEF MSWINDOWS}
+begin
+  DrawTextW(DC, lpString, nCount, lpRect, uFormat);
+end;
+{$ELSE}
 var
   Head, Tail: PWideChar;
   Size: TSize;
@@ -1029,15 +1103,22 @@ begin
     lpRect.Bottom := LineRect.Top;
   end;
 end;
+{$ENDIF}
 
 
 //----------------------------------------------------------------------------------------------------------------------
 
+// Port: the Windows version checks answer False on other platforms.
+
 function IsWinXP: Boolean;
 
 begin
+  {$IFDEF MSWINDOWS}
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and
     (Win32MajorVersion >= 5) and (Win32MinorVersion >= 1);
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1045,7 +1126,11 @@ end;
 function IsWin2k: Boolean;
 
 begin
+  {$IFDEF MSWINDOWS}
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion >= 5) and (Win32MinorVersion = 0);
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1053,24 +1138,34 @@ end;
 function IsWinNT: Boolean;
 
 begin
+  {$IFDEF MSWINDOWS}
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion = 4);
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 function IsWin2kOrXP: Boolean;
 
+{$IFDEF MSWINDOWS}
 var
   Version: DWORD;
   MajorVersion: BYTE;
+{$ENDIF}
 
 begin
+  {$IFDEF MSWINDOWS}
   Version := GetVersion();
 
   // Get major and minor version numbers of Windows.
   MajorVersion := LOBYTE(LOWORD(Version));
 
   Result := MajorVersion >= 5;
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1078,7 +1173,11 @@ end;
 function IsWinNTPlatform: Boolean;
 
 begin
+  {$IFDEF MSWINDOWS}
   Result := (Win32Platform = VER_PLATFORM_WIN32_NT);
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
 end;
 
 
@@ -1104,14 +1203,20 @@ end;
 
 function IsConnectedToInternet: Boolean;
 
+{$IFDEF MSWINDOWS}
 var
   dwConnectionTypes: DWORD;
+{$ENDIF}
 
 begin
+  {$IFDEF MSWINDOWS}
   dwConnectionTypes := INTERNET_CONNECTION_MODEM +
     INTERNET_CONNECTION_LAN + INTERNET_CONNECTION_PROXY;
 
   Result := InternetGetConnectedState(@dwConnectionTypes, 0);
+  {$ELSE}
+  Result := True;                       // Port: no WinInet; the browser reports a missing connection itself
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1139,8 +1244,12 @@ begin
   if (CompareText(Copy(URL, 1, 4), 'http') <> 0) then
     URL := URL + 'http:\\' + URL;
 
+  {$IFDEF MSWINDOWS}
   ShellExecuteW(Application.Handle, 'open', PWideChar(URL),
     nil, nil, SW_NORMAL);
+  {$ELSE}
+  OpenURL(UTF8Encode(URL));
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1451,6 +1560,7 @@ var
   retcode: Integer;
 
 begin
+  {$IFDEF MSWINDOWS}
   GetKeyboardState(keystate);
   SetLength(Result, 2);
   retcode := ToAscii(vkey, MapVirtualKey(vkey, 0), keystate, @Result[1], 0);
@@ -1461,6 +1571,11 @@ begin
   else
     Result := ''; // retcode < 0 indicates a dead key
   end;
+  {$ELSE}
+  // Port: no keyboard layout translation outside Windows; callers that need the typed character
+  // have to take it from KeyPress/UTF8KeyPress there.
+  Result := '';
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1551,6 +1666,8 @@ var
   Reg: TTntRegistry;
 
 begin
+  // Port: Windows only; elsewhere file associations come with the package (.desktop file)
+  {$IFDEF MSWINDOWS}
   Reg := TTntRegistry.Create;
   try
     with Reg do
@@ -1576,6 +1693,7 @@ begin
   end;
 
   SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil);
+  {$ENDIF}
 end;
 
 
@@ -1779,21 +1897,6 @@ begin
     end;
 end;
 
-
-//----------------------------------------------------------------------------------------------------------------------
-
-function GetTimeBias: integer;
-
-var
-  TZInfo : TTimeZoneInformation;
-  TZID   : LongInt;
-
-begin
-  TZID := GetTimeZoneInformation (TZInfo);
-  Result := TZInfo.Bias;   // bias is in minutes
-  if TZID = TIME_ZONE_ID_DAYLIGHT then
-    Result := Result + TZInfo.DaylightBias;
-end;
 
 
 //----------------------------------------------------------------------------------------------------------------------

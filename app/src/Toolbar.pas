@@ -5,7 +5,7 @@ unit Toolbar;
 interface
 
 uses
-  gnugettext, Windows, Messages, Classes, Graphics, Forms, ExtCtrls, PNGImage, Controls,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, Classes, Graphics, Forms, ExtCtrls, PNGImage, Controls,
   AuxFuncs, TntStdCtrls, TntExtCtrls, Contnrs, TntSysUtils, SysUtils, Themes,
   ActnList;
 

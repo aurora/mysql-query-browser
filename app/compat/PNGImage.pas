@@ -9,12 +9,14 @@ unit PNGImage;
 interface
 
 uses
-  Windows, Classes, SysUtils, Graphics, GraphType, IntfGraphics, FPImage;
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Classes, SysUtils, Graphics, GraphType, IntfGraphics, FPImage;
 
 type
   TPNGObject = class(TPortableNetworkGraphic)
   public
-    { Draw stretched into Rect, honouring the alpha channel }
+    { As the original library: an image with alpha channel is drawn at its NATIVE size at
+      Rect.Left/Rect.Top (callers pass rectangles such as Rect(X, Y, Width, Height)); other images
+      are stretched into Rect. }
     procedure Draw(ACanvas: TCanvas; const Rect: TRect); reintroduce;
     { The original library's alpha blending, as used for toolbar buttons and tabs: the image is
       drawn at its NATIVE size at Rect.Left/Rect.Top (Right/Bottom are ignored, which is why callers
@@ -33,7 +35,10 @@ implementation
 
 procedure TPNGObject.Draw(ACanvas: TCanvas; const Rect: TRect);
 begin
-  ACanvas.StretchDraw(Rect, Self);
+  if RawImage.Description.AlphaPrec > 0 then
+    ACanvas.Draw(Rect.Left, Rect.Top, Self)
+  else
+    ACanvas.StretchDraw(Rect, Self);
 end;
 
 procedure TPNGObject.DrawPartialTrans(ACanvas: TCanvas; const Rect: TRect; Transparency: Integer;
@@ -58,11 +63,19 @@ var
   end;
 
 begin
+  {$IFDEF MSWINDOWS}
   Img := TLazIntfImage.Create(0, 0, [riqfRGB, riqfAlpha]);
   Bmp := TBitmap.Create;
   try
     Bmp.Assign(Self);
     Img.LoadFromBitmap(Bmp.Handle, Bmp.MaskHandle);
+  {$ELSE}
+  // The device bitmap of GTK2 does not match the description LoadFromBitmap assumes (the image came
+  // out smeared); read the pixels from the PNG itself.
+  Img := CreateIntfImage;
+  Bmp := TBitmap.Create;
+  try
+  {$ENDIF}
     for Y := 0 to Img.Height - 1 do
       for X := 0 to Img.Width - 1 do
       begin

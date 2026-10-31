@@ -5,7 +5,7 @@ unit RegExTextImporter;
 interface
 
 uses
-  gnugettext, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, laz.VirtualTrees, VTCompat, StdCtrls, TntStdCtrls, ExtCtrls, TntExtCtrls,
   TntForms, AuxFuncs, TntClasses, ComCtrls, TntComCtrls, RegExpr, Contnrs,
   Buttons, TntButtons, StrUtils, Menus, TntMenus, TntDialogs, Clipbrd,

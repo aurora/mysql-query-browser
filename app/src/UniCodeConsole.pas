@@ -26,7 +26,7 @@ unit UniCodeConsole;
 interface
 
 uses UniCodeEditor, Unicode, Classes, Contnrs, Types,
-  Windows, Messages, SysUtils, Controls, Math;
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases{$ENDIF}, Messages, SysUtils, Controls, Math;
 
 type
   TExecuteCommandProcedure = procedure(Cmd: WideString; Key: Word; Shift: TShiftState) of object;

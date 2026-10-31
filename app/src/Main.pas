@@ -21,7 +21,7 @@ unit Main;
 interface
 
 uses
-  TntMenus, TntComCtrls, TntForms, Windows, Messages, SysUtils,
+  TntMenus, TntComCtrls, TntForms, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases{$ENDIF}, Messages, SysUtils,
   Variants, Classes, Graphics, Controls, Forms, Options,
   Dialogs, Menus, MySQLConnection, AuxFuncs, ComCtrls, Sections,
   gnugettext, QueryBrowser, Contnrs, StdCtrls, Clipbrd,
@@ -155,7 +155,10 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure TntFormCloseQuery(Sender: TObject; var CanClose: Boolean);
 
+    // Port: fills the Window menu with the running instances, which are known on Windows only (AppInstanceMgmt)
+    {$IFDEF MSWINDOWS}
     procedure WMInitMenuPopup(var MSG: TWMInitMenuPopup); message WM_INITMENUPOPUP;
+    {$ENDIF}
   private
     FTextToClear: Boolean;
     FStatusbarClearPNGImg: TPNGObject;
@@ -178,12 +181,30 @@ var
 implementation
 
 uses
-  ApplicationDataModule, MyxError, PNGTools, UpdateCheck;
+  ApplicationDataModule, MyxError, PNGTools, UpdateCheck{$IFNDEF MSWINDOWS}, DynLibs{$ENDIF};
 
 {$R ../forms/Main.lfm}
 
+{$IFDEF MSWINDOWS}
 function AddFontResourceExW(lpszFilename: PWideChar; fl: LongWord; pdv: Pointer): Integer; stdcall;
   external 'gdi32.dll' name 'AddFontResourceExW';
+{$ELSE}
+// Port: fontconfig's counterpart of a private font: added to the application's font set, nothing is installed.
+// Loaded at run time so that fontconfig's development files are not needed for building.
+function AddApplicationFont(const FileName: String): Boolean;
+var
+  Lib: TLibHandle;
+  FcConfigAppFontAddFile: function(Config: Pointer; FileName: PChar): LongBool; cdecl;
+begin
+  Result := False;
+  Lib := LoadLibrary('libfontconfig.so.1');
+  if Lib = NilHandle then
+    Exit;
+  @FcConfigAppFontAddFile := GetProcedureAddress(Lib, 'FcConfigAppFontAddFile');
+  if Assigned(FcConfigAppFontAddFile) then
+    Result := FcConfigAppFontAddFile(nil, PChar(FileName));    // nil: the current configuration
+end;
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -930,7 +951,7 @@ begin
     if (CompareText(Screen.Fonts[I], 'Bitstream Vera Sans Mono') = 0) then
       FontsInstalled := True;
 
-  FontDir := ExtractFilePath(Application.ExeName) + 'fonts\';
+  FontDir := ExtractFilePath(Application.ExeName) + ('fonts' + PathDelim);
 
   if (not FontsInstalled) and (not (FileExists(FontDir + 'VeraMoBd.ttf'))) then
     raise EInOutError.Create(Format(_('The Bitstream Vera Sans Mono fonts cannot be found. Please download ' +
@@ -945,7 +966,11 @@ begin
   // behind in the system, and a complete family.
   for I := Low(FontFiles) to High(FontFiles) do
     if FileExists(FontDir + FontFiles[I]) then
+      {$IFDEF MSWINDOWS}
       AddFontResourceExW(PWideChar(FontDir + FontFiles[I]), FR_PRIVATE, nil);
+      {$ELSE}
+      AddApplicationFont(UTF8Encode(FontDir + FontFiles[I]));
+      {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1221,6 +1246,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+{$IFDEF MSWINDOWS}
 procedure TMainForm.WMInitMenuPopup(var MSG: TWMInitMenuPopup);
 
 begin
@@ -1229,6 +1255,7 @@ begin
 
   inherited;
 end;
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 

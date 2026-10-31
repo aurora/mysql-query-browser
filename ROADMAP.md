@@ -61,7 +61,11 @@ waits until after parity and gets its own decision.
 4. Remaining dialogs and flows: options pages, RegEx importer, field viewer,
    about, text search, schema selection.
 5. Packaging for Windows (installer); then Linux and macOS builds (widgetset
-   work, platform guards for Windows API use).
+   work, platform guards for Windows API use). Linux so far: development container
+   (`tools/distrobox-setup.sh`), backend, bindings layout check and the test suite on all six matrix
+   servers (`tests/run-matrix.sh`); `build.sh` and the tools run there. The application compiles
+   with GTK2, connects on all six servers, and the main window's features (results, editing,
+   scripts, export, dialogs, help) work by screenshot. State and next steps: `docs/linux-port.md`.
 
 ## Backlog and ideas
 

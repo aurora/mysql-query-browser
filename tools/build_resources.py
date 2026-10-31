@@ -10,12 +10,17 @@ the images stay where they are in legacy/ until the new UI no longer needs them.
 """
 import os
 import re
+import shutil
 import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "app", "res")
-WINDRES = r"C:\msys64\mingw64\bin\windres.exe"
+if sys.platform == "win32":
+    WINDRES = r"C:\msys64\mingw64\bin\windres.exe"
+else:
+    # the .res files are platform neutral; FPC links them on Linux too (Fedora: mingw64-binutils)
+    WINDRES = shutil.which("x86_64-w64-mingw32-windres") or shutil.which("windres") or "windres"
 
 SCRIPTS = {
     "mysqlcommon": os.path.join(ROOT, "legacy", "mysql-gui-common", "res", "windows", "mysqlcommon.rc"),

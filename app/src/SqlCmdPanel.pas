@@ -5,7 +5,7 @@ unit SqlCmdPanel;
 interface
 
 uses
-  gnugettext, Windows, Messages, SysUtils, Classes, Controls,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Classes, Controls,
   Graphics,
   TntExtCtrls, TntComCtrls, TntClasses, TntStdCtrls, Forms,
   UniCodeEditor, UniCodeConsole, laz.VirtualTrees, VTCompat, TableDrag,

@@ -21,7 +21,7 @@ unit MySQLConnection;
 interface
 
 uses
-  gnugettext, Windows, Messages, SysUtils, Classes, ComCtrls, ImgList,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Classes, ComCtrls, ImgList,
   Controls, TntComCtrls, TntClasses, Forms, Contnrs,
   ExtCtrls, AuxFuncs, PNGImage, StdCtrls,
   SyncObjs, myx_util_public_interface, myx_public_interface, MyxError,
@@ -320,8 +320,12 @@ begin
       FCurrentDataThread.Terminate;
 
       // Wait 2 seconds and kill the thread if it did not stop working within that time.
+      // Port: threads cannot be killed outside Windows; there FreeAndNil waits for the thread to finish
+      // (docs/linux-port.md, section 4.2). Same in FetchData and StopCurrentThread.
+      {$IFDEF MSWINDOWS}
       if WaitForSingleObject(FCurrentDataThread.Handle, 2000) = WAIT_TIMEOUT then
         TerminateThread(FCurrentDataThread.Handle, 999);
+      {$ENDIF}
       FreeAndNil(FCurrentDataThread);
     end;
   finally
@@ -562,7 +566,9 @@ procedure TMySQLConn.FetchData(KindOfData: TFetchingDataKind; FetchMethod: TThre
 // is killed and this method immediately returns to the caller.
 
 var
+  {$IFDEF MSWINDOWS}
   WaitResult: Cardinal;
+  {$ENDIF}
   Thread: TFetchDataThread;
   
 begin
@@ -587,6 +593,7 @@ begin
         begin
           // Wait for the data thread to finish but don't deadlock. Instead poll the thread until it is finished
           // or the control thread is terminated.
+          {$IFDEF MSWINDOWS}
           WaitResult := WAIT_OBJECT_0;
           while not TCastThread(ControlThread).Terminated do
           begin
@@ -602,6 +609,10 @@ begin
             // Close the connection if we have to kill the last query.
             Reconnect;
            end;
+          {$ELSE}
+          while not TCastThread(ControlThread).Terminated and not Thread.Finished do
+            Sleep(10);
+          {$ENDIF}
           Thread.Free;
         end;
       except
@@ -626,8 +637,10 @@ begin
   if Assigned(FCurrentDataThread) then
   begin
     FCurrentDataThread.Terminate;
+    {$IFDEF MSWINDOWS}
     if WaitForSingleObject(FCurrentDataThread.Handle, Timeout) = WAIT_TIMEOUT then
       TerminateThread(FCurrentDataThread.Handle, 999);
+    {$ENDIF}
     FDataBeingFetched := FDataBeingFetched - [FCurrentDataThread.FKindOfData];
     FreeAndNil(FCurrentDataThread);
     if Assigned(FStatusBar) then

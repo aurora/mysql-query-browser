@@ -5,7 +5,7 @@ unit CommonFuncs;
 interface
 
 uses
-  gnugettext, SysUtils, Options, AuxFuncs, Windows, Forms, Controls, About,
+  gnugettext, SysUtils, Options, AuxFuncs, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Forms, Controls, About,
   TntSystem;
 
 {$include Consts.ini}

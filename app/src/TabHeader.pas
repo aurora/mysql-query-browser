@@ -21,7 +21,7 @@ unit TabHeader;
 interface
 
 uses
-  gnugettext, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, ExtCtrls, TntClasses, TntExtCtrls, TntForms,
   PNGImage, AuxFuncs, Contnrs, tntmenus, laz.VirtualTrees, VTCompat, Menus;
 
@@ -351,7 +351,7 @@ begin
 
     // Compute regular text width.
     FPaintBox.Canvas.Font.Style := [];
-    Windows.DrawTextW(FPaintBox.Canvas.Handle, PWideChar(Tab.Caption), Length(Tab.Caption), CaptionRect, DrawFlags);
+    {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(FPaintBox.Canvas.Handle, PWideChar(Tab.Caption), Length(Tab.Caption), CaptionRect, DrawFlags);
 
     TTab(FTabs[I]).RegularTextWidth := CaptionRect.Right;
 
@@ -359,7 +359,7 @@ begin
     FPaintBox.Canvas.Font.Style := [fsBold];
 
     // Compute overall width of the tab.
-    Windows.DrawTextW(FPaintBox.Canvas.Handle, PWideChar(Tab.Caption), Length(Tab.Caption), CaptionRect, DrawFlags);
+    {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(FPaintBox.Canvas.Handle, PWideChar(Tab.Caption), Length(Tab.Caption), CaptionRect, DrawFlags);
 
     TTab(FTabs[I]).BoldTextWidth := CaptionRect.Right;
 
@@ -913,7 +913,7 @@ begin
       end;
 
       SetBkMode(Handle, TRANSPARENT);
-      Windows.DrawTextW(Handle, PWideChar(Tab.Caption), Length(Tab.Caption), CaptionRect, DrawFlags);
+      {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(Handle, PWideChar(Tab.Caption), Length(Tab.Caption), CaptionRect, DrawFlags);
     end;
 
     // Draw border line from last tab to the right and then down.

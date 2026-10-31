@@ -21,7 +21,7 @@ unit AdvancedEdit;
 interface
 
 uses
-  Windows, Messages, LMessages, LCLType, SysUtils, Variants, Classes, Graphics, Controls, TntForms,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, WinAliases, Types{$ENDIF}, Messages, LMessages, LCLType, SysUtils, Variants, Classes, Graphics, Controls, TntForms,
   Dialogs, ExtCtrls, StdCtrls, Themes, PNGImage, AuxFuncs, TntStdCtrls;
 
 type

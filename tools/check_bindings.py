@@ -4,8 +4,8 @@
 C structs: compiles a C and a Pascal program that print sizeof and offsetof of
 every struct field and compares the output.
 
-Needs gcc and pkg-config (MSYS2 mingw64) and fpc on PATH, or at the default
-Windows locations below.
+Needs gcc and pkg-config (MSYS2 mingw64 on Windows) and fpc on PATH, or at the
+default Windows locations below.
 """
 import os
 import shutil
@@ -15,8 +15,12 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BACKEND = os.path.join(ROOT, "backend")
+WINDOWS = sys.platform == "win32"
 MSYS_BIN = r"C:\msys64\mingw64\bin"
 FPC = shutil.which("fpc") or r"C:\lazarus\fpc\3.2.2\bin\x86_64-win64\fpc.exe"
+EXE = ".exe" if WINDOWS else ""
+# the Linux linker resolves the libraries the units import when the layout program is linked
+BACKEND_BUILD = os.path.join(BACKEND, "build" if WINDOWS else "build-linux")
 
 
 def run(cmd, **kw):
@@ -31,7 +35,10 @@ def run(cmd, **kw):
 
 def main():
     env = dict(os.environ)
-    env["PATH"] = MSYS_BIN + os.pathsep + env["PATH"]
+    if WINDOWS:
+        env["PATH"] = MSYS_BIN + os.pathsep + env["PATH"]
+    else:
+        env["LD_LIBRARY_PATH"] = os.pathsep.join(filter(None, [BACKEND_BUILD, env.get("LD_LIBRARY_PATH")]))
     tmp = tempfile.mkdtemp(prefix="qbr-layout-")
     try:
         run([sys.executable, os.path.join(ROOT, "tools", "gen_bindings.py"), "--out", tmp, "--layout", tmp])
@@ -44,12 +51,12 @@ def main():
             ("utilities/include", "utilities/shared_include", "base-library/include",
              "sql-parser/include", "qb/include", "generic-runtime/include")]
         flags = run(["pkg-config", "--cflags", "glib-2.0", "libmariadb", "libxml-2.0", "libpcre"], env=env).split()
-        run(["gcc", "-w", os.path.join(tmp, "layout.c"), "-o", os.path.join(tmp, "layout_c.exe")]
+        run(["gcc", "-w", os.path.join(tmp, "layout.c"), "-o", os.path.join(tmp, "layout_c" + EXE)]
             + ["-I" + i for i in incs] + flags, env=env)
-        run([FPC, "-Fu" + tmp, "-FU" + tmp, "-FE" + tmp, os.path.join(tmp, "layout.pas")])
+        run([FPC, "-Fu" + tmp, "-FU" + tmp, "-FE" + tmp, "-Fl" + BACKEND_BUILD, os.path.join(tmp, "layout.pas")])
 
-        c_out = run([os.path.join(tmp, "layout_c.exe")], env=env).split("\n")
-        p_out = run([os.path.join(tmp, "layout.exe")]).split("\n")
+        c_out = run([os.path.join(tmp, "layout_c" + EXE)], env=env).split("\n")
+        p_out = run([os.path.join(tmp, "layout" + EXE)], env=env).split("\n")
         norm = lambda lines: sorted(l.strip() for l in lines if l.strip())
         c_out, p_out = norm(c_out), norm(p_out)
         diff = sorted(set(c_out) ^ set(p_out))

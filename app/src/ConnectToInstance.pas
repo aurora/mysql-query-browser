@@ -5,7 +5,7 @@ unit ConnectToInstance;
 interface
 
 uses
-  gnugettext, Windows, WinSock, Messages, SysUtils, Variants, Classes, Graphics, Controls,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, {$IFDEF MSWINDOWS}WinSock,{$ELSE}Sockets,{$ENDIF} Messages, SysUtils, Variants, Classes, Graphics, Controls,
   Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls, Buttons, Menus, Grids,
   PNGImage, myx_util_public_interface, myx_public_interface, AuxFuncs, MySQLConnection,
   Options, OptionsEditor, MyxError, Math,
@@ -264,8 +264,12 @@ begin
   MYXCommonOptions.AddWindowPos(self);
 
   //Terminate PingThread if still running
+  // Port: threads cannot be killed outside Windows; there the Free below asks the thread to stop and
+  // waits for it (docs/linux-port.md, section 4.2). Same in DoPing and CancelBtnClick.
+  {$IFDEF MSWINDOWS}
   if(Pinging)then
     TerminateThread(PingThreadHandle, 0);
+  {$ENDIF}
 
   //Free PingThread and stuff
   if(PingThread<>nil)then
@@ -650,7 +654,9 @@ procedure TConnectToInstanceForm.CancelBtnClick(Sender: TObject);
 begin
   if(Connecting)then
   begin
+    {$IFDEF MSWINDOWS}
     TerminateThread(ConnectToInstanceThreadHandle, 0);
+    {$ENDIF}
     ConnectToInstanceThread.Free;
     ConnectToInstanceThread := nil;
   end;
@@ -815,8 +821,10 @@ begin
       end;
 
       //If there is already a thread running, kill it
+      {$IFDEF MSWINDOWS}
       if(Pinging)then
         TerminateThread(PingThreadHandle, 0);
+      {$ENDIF}
 
       if(PingThread<>nil)then
         PingThread.Free;
@@ -1089,7 +1097,7 @@ begin
     //Print result
     if(result=0)then
       output_str :=
-        'Reply from '+inet_ntoa(TInAddr(ip))+': '+
+        'Reply from '+{$IFDEF MSWINDOWS}inet_ntoa(TInAddr(ip)){$ELSE}NetAddrToStr(in_addr(ip)){$ENDIF}+': '+
         //'Bytes: 64 '+
         'Time='+IntToStr(ping_result.round_trip_time)+'ms '+
         'TTL='+IntToStr(ping_result.ttl)

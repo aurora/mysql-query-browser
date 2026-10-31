@@ -4,7 +4,7 @@ unit AppInstanceMgmt;
 
 interface
 
-uses Windows, SysUtils, Forms, TntMenus, Classes;
+uses {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, SysUtils, Forms, TntMenus, Classes;
 
 type
   PAppInstanceInfo = ^TAppInstanceInfo;
@@ -42,6 +42,9 @@ implementation
 
 var
   MappingHandle: THandle; // Central handle for file mapping used for instance management.
+
+// Port: the instance list lives in Windows shared memory. Elsewhere MappingHandle stays 0: no instance is
+// registered and the Window menu lists none.
   
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -70,15 +73,18 @@ end;
 
 function RegisterApplication(App: TApplication; ConnectionString: WideString; AllowOnlyOneInstance: Boolean): Boolean;
 
+{$IFDEF MSWINDOWS}
 var
   AppInstances: PAppInstances;
   S: string;
   I: Integer;
   LastError: Cardinal;
+{$ENDIF}
 
 begin
   Result := True;
 
+  {$IFDEF MSWINDOWS}
   if MappingHandle = 0 then
   begin
     MappingHandle := CreateFileMapping($FFFFFFFF, nil, PAGE_READWRITE, 0, SizeOf(TAppInstances), 'MySQLGuiInstanceManagement');
@@ -132,18 +138,22 @@ begin
       UnmapViewOfFile(AppInstances);
     end;
   end
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure UnregisterApplication(App: TApplication);
 
+{$IFDEF MSWINDOWS}
 var
   AppInstances: PAppInstances;
   I: Integer;
   J: Integer;
+{$ENDIF}
 
 begin
+  {$IFDEF MSWINDOWS}
   if MappingHandle <> 0 then
   begin
     AppInstances := MapViewOfFile(MappingHandle, FILE_MAP_ALL_ACCESS, 0, 0, SizeOf(TAppInstances));
@@ -162,6 +172,7 @@ begin
     Dec(AppInstances^.InstanceCount);
     UnmapViewOfFile(AppInstances);
   end;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -177,6 +188,7 @@ var
 begin
   CurrentCount := MenuItem.Count;
 
+  {$IFDEF MSWINDOWS}
   if MappingHandle <> 0 then
   begin
     AppInstances := MapViewOfFile(MappingHandle, FILE_MAP_ALL_ACCESS, 0, 0, SizeOf(TAppInstances));
@@ -200,6 +212,7 @@ begin
 
     UnmapViewOfFile(AppInstances);
   end;
+  {$ENDIF}
 
   for I := 0 to CurrentCount - 1 do
     MenuItem.Delete(0);
@@ -209,6 +222,8 @@ end;
 
 initialization
 finalization
+  {$IFDEF MSWINDOWS}
   if MappingHandle <> 0 then
     CloseHandle(MappingHandle);
+  {$ENDIF}
 end.

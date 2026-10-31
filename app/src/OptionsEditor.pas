@@ -21,7 +21,7 @@ unit OptionsEditor;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, TntForms,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, TntForms,
   Dialogs, TntStdCtrls, TntExtCtrls, TntComCtrls, ComCtrls, ImgList, AuxFuncs,
   myx_util_public_interface, myx_public_interface, Grids, ValEdit,
   Options, PNGImage, MyxError, Forms, StdCtrls, ExtCtrls, TntClasses;
@@ -381,6 +381,11 @@ begin
         TabSheet := FApplicationOptionsForm.DockOptionPageControl.Pages[0];
         TabSheet.PageControl := OptionPageControl;
         TabSheet.PageIndex := i;
+        {$IFNDEF MSWINDOWS}
+        // Port: leaving its old notebook made the LCL set TabVisible to False, so GTK2 never gets the page
+        // (Win32 shows it as a child window anyway; the tabs are hidden behind HeaderPnl on both).
+        TabSheet.TabVisible := True;
+        {$ENDIF}
 
         if (i < FApplicationOptionsForm.OptionsImgNames.Count) then
           AddOptionPage(FApplicationOptionsForm.OptionsImgNames[i],
@@ -388,6 +393,12 @@ begin
 
         ypos := ypos + 84;
       end;
+      {$IFNDEF MSWINDOWS}
+      // Port: the moved page now has the index the active page had before, so ShowOptionPage(0) would not
+      // switch and GTK2 keeps showing nothing. Select another page first.
+      if ApplPagesCount > 0 then
+        OptionPageControl.ActivePage := GeneralTabSheet;
+      {$ENDIF}
     end;
   end;
 
@@ -837,7 +848,7 @@ begin
       // Port: the LCL caches Screen.Fonts at the first access, which happens before TMainForm.CheckFonts loads
       // the Bitstream Vera Sans Mono files privately, so the family is missing from the list. Without it the
       // code font fell back to "MS Sans Serif" here and was saved that way.
-      if FileExists(ExtractFilePath(Application.ExeName) + 'fonts\VeraMono.ttf') and
+      if FileExists(ExtractFilePath(Application.ExeName) + ('fonts' + PathDelim + 'VeraMono.ttf')) and
         (CodeFontLU.Items.IndexOf('Bitstream Vera Sans Mono') = -1) then
         CodeFontLU.Items.Add('Bitstream Vera Sans Mono');
 
@@ -897,7 +908,7 @@ begin
           begin
             for I := 0 to MYXCommonOptions.Datatypes.datatypes_num - 1 do
             begin
-              Datatype := PMYX_DBM_DATATYPE(Integer(Datatypes.datatypes) + SizeOf(MYX_DBM_DATATYPE) * I);
+              Datatype := PMYX_DBM_DATATYPE(PtrUInt(Datatypes.datatypes) + SizeOf(MYX_DBM_DATATYPE) * I);
               DefaultDatatypeComboBox.Items.Add(Datatype.name);
             end;
           end;

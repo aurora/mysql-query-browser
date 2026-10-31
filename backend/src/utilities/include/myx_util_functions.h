@@ -98,8 +98,11 @@ extern "C" {
   typedef __int64 longlong;
   typedef unsigned __int64 ulonglong;
 #else
-# define min(a,b) ((a)<(b)?(a):(b))
-# define max(a,b) ((a)>(b)?(a):(b))
+/* C only: as macros they break std::min/std::max in libstdc++; C++ code uses those. */
+# ifndef __cplusplus
+#  define min(a,b) ((a)<(b)?(a):(b))
+#  define max(a,b) ((a)>(b)?(a):(b))
+# endif
 
   typedef unsigned char uint8;
   typedef unsigned char uchar;

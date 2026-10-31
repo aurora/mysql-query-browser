@@ -24,7 +24,7 @@ interface
 
 uses
   // Delphi units.
-  Windows, Messages, LMessages, LCLType, SysUtils, Classes, Contnrs, Graphics, Controls, Forms, ActiveX, Menus,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, WinAliases, Types{$ENDIF}, Messages, LMessages, LCLType, SysUtils, Classes, Contnrs, Graphics, Controls, Forms, {$IFDEF MSWINDOWS}ActiveX,{$ELSE}laz.FakeActiveX,{$ENDIF} Menus,
   // Third party units.
   laz.VirtualTrees, VTCompat, Unicode,
   TntExtCtrls, TntComCtrls, TntClasses, TntStdCtrls, TntForms, TntMenus, TntSysUtils, TntDialogs, TnTClipbrd,
@@ -450,7 +450,7 @@ type
 implementation
 
 uses
-  Math, CommCtrl, SchemataTreeview,
+  Math, {$IFDEF MSWINDOWS}CommCtrl,{$ENDIF} SchemataTreeview,
   PNGTools, ColorTypes, ColorTools;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1246,7 +1246,7 @@ begin
       action := nil;
       if (NodeData.actions <> nil) then
         if (NodeData.actions.Count > 0) then
-          action := PMYX_RS_ACTION(Integer(MySQLRS.ResultSet.actions.actions) +
+          action := PMYX_RS_ACTION(PtrUInt(MySQLRS.ResultSet.actions.actions) +
             sizeof(MYX_RS_ACTION) * NodeData.actions[NodeData.actions.Count - 1]);
 
       //If it is, remove action from NodeData
@@ -1444,10 +1444,10 @@ begin
   begin
     for i := NodeData.actions.Count - 1 downto 0 do
     begin
-      action := PMYX_RS_ACTION(Integer(MySQLRS.ResultSet.actions.actions) + sizeof(MYX_RS_ACTION) *
+      action := PMYX_RS_ACTION(PtrUInt(MySQLRS.ResultSet.actions.actions) + sizeof(MYX_RS_ACTION) *
         NodeData.actions[i]);
 
-      action_column := (Integer(action.column) - Integer(MySQLRS.ResultSet.columns)) div sizeof(MYX_RS_COLUMN);
+      action_column := (PtrUInt(action.column) - PtrUInt(MySQLRS.ResultSet.columns)) div sizeof(MYX_RS_COLUMN);
 
       //Check column of the action
       if (Column - 1 = action_column) and
@@ -1481,7 +1481,7 @@ begin
   begin
     //Consider added rows
     if (NodeData.row_index < FMySQLRS.ResultSet.rows_num) then
-      row := PMYX_RS_ROW(Integer(MySQLRS.ResultSet.rows) + sizeof(MYX_RS_ROW) * Integer(NodeData.row_index));
+      row := PMYX_RS_ROW(PtrUInt(MySQLRS.ResultSet.rows) + sizeof(MYX_RS_ROW) * Integer(NodeData.row_index));
   end;
 
   Result := row;
@@ -1505,12 +1505,12 @@ begin
     //Consider added rows
     if (NodeData.row_index < FMySQLRS.ResultSet.rows_num) then
     begin
-      RowData := PMYX_RS_ROW(Integer(MySQLRS.ResultSet.rows) + sizeof(MYX_RS_ROW) * Integer(NodeData.row_index));
+      RowData := PMYX_RS_ROW(PtrUInt(MySQLRS.ResultSet.rows) + sizeof(MYX_RS_ROW) * Integer(NodeData.row_index));
 
       //Consider diff rows
       try
         if (RowData.fields <> nil) then
-          field := PMYX_RS_FIELD(Integer(RowData.fields) + (SizeOf(MYX_RS_FIELD) * (Column - 1)));
+          field := PMYX_RS_FIELD(PtrUInt(RowData.fields) + (SizeOf(MYX_RS_FIELD) * (Column - 1)));
       except
         field := nil;
       end;
@@ -1538,7 +1538,7 @@ begin
   MySQLRS.WorkWithResultset.Acquire;
   try
     if (Column > 0) and (Column - 1 < Integer(MySQLRS.ResultSet.columns_num)) then
-      col := PMYX_RS_COLUMN(Integer(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * (Column - 1))
+      col := PMYX_RS_COLUMN(PtrUInt(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * (Column - 1))
     else
       Exit;
 
@@ -1608,7 +1608,7 @@ begin
     ValueFromAction := False;
 
     if (Column > 0) and (Column - 1 < Integer(MySQLRS.ResultSet.columns_num)) then
-      col := PMYX_RS_COLUMN(Integer(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * (Column - 1))
+      col := PMYX_RS_COLUMN(PtrUInt(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * (Column - 1))
     else
       col := nil;
 
@@ -1973,7 +1973,7 @@ begin
   if (NodeData <> nil) and (Column > 0) and
     (Column - 1 < Integer(FMySQLRS.ResultSet.columns_num)) then
   begin
-    col := (PMYX_RS_COLUMN(Integer(FMySQLRS.ResultSet.columns) + (sizeof(MYX_RS_COLUMN) * (Column - 1))));
+    col := (PMYX_RS_COLUMN(PtrUInt(FMySQLRS.ResultSet.columns) + (sizeof(MYX_RS_COLUMN) * (Column - 1))));
 
     //if length=-1 then get length from WideString
     //if length=-2 it is a NULL value
@@ -2274,7 +2274,7 @@ begin
       MySQLRS.WorkWithResultset.Acquire;
       try
         if (Column > 0) and (Column - 1 < Integer(MySQLRS.ResultSet.columns_num)) then
-          col := PMYX_RS_COLUMN(Integer(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * (Column - 1))
+          col := PMYX_RS_COLUMN(PtrUInt(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * (Column - 1))
         else
           col := nil;
 
@@ -2519,7 +2519,7 @@ begin
       DeleteActionApplyed := True;
       for j := NodeData.actions.Count - 1 downto 0 do
       begin
-        action := PMYX_RS_ACTION(Integer(MySQLRS.ResultSet.actions.actions) + sizeof(MYX_RS_ACTION) *
+        action := PMYX_RS_ACTION(PtrUInt(MySQLRS.ResultSet.actions.actions) + sizeof(MYX_RS_ACTION) *
           NodeData.actions[j]);
 
         if (action.action = MYX_RSA_DELETE) and
@@ -2638,7 +2638,7 @@ begin
     //Check if a new action belongs to a node
     for i:=0 to MySQLRS.ResultSet.actions.actions_num-1 do
     begin
-      RSAction := PMYX_RS_ACTION(Integer(MySQLRS.ResultSet.actions.actions) +
+      RSAction := PMYX_RS_ACTION(PtrUInt(MySQLRS.ResultSet.actions.actions) +
         sizeof(MYX_RS_ACTION) * i);
 
       //If the action is in the same row as the current node,
@@ -2921,7 +2921,7 @@ begin
   if (HitInfo.HitNode <> nil) then
   begin
     if (HitInfo.HitColumn > 0) and (HitInfo.HitColumn - 1 < Integer(MySQLRS.ResultSet.columns_num)) then
-      col := PMYX_RS_COLUMN(Integer(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * (HitInfo.HitColumn - 1))
+      col := PMYX_RS_COLUMN(PtrUInt(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * (HitInfo.HitColumn - 1))
     else
       col := nil;
 
@@ -3049,7 +3049,7 @@ begin
     if (FMySQLRS<>nil) and (FMySQLRS.ResultSet<>nil) then
       for I := 0 to FMySQLRS.ResultSet.columns_num_to_display - 1 do
       begin
-        col := PMYX_RS_COLUMN(Integer(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * i)^;
+        col := PMYX_RS_COLUMN(PtrUInt(FMySQLRS.ResultSet.columns) + sizeof(MYX_RS_COLUMN) * i)^;
 
         if (I+1<Header.Columns.Count) and
           ((col.column_type = MYX_RSCT_INTEGER) or
@@ -4020,7 +4020,7 @@ begin
     not (vsMultiline in FLink.FNode.States) then
     // Instead directly calling AutoAdjustSize it is necessary on Win9x/Me to decouple this notification message
     // and eventual resizing. Hence we use a message to accomplish that.
-    if (Win32Platform and VER_PLATFORM_WIN32_NT) <> 0 then
+    if {$IFDEF MSWINDOWS}(Win32Platform and VER_PLATFORM_WIN32_NT) <> 0{$ELSE}True{$ENDIF} then
       AutoAdjustSize
     else
       PostMessage(Handle, CM_AUTOADJUST, 0, 0);
@@ -4206,7 +4206,7 @@ begin
   begin
     // Add a line break where the cursor is currently.
     SelText := #13#10;
-    SendMessage(Handle, EM_SCROLLCARET, 0, 0);
+    {$IFDEF MSWINDOWS}SendMessage(Handle, EM_SCROLLCARET, 0, 0);{$ENDIF}
 
         // Make the node multi-lined if there are hard line breaks in it.
     if StrPosW(PWideChar(Text), #10) <> nil then
@@ -4234,13 +4234,13 @@ procedure TRSStringEdit.AutoAdjustSize;
 var
   DC: HDC;
   Size: TSize;
-  LastFont: THandle;
+  LastFont: HGDIOBJ;
 
 begin
   if not (vsMultiline in FLink.FNode.States) then
   begin
     // avoid flicker
-    SendMessage(Handle, WM_SETREDRAW, 0, 0);
+    {$IFDEF MSWINDOWS}SendMessage(Handle, WM_SETREDRAW, 0, 0);{$ENDIF}
 
     DC := GetDC(Handle);
     LastFont := SelectObject(DC, Font.Handle);
@@ -4260,7 +4260,7 @@ begin
     finally
       SelectObject(DC, LastFont);
       ReleaseDC(Handle, DC);
-      SendMessage(Handle, WM_SETREDRAW, 1, 0);
+      {$IFDEF MSWINDOWS}SendMessage(Handle, WM_SETREDRAW, 1, 0);{$ENDIF}
     end;
   end;
 end;
@@ -4515,7 +4515,7 @@ begin
       // The selected text shall exclude the text margins (add 1 for the left border).
       R := FEdit.ClientRect;
       Inc(R.Left, FTree.TextMargin + 1);
-      SendMessage(FEdit.Handle, EM_SETRECTNP, 0, Integer(@R));
+      {$IFDEF MSWINDOWS}SendMessage(FEdit.Handle, EM_SETRECTNP, 0, LPARAM(@R));{$ENDIF}
     end;
   end;
 end;

@@ -5,7 +5,7 @@ unit About;
 interface
 
 uses
-  gnugettext, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, LCLType,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, LCLType,
   Dialogs, StdCtrls, PngImage, ExtCtrls, AuxFuncs, TntStdCtrls, TntExtCtrls, TntForms;
 
 {$include Defines.ini}

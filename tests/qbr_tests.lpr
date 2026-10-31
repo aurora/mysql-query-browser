@@ -4,6 +4,7 @@ program qbr_tests;
 {$mode objfpc}{$H+}
 
 uses
+  {$IFDEF UNIX}cwstring,{$ENDIF} // UTF-8 aware WideString manager; LCL programs get it through LazUTF8
   Classes, consoletestrunner, test_connect, test_catalog, test_schema_info, test_classes, test_gettext;
 
 var

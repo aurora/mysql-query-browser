@@ -61,7 +61,7 @@ interface
 {$endif COMPILER_7_UP}
 
 uses
-  Windows, Classes, Graphics, ColorTypes;
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Classes, Graphics, ColorTypes;
 
 type
   // Color formats, which can be handled by the library.
@@ -902,7 +902,7 @@ function MakeColorRef(RGB: TRGB; Gamma: Double = 1): COLORREF; overload;
 begin
   GammaCorrection(RGB, Gamma);
   with RGB do
-    Result := Windows.RGB(Round(R * 255), Round(G * 255), Round(B * 255));
+    Result := {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf{$ENDIF}.RGB(Round(R * 255), Round(G * 255), Round(B * 255));
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -5,12 +5,12 @@ unit EditorTable;
 interface
 
 uses
-  LCLType, LMessages, gnugettext, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  LCLType, LMessages, gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, TntStdCtrls, ComCtrls, TntComCtrls, ExtCtrls,
   laz.VirtualTrees, VTCompat, AuxFuncs, CheckLst, TntCheckLst, Buttons, TntButtons,
   MySQLConnection, myx_util_public_interface, myx_public_interface, MyxError, ImgList, PngImage,
   TntForms, Options, EditorTableVTEdit, EditorTableVTFKEdit,
-  TntMenus, TntExtCtrls, Menus, ActiveX, TntSysUtils, Contnrs;
+  TntMenus, TntExtCtrls, Menus, {$IFDEF MSWINDOWS}ActiveX,{$ELSE}laz.FakeActiveX,{$ENDIF} TntSysUtils, Contnrs;
 
 type
   DBMEditMode = (DBMEditMode_Online = 1, DBMEditMode_Offline);
@@ -1526,7 +1526,7 @@ begin
 
           for I := 0 to NodeData.Column.datatype_pointer.flags_num-1 do
           begin
-            S := PPChar(Integer(NodeData.Column.datatype_pointer.flags)+sizeof(PChar)*I)^;
+            S := PPChar(PtrUInt(NodeData.Column.datatype_pointer.flags)+sizeof(PChar)*I)^;
 
             if(NodeData.Column.datatype_flags.IndexOf(
               S)=-1)then
@@ -1708,7 +1708,7 @@ begin
   begin
     for I := 0 to PDatatypes.datatypes_num-1 do
     begin
-      PDatatype := PMYX_DBM_DATATYPE(Integer(PDatatypes.datatypes)+
+      PDatatype := PMYX_DBM_DATATYPE(PtrUInt(PDatatypes.datatypes)+
         sizeof(MYX_DBM_DATATYPE)*I);
 
       if(CompareText(name, PDatatype.name)=0)then
@@ -2107,7 +2107,7 @@ begin
           begin
             for i := 0 to NodeData.Column.datatype_pointer.flags_num-1 do
             begin
-              S := PPChar(Integer(NodeData.Column.datatype_pointer.flags)+sizeof(PChar)*i)^;
+              S := PPChar(PtrUInt(NodeData.Column.datatype_pointer.flags)+sizeof(PChar)*i)^;
 
               len := GetWideStringTextWidth(ColumnVST.Canvas, S);
 
@@ -3020,7 +3020,7 @@ begin
   begin
     for I := 0 to PMsgs.errors_num - 1 do
     begin
-      PMsg := PMYX_MYSQL_ERROR_MSG(Integer(PMsgs.errors) +
+      PMsg := PMYX_MYSQL_ERROR_MSG(PtrUInt(PMsgs.errors) +
         sizeof(MYX_MYSQL_ERROR_MSG) * I);
 
       if(PMsg.level = MYX_QEL_NOTE) then
@@ -3686,7 +3686,7 @@ begin
       ACanvas.FillRect(ARect);
       Inc(ARect.Left, 8);
       SetBKMode(ACanvas.Handle, TRANSPARENT);
-      Windows.DrawTextW(ACanvas.Handle, PWideChar(Item.Caption), Length(Item.Caption), ARect, DT_LEFT + DT_SINGLELINE +
+      {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(ACanvas.Handle, PWideChar(Item.Caption), Length(Item.Caption), ARect, DT_LEFT + DT_SINGLELINE +
         DT_HIDEPREFIX + DT_VCENTER);
     end;
   end;

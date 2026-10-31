@@ -21,7 +21,7 @@ unit Options;
 interface
 
 uses
-  Windows, Classes, TntClasses, Forms, TntForms, SysUtils, Messages, ComCtrls,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases{$ENDIF}, Classes, TntClasses, Forms, TntForms, SysUtils, Messages, ComCtrls,
   TntComCtrls, myx_util_public_interface, myx_public_interface, AuxFuncs, Types, StrUtils,
   TntSystem, TntSysUtils;
 
@@ -192,11 +192,29 @@ implementation
 uses
   gnugettext;
 
+{$IFDEF MSWINDOWS}
 const
   oleaut = 'oleaut32.dll';
 
 function SysAllocStringLen(P: PWideChar; Len: Integer): PWideChar; stdcall; external oleaut name 'SysAllocStringLen';
 procedure SysFreeString(const S: PWideChar); stdcall; external oleaut name 'SysFreeString';
+{$ELSE}
+// Port: no OLE automation strings outside Windows. The option values are only read back as NUL terminated
+// PWideChar, so a copy on the heap does the same.
+
+function SysAllocStringLen(P: PWideChar; Len: Integer): PWideChar;
+begin
+  GetMem(Result, (Len + 1) * SizeOf(WideChar));
+  if Len > 0 then
+    Move(P^, Result^, Len * SizeOf(WideChar));
+  Result[Len] := #0;
+end;
+
+procedure SysFreeString(const S: PWideChar);
+begin
+  FreeMem(S);
+end;
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -212,7 +230,14 @@ begin
   FOptions.Sorted := True;     // Port: Delphi's Find did not check this, FPC's raises on an unsorted list
 
   // Fill the format settings with language neutral values (actually english is used but for all system languages).
+  {$IFDEF MSWINDOWS}
   GetLocaleFormatSettings(MakeLong(LANG_ENGLISH, SUBLANG_NEUTRAL), FFormatSettings);
+  {$ELSE}
+  // Port: no Windows locales; only the float conversions below use these settings
+  FFormatSettings := DefaultFormatSettings;
+  FFormatSettings.DecimalSeparator := '.';
+  FFormatSettings.ThousandSeparator := ',';
+  {$ENDIF}
   LoadOptions;
 end;
 
@@ -680,8 +705,10 @@ begin
     begin
       UserDataDir := WideIncludeTrailingBackslash(WideParamStr(I + 1));
 
-      if (Copy(UserDataDir, 1, 1) = '\') or
-        (Copy(UserDataDir, 1, 1) = '/') then
+      // Port: on Windows a leading (back)slash means "relative to the program folder"; elsewhere it is
+      // an absolute path.
+      if {$IFDEF MSWINDOWS}(Copy(UserDataDir, 1, 1) = '\') or
+        (Copy(UserDataDir, 1, 1) = '/'){$ELSE}False{$ENDIF} then
         UserDataDir := ExePath +
           Copy(UserDataDir, 2, MaxInt);
     end
@@ -691,7 +718,7 @@ begin
 
 
   if (UserDataDir = '') then
-    UserDataDir := GetApplicationDataDir + 'MySQL\';
+    UserDataDir := GetApplicationDataDir + ('MySQL' + PathDelim);
   ForceDirectories(UserDataDir);
 
   //Detect if XPStyle is enabled
@@ -702,7 +729,7 @@ begin
   if (not (IsWinNT)) then
     AvailablePasswordStorageTypes := AvailablePasswordStorageTypes + #13#10'OS Specific';
 
-  XMLDir := ExtractFilePath(Application.ExeName) + 'XML\';
+  XMLDir := ExtractFilePath(Application.ExeName) + ('XML' + PathDelim);
 
   //------------------------------------------------------------
   //Initialize Values
@@ -1011,7 +1038,7 @@ begin
 
   Langs := TTntStringList.Create;
   try
-    Langs.LoadFromFile(WideExtractFilePath(TntApplication.ExeName) + 'locale\languages_list.txt');
+    Langs.LoadFromFile(WideExtractFilePath(TntApplication.ExeName) + ('locale' + PathDelim + 'languages_list.txt'));
 
     for I := 0 to Langs.Count - 1 do
     begin
@@ -1023,7 +1050,7 @@ begin
       else
         ID := FApplicationID;
         
-      if WideFileExists(WideExtractFilePath(TntApplication.ExeName) + 'locale\' + LangId + '\LC_MESSAGES\' + ID +
+      if WideFileExists(WideExtractFilePath(TntApplication.ExeName) + ('locale' + PathDelim) + LangId + (PathDelim + 'LC_MESSAGES' + PathDelim) + ID +
         '.mo') then
       begin
         LangNames := LangNames + LangName + #13#10;

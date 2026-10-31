@@ -25,11 +25,13 @@ procedure RunDialogConnectSelftest(const ReportFile: String);
 implementation
 
 uses
-  Windows, Classes, SysUtils, Forms, Graphics, Controls, MySQLConnection, ConnectToInstance, Options,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Classes, SysUtils, Forms, Graphics, Controls, MySQLConnection, ConnectToInstance, Options,
   OptionsEditor,
   myx_types, myx_public_interface;
 
+{$IFDEF MSWINDOWS}
 function PrintWindow(hwnd: HWND; hdcBlt: HDC; nFlags: UINT): BOOL; stdcall; external 'user32.dll';
+{$ENDIF}
 
 procedure Trace(const Msg: String);
 var
@@ -70,6 +72,7 @@ end;
 procedure CaptureWindowToPng(Wnd: TObject; const FileName: String);
 var
   Form: TCustomForm;
+  {$IFDEF MSWINDOWS}
   Bmp, Crop: TBitmap;
   Png: TPortableNetworkGraphic;
   R: TRect;
@@ -77,12 +80,48 @@ var
   HBmp: HBITMAP;
   OldBmp: HGDIOBJ;
   L, Rr, Bt: Integer;
+  {$ELSE}
+  Bmp, Shot: TBitmap;
+  Png: TPortableNetworkGraphic;
+  R: TRect;
+  ScreenDC: HDC;
+  L: Integer;
+  {$ENDIF}
 begin
   Form := TCustomForm(Wnd);
   Form.Invalidate;
   Application.ProcessMessages;
   Sleep(150);
   Application.ProcessMessages;
+  {$IFNDEF MSWINDOWS}
+  // No PrintWindow outside Windows, and the LCL's PaintTo/GetFormImage leaves out native GTK widgets: copy
+  // the window's area from the screen. Works on X11 (also Xvfb, as the self-tests use), not on Wayland.
+  for L := 1 to 20 do                   // let the window be mapped and painted
+  begin
+    Application.ProcessMessages;
+    Sleep(25);
+  end;
+  Bmp := TBitmap.Create;
+  Png := TPortableNetworkGraphic.Create;
+  try
+    GetWindowRect(Form.Handle, R);
+    ScreenDC := GetDC(0);
+    Shot := TBitmap.Create;
+    try
+      Shot.LoadFromDevice(ScreenDC);
+      Bmp.SetSize(R.Right - R.Left, R.Bottom - R.Top);
+      Bmp.Canvas.CopyRect(Rect(0, 0, Bmp.Width, Bmp.Height), Shot.Canvas, R);
+    finally
+      Shot.Free;
+      ReleaseDC(0, ScreenDC);
+    end;
+    Png.Assign(Bmp);
+    Png.SaveToFile(FileName);
+  finally
+    Png.Free;
+    Bmp.Free;
+  end;
+  {$ELSE}
   Bmp := TBitmap.Create;
   Png := TPortableNetworkGraphic.Create;
   try
@@ -119,6 +158,7 @@ begin
     Png.Free;
     Bmp.Free;
   end;
+  {$ENDIF}
 end;
 
 procedure RunConnectDialogScreenshot(const FileName: String);

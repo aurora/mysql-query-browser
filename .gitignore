@@ -306,6 +306,7 @@ x86/
 *.vsix
 # new build output
 /backend/build/
+/backend/build-linux/
 /tests/bin/
 /tests/lib/
 *.ppu

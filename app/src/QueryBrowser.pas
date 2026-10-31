@@ -21,12 +21,12 @@ unit QueryBrowser;
 interface
 
 uses
-  Windows, Messages, ShellAPI, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, {$IFDEF MSWINDOWS}ShellAPI,{$ENDIF} SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, StdCtrls, ComCtrls, MySQLConnection, AuxFuncs, Contnrs, SyncObjs,
   laz.VirtualTrees, VTCompat, MyxError, PNGImage, Toolbar, gnugettext,
   TabHeader, TntExtCtrls, TntComCtrls, AdvancedEdit, SchemataTreeView, TntForms, Menus,
   TntClasses, TntStdCtrls, MySQLResultSetControls, InstanceSections,
-  ImgList, Options, ActiveX,
+  ImgList, Options, {$IFDEF MSWINDOWS}ActiveX,{$ELSE}laz.FakeActiveX,{$ENDIF}
   EmbeddedWB, Sections, TableDrag, TntMenus,
   myx_public_interface, myx_qb_public_interface, TntControls,
   UniCodeEditor, UCEHighlighter, UCESQLHighlighter, UCEShared, ServerHelp,
@@ -615,7 +615,9 @@ type
     procedure SetSQLEditorMaximized(SQLEditorMaximized: Boolean);
 
     procedure WMCursorChanged(var Msg: TMessage); message WM_CursorChanged;
+    {$IFDEF MSWINDOWS}
     procedure WMHotKey(var Msg: TWMHotKey); message WM_HOTKEY;
+    {$ENDIF}
     procedure WMTimer(var Msg: TWMTimer); message WM_TIMER;
     procedure WMUpdateCommand(var Msg: TWMTimer); message WM_UPDATE_COMMAND;
   protected
@@ -945,10 +947,14 @@ begin
   LoadServerHelp;
 
   //Register global CopySQL Hotkey
+  // Port: system-wide hot keys that type into other programs exist on Windows only (docs/linux-port.md,
+  // section 4.3).
+  {$IFDEF MSWINDOWS}
   IdCopySQLHotKey := GlobalAddAtom('CopySQLHotkey');
   IdPasteSQLHotKey := GlobalAddAtom('PasteSQLHotkey');
   RegisterHotKey(Handle, IdCopySQLHotKey, MOD_CONTROL + MOD_ALT + MOD_SHIFT, Ord('C'));
   RegisterHotKey(Handle, IdPasteSQLHotKey, MOD_CONTROL + MOD_ALT + MOD_SHIFT, Ord('V'));
+  {$ENDIF}
   hOtherWin := 0;
 
   if (IsWin2kOrXP) then
@@ -1225,8 +1231,10 @@ begin
   PNGImages.Free;
   FMaximizedQueryAreaHeaderBGBmp.Free;
 
+  {$IFDEF MSWINDOWS}
   UnRegisterHotKey(Handle, IdCopySQLHotKey);
   GlobalDeleteAtom(IdCopySQLHotKey);
+  {$ENDIF}
 
   FTrxQueryList.Free;
   FGlobalParams.Free;
@@ -2693,7 +2701,7 @@ begin
     BusyAnimate.Show;
     BusyAnimationStart := True;
     BusyAnimate.Play(1, 74, -1);
-    SetCursor(LoadCursor(0,IDC_APPSTARTING));
+    SetCursor({$IFDEF MSWINDOWS}LoadCursor(0,IDC_APPSTARTING){$ELSE}Screen.Cursors[crAppStart]{$ENDIF});
     Inc(FQueryRunningCount);
   end;
 end;
@@ -2715,7 +2723,7 @@ begin
     BusyAnimationStart := False;
     BusyAnimate.Stop;
 
-    SetCursor(LoadCursor(0, IDC_ARROW));
+    SetCursor({$IFDEF MSWINDOWS}LoadCursor(0, IDC_ARROW){$ELSE}Screen.Cursors[crArrow]{$ENDIF});
     FQueryRunningCount := 0;
   end;
 
@@ -4123,7 +4131,7 @@ begin
   if Pos('http://', url) = 1 then
     HelpWebBrowser.Navigate(url)
   else
-    HelpWebBrowser.Navigate('file://' + ExtractFilePath(Application.ExeName) + 'doc\' + url);
+    HelpWebBrowser.Navigate('file://' + ExtractFilePath(Application.ExeName) + ('doc' + PathDelim) + url);
 
   CurrentPerspective := apHelp;
 end;
@@ -4141,6 +4149,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+{$IFDEF MSWINDOWS}
 procedure TQueryBrowserForm.WMHotKey(var Msg: TWMHotKey);
 
 var
@@ -4247,6 +4256,7 @@ begin
           SendMessage(hFocusWin, WM_PASTE, 0, 0);
     end;
 end;
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -5748,7 +5758,7 @@ begin
   begin
     R := ClientRect;
     Title := _('SQL Query Area');
-    Windows.DrawTextW(Handle, PWideChar(Title), Length(Title), R, DT_SINGLELINE or DT_NOCLIP or DT_CALCRECT);
+    {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(Handle, PWideChar(Title), Length(Title), R, DT_SINGLELINE or DT_NOCLIP or DT_CALCRECT);
     QueryAreaHeaderPBox.Height := R.Bottom + 8;
   end;
 
@@ -6721,7 +6731,7 @@ begin
                           Format(_('The resultset has been exported to %s successfully.'),
                           [Filename]), myx_mtInformation, _('OK'))
                       else
-                        ShellExecuteW(Handle, 'OPEN', PWideChar(Filename), nil, nil, SW_SHOWNORMAL);
+                        {$IFDEF MSWINDOWS}ShellExecuteW(Handle, 'OPEN', PWideChar(Filename), nil, nil, SW_SHOWNORMAL){$ELSE}OpenDocument(UTF8Encode(Filename)){$ENDIF};
                     end
                     else
                       ShowError('Error', _('The file %s cannot be written.'), [Filename]);
@@ -7044,21 +7054,21 @@ begin
           for J := 0 to HistoryInterval.catalogs_num - 1 do
           begin
             PHistoryCatalog := PMYX_HISTORY_CATALOG(
-              (Integer(HistoryInterval.catalogs) + sizeof(MYX_HISTORY_CATALOG) * J)
+              (PtrUInt(HistoryInterval.catalogs) + sizeof(MYX_HISTORY_CATALOG) * J)
               );
 
             for K := 0 to PHistoryCatalog.schemata_num - 1 do
             begin
               PHistorySchema :=
                 PMYX_HISTORY_SCHEMA(
-                (Integer(PHistoryCatalog.schemata) + sizeof(MYX_HISTORY_SCHEMA) * K)
+                (PtrUInt(PHistoryCatalog.schemata) + sizeof(MYX_HISTORY_SCHEMA) * K)
                 );
 
               for L := 0 to PHistorySchema.entries_num - 1 do
               begin
                 PPHistoryEntry :=
                   PPMYX_HISTORY_ENTRY(
-                  (Integer(PHistorySchema.entries) + sizeof(Pointer) * L)
+                  (PtrUInt(PHistorySchema.entries) + sizeof(Pointer) * L)
                   );
 
                 PPHistoryEntry^.marked_deleted := 1;
@@ -7640,7 +7650,7 @@ begin
     DrawFlags := DT_SINGLELINE or DT_NOCLIP or DT_VCENTER;
 
     SetBkMode(Handle, TRANSPARENT);
-    Windows.DrawTextW(Handle, PWideChar(Title), Length(Title), CaptionRect, DrawFlags);
+    {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(Handle, PWideChar(Title), Length(Title), CaptionRect, DrawFlags);
   end;
 end;
 

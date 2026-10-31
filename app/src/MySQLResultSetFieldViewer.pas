@@ -5,7 +5,7 @@ unit MySQLResultSetFieldViewer;
 interface
 
 uses
-  gnugettext, Windows, Messages, SysUtils, Variants, Classes,
+  gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes,
   Graphics, Controls, TntForms, Forms,
   Dialogs, ExtCtrls, TntExtCtrls, ComCtrls, TntComCtrls,
   AuxFuncs, myx_public_interface, StdCtrls, TntStdCtrls,

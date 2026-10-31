@@ -23,7 +23,7 @@ unit CommonTypes;
 interface
 
 uses
-  Windows, Messages,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages,
   Unicode;
   
 type

@@ -8,7 +8,8 @@ program qbr;
 {$R res/qbr.res}
 
 uses
-  Interfaces, Classes, Forms, SysUtils, Windows, Messages, OptionsEditor, ExtCtrls, Controls,
+  {$IFDEF UNIX}cthreads,{$ENDIF} // thread support on Unix; must come first
+  Interfaces, Classes, Forms, SysUtils, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, OptionsEditor, ExtCtrls, Controls,
   TntClasses, TntStdCtrls, TntCheckLst, TntExtCtrls, TntForms, TntComCtrls, TntButtons, TntGrids,
   TntMenus, TntActnList, TntDialogs, TntRegistry, TntSysUtils, TntSystem, TntClipBrd,
   gnugettext, PNGImage, PNGTools, ResSelfTest, AuxFuncs, Options, MyxError, AuxApplicationFuncs,

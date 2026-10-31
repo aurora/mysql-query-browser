@@ -5,7 +5,7 @@ unit MySQLCommonFuncs;
 interface
 
 uses
-  gnugettext, SysUtils, AuxFuncs, Windows, Forms, TntRegistry, TntClasses, TntSysUtils;
+  gnugettext, SysUtils, AuxFuncs, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Registry, Types{$ENDIF}, Forms, TntRegistry, TntClasses, TntSysUtils;
 
 function GetMySQLCommandLineClientPath: WideString;
 function GetMySQLAdministratorCmd: WideString;
@@ -138,6 +138,9 @@ end;
 
 function GetSubkeyNameByPrefix(RegMainPath: WideString; RegAppName: WideString) : WideString;
 
+// Port: the MySQL installations are found in the Windows registry only; elsewhere the result is empty.
+
+{$IFDEF MSWINDOWS}
 var
   ParentKey: HKEY;
   I: Integer;
@@ -147,9 +150,11 @@ var
   KeyLen: Cardinal;
   L: Integer;
   RegResult: Integer;
+{$ENDIF}
   
 begin
   Result := '';
+  {$IFDEF MSWINDOWS}
   if RegOpenKeyExW(HKEY_LOCAL_MACHINE, PWideChar(RegMainPath), 0, KEY_READ, ParentKey) = ERROR_SUCCESS then
   begin
     if RegQueryInfoKey(ParentKey, nil, nil, nil, @NumSubKeys, @MaxKeySize, nil, nil, nil, nil, nil, nil) = ERROR_SUCCESS then
@@ -175,6 +180,7 @@ begin
       end;
     end;
   end;
+  {$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

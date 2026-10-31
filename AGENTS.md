@@ -42,6 +42,31 @@ If you need a different generated result, change the generator, not its output.
 - Podman (with a `docker.bat` shim) for the test servers.
 - Python 3 for the tools.
 
+## Toolchain (Linux, distrobox)
+
+`tools/distrobox-setup.sh` (run on the host) creates the Fedora container `freepascal` with
+Lazarus 4.8 / FPC 3.2.3 (`lazbuild`, LCL gtk2 and qt5), gcc/cmake/ninja, the backend libraries,
+Python, `x86_64-w64-mingw32-windres`, gdb and the mariadb client; `podman` inside forwards to
+the host. Work inside with `distrobox enter freepascal`.
+
+- The backend builds into `backend/build-linux` (not `backend/build`, which may hold a Windows build
+  of the same checkout). `./build.sh` picks that directory and `lazbuild` from `PATH` on Linux.
+- Unlike Windows, the Linux linker resolves the backend libraries when a program is linked: pass
+  `-Flbackend/build-linux` to `fpc` (`build.sh` does that for lazbuild) and set `LD_LIBRARY_PATH` to
+  run it.
+- Console programs need `cwstring` in their `uses` on Unix, otherwise `String`/`WideString`
+  conversions mangle non-ASCII text (LCL programs get it through LazUTF8).
+- `app/qbr.lpi` compiles with GTK2; state and open problems of the port are in
+  `docs/linux-port.md`. Windows-only code is guarded with `{$IFDEF MSWINDOWS}` and a `// Port:`
+  comment; Windows names the LCL has under another name go into `app/compat/WinAliases.pas` (only
+  ones with the same meaning). `python tools/winapi_usage.py [--where] [Unit ...]` lists remaining
+  Windows API use (needs the FPC/Lazarus sources, i.e. the distrobox).
+- **Changes for Linux must leave the Windows build unchanged** unless they fix it: cross-build for
+  Win64 in the distrobox and compare (`docs/linux-port.md`, "Checking the Windows build").
+- Run GUI self-tests under `xvfb-run -a` (no windows on the desktop; `tests/run-matrix.sh` does it).
+  The screenshots of the developer modes work there, not on a Wayland desktop.
+- Programs using threads need `cthreads` as the first unit on Unix (`qbr.lpr` has it).
+
 ## Everyday commands
 
 ```bash
@@ -62,6 +87,12 @@ fpc -Fubindings -Fuapp/compat -FUtests/lib -FEtests/bin \
   -Fu/c/lazarus/fpc/3.2.2/units/x86_64-win64/fcl-fpcunit tests/qbr_tests.lpr
 QBR_TEST_PORT=33306 tests/bin/qbr_tests.exe --all --format=plain   # backend/build and mingw64/bin on PATH
 pwsh tests/run-matrix.ps1                # all supported servers in throw-away containers
+
+# the same on Linux (inside the freepascal container)
+cmake -S backend -B backend/build-linux -G Ninja && cmake --build backend/build-linux
+fpc -Fubindings -Fuapp/compat -Flbackend/build-linux -FUtests/lib -FEtests/bin \
+  -Fu/usr/lib64/fpc/3.2.3/units/x86_64-linux/fcl-fpcunit tests/qbr_tests.lpr
+tests/run-matrix.sh [--only mysql:8.4]   # sets LD_LIBRARY_PATH itself
 
 # forms: convert everything and render screenshots into docs/reconstructed/
 python tools/convert_forms.py            # needs tools/lfmview built: lazbuild tools/lfmview/lfmview.lpi
@@ -149,6 +180,12 @@ choice that a future contributor would ask "why?" about, write the ADR.
 - **Old C code and modern compilers:** expect undefined behaviour of the kind
   `&vec.front()` on empty vectors, implicit `int`, `NULL` in integer fields; see
   ADR-0003 for the ones already fixed.
+- **`Integer(Pointer)` cuts 64-bit addresses.** Legacy code walks C arrays as
+  `PFoo(Integer(Base) + SizeOf(Foo) * I)`; that keeps 32 bits and fails as soon as the heap lies
+  above 4 GB (always on Linux, sometimes on Win64). Use `PtrUInt`; build with `--opt=-vw` and look
+  for warnings 4056/4082 after porting a unit.
+- **`THandle` is 32 bits on Linux** (`Longint`; 64 bits on Win64). A device context, font or window
+  handle kept in a `THandle` loses its upper half there; use `HDC`, `HGDIOBJ`, `HWND`.
 - **Unsigned counters:** `for I := 0 to num - 1` with `num: cuint = 0` loops
   4 billion times; cast to `Integer` first.
 - **Window screenshots on Windows 10/11** include an invisible border that

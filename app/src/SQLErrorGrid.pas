@@ -21,7 +21,7 @@ unit SQLErrorGrid;
 interface
 
 uses
-  Windows, SysUtils, Classes, Contnrs, Graphics, Controls,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, SysUtils, Classes, Contnrs, Graphics, Controls,
   laz.VirtualTrees, VTCompat, gnugettext, PNGImage,
   MySQLConnection, MySQLResultSet, AuxLists, TntMenus, Forms,
   

@@ -21,7 +21,7 @@ unit SchemataTreeView;
 interface
 
 uses
-  LCLType, gnugettext, Windows, Messages, SysUtils, Variants, Classes, Graphics, SyncObjs,
+  LCLType, gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, SyncObjs,
   Controls, Forms, Dialogs, AdvancedEdit, StdCtrls, ExtCtrls, ComCtrls, Menus,
   MySQLConnection, AuxFuncs, myx_public_interface, MyxError, ImgList,
   EditorTable, laz.VirtualTrees, VTCompat, PNGImage, Contnrs, TntClasses, TntForms, TntSysUtils,
@@ -2145,7 +2145,7 @@ begin
         TMYX_SCHEMA_TABLE(ParentNodeData^).columns.IndexOf(NodeData2^)
     else
       Result := WideCompareText(TVirtualStringTree(Sender).Text[Node1, Column],
-        TVirtualStringTree(Sender).Text[Node2, Column], LOCALE_USER_DEFAULT);
+        TVirtualStringTree(Sender).Text[Node2, Column]{$IFDEF MSWINDOWS}, LOCALE_USER_DEFAULT{$ENDIF});
   end
   else
     Result := V1 - V2;
@@ -2669,7 +2669,7 @@ begin
       ACanvas.FillRect(ARect);
       Inc(ARect.Left, 8);
       SetBKMode(ACanvas.Handle, TRANSPARENT);
-      Windows.DrawTextW(ACanvas.Handle, PWideChar(Item.Caption), Length(Item.Caption), ARect, DT_LEFT + DT_SINGLELINE +
+      {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(ACanvas.Handle, PWideChar(Item.Caption), Length(Item.Caption), ARect, DT_LEFT + DT_SINGLELINE +
         DT_HIDEPREFIX + DT_VCENTER);
     end;
   end;

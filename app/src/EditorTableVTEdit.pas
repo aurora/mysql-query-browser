@@ -5,7 +5,7 @@ unit EditorTableVTEdit;
 interface
 
 uses
-  LCLType, LMessages, gnugettext, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  LCLType, LMessages, gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, TntStdCtrls, ComCtrls, TntComCtrls, ExtCtrls,
   laz.VirtualTrees, VTCompat, AuxFuncs, CheckLst, TntCheckLst, Buttons, TntButtons,
   MySQLConnection, myx_public_interface, MyxError, ImgList, PngImage,
@@ -139,7 +139,7 @@ begin
     not (vsMultiline in FLink.FNode.States) then
     // Instead directly calling AutoAdjustSize it is necessary on Win9x/Me to decouple this notification message
     // and eventual resizing. Hence we use a message to accomplish that.
-    if false and ((Win32Platform and VER_PLATFORM_WIN32_NT) <> 0) then
+    if false {$IFDEF MSWINDOWS}and ((Win32Platform and VER_PLATFORM_WIN32_NT) <> 0){$ENDIF} then
       AutoAdjustSize
     else
       PostMessage(Handle, CM_AUTOADJUST, 0, 0);
@@ -321,7 +321,7 @@ begin
     PDatatype:=nil;
     for i:=0 to FLink.PDatatypes.datatypes_num-1 do
     begin
-      PDatatype:=PMYX_DBM_DATATYPE(integer(FLink.PDatatypes.datatypes)+
+      PDatatype:=PMYX_DBM_DATATYPE(PtrUInt(FLink.PDatatypes.datatypes)+
         sizeof(MYX_DBM_DATATYPE)*i);
 
       if(CompareText(PDatatype.name, Text)=0)then
@@ -358,7 +358,7 @@ begin
     begin
       for i:=0 to FLink.PDatatypes.datatypes_num-1 do
       begin
-        PDatatype:=PMYX_DBM_DATATYPE(integer(FLink.PDatatypes.datatypes)+
+        PDatatype:=PMYX_DBM_DATATYPE(PtrUInt(FLink.PDatatypes.datatypes)+
           sizeof(MYX_DBM_DATATYPE)*i);
         if(CompareText(
           Copy(PDatatype.name, 1, Length(Text)),
@@ -386,13 +386,13 @@ procedure TColumnGridEdit.AutoAdjustSize;
 var
   DC: HDC;
   Size: TSize;
-  LastFont: THandle;
+  LastFont: HGDIOBJ;
 
 begin
   if not (vsMultiline in FLink.FNode.States) then
   begin
     // avoid flicker
-    SendMessage(Handle, WM_SETREDRAW, 0, 0);
+    {$IFDEF MSWINDOWS}SendMessage(Handle, WM_SETREDRAW, 0, 0);{$ENDIF}
 
     DC := GetDC(Handle);
     LastFont := SelectObject(DC, Font.Handle);
@@ -416,7 +416,7 @@ begin
     finally
       SelectObject(DC, LastFont);
       ReleaseDC(Handle, DC);
-      SendMessage(Handle, WM_SETREDRAW, 1, 0);
+      {$IFDEF MSWINDOWS}SendMessage(Handle, WM_SETREDRAW, 1, 0);{$ENDIF}
     end;
   end;
 end;
@@ -650,7 +650,7 @@ begin
       if not (vsMultiline in FNode.States) then
         OffsetRect(R, 0, FTextBounds.Top - FEdit.Top);
 
-      SendMessage(FEdit.Handle, EM_SETRECTNP, 0, Integer(@R));
+      {$IFDEF MSWINDOWS}SendMessage(FEdit.Handle, EM_SETRECTNP, 0, LPARAM(@R));{$ENDIF}
     end;
   end;
 end;
