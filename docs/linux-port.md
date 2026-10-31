@@ -101,6 +101,14 @@ Still open, cosmetic: in the options dialog a few pixels of the hidden notebook 
 keyboard/mouse interaction, drag and drop, bookmarks, the field viewer, the Qt5 widgetset
 (checklist: `docs/linux-manual-test.md`).
 
+**Scaled desktops (2026-10-31).** On a KDE desktop with scale 1.45 the menu was much larger than the rest of
+the window: GTK sized its own text from the desktop's dpi while the forms are fixed pixel layouts. The dpi
+setting is now pinned to 96 (ADR-0023); KDE's "Legacy applications: scaled by the system" scales the window
+as a whole. The result bar's status text was cut off at its lower edge because the LCL clips `DrawText` to the
+given rectangle while the Windows code clips to the text height (`DrawWideStringText`, fixed, Win64 build
+unchanged). Still open, cosmetic: the page control tab strips that the VCL leaves invisible show in the connect
+dialog ("Advanced Connection Options", caption `MySQLOptionsTabSheet`) and in the options dialog.
+
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with
 `double free or corruption (out)`. The core dump shows `g_free` called from

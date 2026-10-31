@@ -18,7 +18,7 @@ uses
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
   UCEShared, UCEHighlighter, UniCodeEditor, UCEEditorKeyCommands, UniCodeConsole,
-  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main;
+  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main{$IFNDEF MSWINDOWS}, GtkDpi{$ENDIF};
 
 var
   I: Integer;
@@ -126,6 +126,7 @@ begin
     UseLanguage(MYXCommonOptions.Language);
 
   Application.Title := 'MySQL Query Browser';
+  {$IFNDEF MSWINDOWS}PinGtkDpiTo96;{$ENDIF}   // Port: see unit GtkDpi
   Application.Initialize;
   InitGlobalVars;
 
