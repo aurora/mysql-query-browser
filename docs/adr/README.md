@@ -27,6 +27,7 @@ Related.
 | [0016](0016-help-from-the-connected-server.md) | Help reference from the connected server | Accepted by implementation (to confirm) |
 | [0017](0017-trim-menus-for-first-release.md) | Trim the menus for the first release | Accepted |
 | [0018](0018-update-check-with-velopack-pas.md) | Update check with velopack-pas and GitHub releases | Accepted (implemented, not yet built) |
+| [0019](0019-user-data-directory-of-the-original.md) | User data directory: the original's folder on each platform | Accepted (implemented and checked on Linux) |
 
 ## Numbering
 

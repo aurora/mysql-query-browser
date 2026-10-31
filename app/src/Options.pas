@@ -717,8 +717,14 @@ begin
         NoRegistry := True;
 
 
+  // Port: the folder of the original Query Browser on each platform, so that existing files are used as they are
+  // (ADR-0019). Windows: %APPDATA%\MySQL, macOS: ~/Library/Application Support/MySQL, Linux: ~/.mysqlgui.
   if (UserDataDir = '') then
+    {$IFDEF LINUX}
+    UserDataDir := IncludeTrailingPathDelimiter(UTF8Decode(GetUserDir) + '.mysqlgui');
+    {$ELSE}
     UserDataDir := GetApplicationDataDir + ('MySQL' + PathDelim);
+    {$ENDIF}
   ForceDirectories(UserDataDir);
 
   //Detect if XPStyle is enabled
