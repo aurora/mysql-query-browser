@@ -98,7 +98,8 @@ Fixes:
 
 Still open, cosmetic: in the options dialog a few pixels of the hidden notebook tabs show above
 `HeaderPnl` (GTK2 tabs are taller than the 16 pixels the original hides). Not checked yet: real
-keyboard/mouse interaction, drag and drop, bookmarks, the field viewer, the Qt5 widgetset.
+keyboard/mouse interaction, drag and drop, bookmarks, the field viewer, the Qt5 widgetset
+(checklist: `docs/linux-manual-test.md`).
 
 ## Summary before the port (2026-10-30)
 
