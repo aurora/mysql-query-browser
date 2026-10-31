@@ -929,6 +929,11 @@ function myx_pop_schema(mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
 function _myx_get_default_schema(mysql: PMYSQL): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_get_default_schema';
 function myx_get_default_schema(mysql: PMYSQL): String;
 function myx_get_thread_id(mysql: PMYSQL): culong; cdecl; external LIB_MYSQLX;
+function _myx_query_single_value(mysql: PMYSQL; sql: PAnsiChar): PAnsiChar; cdecl; external LIB_MYSQLX name 'myx_query_single_value';
+function myx_query_single_value(mysql: PMYSQL; const sql: WideString): String;
+function _myx_query_errno(mysql: PMYSQL; sql: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_query_errno';
+function myx_query_errno(mysql: PMYSQL; const sql: WideString): cint;
+function myx_mysql_cancel(mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
 function myx_ping_server(mysql: PMYSQL): cint; cdecl; external LIB_MYSQLX;
 function myx_get_mysql_quote_char(mysql: PMYSQL; detect: cint): cint; cdecl; external LIB_MYSQLX;
 function myx_mysql_esc(mysql: PMYSQL; cmd: PAnsiChar): PAnsiChar; cdecl; varargs; external LIB_MYSQLX;
@@ -2736,6 +2741,23 @@ begin
   else
     Result := String(P);
   g_free(P);
+end;
+
+function myx_query_single_value(mysql: PMYSQL; const sql: WideString): String;
+var
+  P: PAnsiChar;
+begin
+  P := _myx_query_single_value(mysql, PAnsiChar(UTF8Encode(sql)));
+  if P = nil then
+    Result := ''
+  else
+    Result := String(P);
+  g_free(P);
+end;
+
+function myx_query_errno(mysql: PMYSQL; const sql: WideString): cint;
+begin
+  Result := _myx_query_errno(mysql, PAnsiChar(UTF8Encode(sql)));
 end;
 
 function myx_mysql_query(mysql: PMYSQL; const cmd: WideString): cint;

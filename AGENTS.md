@@ -83,14 +83,14 @@ python tools/gen_tnt_shims.py
 python tools/check_bindings.py
 
 # tests: build, then run against a server (QBR_TEST_PORT etc., see tests/README.md)
-fpc -Fubindings -Fuapp/compat -FUtests/lib -FEtests/bin \
+fpc -Fubindings -Fuapp/compat -Fuapp/src -FUtests/lib -FEtests/bin \
   -Fu/c/lazarus/fpc/3.2.2/units/x86_64-win64/fcl-fpcunit tests/qbr_tests.lpr
 QBR_TEST_PORT=33306 tests/bin/qbr_tests.exe --all --format=plain   # backend/build and mingw64/bin on PATH
 pwsh tests/run-matrix.ps1                # all supported servers in throw-away containers
 
 # the same on Linux (inside the freepascal container)
 cmake -S backend -B backend/build-linux -G Ninja && cmake --build backend/build-linux
-fpc -Fubindings -Fuapp/compat -Flbackend/build-linux -FUtests/lib -FEtests/bin \
+fpc -Fubindings -Fuapp/compat -Fuapp/src -Flbackend/build-linux -FUtests/lib -FEtests/bin \
   -Fu/usr/lib64/fpc/3.2.3/units/x86_64-linux/fcl-fpcunit tests/qbr_tests.lpr
 tests/run-matrix.sh [--only mysql:8.4]   # sets LD_LIBRARY_PATH itself
 

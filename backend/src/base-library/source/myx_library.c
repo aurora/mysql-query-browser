@@ -910,6 +910,84 @@ unsigned long myx_get_thread_id(MYSQL *mysql)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+/** @brief run a query and return the first column of its first row
+    @ingroup bridge_to_MySQL_API
+
+    Used by the query canceller (ADR-0020). Goes to the client library directly,
+    so the query hooks and the shared last-error variables are not involved.
+
+    @param mysql connection handler
+    @param sql the query
+
+    @return the value, or NULL on an error, an empty result or a NULL value.
+            The returned string must be freed with g_free().
+*//////////////////////////////////////////////////////////////////////////////
+char *myx_query_single_value(MYSQL *mysql, const char *sql)
+{
+  MYSQL_RES *res;
+  MYSQL_ROW row;
+  char *value= NULL;
+
+  if (mysql_query(mysql, sql) != 0)
+    return NULL;
+
+  res= mysql_store_result(mysql);
+  if (res != NULL)
+  {
+    row= mysql_fetch_row(res);
+    if (row != NULL && row[0] != NULL)
+      value= g_strdup(row[0]);
+    mysql_free_result(res);
+  }
+
+  return value;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/** @brief run a statement and return its error number
+    @ingroup bridge_to_MySQL_API
+
+    Like myx_query_single_value(), this bypasses the hooks and the shared
+    last-error variables (which are not thread-safe). A result is discarded.
+
+    @param mysql connection handler
+    @param sql the statement
+
+    @return 0 on success, otherwise mysql_errno()
+*//////////////////////////////////////////////////////////////////////////////
+int myx_query_errno(MYSQL *mysql, const char *sql)
+{
+  MYSQL_RES *res;
+
+  if (mysql_query(mysql, sql) != 0)
+    return (int)mysql_errno(mysql);
+
+  res= mysql_store_result(mysql);
+  if (res != NULL)
+    mysql_free_result(res);
+
+  return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/** @brief shut down the socket of a connection
+    @ingroup bridge_to_MySQL_API
+
+    May be called from another thread while the connection is busy: the
+    owner's pending read or write fails, the connection cannot be used
+    afterwards and must be closed. The server is not told anything, so a
+    running statement goes on there (ADR-0020).
+
+    @param mysql connection handler
+
+    @return @see mariadb_cancel
+*//////////////////////////////////////////////////////////////////////////////
+int myx_mysql_cancel(MYSQL *mysql)
+{
+  return mariadb_cancel(mysql);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 /** @brief Checks availability of the connection.
     @ingroup bridge_to_MySQL_API
 

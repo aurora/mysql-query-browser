@@ -1116,6 +1116,9 @@ MYX_PUBLIC_FUNC int myx_push_schema(MYSQL *mysql, const char *schema);
 MYX_PUBLIC_FUNC int myx_pop_schema(MYSQL *mysql);
 MYX_PUBLIC_FUNC char * myx_get_default_schema(MYSQL *mysql);
 MYX_PUBLIC_FUNC unsigned long myx_get_thread_id(MYSQL *mysql);
+MYX_PUBLIC_FUNC char * myx_query_single_value(MYSQL *mysql, const char *sql);
+MYX_PUBLIC_FUNC int myx_query_errno(MYSQL *mysql, const char *sql);
+MYX_PUBLIC_FUNC int myx_mysql_cancel(MYSQL *mysql);
 MYX_PUBLIC_FUNC int myx_ping_server(MYSQL *mysql);
 MYX_PUBLIC_FUNC int myx_get_mysql_quote_char(MYSQL *mysql, int detect);
 

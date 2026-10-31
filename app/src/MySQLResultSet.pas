@@ -9,7 +9,7 @@ uses
   TntExtCtrls, TntComCtrls, TntClasses, TntStdCtrls, SyncObjs,
   myx_types, myx_public_interface, myx_util_public_interface, gnugettext, auxfuncs, MyxError,
   MySQLConnection, laz.VirtualTrees, VTCompat, Graphics, StrUtils,
-  TextSearch;
+  TextSearch, QueryCancel;
 
 type
   TMySQLRS = class;
@@ -133,6 +133,11 @@ type
     FStopQuery: Boolean;
     FQueryExecuting: Boolean;
 
+    // Port: what Stop cancels on the server (ADR-0020), set while the query thread runs.
+    FCanceller: IQueryCanceller;
+    FCancelTicket: Int64;
+    FCancelAllowCut: Boolean;
+
     FCreateNextRSForMultibleRSQuery: TResultsetEvent;
 
     FRemoveRSForMultibleRSQuery: TNotifyEvent;
@@ -200,6 +205,7 @@ type
     DeletedRows: Integer;
 
     function AllowedToDiscard: Boolean;
+    procedure SetCancelTarget(const Canceller: IQueryCanceller; Ticket: Int64; AllowCut: Boolean);
 
     property CommandList: TCommandList read FCommandList;
     property MySQLConn: TMySQLConn read GetMySQLConn write SetMySQLConn default nil;
@@ -259,6 +265,9 @@ type
     ThreadPMySQL: Pointer;
     ExceptionMsg: WideString;
     FNeedCleanup: Boolean;
+    FCanceller: IQueryCanceller;   // Port: cancels the query on the server (ADR-0020).
+    FTicket: Int64;
+    procedure CheckCancelled(var ErrorCode: MYX_LIB_ERROR);
   public
     MySQLRS: TMySQLRS;
 
@@ -927,6 +936,17 @@ begin
   finally
     QueryStateMultiReadSync.EndWrite;
   end;
+
+  // Port: also stop the statement on the server, not only the fetching of rows (ADR-0020).
+  if StopQuery then
+    CancelInBackground(FCanceller, FCancelTicket, FCancelAllowCut);
+end;
+
+procedure TMySQLRS.SetCancelTarget(const Canceller: IQueryCanceller; Ticket: Int64; AllowCut: Boolean);
+begin
+  FCanceller := Canceller;
+  FCancelTicket := Ticket;
+  FCancelAllowCut := AllowCut;
 end;
 
 function TMySQLRS.GetQueryExecuting: Boolean;
@@ -1013,14 +1033,27 @@ begin
     if(MySQLRS.MySQLConn.DefaultSchema<>'')and
       (MySQLRS.MySQLConn.DefaultSchema<>MySQLRS.MySQLConn.UserConnection.schema)then
         myx_use_schema(ThreadPMySQL, MySQLRS.MySQLConn.DefaultSchema);
+
+    FCanceller := TQueryCanceller.Create;
+    FCanceller.Attach(ThreadPMySQL, MySQLRS.MySQLConn.UserConnection, MySQLRS.MySQLConn.EmbeddedConnection);
   end
   else
+  begin
     ThreadPMySQL:=MySQLRS.MySQLConn.MySQL;
+    FCanceller := MySQLRS.MySQLConn.Canceller;
+  end;
+
+  // Port: Stop cancels the statement on the server (ADR-0020). Cutting the connection is only allowed for the
+  // thread's own one; on the main connection it would lose the user's transaction.
+  FTicket := FCanceller.NewTicket;
+  MySQLRS.SetCancelTarget(FCanceller, FTicket, FNeedCleanup);
 end;
 
 destructor TExecuteQueryThread.Destroy;
 
 begin
+  if FNeedCleanUp and Assigned(FCanceller) then
+    FCanceller.Detach;
   if FNeedCleanUp and Assigned(MySQLRS) and Assigned(MySQLRS.MySQLConn) then
     myx_mysql_close(ThreadPMySQL);
 
@@ -1035,6 +1068,7 @@ var
   MySQLConn: TMySQLConn;
   InTransaction: Boolean;
   DoRemoveLastRS: Boolean;
+  Started: Boolean;
 
 begin
   DoRemoveLastRS := False;
@@ -1050,6 +1084,7 @@ begin
       try
         Query:=MySQLRS.SQL;
 
+        Started := False;
         Parameters:=TMYX_STRINGLIST.create;
         try
           Parameters.strings.Text := '';
@@ -1067,12 +1102,22 @@ begin
             Parameters.strings.Text:=Parameters.strings.Text+#13#10+
               MySQLRS.FParentRS.DynamicParams.Text;
 
-          result_set := myx_query_execute(ThreadPMySQL,
-            Query, Ord(ApplicationDM.Options.EnforceEditableQueries),
-            Parameters.get_record_pointer,
-            @ErrorCode, Addr(self), @progress_row_fetch,
-            @resultset_realloc_before,
-            @resultset_realloc_after);
+          // Port: bracket the statements so that Stop can cancel them on the server (ADR-0020). A Stop before the
+          // start skips the query.
+          Started := FCanceller.BeginStatement(FTicket);
+          if Started then
+            result_set := myx_query_execute(ThreadPMySQL,
+              Query, Ord(ApplicationDM.Options.EnforceEditableQueries),
+              Parameters.get_record_pointer,
+              @ErrorCode, Addr(self), @progress_row_fetch,
+              @resultset_realloc_before,
+              @resultset_realloc_after)
+          else
+          begin
+            result_set := nil;
+            ErrorCode := MYX_STOP_EXECUTION;
+          end;
+          CheckCancelled(ErrorCode);
 
           //Handle multible resultsets
           while (1=1) do
@@ -1116,6 +1161,7 @@ begin
                   @ErrorCode, Addr(self), @progress_row_fetch,
                   @resultset_realloc_before,
                   @resultset_realloc_after);
+                CheckCancelled(ErrorCode);
 
                 //Handle last result in a multi resultset query
                 if (ErrorCode=MYX_SQL_ERROR) and
@@ -1136,6 +1182,8 @@ begin
           end;
         finally
           Parameters.Free;
+          if Started then
+            FCanceller.EndStatement(FTicket);
         end;
       finally
         if(InTransaction)then
@@ -1159,6 +1207,21 @@ begin
     MySQLRS := MySQLRS.CreateNextRSForMultibleRSQuery(MySQLRS)
   else
     MySQLRS := nil;
+
+  // Port: Stop on the next result set cancels the same statement (ADR-0020).
+  if Assigned(MySQLRS) then
+    MySQLRS.SetCancelTarget(FCanceller, FTicket, FNeedCleanup);
+end;
+
+procedure TExecuteQueryThread.CheckCancelled(var ErrorCode: MYX_LIB_ERROR);
+
+// Port: a statement that Stop cancelled on the server (or whose connection it cut) ends with an error. Report it as
+// stopped, as the original does when Stop ends the fetching of rows (ADR-0020).
+
+begin
+  if (ErrorCode = MYX_SQL_ERROR) and FCanceller.WasCancelled(FTicket) and
+    IsCancelError(myx_mysql_errno(ThreadPMySQL)) then
+    ErrorCode := MYX_STOP_EXECUTION;
 end;
 
 procedure TExecuteQueryThread.RemoveRSForMultibleRSQuery;
@@ -1269,6 +1332,9 @@ end;
 procedure TExecuteQueryThread.QueryExecuted;
 
 begin
+  if Assigned(MySQLRS) then
+    MySQLRS.SetCancelTarget(nil, 0, False);
+
   if(Assigned(MySQLRS)) then
     if(Assigned(MySQLRS.OnQueryExecuted))then
       MySQLRS.OnQueryExecuted(MySQLRS);

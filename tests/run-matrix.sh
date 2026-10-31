@@ -6,7 +6,7 @@
 #   tests/run-matrix.sh [--only mysql:8.4,mariadb:11.4] [--keep]
 #
 # Prerequisites: backend built (backend/build-linux), tests built (tests/bin/qbr_tests):
-#   fpc -Fubindings -Fuapp/compat -Flbackend/build-linux -FUtests/lib -FEtests/bin \
+#   fpc -Fubindings -Fuapp/compat -Fuapp/src -Flbackend/build-linux -FUtests/lib -FEtests/bin \
 #     -Fu/usr/lib64/fpc/<version>/units/x86_64-linux/fcl-fpcunit tests/qbr_tests.lpr
 set -uo pipefail
 

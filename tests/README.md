@@ -13,7 +13,7 @@ Build and run (Windows, MSYS2 mingw64 + Lazarus/FPC 3.2.2):
 
 ```
 cmake -S backend -B backend/build -G Ninja && cmake --build backend/build
-fpc -Fubindings -Fuapp/compat -FUtests/lib -FEtests/bin -Fu<fpc>/units/x86_64-win64/fcl-fpcunit tests/qbr_tests.lpr
+fpc -Fubindings -Fuapp/compat -Fuapp/src -FUtests/lib -FEtests/bin -Fu<fpc>/units/x86_64-win64/fcl-fpcunit tests/qbr_tests.lpr
 # backend/build and mingw64/bin must be on PATH so the DLLs are found
 tests/bin/qbr_tests.exe --all --format=plain
 ```
@@ -22,7 +22,7 @@ Linux (inside the `freepascal` distrobox from `tools/distrobox-setup.sh`):
 
 ```
 cmake -S backend -B backend/build-linux -G Ninja && cmake --build backend/build-linux
-fpc -Fubindings -Fuapp/compat -Flbackend/build-linux -FUtests/lib -FEtests/bin -Fu/usr/lib64/fpc/3.2.3/units/x86_64-linux/fcl-fpcunit tests/qbr_tests.lpr
+fpc -Fubindings -Fuapp/compat -Fuapp/src -Flbackend/build-linux -FUtests/lib -FEtests/bin -Fu/usr/lib64/fpc/3.2.3/units/x86_64-linux/fcl-fpcunit tests/qbr_tests.lpr
 LD_LIBRARY_PATH=backend/build-linux tests/bin/qbr_tests --all --format=plain
 ```
 

@@ -49,8 +49,9 @@ How it is done:
 Interim behaviour until the decisions in section 4:
 
 - Data directory: `~/.mysqlgui/`, the folder of the original Linux version (ADR-0019, decision 4.1).
-- Threads are not killed outside Windows: freeing them waits until they finish (4.2). Cancelling a
-  long query therefore waits for it.
+- Long statements are cancelled on the server with `KILL QUERY` over a second connection, guarded so
+  that no other statement can be hit (ADR-0020, decision 4.2), on Linux and Windows. The connect and
+  ping threads of the connect dialog are still not killed outside Windows; freeing them waits.
 - No global hot keys outside Windows (4.3).
 
 **64-bit pointer arithmetic (fixed).** Query results stayed empty on Linux: the ported code walked
@@ -164,11 +165,14 @@ are listed so that each guard is a deliberate choice.
    Linux Query Browser used `~/.mysqlgui` (`legacy/mysql-gui-common/source/linux/MGPreferences.cc`), the
    desktop convention is `$XDG_CONFIG_HOME/<name>`. Reading an existing `~/.mysqlgui` would carry
    over connections from the old Linux version.
-2. **Stopping hanging threads.** `TerminateThread` kills query, connect and ping threads after a
-   timeout (`MySQLConnection.ClearWorkList`, `FetchData`, `StopCurrentThread`; `ConnectToInstance`
-   3x). POSIX has no safe equivalent. Options: cancel on the server (`KILL QUERY` over a second
-   connection), close the socket (`mariadb_cancel`) and then wait, or abandon the thread. The same
-   change would make Windows safer (killing a thread inside libmysql can leave locks held).
+2. **Stopping hanging threads (decided: ADR-0020, cancel on the server).** `TerminateThread` kills
+   query, connect and ping threads after a timeout (`MySQLConnection.ClearWorkList`, `FetchData`,
+   `StopCurrentThread`; `ConnectToInstance` 3x). POSIX has no safe equivalent. Options: cancel on
+   the server (`KILL QUERY` over a second connection), close the socket (`mariadb_cancel`) and then
+   wait, or abandon the thread. The same change would make Windows safer (killing a thread inside
+   libmysql can leave locks held). Implemented for the `MySQLConnection` threads and the query Stop
+   button (`app/src/QueryCancel.pas`, tests in `tests/test_cancel.pas`); the `ConnectToInstance`
+   threads run no statement and are unchanged.
 3. **Global copy/paste hotkeys.** `QueryBrowser.FormCreate`/`WMHotKey` registers Ctrl+Alt+Shift+C/V
    system-wide and sends keystrokes to the foreground application (`RegisterHotKey`, `keybd_event`,
    `AttachThreadInput`). X11 can do something similar, Wayland cannot. Probably Windows-only; the
@@ -218,4 +222,4 @@ x86_64-w64-mingw32-objdump -d --no-addresses <lib-a>/Unit.o > a.dis   # same for
 2. ~~The 64-bit pointer arithmetic, so that results show.~~ ~~Check the main window's features by
    screenshot under GTK2.~~ Done (see "State"); interactive use on a real desktop is next.
 3. ~~Decide 4.1 (data directory).~~ Done, ADR-0019.
-4. Decide and implement 4.2 and 4.3; ~~4.4~~ (ADR-0021).
+4. ~~Decide and implement 4.2~~ (ADR-0020); ~~decide and implement 4.4~~ (ADR-0021); decide 4.3.

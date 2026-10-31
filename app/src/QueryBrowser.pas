@@ -1956,6 +1956,19 @@ begin
         if Name = 'bookmark' then
           AddBookmark('select 1')
         else
+        if Name = 'stop' then
+          QueryStopClick(nil)
+        else
+        if (Name = 'status') and Assigned(ActiveResultset) then
+          with TStringList.Create do
+          try
+            Add('status=' + UTF8Encode(ActiveResultset.StatusCaption));
+            Add('executing=' + BoolToStr(ActiveResultset.QueryExecuting, True));
+            SaveToFile('dbg-status.txt');
+          finally
+            Free;
+          end
+        else
         if Name = 'bad' then
           ShowError('Error', _('The file %s cannot be written.'), ['x.txt'])
         else

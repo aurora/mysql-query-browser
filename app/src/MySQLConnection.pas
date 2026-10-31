@@ -25,7 +25,7 @@ uses
   Controls, TntComCtrls, TntClasses, Forms, Contnrs,
   ExtCtrls, AuxFuncs, PNGImage, StdCtrls,
   SyncObjs, myx_util_public_interface, myx_public_interface, MyxError,
-  Options, myx_sql_parser_public_interface;
+  Options, myx_sql_parser_public_interface, QueryCancel;
 
 const
   WM_CONNECTION_LOST        = WM_USER + 101; // The currently connected server got lost. Reconnection might be possible.
@@ -130,8 +130,11 @@ type
     FErrorCode: MYX_LIB_ERROR;
     FKeepAliveTimer: TTimer;
     FLastConnectionState: TConnectionState;
+    FCanceller: IQueryCanceller;                 // Port: cancels fetch threads on the server (ADR-0020).
 
     procedure KeepAliveTrigger(Sender: TObject);
+    function WaitForTicket(Ticket: Int64; Timeout: Integer): Boolean;
+    procedure StopThreadWork(Ticket: Int64; Timeout: Integer);
     procedure SetConnected(const Value: Boolean);
     procedure SetKeepAlive(const Value: Boolean);
   protected
@@ -181,6 +184,7 @@ type
     procedure UseStatusBar(StatusBar: TTntStatusBar);
 
     property AllowConnectionSkip: Boolean read FAllowConnectionSkip write FAllowConnectionSkip default True;
+    property Canceller: IQueryCanceller read FCanceller;
     property Connected: Boolean read FConnected write SetConnected;
     property DataBeingFetched: TFetchingDataKinds read FDataBeingFetched;
     property DefaultSchema: WideString read FDefaultSchema write SetDefaultSchema;
@@ -209,6 +213,7 @@ type
     FStatusBarText: WideString;
     FAllowParallelExecution: Boolean;
     FShowWaitCursor: Boolean;
+    FTicket: Int64;                              // Port: identifies the work for FConnection.Canceller.
   protected
     procedure Execute; override;
     procedure SetStatusBar(StatusBarText: WideString);
@@ -265,6 +270,8 @@ begin
 
   FQueryHookMultiReadSync := TMultiReadExclusiveWriteSynchronizer.Create;
 
+  FCanceller := TQueryCanceller.Create;
+
   FAllowConnectionSkip := True;
   FKeepAlive := True;
   FKeepAliveTimer := TTimer.Create(nil);
@@ -290,6 +297,7 @@ begin
   FParameters.Free;
 
   // Close connection and free memory for MySQL struct
+  FCanceller.Detach;
   if Assigned(FMySQL) then
     myx_mysql_close(FMySQL);
 
@@ -320,12 +328,9 @@ begin
       FCurrentDataThread.Terminate;
 
       // Wait 2 seconds and kill the thread if it did not stop working within that time.
-      // Port: threads cannot be killed outside Windows; there FreeAndNil waits for the thread to finish
-      // (docs/linux-port.md, section 4.2). Same in FetchData and StopCurrentThread.
-      {$IFDEF MSWINDOWS}
-      if WaitForSingleObject(FCurrentDataThread.Handle, 2000) = WAIT_TIMEOUT then
-        TerminateThread(FCurrentDataThread.Handle, 999);
-      {$ENDIF}
+      // Port: instead of killing the thread its statement is cancelled on the server, and FreeAndNil
+      // waits for the thread to finish (ADR-0020). Same in FetchData and StopCurrentThread.
+      StopThreadWork(FCurrentDataThread.FTicket, 2000);
       FreeAndNil(FCurrentDataThread);
     end;
   finally
@@ -369,6 +374,8 @@ begin
 
     FConnected := True;
     FIsLocalServer := myx_is_localhost(FUserConnection.hostname) = 1;
+
+    FCanceller.Attach(FMySQL, FUserConnection, False);
   end;
 end;
 
@@ -566,9 +573,6 @@ procedure TMySQLConn.FetchData(KindOfData: TFetchingDataKind; FetchMethod: TThre
 // is killed and this method immediately returns to the caller.
 
 var
-  {$IFDEF MSWINDOWS}
-  WaitResult: Cardinal;
-  {$ENDIF}
   Thread: TFetchDataThread;
   
 begin
@@ -593,26 +597,20 @@ begin
         begin
           // Wait for the data thread to finish but don't deadlock. Instead poll the thread until it is finished
           // or the control thread is terminated.
-          {$IFDEF MSWINDOWS}
-          WaitResult := WAIT_OBJECT_0;
-          while not TCastThread(ControlThread).Terminated do
-          begin
-            WaitResult := WaitForSingleObject(Thread.Handle, 100);
-            if WaitResult = WAIT_OBJECT_0 then
-              Break;
-          end;
-          // Kill the fetch thread if the control thread has been told to finish but the fetch thread is still working.
-          if WaitResult = WAIT_TIMEOUT then
-          begin
-            TerminateThread(Thread.Handle, 999);
-
-            // Close the connection if we have to kill the last query.
-            Reconnect;
-           end;
-          {$ELSE}
           while not TCastThread(ControlThread).Terminated and not Thread.Finished do
             Sleep(10);
-          {$ENDIF}
+          // Kill the fetch thread if the control thread has been told to finish but the fetch thread is still working.
+          // Port: its statement is cancelled on the server instead, and Free waits for the thread (ADR-0020).
+          if not Thread.Finished then
+          begin
+            Thread.Terminate;
+            StopThreadWork(Thread.FTicket, 0);
+            Thread.WaitFor;
+
+            // Close the connection if we had to cut it.
+            if FCanceller.WasCut then
+              Reconnect;
+          end;
           Thread.Free;
         end;
       except
@@ -631,18 +629,58 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+function TMySQLConn.WaitForTicket(Ticket: Int64; Timeout: Integer): Boolean;
+
+// Port: waits up to Timeout ms until the work with the given ticket has ended its statements. Handles
+// synchronized calls while waiting in the main thread, as TThread.WaitFor does.
+
+var
+  Start: QWord;
+
+begin
+  Start := GetTickCount64;
+  repeat
+    Result := not FCanceller.IsRunning(Ticket);
+    if Result or (GetTickCount64 - Start >= QWord(Timeout)) then
+      Break;
+    if GetCurrentThreadId = MainThreadID then
+      CheckSynchronize(10)
+    else
+      Sleep(10);
+  until False;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TMySQLConn.StopThreadWork(Ticket: Int64; Timeout: Integer);
+
+// Port: replaces TerminateThread (ADR-0020). The thread has been asked to terminate already. Waits Timeout ms for its
+// statement to end, then cancels it on the server, waits 2 more seconds and finally cuts the connection, which makes
+// the thread's pending network call return. The caller then waits for the thread itself.
+
+begin
+  if WaitForTicket(Ticket, Timeout) then
+    Exit;
+  FCanceller.Cancel(Ticket, False);
+  if WaitForTicket(Ticket, 2000) then
+    Exit;
+  FCanceller.Cut(Ticket);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 procedure TMySQLConn.StopCurrentThread(Timeout: Integer);
 
 begin
   if Assigned(FCurrentDataThread) then
   begin
     FCurrentDataThread.Terminate;
-    {$IFDEF MSWINDOWS}
-    if WaitForSingleObject(FCurrentDataThread.Handle, Timeout) = WAIT_TIMEOUT then
-      TerminateThread(FCurrentDataThread.Handle, 999);
-    {$ENDIF}
+    // Port: the statement is cancelled on the server instead of killing the thread (ADR-0020).
+    StopThreadWork(FCurrentDataThread.FTicket, Timeout);
     FDataBeingFetched := FDataBeingFetched - [FCurrentDataThread.FKindOfData];
     FreeAndNil(FCurrentDataThread);
+    if FCanceller.WasCut then
+      Reconnect;
     if Assigned(FStatusBar) then
     begin
       FStatusBar.Panels[1].Text := '';
@@ -680,6 +718,7 @@ begin
     if ConnectionResult = 0 then
     begin
       FConnected := True;
+      FCanceller.Attach(FMySQL, FUserConnection, FEmbeddedConnection);
       MessageToAllForms(WM_CONNECTED, 0, 0);
       Result := True;
     end;
@@ -692,6 +731,7 @@ procedure TMySQLConn.Disconnect;
 
 begin
   // Close connection and free memory for MySQL struct.
+  FCanceller.Detach;
   myx_mysql_close(FMySQL);
   FMySQL := nil;
 
@@ -1283,6 +1323,7 @@ begin
   if ConnectionResult = 0 then
   begin
     FConnected := True;
+    FCanceller.Attach(FMySQL, FUserConnection, True);
     Result := 1;
   end
   else
@@ -1312,6 +1353,7 @@ begin
   FSynchronizedMethod := nil;
   FAllowParallelExecution := AAllowParallelExecution;
   FShowWaitCursor := ShowWaitCursor;
+  FTicket := AMySQLConn.FCanceller.NewTicket;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1346,8 +1388,18 @@ begin
         if (FStatusBarText <> '') then
           Synchronize(UpdateStatusBar);
 
+        // Port: the fetch can be cancelled on the server (ADR-0020). Not when running in parallel: then
+        // the connection's current statement may belong to another thread.
         if (Assigned(FFetchMethod)) then
-          FFetchMethod(self);
+          if FAllowParallelExecution then
+            FFetchMethod(self)
+          else
+            if FConnection.FCanceller.BeginStatement(FTicket) then
+            try
+              FFetchMethod(self);
+            finally
+              FConnection.FCanceller.EndStatement(FTicket);
+            end;
 
         if (Assigned(FRefreshMethod)) then
           ExecuteSynchronized(FRefreshMethod);
