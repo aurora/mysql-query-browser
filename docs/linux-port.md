@@ -112,6 +112,15 @@ height only then). In the connect dialog the original's strip is only 1 pixel hi
 that plus the 3D border, and the covering panel is hidden (it would cut into the taller GTK2 group caption).
 Checked by screenshot; the Win64 build is unchanged.
 
+**Qt5 widgetset (2026-11-01, first try).** `lazbuild --ws=qt5` builds the whole program without errors (own unit
+and output directory, so the GTK2 build is untouched; needs `libQt5Pas`) and it starts, connects and shows the main
+window under Xvfb with the same layout as GTK2 (menu, toolbar, result tabs, schema tree, syntax tree, result bar
+with its text complete). Qt picks the Wayland plugin inside the distrobox because `WAYLAND_DISPLAY` is inherited:
+run with `QT_QPA_PLATFORM=xcb` and `unset WAYLAND_DISPLAY`, otherwise the windows appear on the real desktop. With
+`QT_SCALE_FACTOR=1.5` the whole window scales uniformly. Not done: the developer screenshot modes (they paint
+black under Qt5), the GTK2-specific adjustments (`AdjustGroupBoxes` measures GTK2; the connect dialog shows the group
+caption above its frame), dialogs other than connect, interaction, the server matrix.
+
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with
 `double free or corruption (out)`. The core dump shows `g_free` called from
