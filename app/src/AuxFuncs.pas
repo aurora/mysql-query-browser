@@ -1294,6 +1294,8 @@ var
   Hider: TPageControlTabHider;
 
 begin
+  // Only GTK2 draws tabs taller than the strip the original covers (ADR-0024); other widgetsets are left alone.
+  {$IFDEF LCLGTK2}
   if Strip >= 0 then
   begin
     PC.ShowTabs := False;
@@ -1312,6 +1314,7 @@ begin
     Application.QueueAsyncCall(Hider.Run, 0)
   else
     Form.AddHandlerFirstShow(Hider.FormShow);
+  {$ENDIF}
 end;
 {$ENDIF}
 

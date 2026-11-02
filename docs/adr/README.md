@@ -32,6 +32,7 @@ Related.
 | [0021](0021-no-os-specific-password-storage-outside-windows.md) | No "OS Specific" password storage outside Windows (for now) | Accepted (implemented on Linux) |
 | [0022](0022-global-copy-paste-hotkeys-on-windows-only.md) | Global copy/paste hot keys on Windows only | Accepted |
 | [0023](0023-pin-gtk-dpi-to-96.md) | Pin GTK's dpi setting to 96 on Linux | Accepted (GTK2) |
+| [0024](0024-gtk2-for-the-first-release-then-qt.md) | GTK2 for the first release, a move to Qt afterwards | Accepted (principle) |
 
 ## Numbering
 

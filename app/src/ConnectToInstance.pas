@@ -215,7 +215,7 @@ begin
     ord(Not(SelectSchemata))*34;
   AdvancedOptionsGBox.Visible := False;
   AdvancedOptionsHidePageControlHeaderPnl.BringToFront;
-  {$IFNDEF MSWINDOWS}
+  {$IFDEF LCLGTK2}
   // Port: the panel only covers the tab strip, which is switched off here (HidePageControlTabs); GTK2 draws the group
   // caption taller than the VCL, so the panel would cut into it
   AdvancedOptionsHidePageControlHeaderPnl.Visible := False;
