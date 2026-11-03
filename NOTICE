@@ -9,6 +9,11 @@ It is a continuation of the MySQL Query Browser and the MySQL GUI common
 library (Copyright (C) 2003-2005 MySQL AB). The original sources are kept
 unchanged in legacy/, and files ported from them keep their original headers.
 
+The sources in legacy/ are a snapshot of mixed origin: the Linux build files name the version 1.2.5beta
+(legacy/mysql-query-browser/configure.in), the Windows sources 1.2.4 beta (source/windows/Consts.ini,
+res/windows/MySQLQueryBrowser.rc). The revival reproduces the Windows program, so its About dialog says "based on
+1.2.4 beta" (ADR-0026).
+
 Additional permission inherited from the original distribution
 --------------------------------------------------------------
 

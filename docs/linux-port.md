@@ -133,6 +133,14 @@ was not isolated further and may point at an uninitialised value in the connect 
 again: save the core (`coredumpctl dump <pid> -o core`), start with `QBR_TRACE=1` (flow trace in
 `app/bin/qbr.trace.txt`) and note what was done in the last seconds.
 
+Still open, sporadic hang (2026-11-03): once, while scrolling the Schemata tree of a database with many tables
+(real KDE/XWayland session, remote server), the main window stopped responding; the console showed only the
+`gtk_window_realize_icon` assertion above. Not reproduced: 25 rounds of wheel, page and scrollbar input against a
+local schema with 3000 tables under Xvfb stayed responsive. Not known whether the hang is permanent, whether it
+depends on the server's latency or the size of the schema. If it happens again: attach to the process while it
+hangs (`gdb -batch -p <pid> -ex "set debuginfod enabled off" -ex "thread apply all bt 15"`), and start with
+`QBR_TRACE=1`.
+
 ## Summary before the port (2026-10-30)
 
 - 40 files have Windows units in their `uses` clauses.
