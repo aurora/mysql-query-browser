@@ -65,6 +65,9 @@ if [ "$do_runtime" = 1 ]; then
   python "$ROOT/tools/prepare_runtime.py"
 fi
 
+echo "== version"
+python "$ROOT/tools/gen_version.py"
+
 echo "== application"
 cd "$ROOT/app"
 "${LAZBUILD[@]}" qbr.lpi

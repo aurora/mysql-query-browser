@@ -32,7 +32,7 @@ def make_app_rc():
     """Icon and version information of qbr.exe, from the VERSION file. No copyright holder is
     invented: that string is left out."""
     ver = open(os.path.join(ROOT, "VERSION"), encoding="utf-8").read().strip()
-    nums = (re.findall(r"[0-9]+", ver) + ["0", "0", "0", "0"])[:4]
+    nums = (re.findall(r"[0-9]+", ver.split("-")[0]) + ["0", "0", "0", "0"])[:4]
     icon = os.path.join(ROOT, "legacy", "mysql-query-browser", "images", "icons", "MySQLQueryBrowser.ico")
     rc = os.path.join(OUT, "qbr.rc")
     strings = (("FileDescription", "Query Browser (revival of the MySQL Query Browser)"),

@@ -9,8 +9,18 @@ uses
   TntSystem;
 
 {$include Consts.ini}
+{$include RevivalInfo.inc}
+
+// Version shown to the user: that of the revival, e.g. "0.1.0 beta.1" (VERSION file). product_version is the
+// version of the original this program is based on.
+function RevivalVersionText: WideString;
+
+// Texts of the About dialog (version line and credits, ADR-0026).
+function AboutVersionText: WideString;
+function AboutCreditsText: WideString;
 
 procedure CheckCommonCommandlineParameter;
+function CreateAboutForm(Caption: WideString; Version: WideString; Credits: WideString): TAboutForm;
 procedure ShowAboutDialog(Caption: WideString;
   Version: WideString; Credits: WideString);
 function ShowSplashScreen(Caption: WideString): TAboutForm;
@@ -19,6 +29,38 @@ implementation
 
 uses
   Classes;
+
+// -----------------------------------------------------------------------------
+
+function RevivalVersionText: WideString;
+
+begin
+  Result := revival_version_text;
+end;
+
+// -----------------------------------------------------------------------------
+
+function AboutVersionText: WideString;
+
+begin
+  Result := RevivalVersionText + ' (' + _('based on') + ' ' + product_version + ' ' + product_build_level + ')';
+end;
+
+// -----------------------------------------------------------------------------
+
+function AboutCreditsText: WideString;
+
+begin
+  Result := 'Michael G. Zinner, graphical design, ' +
+    'Windows development, library coding | ' +
+    'Alfredo Kengi Kojima, Linux development, library coding | ' +
+    'Mike Lischke, Windows development, library coding | ' +
+    'Victor Vagin, library coding, QA | ' +
+    'Ulrich Bayer, library coding, WIX | ' +
+    'Brian Aker, main concept | ' +
+    'Mike Hillyer, documentation | ' +
+    'Revival (Free Pascal / Lazarus): Harald Lapp, with the help of Claude Code (Anthropic), an AI coding assistant';
+end;
 
 // -----------------------------------------------------------------------------
 
@@ -113,6 +155,30 @@ end;
 
 // -----------------------------------------------------------------------------
 
+function CreateAboutForm(Caption: WideString; Version: WideString; Credits: WideString): TAboutForm;
+
+begin
+  Result := TAboutForm.Create(nil);
+  Result.Caption := _('About ') + Caption;
+  Result.VersionLbl.Caption := _('version') + ' ' + Version;
+  Result.TextLbl.Caption := Credits;
+  // The revival adds lines to the original's texts (ADR-0026): the credits get the space down to the button line
+  // and the licence note names the source.
+  Result.TextLbl.Top := 254;
+  Result.TextLbl.Height := 85;
+  {$IFNDEF MSWINDOWS}
+  // Port: the substitute for Tahoma is wider; one pixel less keeps the texts above the button line
+  Result.TextLbl.Font.Height := -10;
+  Result.LicenceLbl.Font.Height := -10;
+  Result.CopyrightLbl.Font.Height := -10;
+  {$ENDIF}
+  Result.LicenceLbl.Caption := _('This software is released under the GNU General Public License, version 2 or ' +
+    '(at your option) any later version, and comes with NO WARRANTY. Source code and bug reports: ' +
+    'https://github.com/aurora/mysql-query-browser');
+end;
+
+// -----------------------------------------------------------------------------
+
 procedure ShowAboutDialog(Caption: WideString;
   Version: WideString; Credits: WideString);
 
@@ -120,11 +186,8 @@ var
   AboutForm: TAboutForm;
 
 begin
-  AboutForm := TAboutForm.Create(nil);
+  AboutForm := CreateAboutForm(Caption, Version, Credits);
   try
-    AboutForm.Caption := _('About ') + Caption;
-    AboutForm.VersionLbl.Caption := _('version') + ' ' + Version;
-    AboutForm.TextLbl.Caption := Credits;
     AboutForm.ShowModal;
   finally
     AboutForm.Free;
@@ -144,8 +207,7 @@ begin
   AboutForm := TAboutForm.Create(nil);
   try
     AboutForm.Caption := _('About ') + Caption;
-    AboutForm.VersionLbl.Caption := _('version') + ' ' +
-      product_version+' '+product_build_level;
+    AboutForm.VersionLbl.Caption := _('version') + ' ' + RevivalVersionText;
     AboutForm.TextLbl.Caption := '';
     AboutForm.BorderStyle := bsNone;
     AboutForm.Width := AboutForm.AboutImg.Width;

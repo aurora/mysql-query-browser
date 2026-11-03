@@ -313,7 +313,13 @@ begin
           else if ParamStr(I + 1) = 'regex' then
             Dlg := TRegExTextImporterForm.Create(MainForm)
           else if ParamStr(I + 1) = 'schemasel' then
-            Dlg := TSchemaSelectionForm.Create(MainForm, MainForm.MySQLConn);
+            Dlg := TSchemaSelectionForm.Create(MainForm, MainForm.MySQLConn)
+          else if (ParamStr(I + 1) = 'about') or (ParamStr(I + 1) = 'credits') then
+          begin
+            Dlg := CreateAboutForm('MySQL Query Browser', AboutVersionText, AboutCreditsText);
+            if ParamStr(I + 1) = 'credits' then
+              TAboutForm(Dlg).CreditsBtnClick(nil);
+          end;
           if Dlg <> nil then
           begin
             Dlg.Show;

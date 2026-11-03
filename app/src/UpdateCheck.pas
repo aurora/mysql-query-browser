@@ -12,6 +12,9 @@ interface
 const
   UpdateRepositoryUrl = 'https://github.com/aurora/mysql-query-browser';
 
+  // The beta releases have no update mechanism (ADR-0026): the menu item stays hidden until it is switched on.
+  UpdateMenuVisible = False;
+
 // First statement of the program, before the GUI is initialised: lets Velopack handle the install, update
 // and uninstall launches (it may end the process) and applies a downloaded update on startup.
 procedure StartupVelopack;

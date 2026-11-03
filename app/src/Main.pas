@@ -815,6 +815,7 @@ begin
   Enable := IsConnectedToInternet;
   ReportBugMI.Enabled := Enable;
   CheckForUpdatesMI.Enabled := Enable and UpdatesAvailable;
+  CheckForUpdatesMI.Visible := UpdateMenuVisible;
 
   if (MySQLConn.Connected) then
   begin
@@ -1065,16 +1066,7 @@ end;
 procedure TMainForm.AboutMIClick(Sender: TObject);
 
 begin
-  ShowAboutDialog('MySQL Query Browser',
-    product_version + ' ' + product_build_level,
-    'Michael G. Zinner, graphical design, ' +
-    'Windows development, library coding | ' +
-    'Alfredo Kengi Kojima, Linux development, library coding | ' +
-    'Mike Lischke, Windows development, library coding | ' +
-    'Victor Vagin, library coding, QA | ' +
-    'Ulrich Bayer, library coding, WIX | ' +
-    'Brian Aker, main concept | ' +
-    'Mike Hillyer, documentation');
+  ShowAboutDialog('MySQL Query Browser', AboutVersionText, AboutCreditsText);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -34,6 +34,7 @@ Related.
 | [0023](0023-pin-gtk-dpi-to-96.md) | Pin GTK's dpi setting to 96 on Linux | Accepted (GTK2) |
 | [0024](0024-gtk2-for-the-first-release-then-qt.md) | GTK2 for the first release, a move to Qt afterwards | Accepted (principle) |
 | [0025](0025-keep-the-package-id-when-renaming.md) | Keep the Velopack package id and the update feed when the application is renamed | Accepted (principle); Velopack behaviour not verified |
+| [0026](0026-beta-release-without-updater.md) | First public beta: no updater, own version, About dialog with the revival's credits | Accepted (principle) |
 
 ## Numbering
 

@@ -182,7 +182,7 @@ type
 implementation
 
 uses
-  PNGTools;
+  PNGTools, CommonFuncs;
 
 {$R ../forms/ConnectToInstance.lfm}
 
@@ -198,7 +198,7 @@ begin
 
   InitForm(self);
 
-  Caption := Application.Title+' '+product_version+' '+product_build_level;
+  Caption := Application.Title+' '+RevivalVersionText;
 
   self.MySQLConnectionsOnly := MySQLConnectionsOnly;
   self.SelectSchemata := SelectSchemata;
