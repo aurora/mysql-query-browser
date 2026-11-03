@@ -1,4 +1,4 @@
-# ADR-0026 — First public beta: no updater, own version, About dialog with the revival's credits
+# ADR-0026 — First public release as an alpha: no updater, own version, About dialog with the revival's credits
 
 - Status: Accepted (principle); packaging for Linux and macOS is not done yet
 - Date: 2026-11-03
@@ -6,12 +6,12 @@
 
 ## Context
 
-ADR-0014 and ADR-0018 prepared installers and updates with Velopack. For a first public beta the project owner
+ADR-0014 and ADR-0018 prepared installers and updates with Velopack. For a first public release the project owner
 prefers to ship plain downloads for Windows and Linux (macOS later, it needs a Mac) and to leave the update
 mechanism for later; users replace the program by hand. The program is still called "MySQL Query Browser"; the
 rename (ADR-0025) comes later.
 
-Two things in the program are wrong for a public beta:
+Two things in the program are wrong for a public release:
 
 - **Versions.** The program shows the original's version (`product_version` 1.2.4 beta, from `Consts.ini`) while the
   project has its own (`VERSION`).
@@ -22,9 +22,9 @@ Two things in the program are wrong for a public beta:
 ## Decision
 
 - **Version.** The `VERSION` file is the version of the revival, as a semantic version with a pre-release part
-  (`0.1.0-beta.1`). `tools/gen_version.py` writes `app/src/RevivalInfo.inc` from it (run by `build.sh`; the file is
+  (`0.1.0-alpha.1`). `tools/gen_version.py` writes `app/src/RevivalInfo.inc` from it (run by `build.sh`; the file is
   generated and committed like the other generated sources). The splash screen, the About dialog and the connect
-  dialog's title show it ("0.1.0 beta.1"); the About dialog adds "based on 1.2.4 beta", the version of the original.
+  dialog's title show it ("0.1.0 alpha.1"); the About dialog adds "based on 1.2.4 beta", the version of the original.
   The version resource of `qbr.exe` takes its numbers from the part before the hyphen.
 - **About dialog** (a deliberate exception to ADR-0001, like ADR-0017): the original's copyright line and credits
   stay unchanged; the credits get one more entry, "Revival (Free Pascal / Lazarus): Harald Lapp, with the help of
@@ -32,7 +32,11 @@ Two things in the program are wrong for a public beta:
   states that there is no warranty and gives the source and bug report address. No copyright line is invented for the
   revival (AGENTS.md). The credits text may use more lines than the original's; the label is made taller, and outside
   Windows the three text labels use one pixel smaller font, because the substitute for Tahoma is wider.
-- **Updates.** The beta has no update mechanism. The menu item "Check for Updates ..." is hidden
+- **Stage.** The first release is an **alpha**: known faults (a sporadic crash after connecting, a freeze while
+  scrolling the schema tree, see `docs/linux-port.md`), the interactive checklist not worked through, no macOS build,
+  a name and data folder that are still to change. A **beta** follows when the checklist is done and those faults
+  are found or fixed; `0.1.0` with an update mechanism after that.
+- **Updates.** The alpha has no update mechanism. The menu item "Check for Updates ..." is hidden
   (`UpdateMenuVisible` in `UpdateCheck.pas`); the code, the Velopack startup call and `tools/package.sh --velopack`
   stay, so the mechanism can be switched on in a later release without rework.
 - **Releases.** Windows: the portable zip of `tools/package.sh`. Linux: an AppImage, built in an older container so
@@ -43,7 +47,7 @@ Two things in the program are wrong for a public beta:
 ## Consequences
 
 Positive:
-- The beta is honest about what it is: version, licence, maintainer, source, use of an AI assistant.
+- The alpha is honest about what it is: version, licence, maintainer, source, use of an AI assistant.
 - No Velopack dependency for the first download; the update work is not wasted.
 
 Negative:
@@ -57,11 +61,11 @@ Negative:
 ## Alternatives considered
 
 - **Keep the original's version number:** confuses the revival with the 2006 program.
-- **Ship Velopack in the beta:** more to test before anyone has the program; no installer is needed to try it.
+- **Ship Velopack in the alpha:** more to test before anyone has the program; no installer is needed to try it.
 - **Put the AI note only in the README:** the About dialog is where users look for who made the program.
 
 ## Related
 
 - ADR-0001 — no UX changes before parity; exceptions are recorded in their own ADRs.
-- ADR-0014, ADR-0018 — Velopack packaging and update check (kept, switched off in the beta).
+- ADR-0014, ADR-0018 — Velopack packaging and update check (kept, switched off in the alpha).
 - ADR-0025 — package id and feed when the application is renamed.
