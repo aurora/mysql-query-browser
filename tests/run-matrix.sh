@@ -3,7 +3,10 @@
 # Linux counterpart of run-matrix.ps1: runs the FPCUnit tests against several server versions
 # using throw-away Podman/Docker containers.
 #
-#   tests/run-matrix.sh [--only mysql:8.4,mariadb:11.4] [--keep]
+#   tests/run-matrix.sh [--only mysql:8.4,mariadb:11.4] [--keep] [--app-only]
+#
+# --app-only skips the FPCUnit tests and only runs the application self-tests; QBR_APP names the program to run
+# (default app/bin/qbr), e.g. dist/AppDir/AppRun to check the AppImage's libraries against every server.
 #
 # Prerequisites: backend built (backend/build-linux), tests built (tests/bin/qbr_tests):
 #   fpc -Fubindings -Fuapp/compat -Fuapp/src -Flbackend/build-linux -FUtests/lib -FEtests/bin \
@@ -12,24 +15,27 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXE="$ROOT/tests/bin/qbr_tests"
-APP="$ROOT/app/bin/qbr"
-[ -x "$EXE" ] || { echo "Build the tests first: $EXE not found" >&2; exit 1; }
+APP="${QBR_APP:-$ROOT/app/bin/qbr}"
 
-only="" keep=0
+only="" keep=0 app_only=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --only) only="$2"; shift ;;
     --keep) keep=1 ;;
+    --app-only) app_only=1 ;;
     -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
     *) echo "unknown option: $1 (see --help)" >&2; exit 2 ;;
   esac
   shift
 done
 
+[ "$app_only" = 1 ] || [ -x "$EXE" ] || { echo "Build the tests first: $EXE not found" >&2; exit 1; }
+
 engine=$(command -v podman || command -v docker) || { echo "neither podman nor docker found" >&2; exit 1; }
 password="${QBR_TEST_PASSWORD:-qbr-test}"
 export QBR_TEST_PASSWORD="$password"
-export LD_LIBRARY_PATH="$ROOT/backend/build-linux${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+# (not for a self-contained program such as the AppImage: LD_LIBRARY_PATH would win over its own run paths)
+[ -n "${QBR_APP:-}" ] || export LD_LIBRARY_PATH="$ROOT/backend/build-linux${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 # image, env var for the root password, admin client used for readiness checks
 matrix=(
@@ -65,15 +71,19 @@ for entry in "${matrix[@]}"; do
   # the entrypoint restarts the server once after initialisation; wait until it is stable
   sleep 3
 
-  log=$(QBR_TEST_PORT="$port" timeout 300 "$EXE" --all --format=plain 2>&1)
-  run=$(grep -oP 'Number of run tests:\s+\K\d+' <<< "$log")
-  err=$(grep -oP 'Number of errors:\s+\K\d+' <<< "$log")
-  fail=$(grep -oP 'Number of failures:\s+\K\d+' <<< "$log")
-  if [ -n "$run" ] && [ "$err" = 0 ] && [ "$fail" = 0 ]; then
-    status="PASS ($run tests)" details=""
+  if [ "$app_only" = 1 ]; then
+    status="skipped" details=""
   else
-    status="FAIL ($run tests)" failed=1
-    details=$(grep -E 'Failed:|Exception|Assertion|Message' <<< "$log" | head -5 | tr '\n' ' ')
+    log=$(QBR_TEST_PORT="$port" timeout 300 "$EXE" --all --format=plain 2>&1)
+    run=$(grep -oP 'Number of run tests:\s+\K\d+' <<< "$log")
+    err=$(grep -oP 'Number of errors:\s+\K\d+' <<< "$log")
+    fail=$(grep -oP 'Number of failures:\s+\K\d+' <<< "$log")
+    if [ -n "$run" ] && [ "$err" = 0 ] && [ "$fail" = 0 ]; then
+      status="PASS ($run tests)" details=""
+    else
+      status="FAIL ($run tests)" failed=1
+      details=$(grep -E 'Failed:|Exception|Assertion|Message' <<< "$log" | head -5 | tr '\n' ' ')
+    fi
   fi
 
   # the application itself: connect through the ported code, once via the command line path and

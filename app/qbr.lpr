@@ -18,9 +18,14 @@ uses
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
   UCEShared, UCEHighlighter, UniCodeEditor, UCEEditorKeyCommands, UniCodeConsole,
-  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main{$IFNDEF MSWINDOWS}, GtkDpi{$ENDIF};
+  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main{$IFNDEF MSWINDOWS}, GtkDpi, Math{$ENDIF};
+
+{$IFNDEF MSWINDOWS}
+procedure xmlInitParser; cdecl; external 'xml2';
+{$ENDIF}
 
 var
+  {$IFNDEF MSWINDOWS}SavedFPUMask: TFPUExceptionMask;{$ENDIF}
   I: Integer;
   ExeDir: String;
   Res: Integer;
@@ -98,6 +103,18 @@ var
   Counter: TMsgCounter;
 
 begin
+  {$IFNDEF MSWINDOWS}
+  // Port: FPC leaves the FPU traps armed, and libxml2 2.9 (RHEL 9, Ubuntu 22.04, Debian 12) computes NaN and
+  // infinity as 0.0/0.0 and 1.0/0.0 in xmlInitParser, which then raises EInvalidOp/EZeroDivide inside the library.
+  // Initialising it once with the traps masked leaves the Pascal code's float semantics as they are.
+  SavedFPUMask := GetExceptionMask;
+  SetExceptionMask(SavedFPUMask + [exInvalidOp, exZeroDivide]);
+  try
+    xmlInitParser;
+  finally
+    SetExceptionMask(SavedFPUMask);
+  end;
+  {$ENDIF}
   // before anything else: Velopack handles the install/update/uninstall launches here (ADR-0018)
   StartupVelopack;
 

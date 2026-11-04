@@ -9,7 +9,8 @@
 #
 # Windows needs Lazarus in C:\lazarus and MSYS2 mingw64 in C:\msys64; Linux needs the
 # "freepascal" container from tools/distrobox-setup.sh (see AGENTS.md). On Linux the widgetset
-# can be chosen with QBR_WIDGETSET=gtk2|qt5 (default: the project's, gtk2).
+# can be chosen with QBR_WIDGETSET=gtk2|qt5 (default: the project's, gtk2); QBR_BACKEND_BUILD names another
+# backend build directory (tools/package-appimage.sh links against the one built in the older container).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,7 +29,7 @@ if [ "$windows" = 1 ]; then
   LAZBUILD=("$LAZARUS/lazbuild.exe" --lazarusdir="$(cygpath -m "$LAZARUS")")
 else
   # own build directory: backend/build may hold a Windows build of the same checkout
-  BACKEND_BUILD="$ROOT/backend/build-linux"
+  BACKEND_BUILD="${QBR_BACKEND_BUILD:-$ROOT/backend/build-linux}"
   EXE=qbr
   export LD_LIBRARY_PATH="$BACKEND_BUILD${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   # the Linux linker resolves the backend libraries at link time
