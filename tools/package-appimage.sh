@@ -68,6 +68,8 @@ rm -rf "$icons"
 mkdir -p "$APPDIR/licenses/lazarus" "$APPDIR/licenses/fonts"
 distrobox enter freepascal -- sh -c "cp /usr/share/licenses/lazarus-lcl/COPYING.* '$APPDIR/licenses/lazarus/'"
 cp "$ROOT/docs/third-party/Bitstream-Vera-fonts.txt" "$APPDIR/licenses/fonts/"
+mkdir -p "$APPDIR/licenses/fonts/wine-tahoma"
+cp "$ROOT/third_party/fonts/wine-tahoma/README.md" "$ROOT/third_party/fonts/wine-tahoma/LICENSE-LGPL-2.1.txt" "$APPDIR/licenses/fonts/wine-tahoma/"
 cp "$ROOT/docs/licenses.md" "$APPDIR/licenses/README-licenses.md"
 
 echo "== packing"

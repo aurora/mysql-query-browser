@@ -39,6 +39,10 @@ def main():
     copy(os.path.join(QB, "res", "doc", "mysqlqb_quickstart.html"), os.path.join(out, "doc")); n += 1
     for f in glob.glob(os.path.join(COMMON, "res", "fonts", "*.ttf")):
         copy(f, os.path.join(out, "fonts")); n += 1
+    # Tahoma is part of Windows; elsewhere the forms get a free stand-in with similar metrics (ADR-0028)
+    if sys.platform != "win32":
+        for f in ("tahoma.ttf", "tahomabd.ttf"):
+            copy(os.path.join(ROOT, "third_party", "fonts", "wine-tahoma", f), os.path.join(out, "fonts")); n += 1
     for f in ("languages_list.txt", "how_to_translate.txt"):
         copy(os.path.join(COMMON, "res", f), os.path.join(out, "locale")); n += 1
     for domain, podir in (("query-browser", os.path.join(QB, "po")), ("mysql-gui-common", os.path.join(COMMON, "po"))):

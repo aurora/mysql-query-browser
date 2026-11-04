@@ -36,6 +36,7 @@ Related.
 | [0025](0025-keep-the-package-id-when-renaming.md) | Keep the Velopack package id and the update feed when the application is renamed | Accepted (principle); Velopack behaviour not verified |
 | [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle) |
 | [0027](0027-linux-appimage-built-on-almalinux-9.md) | Linux release as an AppImage, bundled GTK2 and backend built on AlmaLinux 9 | Accepted |
+| [0028](0028-bundled-tahoma-substitute-outside-windows.md) | Ship Wine's Tahoma stand-in and use it for the forms outside Windows | Accepted |
 
 ## Numbering
 

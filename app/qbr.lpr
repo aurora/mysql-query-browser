@@ -18,7 +18,7 @@ uses
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
   UCEShared, UCEHighlighter, UniCodeEditor, UCEEditorKeyCommands, UniCodeConsole,
-  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main{$IFNDEF MSWINDOWS}, GtkDpi, Math{$ENDIF};
+  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main{$IFNDEF MSWINDOWS}, GtkDpi, AppFonts, Math{$ENDIF};
 
 {$IFNDEF MSWINDOWS}
 procedure xmlInitParser; cdecl; external 'xml2';
@@ -143,7 +143,7 @@ begin
     UseLanguage(MYXCommonOptions.Language);
 
   Application.Title := 'MySQL Query Browser';
-  {$IFNDEF MSWINDOWS}PinGtkDpiTo96;{$ENDIF}   // Port: see unit GtkDpi
+  {$IFNDEF MSWINDOWS}PinGtkDpiTo96; AddBundledTahoma;{$ENDIF}   // Port: see units GtkDpi, AppFonts
   Application.Initialize;
   InitGlobalVars;
 

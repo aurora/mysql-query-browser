@@ -181,29 +181,13 @@ var
 implementation
 
 uses
-  ApplicationDataModule, MyxError, PNGTools, UpdateCheck{$IFNDEF MSWINDOWS}, DynLibs{$ENDIF};
+  ApplicationDataModule, MyxError, PNGTools, UpdateCheck{$IFNDEF MSWINDOWS}, AppFonts{$ENDIF};
 
 {$R ../forms/Main.lfm}
 
 {$IFDEF MSWINDOWS}
 function AddFontResourceExW(lpszFilename: PWideChar; fl: LongWord; pdv: Pointer): Integer; stdcall;
   external 'gdi32.dll' name 'AddFontResourceExW';
-{$ELSE}
-// Port: fontconfig's counterpart of a private font: added to the application's font set, nothing is installed.
-// Loaded at run time so that fontconfig's development files are not needed for building.
-function AddApplicationFont(const FileName: String): Boolean;
-var
-  Lib: TLibHandle;
-  FcConfigAppFontAddFile: function(Config: Pointer; FileName: PChar): LongBool; cdecl;
-begin
-  Result := False;
-  Lib := LoadLibrary('libfontconfig.so.1');
-  if Lib = NilHandle then
-    Exit;
-  @FcConfigAppFontAddFile := GetProcedureAddress(Lib, 'FcConfigAppFontAddFile');
-  if Assigned(FcConfigAppFontAddFile) then
-    Result := FcConfigAppFontAddFile(nil, PChar(FileName));    // nil: the current configuration
-end;
 {$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------

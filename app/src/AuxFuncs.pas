@@ -197,7 +197,7 @@ var
 implementation
 
 uses
-  TntWindows, Types, PNGTools{$IFNDEF MSWINDOWS}, Process{$ENDIF}{$IFDEF LCLGTK2}, gtk2{$ENDIF};
+  TntWindows, Types, PNGTools{$IFNDEF MSWINDOWS}, Process, AppFonts{$ENDIF}{$IFDEF LCLGTK2}, gtk2{$ENDIF};
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -216,10 +216,11 @@ begin
   SystemParametersInfo(SPI_GETFONTSMOOTHINGTYPE, 0, @Parameter, 0);
   ClearTypeOn := (Parameter and FE_FONTSMOOTHINGCLEARTYPE) <> 0;
   {$ELSE}
-  // Port: a Windows setting; elsewhere the forms keep the fonts of their .lfm files
-  ClearTypeOn := False;
+  // Port: a Windows setting; elsewhere the forms get Tahoma, as with ClearType on Windows, when the font is there
+  // (the one that ships with the program, ADR-0028)
+  ClearTypeOn := BundledTahomaLoaded or (Screen.Fonts.IndexOf('Tahoma') > -1);
   {$ENDIF}
-  TahomaFontAvailable := Screen.Fonts.IndexOf('Tahoma') > -1;
+  TahomaFontAvailable := {$IFNDEF MSWINDOWS}BundledTahomaLoaded or{$ENDIF} (Screen.Fonts.IndexOf('Tahoma') > -1);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

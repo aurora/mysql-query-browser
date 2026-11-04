@@ -152,9 +152,9 @@ come from the host (read from `/proc/<pid>/maps`); `tests/run-matrix.sh --app-on
 libxml2 2.9 raised `EInvalidOp`/`EZeroDivide` (it computes NaN/infinity by dividing by zero): `qbr.lpr` initialises
 it once with those traps masked.
 
-Still open, found with the AppImage on Ubuntu 26.04: the substitute for Tahoma there (DejaVu Sans) is wider than
-Fedora's, and the connect dialog's "Stored Connection:" label is cut off on the left. The same class as the About
-dialog's text (ADR-0009 defers font work); not fixed. Not tried: the AppImage on a real desktop session
+Fixed, found with the AppImage on Ubuntu 26.04: the substitute for Tahoma there (DejaVu Sans) is wider than
+Fedora's and cut off the connect dialog's "Stored Connection:" label. The program now ships Wine's Tahoma stand-in
+and uses it for the forms (ADR-0028); the dialog fits on Ubuntu and Fedora. Not tried: the AppImage on a real desktop session
 (mouse, themes, file dialog), on RHEL 9 / Ubuntu 22.04 / Debian 12 themselves.
 
 ## Summary before the port (2026-10-30)
