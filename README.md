@@ -47,8 +47,11 @@ Releases are published as GitHub pre-releases at
 
 - **Windows (64 bit):** unpack the zip and run `qbr.exe`. Settings and connections are kept in
   `%APPDATA%\MySQL\`, the folder of the original, so a configuration of the old program is found as it is.
-- **Linux (x86_64):** make the AppImage executable and run it. Settings are kept in `~/.mysqlgui/`, the folder of
-  the original Linux version. (The AppImage is still to be built; until it is published, build from source.)
+- **Linux (x86_64):** make the AppImage executable and run it (`chmod +x`, then start it). It brings GTK2 and the
+  other libraries it needs and runs on distributions with glibc 2.34 or newer (RHEL 9, Ubuntu 22.04, Debian 12,
+  Fedora 35 and newer); it needs libstdc++ and an X server (XWayland on a Wayland desktop). Without FUSE 2 on the
+  system, start it with `--appimage-extract-and-run`. Settings are kept in `~/.mysqlgui/`, the folder of the
+  original Linux version.
 
 Use a throw-away or test account when you try the alpha on a server that matters.
 

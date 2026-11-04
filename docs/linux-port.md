@@ -141,6 +141,22 @@ depends on the server's latency or the size of the schema. If it happens again: 
 hangs (`gdb -batch -p <pid> -ex "set debuginfod enabled off" -ex "thread apply all bt 15"`), and start with
 `QBR_TRACE=1`.
 
+## AppImage (2026-11-04)
+
+`tools/package-appimage.sh` builds `dist/MySQL_Query_Browser-<version>-x86_64.AppImage` (ADR-0027): backend and
+bundled libraries from AlmaLinux 9 (glibc 2.34), the Pascal program from the `freepascal` container. Checked: every
+bundled file needs glibc 2.34 at most; the program started from the AppDir and from the AppImage under Xvfb on
+Fedora 44 and on Ubuntu 26.04 (no GTK2, no FUSE 2 there); only the C library, X11 core, font stack and libstdc++
+come from the host (read from `/proc/<pid>/maps`); `tests/run-matrix.sh --app-only` with
+`QBR_APP=dist/AppDir/AppRun` passes the application self-tests on all six servers. The first start of the bundled
+libxml2 2.9 raised `EInvalidOp`/`EZeroDivide` (it computes NaN/infinity by dividing by zero): `qbr.lpr` initialises
+it once with those traps masked.
+
+Still open, found with the AppImage on Ubuntu 26.04: the substitute for Tahoma there (DejaVu Sans) is wider than
+Fedora's, and the connect dialog's "Stored Connection:" label is cut off on the left. The same class as the About
+dialog's text (ADR-0009 defers font work); not fixed. Not tried: the AppImage on a real desktop session
+(mouse, themes, file dialog), on RHEL 9 / Ubuntu 22.04 / Debian 12 themselves.
+
 ## Summary before the port (2026-10-30)
 
 - 40 files have Windows units in their `uses` clauses.

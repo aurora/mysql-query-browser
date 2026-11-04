@@ -317,3 +317,5 @@ x86/
 /app/bin/
 /app/lib/
 /app/res/
+/backend/build-el9/
+/tools/cache/

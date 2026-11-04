@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=MySQL Query Browser
+GenericName=SQL client
+Comment=Revival of the MySQL Query Browser (alpha)
+Exec=qbr
+Icon=mysql-query-browser
+Categories=Development;Database;
+Terminal=false
+StartupWMClass=qbr

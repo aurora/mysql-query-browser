@@ -73,6 +73,8 @@ the host. Work inside with `distrobox enter freepascal`.
 git submodule update --init                      # once after cloning (third_party/velopack-pas)
 ./build.sh [--backend] [--runtime] [--run args]   # build the application (see the script header)
 tools/package.sh [--velopack] [--no-build]       # release package in dist/ (version from VERSION, ADR-0014)
+tools/package-appimage.sh [--no-build]           # Linux AppImage in dist/, run on the host (ADR-0027; needs podman, the
+                                                 #   freepascal distrobox, icotool and tools/cache/appimagetool-x86_64.AppImage)
 
 # backend (needs C:\msys64\mingw64\bin on PATH)
 cmake -S backend -B backend/build -G Ninja && cmake --build backend/build
