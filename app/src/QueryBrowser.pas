@@ -672,6 +672,7 @@ type
     procedure DevExecute;                          // ... and run it
     procedure DevExpandSchema(Index: Integer);     // developer mode (--expand): open a schema node and its children
     procedure DevStressSchemata(Seconds: Integer; const OutFile: String); // (--stress-schemata)
+    procedure DevStopAndEdit(SchemaIndex, TableIndex, StopAfterMs: Integer; const Addition, OutFile: String);
     function SaveScriptAs(ScriptPanel: TScriptPanel): Boolean;
     procedure UpdateActions; override;
 
@@ -1841,6 +1842,114 @@ begin
     Child := SchemataFrame.CatalogVST.GetNextSibling(Child);
   end;
   SchemataFrame.CatalogVST.Invalidate;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevStopAndEdit(SchemaIndex, TableIndex, StopAfterMs: Integer;
+  const Addition, OutFile: String);
+
+// Developer mode (--stop-and-edit <schema> <table> <ms> <addition> <file>): double clicks a table (which runs
+// SELECT * on it), stops the query after <ms>, types <addition> before the end of the command (e.g. " LIMIT 5"), runs
+// it again and reports what was executed after each step.
+
+var
+  Report: TStringList;
+  Start: QWord;
+
+  procedure Settle(Ms: Integer);
+
+  var
+    T: QWord;
+
+  begin
+    T := GetTickCount64;
+    repeat
+      Application.ProcessMessages;
+      CheckSynchronize(10);
+    until GetTickCount64 - T >= QWord(Ms);
+  end;
+
+  procedure WaitIdle;
+
+  var
+    T: QWord;
+
+  begin
+    T := GetTickCount64;
+    repeat
+      Settle(20);
+    until not Assigned(ActiveResultset) or not ActiveResultset.QueryExecuting or (GetTickCount64 - T > 60000);
+    Settle(200);
+  end;
+
+  procedure State(const Step: String);
+
+  begin
+    Report.Add('[' + Step + '] t=' + IntToStr(GetTickCount64 - Start) + 'ms');
+    Report.Add('  editor=' + UTF8Encode(FSQLEditor.Text));
+    Report.Add('  current=' + UTF8Encode(FCurrentCommand));
+    if Assigned(ActiveResultset) then
+    begin
+      Report.Add('  rs.sql=' + UTF8Encode(ActiveResultset.SQL));
+      Report.Add('  rows=' + IntToStr(ActiveResultset.RowCount) + ' executing=' +
+        BoolToStr(ActiveResultset.QueryExecuting, True) + ' stop=' + BoolToStr(ActiveResultset.StopQuery, True));
+      Report.Add('  status=' + UTF8Encode(ActiveResultset.StatusCaption));
+    end;
+    Report.SaveToFile(OutFile);
+  end;
+
+var
+  Line, P: Integer;
+  Text: WideString;
+  StopTimer: TTimer;
+
+begin
+  Report := TStringList.Create;
+  try
+    Start := GetTickCount64;
+    DevExpandSchema(SchemaIndex);
+    Settle(3000);
+    DevDblClickTable(SchemaIndex, TableIndex);
+    Settle(500);
+    State('double clicked');
+    // Stop through a timer: ProcessMessages does not return while the fetch thread keeps sending rows.
+    StopTimer := nil;
+    if StopAfterMs >= 0 then
+    begin
+      StopTimer := TTimer.Create(nil);
+      StopTimer.Interval := StopAfterMs;
+      StopTimer.OnTimer := QueryStopClick;
+    end;
+    try
+      HandleEditorCommand(edExecute);
+      WaitIdle;
+    finally
+      StopTimer.Free;
+    end;
+    State('stopped or finished');
+
+    // Type the addition before the delimiter of the (single line) command, as a user would.
+    Line := FCurrentCommandEnd.Y;
+    if Line < 0 then
+      Line := 0;
+    Text := FSQLEditor.Content[Line].Text;
+    P := Length(Text);
+    while (P > 0) and ((Text[P] = ';') or (Text[P] = ' ')) do
+      Dec(P);
+    FSQLEditor.CaretXY := Point(P, Line);
+    FSQLEditor.SelectedText := UTF8Decode(Addition);
+    Settle(500);
+    State('edited');
+
+    HandleEditorCommand(edExecute);
+    WaitIdle;
+    State('executed again');
+
+    Report.SaveToFile(OutFile);
+  finally
+    Report.Free;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

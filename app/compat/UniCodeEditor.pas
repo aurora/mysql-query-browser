@@ -452,11 +452,15 @@ procedure TUCEContent.LineChanged(Sender: TSynEditStrings; AIndex, ACount: Integ
 var
   I: Integer;
 begin
-  if not Assigned(FOnChangeLine) then
-    Exit;
   for I := AIndex to AIndex + ACount - 1 do
     if (I >= 0) and (I < FLines.Count) and (FLines[I] <> nil) then
-      FOnChangeLine(Self, TUCELine(FLines[I]));
+    begin
+      // A changed line is validated again on its next access (OnValidateLine), as in the original. Without this
+      // the query editor kept the command bounds of the old text and executed the old command (2026-11-13).
+      TUCELine(FLines[I]).Invalidate;
+      if Assigned(FOnChangeLine) then
+        FOnChangeLine(Self, TUCELine(FLines[I]));
+    end;
 end;
 
 procedure TUCEContent.LinesCleared(Sender: TObject);

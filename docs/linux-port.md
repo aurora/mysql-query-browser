@@ -180,7 +180,15 @@ many reloads the tree kept changing for up to two minutes). Reloads during a cat
 fetch after it (`FCatalogFetching`, `FReloadAgain`); the final tree is the same, it settled after 6-12 s instead of
 33-118 s in the stress test.
 
-These most likely explain the crash of 2026-10-31 and the hang of 2026-11-03 above. Not checked: a real desktop
+These most likely explain the crash of 2026-10-31 and the hang of 2026-11-03 above.
+
+**Edited query ran the old command (2026-11-13, fixed).** After a table was double clicked into the editor and
+executed (stopped or not), typing e.g. ` LIMIT 5` and executing again ran the old `SELECT *`. The compat
+`UniCodeEditor` did not reset `lsValidated` when a line's text changed, so `OnValidateLine` never analyzed it again;
+`UpdateCommandDisplay` kept the old command end and cut the new text to the old length. A changed line is now
+validated again on its next access, as in the original. Reproduced and checked with the developer mode
+`--stop-and-edit <schema> <table> <ms|-1> <addition> <file>` (double click, execute, stop after <ms>, type, execute);
+the script tab (statement markers, error line, breakpoint) still works. Not checked: a real desktop
 session and a remote server with real latency.
 
 ## AppImage (2026-11-04)

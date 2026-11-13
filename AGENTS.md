@@ -114,6 +114,7 @@ qbr.exe -datadir <tmp> -u root -p <pwd> -h 127.0.0.1 -P <port> --selftest-connec
 qbr.exe ... --selftest-dialog out.txt                              # drives the connect dialog
 qbr.exe -datadir <tmp> --shot-options <base>                        # options dialog -> <base>_default.png, _connections.png
 qbr ... --shot-main x.png --stress-schemata 90 out.txt              # schemata tree stress test (docs/linux-port.md)
+qbr ... --shot-main x.png --stop-and-edit 0 0 700 " LIMIT 5" out.txt # double click, run, stop, edit, run again
 # unhandled exceptions are written with a stack trace to bin/qbr.error.txt (program exits with 3);
 # QBR_TRACE=1 adds a flow trace in bin/qbr.trace.txt
 ```

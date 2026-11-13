@@ -208,6 +208,15 @@ begin
           for K := 1 to 60 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
           TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevDump;
         end;
+      for I := 1 to ParamCount - 5 do
+        if ParamStr(I) = '--stop-and-edit' then
+        begin
+          // --stop-and-edit <schema index> <table index> <ms> <addition> <report file>
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevStopAndEdit(
+            StrToIntDef(ParamStr(I + 1), 0), StrToIntDef(ParamStr(I + 2), 0), StrToIntDef(ParamStr(I + 3), 500),
+            ParamStr(I + 4), ParamStr(I + 5));
+        end;
       for I := 1 to ParamCount - 2 do
         if ParamStr(I) = '--stress-schemata' then
         begin
