@@ -671,6 +671,7 @@ type
     procedure DevScript(const Text: WideString; BreakLine: Integer; Run: Boolean);
     procedure DevExecute;                          // ... and run it
     procedure DevExpandSchema(Index: Integer);     // developer mode (--expand): open a schema node and its children
+    procedure DevStressSchemata(Seconds: Integer; const OutFile: String); // (--stress-schemata)
     function SaveScriptAs(ScriptPanel: TScriptPanel): Boolean;
     procedure UpdateActions; override;
 
@@ -1840,6 +1841,136 @@ begin
     Child := SchemataFrame.CatalogVST.GetNextSibling(Child);
   end;
   SchemataFrame.CatalogVST.Invalidate;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevStressSchemata(Seconds: Integer; const OutFile: String);
+
+// Developer mode (--stress-schemata <seconds> <file>): expands and collapses schema nodes, scrolls, reloads and
+// searches the schemata tree in random order while the fetch threads run, then expands every schema and counts the
+// nodes that still show no tables. Reports to OutFile. A hang or crash shows as a timeout or qbr.error.txt.
+
+  procedure Settle(Count: Integer);
+
+  var
+    I: Integer;
+
+  begin
+    for I := 1 to Count do
+    begin
+      Application.ProcessMessages;
+      CheckSynchronize(20);
+    end;
+  end;
+
+var
+  Tree: TVirtualStringTree;
+  Node: PVirtualNode;
+  NodeData: ^TObject;
+  Start: QWord;
+  I, N, Op, Toggles, Scrolls, Reloads, Searches, Schemata, Placeholders, Empty: Integer;
+  Ops: String;
+
+begin
+  Tree := SchemataFrame.CatalogVST;
+  RandSeed := 1;
+  Toggles := 0;
+  Scrolls := 0;
+  Reloads := 0;
+  Searches := 0;
+  Start := GetTickCount64;
+  // QBR_STRESS_OPS limits the actions: t(oggle) s(croll) r(eload) f(ind) c(ollapse all).
+  Ops := GetEnvironmentVariable('QBR_STRESS_OPS');
+  if Ops = '' then
+    Ops := 'tsrfc';
+  while GetTickCount64 - Start < QWord(Seconds) * 1000 do
+  begin
+    repeat
+      Op := Random(14);
+    until Pos(Copy('ttttttssssrffc', Op + 1, 1), Ops) > 0;
+    case Op of
+      0..5:
+        begin
+          N := Tree.RootNodeCount;
+          Node := Tree.GetFirst;
+          if N > 0 then
+            for I := 1 to Random(N) do
+              if Node <> nil then
+                Node := Tree.GetNextSibling(Node);
+          if Node <> nil then
+          begin
+            Tree.ToggleNode(Node);
+            Inc(Toggles);
+          end;
+        end;
+      6..9:
+        begin
+          N := Tree.RootNode.TotalHeight;
+          if N < 1 then
+            N := 1;
+          Tree.OffsetY := -Random(N);
+          Inc(Scrolls);
+        end;
+      10:
+        begin
+          SchemataFrame.ReloadSchemaTree;
+          Inc(Reloads);
+        end;
+      11:
+        begin
+          SchemataFrame.AdvancedEdit.SearchEd.Text := Chr(Ord('a') + Random(6));
+          Inc(Searches);
+        end;
+      12:
+        SchemataFrame.AdvancedEdit.SearchEd.Text := '';
+      13:
+        Tree.FullCollapse;
+    end;
+    Settle(1 + Random(4));
+  end;
+
+  // Let everything finish (reloads still queued rebuild the tree with collapsed nodes), then expand every schema until
+  // all expanded schemata show their tables. Waits up to two minutes.
+  SchemataFrame.AdvancedEdit.SearchEd.Text := '';
+  Start := GetTickCount64;
+  repeat
+    Node := Tree.GetFirst;
+    while Node <> nil do
+    begin
+      if not Tree.Expanded[Node] then
+        Tree.ToggleNode(Node);
+      Node := Tree.GetNextSibling(Node);
+    end;
+    Settle(50);
+    Schemata := 0;
+    Placeholders := 0;
+    Empty := 0;
+    Node := Tree.GetFirst;
+    while Node <> nil do
+    begin
+      Inc(Schemata);
+      if Node.FirstChild = nil then
+        Inc(Empty)
+      else
+      begin
+        NodeData := Tree.GetNodeData(Node.FirstChild);
+        if (NodeData^ = nil) or not Tree.Expanded[Node] then
+          Inc(Placeholders);
+      end;
+      Node := Tree.GetNextSibling(Node);
+    end;
+  until ((Schemata > 0) and (Placeholders = 0)) or (GetTickCount64 - Start > 120000);
+
+  with TStringList.Create do
+  try
+    Add(Format('toggles=%d scrolls=%d reloads=%d searches=%d', [Toggles, Scrolls, Reloads, Searches]));
+    Add(Format('schemata=%d placeholders=%d empty=%d settled=%dms', [Schemata, Placeholders, Empty,
+      GetTickCount64 - Start]));
+    SaveToFile(OutFile);
+  finally
+    Free;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

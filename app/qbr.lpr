@@ -208,6 +208,14 @@ begin
           for K := 1 to 60 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
           TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevDump;
         end;
+      for I := 1 to ParamCount - 2 do
+        if ParamStr(I) = '--stress-schemata' then
+        begin
+          // --stress-schemata <seconds> <report file>
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          TQueryBrowserForm(MainForm.SectionControls.CurrentSidebarSection.SectionForm).DevStressSchemata(
+            StrToIntDef(ParamStr(I + 1), 30), ParamStr(I + 2));
+        end;
       for I := 1 to ParamCount - 1 do
         if ParamStr(I) = '--script' then
         begin

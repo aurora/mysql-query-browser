@@ -113,6 +113,7 @@ qbr.exe -datadir <tmp> --shot-connect out.png                     # screenshot o
 qbr.exe -datadir <tmp> -u root -p <pwd> -h 127.0.0.1 -P <port> --selftest-connect out.txt
 qbr.exe ... --selftest-dialog out.txt                              # drives the connect dialog
 qbr.exe -datadir <tmp> --shot-options <base>                        # options dialog -> <base>_default.png, _connections.png
+qbr ... --shot-main x.png --stress-schemata 90 out.txt              # schemata tree stress test (docs/linux-port.md)
 # unhandled exceptions are written with a stack trace to bin/qbr.error.txt (program exits with 3);
 # QBR_TRACE=1 adds a flow trace in bin/qbr.trace.txt
 ```
@@ -167,6 +168,10 @@ editing). Ideas and open work go into `ROADMAP.md`. If you are about to make a
 choice that a future contributor would ask "why?" about, write the ADR.
 
 ## Known pitfalls (each cost time once)
+
+- **Never touch the LCL from a thread** — not even `Screen.Cursor` or a property whose setter repaints.
+  The VCL tolerated it; on GTK2 it uses Xlib/GDK from two threads and corrupts the C heap, which shows
+  later as GDK region assertions, `double free` or hangs (schemata tree, 2026-11-13). Use `Synchronize`.
 
 - **GUI-subsystem programs have no stdout.** `WriteLn` in `qbr.exe` (or any
   Lazarus GUI program) opens an error dialog and hangs. Report through a file,

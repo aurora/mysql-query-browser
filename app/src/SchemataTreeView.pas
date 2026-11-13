@@ -196,8 +196,20 @@ type
     FDefaultSchemaNode: TSchemaVirtualNode;
     FMySQLConnection: TMySQLConn;
     FSearchTargets: TSearchTargets;
-    FSearchLock: TCriticalSection;
     FSearchString: WideString;
+
+    // Port: the tree is changed in the main thread only. The original also changed it from the search thread and
+    // guarded it with FSearchLock, which made the main thread wait for network work; the fetch threads touched the
+    // GUI. Now fetch threads only fill schema objects, and FFetchLock only serializes the fetching itself.
+    FFetchLock: TCriticalSection;
+    FTreeGeneration: Cardinal;       // Incremented whenever the tree is cleared: nodes kept by fetches are gone.
+    FPendingSchemas: TList;          // Schemata whose tables are being fetched in the background.
+    FPendingFetches: Integer;        // Fetches (tables and indices) that still write into schema objects.
+    FExpandFetches: Integer;         // Table fetches started by expanding a node; the search input waits for them.
+    FRetiredObjects: TObjectList;    // Schema objects replaced while fetches were pending, freed after them.
+    FCatalogFetching: Boolean;       // A catalog fetch is queued or running.
+    FReloadAgain: Boolean;           // The tree was reloaded meanwhile; fetch the catalogs once more afterwards.
+    FCatalogError: TObject;          // Exception of the catalog fetch, raised again in the main thread.
 
     FOptionProvider: IOptionProvider;
     FShowEscapedNames: Boolean;
@@ -208,6 +220,15 @@ type
     procedure WMTimer(var Msg: TWMTimer); message WM_TIMER;
   protected
     procedure DoSearch(Thread: TThread);
+    procedure SearchStart(Thread: TThread);
+    procedure SearchStep(Thread: TThread);
+    procedure SearchFetched(Thread: TThread);
+    function NodeIsCurrent(SchemaNode: TSchemaVirtualNode): Boolean;
+    function FindTablesNode(Schema: TMYX_SCHEMA): PVirtualNode;
+    procedure BeginFetch(SchemaNode: TSchemaVirtualNode);
+    procedure EndFetch;
+    procedure EndTablesFetch(SchemaNode: TSchemaVirtualNode);
+    procedure RetireObject(AObject: TObject);
     function GetOptionProvider: IOptionProvider;
     procedure PrepareSearch(Text: WideString);
     procedure SetShowSchemaAssets(ShowSchemaAssets: Boolean);
@@ -220,8 +241,7 @@ type
     procedure SetDefaultSchema(DefaultSchema: WideString);
     procedure SearchTerminated(Sender: TObject);
     procedure StopSearch;
-    procedure FetchSchemaTablesFromNode(FMySQLConnection: TMySQLConn; SchemaNode: TSchemaVirtualNode;
-      WithLock: Boolean = True);
+    procedure FetchSchemaTablesFromNode(FMySQLConnection: TMySQLConn; SchemaNode: TSchemaVirtualNode);
   public
     CatalogList: TMYX_CATALOGS;
     SchemaPatterns: TTntStringList;
@@ -297,6 +317,11 @@ type
     FSchema: TMYX_SCHEMA;
     FNode: PVirtualNode;
   public
+    // Port: set when the node is handed to a fetch thread. Generation is the tree's generation at that time (the node
+    // is gone when the tree has been cleared since), FetchError the exception of the fetch, raised again in the main
+    // thread.
+    Generation: Cardinal;
+    FetchError: TObject;
     property Schema: TMYX_SCHEMA read FSchema write FSchema;
     property Node: PVirtualNode read FNode write FNode;
   end;
@@ -332,10 +357,22 @@ type
   TSearchThread = class(TThread)
   private
     FMethod: TSearchMethod; // This method is called in the context of the thread.
+    FFrame: TSchemataFrame;
   protected
     procedure Execute; override;
   public
-    constructor Create(Method: TSearchMethod);
+    // Port: the state of this search run, used by the frame's synchronized search steps in the main thread. Kept
+    // per thread because a terminated search may still be finishing while the next one runs.
+    Node: PVirtualNode;          // Node to continue with (Started: after), or nil when the search is finished.
+    Started: Boolean;
+    Generation: Cardinal;        // Tree generation when the search started.
+    Fetch: TSchemaVirtualNode;   // Schema whose tables must be fetched before the search continues.
+
+    constructor Create(Frame: TSchemataFrame; Method: TSearchMethod);
+    procedure RunStart;
+    procedure RunStep;
+    procedure RunFetched;
+    procedure RunFinish;
 
     property Terminated;
   end;
@@ -345,12 +382,45 @@ var
 
 //----------------- TSearchThread --------------------------------------------------------------------------------------
 
-constructor TSearchThread.Create(Method: TSearchMethod);
+constructor TSearchThread.Create(Frame: TSchemataFrame; Method: TSearchMethod);
 
 begin
   inherited Create(True);
 
+  FFrame := Frame;
   FMethod := Method;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSearchThread.RunStart;
+
+begin
+  FFrame.SearchStart(Self);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSearchThread.RunStep;
+
+begin
+  FFrame.SearchStep(Self);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSearchThread.RunFetched;
+
+begin
+  FFrame.SearchFetched(Self);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSearchThread.RunFinish;
+
+begin
+  FFrame.CatalogVST.Cursor := crDefault;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -390,7 +460,9 @@ begin
 
   FMySQLConnection := nil;
   CatalogList := nil;
-  FSearchLock := TCriticalSection.Create;
+  FFetchLock := TCriticalSection.Create;
+  FPendingSchemas := TList.Create;
+  FRetiredObjects := TObjectList.Create;
   SchemaPatterns := TTntStringList.Create;
   AddedSchemataList := TObjectList.Create;
   FShowEscapedNames := False;
@@ -482,7 +554,9 @@ begin
   ViewPNGImg.Free;
 
   ExpandedNodesList.Free;
-  FSearchLock.Free;
+  FPendingSchemas.Free;
+  FRetiredObjects.Free;
+  FFetchLock.Free;
 
   inherited Destroy;
 end;
@@ -545,62 +619,131 @@ procedure TSchemataFrame.DoSearch(Thread: TThread);
 
 // Searches through the catalog treeview and hides all nodes whose captions do not fit the search text.
 
+// Port: runs in the search thread as in the original, but the tree is only touched in the main thread (SearchStart,
+// SearchStep, SearchFetched); this thread only waits for the tables of a schema to be fetched.
+
 var
+  Search: TSearchThread;
+
+begin
+  Search := TSearchThread(Thread);
+  try
+    TThread.Synchronize(Search, Search.RunStart);
+    while Assigned(Search.Node) and not Search.Terminated do
+    begin
+      TThread.Synchronize(Search, Search.RunStep);
+      if Assigned(Search.Fetch) then
+      try
+        FMySQLConnection.FetchData(dkSchemaTables, FetchSchemaTablesNoLock, SchemaTablesFetchedForSearch,
+          Search.Fetch, _('Fetching assets ...'), False, True, True, Search);
+      finally
+        TThread.Synchronize(Search, Search.RunFetched);
+      end;
+    end;
+  finally
+    TThread.Synchronize(Search, Search.RunFinish);
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSchemataFrame.SearchStart(Thread: TThread);
+
+// Port: first part of DoSearch, in the main thread.
+
+var
+  Search: TSearchThread;
+  Node: PVirtualNode;
+
+begin
+  Search := TSearchThread(Thread);
+  Search.Node := nil;
+  if Search.Terminated then
+    Exit;
+
+  CatalogVST.Cursor := crAppStart;
+
+  // First hide all nodes in one rush.
+  CatalogVST.BeginUpdate;
+  try
+    // Use the NoInit methods for walking the tree. This way only already existing nodes are traversed.
+    // No need to make nodes visible that aren't loaded yet.
+    Node := CatalogVST.GetFirstNoInit;
+    while Assigned(Node) do
+    begin
+      CatalogVST.IsVisible[Node] := False;
+      Node := CatalogVST.GetNextNoInit(Node);
+    end;
+  finally
+    CatalogVST.EndUpdate;
+  end;
+
+  if FMySQLConnection.MySQL = nil then
+    FMySQLConnection.Reconnect;
+
+  Search.Generation := FTreeGeneration;
+  Search.Node := CatalogVST.GetFirst;
+  Search.Started := False;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSchemataFrame.SearchStep(Thread: TThread);
+
+// Port: the loop of DoSearch, in the main thread. Runs until a schema's tables must be fetched (Search.Fetch, the
+// search thread then fetches them and calls again) or the tree has been searched (Search.Node = nil).
+
+var
+  Search: TSearchThread;
   Node: PVirtualNode;
   Text: String;
   NodeData: ^TObject;
-  SchemaNode: TSchemaVirtualNode;
-  
+
 begin
-  CatalogVST.Cursor := crAppStart;
-  FSearchLock.Acquire;
-  try
-    // First hide all nodes in one rush.
-    CatalogVST.BeginUpdate;
-    try
-      // Use the NoInit methods for walking the tree. This way only already existing nodes are traversed.
-      // No need to make nodes visible that aren't loaded yet.
-      Node := CatalogVST.GetFirstNoInit;
-      while Assigned(Node) do
-      begin
-        CatalogVST.IsVisible[Node] := False;
-        Node := CatalogVST.GetNextNoInit(Node);
-      end;
-    finally
-      CatalogVST.EndUpdate;
-    end;
+  Search := TSearchThread(Thread);
+  Search.Fetch := nil;
+  // A cleared tree has no more nodes to search; its nodes are gone.
+  if Search.Terminated or (Search.Generation <> FTreeGeneration) then
+  begin
+    Search.Node := nil;
+    Exit;
+  end;
 
-    if FMySQLConnection.MySQL = nil then
-      FMySQLConnection.Reconnect;
-    
-    // Reshow nodes step by step if they match, giving so a kind of progress when searching.
-    Node := CatalogVST.GetFirst;
-    while Assigned(Node) and not TSearchThread(Thread).Terminated do
+  // The first step starts with Search.Node, later ones after it (the schema whose tables have been fetched).
+  if Search.Started then
+    Node := CatalogVST.GetNext(Search.Node)
+  else
+    Node := Search.Node;
+  Search.Started := True;
+
+  // Reshow nodes step by step if they match, giving so a kind of progress when searching.
+  while Assigned(Node) do
+  begin
+    // Check each node type and consider it only if it is allowed to be searched.
+    NodeData := CatalogVST.GetNodeData(Node);
+    if NodeData^ is TMYX_SCHEMA then
     begin
-      // Check each node type and consider it only if it is allowed to be searched.
-      NodeData := CatalogVST.GetNodeData(Node);
-      if NodeData^ is TMYX_SCHEMA then
+      // Schema nodes need a bit more work.
+      if smSchemata in FSearchTargets then
       begin
-        // Schema nodes need a bit more work.
-        if smSchemata in FSearchTargets then
-        begin
-          CatalogVSTGetText(CatalogVST, Node, 0, ttNormal, Text);
-          CatalogVST.FullyVisible[Node] := myx_match_pattern(Text, FSearchString, 0, 0) <> 0;
-        end;
+        CatalogVSTGetText(CatalogVST, Node, 0, ttNormal, Text);
+        CatalogVST.FullyVisible[Node] := myx_match_pattern(Text, FSearchString, 0, 0) <> 0;
+      end;
 
-        // Check if the schema node's subdata has been loaded already.
-        if FFetchTables and (TMYX_SCHEMA(NodeData^).schema_tables = nil) then
-        begin
-          SchemaNode := TSchemaVirtualNode.Create(Node, TMYX_SCHEMA(NodeData^));
-          try
-            FMySQLConnection.FetchData(dkSchemaTables, FetchSchemaTablesNoLock, SchemaTablesFetchedForSearch,
-              SchemaNode, _('Fetching assets ...'), False, True, True, SearchThread);
-          finally
-            SchemaNode.Free;
-          end;
-        end;
-      end
-      else
+      // Check if the schema node's subdata has been loaded already. Schemata whose tables are being fetched for
+      // an expanded node are left out; that fetch fills them.
+      if FFetchTables and (TMYX_SCHEMA(NodeData^).schema_tables = nil) and
+        (FPendingSchemas.IndexOf(NodeData^) < 0) then
+      begin
+        Search.Fetch := TSchemaVirtualNode.Create(Node, TMYX_SCHEMA(NodeData^));
+        BeginFetch(Search.Fetch);
+        FPendingSchemas.Add(NodeData^);
+        Search.Node := Node;
+        Exit;
+      end;
+    end
+    else
+      if NodeData^ <> nil then
       begin
         // All other nodes.
         // TODO: views and triggers must yet be considered for search once they are available.
@@ -614,11 +757,29 @@ begin
           CatalogVST.FullyVisible[Node] := myx_match_pattern(Text, FSearchString, 0, 0) <> 0;
         end;
       end;
-      Node := CatalogVST.GetNext(Node);
-    end;
-  finally
-    FSearchLock.Release;
-    CatalogVST.Cursor := crDefault;
+    Node := CatalogVST.GetNext(Node);
+  end;
+
+  Search.Node := nil;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSchemataFrame.SearchFetched(Thread: TThread);
+
+// Port: the search thread has fetched (or given up fetching) Search.Fetch. Its nodes were filled by
+// SchemaTablesFetchedForSearch if the fetch succeeded.
+
+var
+  Search: TSearchThread;
+
+begin
+  Search := TSearchThread(Thread);
+  if Assigned(Search.Fetch) then
+  begin
+    FPendingSchemas.Remove(Search.Fetch.Schema);
+    FreeAndNil(Search.Fetch);
+    EndFetch;
   end;
 end;
 
@@ -917,6 +1078,16 @@ begin
   begin
     if (CatalogList = nil) or (ReloadSchemata) then
     begin
+      // Port: one catalog fetch at a time. Each reload used to queue another fetch, and each of them rebuilt the
+      // tree in turn; requests made meanwhile are now answered by one more fetch after the current one, which
+      // gives the same final tree.
+      if FCatalogFetching then
+      begin
+        if ReloadSchemata then
+          FReloadAgain := True;
+        Exit;
+      end;
+
       //Store current selected and expanded nodes
       ExpandedNodesList.Clear;
       GetExpandedNodes(ExpandedNodesList,
@@ -927,13 +1098,23 @@ begin
 
       if (CatalogList <> nil) then
       begin
-        CatalogList.Free;
+        // Port: fetch threads may still fill its schema objects.
+        RetireObject(CatalogList);
         CatalogList := nil;
+        // Their schemata are no longer in the tree; new ones may be fetched again.
+        FPendingSchemas.Clear;
       end;
 
       // (Re-)load CatalogList, AllowDuplicatedKindOfData
-      FMySQLConnection.FetchData(dkCatalogSchema, GetCatalogList, RefreshCatalogList, nil,
-        _('Fetching Catalogs/Schemata data ...'), False, True);
+      FCatalogFetching := True;
+      FCatalogError := nil;
+      try
+        FMySQLConnection.FetchData(dkCatalogSchema, GetCatalogList, RefreshCatalogList, nil,
+          _('Fetching Catalogs/Schemata data ...'), False, True);
+      except
+        FCatalogFetching := False;
+        raise;
+      end;
     end
     else
     begin
@@ -957,16 +1138,21 @@ var
   Catalogs: PMYX_CATALOGS;
 
 begin
-  Catalogs := myx_get_catalogs(TFetchDataThread(Sender).Connection.MySQL);
-  if (Catalogs = nil) then
-    raise EMyxSQLError.Create(_('Could not fetch Catalogs/Schemata data.'),
-      myx_mysql_errno(TFetchDataThread(Sender).Connection.MySQL),
-      myx_mysql_error(TFetchDataThread(Sender).Connection.MySQL));
-
+  // Port: an error is raised again by RefreshCatalogList in the main thread, after it has cleaned up.
   try
-    CatalogList := TMYX_CATALOGS.Create(Catalogs);
-  finally
-    myx_free_catalogs(Catalogs);
+    Catalogs := myx_get_catalogs(TFetchDataThread(Sender).Connection.MySQL);
+    if (Catalogs = nil) then
+      raise EMyxSQLError.Create(_('Could not fetch Catalogs/Schemata data.'),
+        myx_mysql_errno(TFetchDataThread(Sender).Connection.MySQL),
+        myx_mysql_error(TFetchDataThread(Sender).Connection.MySQL));
+
+    try
+      CatalogList := TMYX_CATALOGS.Create(Catalogs);
+    finally
+      myx_free_catalogs(Catalogs);
+    end;
+  except
+    FCatalogError := AcquireExceptionObject;
   end;
 end;
 
@@ -974,12 +1160,32 @@ end;
 
 procedure TSchemataFrame.RefreshCatalogList(Sender: TObject);
 
-begin
-  FillSchemaTree();
+var
+  Error: TObject;
 
-  // Update the current schema reference.
-  DefaultSchema := FDefaultSchema;
-  CatalogVST.OffsetY := FLastVerticalOffset;
+begin
+  FCatalogFetching := False;
+  Error := FCatalogError;
+  FCatalogError := nil;
+
+  if Error = nil then
+  begin
+    FillSchemaTree();
+
+    // Update the current schema reference.
+    DefaultSchema := FDefaultSchema;
+    CatalogVST.OffsetY := FLastVerticalOffset;
+  end;
+
+  // Port: reloads requested while fetching (see FillSchemaTree).
+  if FReloadAgain then
+  begin
+    FReloadAgain := False;
+    FillSchemaTree('', True);
+  end;
+
+  if Assigned(Error) then
+    raise Error;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1079,123 +1285,126 @@ begin
 
   PCatalogNode := nil;
 
-  FSearchLock.Acquire;
+  CatalogVST.BeginUpdate;
   try
-    CatalogVST.BeginUpdate;
-    try
-      ClearCatalogTree;
+    ClearCatalogTree;
 
-      if (Catalog = nil) then
+    if (Catalog = nil) then
+    begin
+      for I := 0 to CatalogList.Catalogs.Count - 1 do
       begin
-        for I := 0 to CatalogList.Catalogs.Count - 1 do
-        begin
-          for J := 0 to CatalogList.Catalogs[I].schemata.Count - 1 do
-            if (StrMatchesSearchStr(
-              CatalogList.Catalogs[I].schemata[J].schema_name, searchStr)) then
+        for J := 0 to CatalogList.Catalogs[I].schemata.Count - 1 do
+          if (StrMatchesSearchStr(
+            CatalogList.Catalogs[I].schemata[J].schema_name, searchStr)) then
+          begin
+            PNode := AddSchemaToCatalogTree(MySQLMajorVersion, CatalogVST,
+              PCatalogNode, CatalogList.Catalogs[I],
+              CatalogList.Catalogs[I].schemata[J], searchStr,
+              FShowSchemaAssets, FShowAssetsOnSchemaExpansion);
+
+            if (CatalogList.Catalogs[I].catalog_name = LastCatalogName) and
+              (CatalogList.Catalogs[I].schemata[J].schema_name = LastSchemaName) then
             begin
-              PNode := AddSchemaToCatalogTree(MySQLMajorVersion, CatalogVST,
-                PCatalogNode, CatalogList.Catalogs[I],
-                CatalogList.Catalogs[I].schemata[J], searchStr,
-                FShowSchemaAssets, FShowAssetsOnSchemaExpansion);
-
-              if (CatalogList.Catalogs[I].catalog_name = LastCatalogName) and
-                (CatalogList.Catalogs[I].schemata[J].schema_name = LastSchemaName) then
-              begin
-                CatalogVST.Selected[PNode] := True;
-                CatalogVST.FocusedNode := PNode;
-              end;
-
-              if (CompareText(ExpandSchemaOnLaunch,
-                CatalogList.Catalogs[I].schemata[J].schema_name) = 0) then
-              begin
-                ExpandSchemaOnLaunch := '';
-                CatalogVST.Expanded[PNode] := True;
-              end;
+              CatalogVST.Selected[PNode] := True;
+              CatalogVST.FocusedNode := PNode;
             end;
 
-          for J := 0 to SchemaPatterns.Count - 1 do
-          begin
-            if (CompareText(
-              Copy(SchemaPatterns[J], 1, Pos('/', SchemaPatterns[J]) - 1),
-              CatalogList.Catalogs[I].catalog_name) = 0) then
+            if (CompareText(ExpandSchemaOnLaunch,
+              CatalogList.Catalogs[I].schemata[J].schema_name) = 0) then
             begin
-              Found := False;
-              SchemaName := Copy(SchemaPatterns[J], Pos('/', SchemaPatterns[J]) + 1,
-                Length(SchemaPatterns[J]));
-
-              for K := 0 to CatalogList.Catalogs[I].schemata.Count - 1 do
-                if (CompareText(SchemaName,
-                  CatalogList.Catalogs[I].schemata[K].escaped_schema_name) = 0) then
-                begin
-                  Found := True;
-                  break;
-                end;
-
-              if not Found and StrMatchesSearchStr(SchemaName, searchStr) then
-              begin
-                // Patterns for user rights must not be impicitely escaped. The user must do this explicitely.
-                AddedSchema := TMYX_SCHEMA.create(SchemaName, SchemaName, CatalogList.Catalogs[I].catalog_name,
-                  nil, nil, nil);
-
-                AddedSchemataList.Add(AddedSchema);
-
-                PNode := AddSchemaToCatalogTree(MySQLMajorVersion, CatalogVST,
-                  PCatalogNode, CatalogList.Catalogs[I],
-                  AddedSchema, searchStr, FShowSchemaAssets,
-                  FShowAssetsOnSchemaExpansion);
-
-                if (CatalogList.Catalogs[I].catalog_name = LastCatalogName) and
-                  (SchemaName = LastSchemaName) then
-                begin
-                  CatalogVST.FocusedNode := PNode;
-                  CatalogVST.ClearSelection;
-                  CatalogVST.Selected[PNode] := True;
-                end;
-              end;
+              ExpandSchemaOnLaunch := '';
+              CatalogVST.Expanded[PNode] := True;
             end;
           end;
 
-          if (PCatalogNode <> nil) then
-            if (CatalogVST.ChildCount[PCatalogNode] > 0) then
-              CatalogVST.Expanded[PCatalogNode] := True
-            else
-              CatalogVST.DeleteNode(PCatalogNode);
-        end;
-      end;
+        for J := 0 to SchemaPatterns.Count - 1 do
+        begin
+          if (CompareText(
+            Copy(SchemaPatterns[J], 1, Pos('/', SchemaPatterns[J]) - 1),
+            CatalogList.Catalogs[I].catalog_name) = 0) then
+          begin
+            Found := False;
+            SchemaName := Copy(SchemaPatterns[J], Pos('/', SchemaPatterns[J]) + 1,
+              Length(SchemaPatterns[J]));
 
-      //Re-expand tree nodes
-      ThreadsDisabled := True;
-      try
-        ReExpandedNodes(ExpandedNodesList, 0, CatalogVST, CatalogVST.GetFirst);
-      finally
-        ThreadsDisabled := False;
+            for K := 0 to CatalogList.Catalogs[I].schemata.Count - 1 do
+              if (CompareText(SchemaName,
+                CatalogList.Catalogs[I].schemata[K].escaped_schema_name) = 0) then
+              begin
+                Found := True;
+                break;
+              end;
+
+            if not Found and StrMatchesSearchStr(SchemaName, searchStr) then
+            begin
+              // Patterns for user rights must not be impicitely escaped. The user must do this explicitely.
+              AddedSchema := TMYX_SCHEMA.create(SchemaName, SchemaName, CatalogList.Catalogs[I].catalog_name,
+                nil, nil, nil);
+
+              AddedSchemataList.Add(AddedSchema);
+
+              PNode := AddSchemaToCatalogTree(MySQLMajorVersion, CatalogVST,
+                PCatalogNode, CatalogList.Catalogs[I],
+                AddedSchema, searchStr, FShowSchemaAssets,
+                FShowAssetsOnSchemaExpansion);
+
+              if (CatalogList.Catalogs[I].catalog_name = LastCatalogName) and
+                (SchemaName = LastSchemaName) then
+              begin
+                CatalogVST.FocusedNode := PNode;
+                CatalogVST.ClearSelection;
+                CatalogVST.Selected[PNode] := True;
+              end;
+            end;
+          end;
+        end;
+
+        if (PCatalogNode <> nil) then
+          if (CatalogVST.ChildCount[PCatalogNode] > 0) then
+            CatalogVST.Expanded[PCatalogNode] := True
+          else
+            CatalogVST.DeleteNode(PCatalogNode);
       end;
-    finally
-      CatalogVST.EndUpdate;
     end;
 
-    if (CatalogVST.FocusedNode <> nil) then
-      CatalogVST.ScrollIntoView(CatalogVST.FocusedNode, True);
-
-    SetDefaultSchema(FDefaultSchema);
+    //Re-expand tree nodes
+    ThreadsDisabled := True;
+    try
+      ReExpandedNodes(ExpandedNodesList, 0, CatalogVST, CatalogVST.GetFirst);
+    finally
+      ThreadsDisabled := False;
+    end;
   finally
-    FSearchLock.Release;
+    CatalogVST.EndUpdate;
   end;
+
+  if (CatalogVST.FocusedNode <> nil) then
+    CatalogVST.ScrollIntoView(CatalogVST.FocusedNode, True);
+
+  SetDefaultSchema(FDefaultSchema);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TSchemataFrame.FetchSchemaTablesFromNode(FMySQLConnection: TMySQLConn; SchemaNode: TSchemaVirtualNode;
-  WithLock: Boolean = True);
+procedure TSchemataFrame.FetchSchemaTablesFromNode(FMySQLConnection: TMySQLConn; SchemaNode: TSchemaVirtualNode);
+
+// Port: runs in a fetch thread or, while the tree is rebuilt, in the main thread. Only fills the schema object; the
+// tree is changed by the caller in the main thread. FFetchLock is held only while fetching (the original held
+// FSearchLock, which the main thread also took for every tree change).
 
 var
   SchemaTables: PMYX_SCHEMA_TABLES;
   SchemaSPs: PMYX_SCHEMA_STORED_PROCEDURES;
+  Tables: TMYX_SCHEMA_TABLES;
+  SPs: TMYX_SCHEMA_STORED_PROCEDURES;
 
 begin
-  if WithLock then
-    FSearchLock.Acquire;
+  FFetchLock.Acquire;
   try
+    // Port: fetched by another thread in the meantime.
+    if SchemaNode.Schema.schema_tables <> nil then
+      Exit;
+
     SchemaTables := myx_get_schema_tables(FMySQLConnection.MySQL, '', SchemaNode.Schema.schema_name);
     if (SchemaTables = nil) then
       raise EMyxSQLError.Create(_('Could not fetch schema tables.'),
@@ -1203,27 +1412,34 @@ begin
         myx_mysql_error(FMySQLConnection.MySQL));
 
     try
-      SchemaNode.Schema.schema_tables := 
-        TMYX_SCHEMA_TABLES.create(SchemaTables);
+      Tables := TMYX_SCHEMA_TABLES.create(SchemaTables);
     finally
       myx_free_schema_tables(SchemaTables);
     end;
 
-    SchemaSPs := myx_get_schema_sps(FMySQLConnection.MySQL, '', SchemaNode.Schema.schema_name);
-    if (SchemaTables = nil) then
-      raise EMyxSQLError.Create(_('Could not fetch stored procedures.'),
-        myx_mysql_errno(FMySQLConnection.MySQL),
-        myx_mysql_error(FMySQLConnection.MySQL));
-
     try
-      SchemaNode.Schema.schema_sps := 
-        TMYX_SCHEMA_STORED_PROCEDURES.create(SchemaSPs);
-    finally
-      myx_free_schema_sps(SchemaSPs);
+      SchemaSPs := myx_get_schema_sps(FMySQLConnection.MySQL, '', SchemaNode.Schema.schema_name);
+      // Port: the original tested SchemaTables here.
+      if (SchemaSPs = nil) then
+        raise EMyxSQLError.Create(_('Could not fetch stored procedures.'),
+          myx_mysql_errno(FMySQLConnection.MySQL),
+          myx_mysql_error(FMySQLConnection.MySQL));
+
+      try
+        SPs := TMYX_SCHEMA_STORED_PROCEDURES.create(SchemaSPs);
+      finally
+        myx_free_schema_sps(SchemaSPs);
+      end;
+    except
+      Tables.Free;
+      raise;
     end;
+
+    // Port: procedures first, the main thread takes assigned tables as a sign that both are there.
+    SchemaNode.Schema.schema_sps := SPs;
+    SchemaNode.Schema.schema_tables := Tables;
   finally
-    if WithLock then
-      FSearchLock.Release;
+    FFetchLock.Release;
   end;
 end;
 
@@ -1231,38 +1447,200 @@ end;
 
 procedure TSchemataFrame.FetchSchemaTables(Sender: TObject);
 
-begin
-  // Do not allow the user to start a search until this operation is finished.
-  AdvancedEdit.Enabled := False;
+// Port: runs in the fetch thread. The original disabled the search input here (from the thread); RefreshTableNames
+// does that now. An error is raised again by the refresh method in the main thread, after it has cleaned up.
 
-  FetchSchemaTablesFromNode(TFetchDataThread(Sender).Connection, TSchemaVirtualNode(TFetchDataThread(Sender).Target));
+var
+  SchemaNode: TSchemaVirtualNode;
+
+begin
+  SchemaNode := TSchemaVirtualNode(TFetchDataThread(Sender).Target);
+  try
+    FetchSchemaTablesFromNode(TFetchDataThread(Sender).Connection, SchemaNode);
+  except
+    SchemaNode.FetchError := AcquireExceptionObject;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TSchemataFrame.FetchSchemaTablesNoLock(Sender: TObject);
 
+// Port: the search's fetch method. Same as FetchSchemaTables now (the search no longer holds a lock).
+
 begin
-  FetchSchemaTablesFromNode(TFetchDataThread(Sender).Connection, TSchemaVirtualNode(TFetchDataThread(Sender).Target), False);
+  FetchSchemaTables(Sender);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TSchemataFrame.SchemaTablesFetched(Sender: TObject);
 
-begin
-  RefreshTableNames(TSchemaVirtualNode(TFetchDataThread(Sender).Target));
+var
+  SchemaNode: TSchemaVirtualNode;
+  Error: TObject;
 
-  // Reenabled seach input.
-  AdvancedEdit.Enabled := True;
+begin
+  SchemaNode := TSchemaVirtualNode(TFetchDataThread(Sender).Target);
+  Error := SchemaNode.FetchError;
+  SchemaNode.FetchError := nil;
+  FPendingSchemas.Remove(SchemaNode.Schema);
+  try
+    // Port: the node may be gone; then fill the schema's current node, if there is one.
+    if (Error = nil) and not NodeIsCurrent(SchemaNode) then
+      SchemaNode.Node := FindTablesNode(SchemaNode.Schema);
+    if (Error = nil) and Assigned(SchemaNode.Node) then
+    begin
+      RefreshTableNames(SchemaNode); // Frees SchemaNode.
+      SchemaNode := nil;
+    end;
+  finally
+    EndTablesFetch(SchemaNode);
+  end;
+
+  if Assigned(Error) then
+    raise Error;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TSchemataFrame.SchemaTablesFetchedForSearch(Sender: TObject);
 
+// Port: SearchFetched cleans up after this, in every case.
+
+var
+  SchemaNode: TSchemaVirtualNode;
+  Error: TObject;
+
 begin
-  FillTableNamesDirectly(TSchemaVirtualNode(TFetchDataThread(Sender).Target));
+  SchemaNode := TSchemaVirtualNode(TFetchDataThread(Sender).Target);
+  Error := SchemaNode.FetchError;
+  SchemaNode.FetchError := nil;
+  if Assigned(Error) then
+    raise Error;
+
+  if NodeIsCurrent(SchemaNode) then
+    FillTableNamesDirectly(SchemaNode);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+function TSchemataFrame.NodeIsCurrent(SchemaNode: TSchemaVirtualNode): Boolean;
+
+// Port: True if the node kept by a fetch is still in the tree, i.e. the tree has not been cleared since.
+
+begin
+  Result := SchemaNode.Generation = FTreeGeneration;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+function TSchemataFrame.FindTablesNode(Schema: TMYX_SCHEMA): PVirtualNode;
+
+// Port: the node that shows the tables of Schema in the current tree (the schema node, or its "Tables" node when
+// the schema assets are shown), if it has not been filled yet. Otherwise nil.
+
+var
+  Node, Child: PVirtualNode;
+  NodeData, ChildData: ^TObject;
+
+begin
+  Result := nil;
+  Node := CatalogVST.RootNode.FirstChild;
+  while Assigned(Node) and (Result = nil) do
+  begin
+    NodeData := CatalogVST.GetNodeData(Node);
+    if NodeData^ = Schema then
+    begin
+      if FShowAssetsOnSchemaExpansion then
+        Result := Node
+      else
+      begin
+        Child := Node.FirstChild;
+        while Assigned(Child) do
+        begin
+          ChildData := CatalogVST.GetNodeData(Child);
+          if (ChildData^ is TSchemaSubNode) and (TSchemaSubNode(ChildData^).SubNodeType = TSNTables) then
+          begin
+            Result := Child;
+            Break;
+          end;
+          Child := Child.NextSibling;
+        end;
+      end;
+    end;
+    Node := Node.NextSibling;
+  end;
+
+  // Only a node that still has its placeholder child (or none) is filled.
+  if Assigned(Result) and Assigned(Result.FirstChild) then
+  begin
+    ChildData := CatalogVST.GetNodeData(Result.FirstChild);
+    if ChildData^ <> nil then
+      Result := nil;
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSchemataFrame.BeginFetch(SchemaNode: TSchemaVirtualNode);
+
+// Port: called in the main thread before SchemaNode is handed to a fetch thread.
+
+begin
+  Inc(FPendingFetches);
+  SchemaNode.Generation := FTreeGeneration;
+  SchemaNode.FetchError := nil;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSchemataFrame.EndFetch;
+
+// Port: called in the main thread when a fetch thread no longer touches its schema object.
+
+begin
+  Dec(FPendingFetches);
+  if FPendingFetches <= 0 then
+  begin
+    FPendingFetches := 0;
+    FRetiredObjects.Clear;
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSchemataFrame.EndTablesFetch(SchemaNode: TSchemaVirtualNode);
+
+// Port: ends a table fetch started by RefreshTableNames. SchemaNode is freed unless it is nil already.
+
+begin
+  if Assigned(SchemaNode) then
+  begin
+    FPendingSchemas.Remove(SchemaNode.Schema);
+    SchemaNode.Free;
+  end;
+  Dec(FExpandFetches);
+  if FExpandFetches <= 0 then
+  begin
+    FExpandFetches := 0;
+    // Reenabled seach input.
+    AdvancedEdit.Enabled := True;
+  end;
+  EndFetch;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TSchemataFrame.RetireObject(AObject: TObject);
+
+// Port: frees AObject, or keeps it until no fetch thread can write into it any more.
+
+begin
+  if FPendingFetches > 0 then
+    FRetiredObjects.Add(AObject)
+  else
+    AObject.Free;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1276,17 +1654,51 @@ var
 
 begin
   if (SchemaNode.schema.schema_tables = nil) and (not (ThreadsDisabled)) then
-    FMySQLConnection.FetchData(dkSchemaTables,
-      FetchSchemaTables, SchemaTablesFetched,
-      SchemaNode, _('Fetching assets ...'),
-      False, False)
+  begin
+    // Port: a schema is fetched once at a time; the running fetch fills the node.
+    if FPendingSchemas.IndexOf(SchemaNode.Schema) >= 0 then
+    begin
+      SchemaNode.Free;
+      Exit;
+    end;
+
+    BeginFetch(SchemaNode);
+    FPendingSchemas.Add(SchemaNode.Schema);
+    Inc(FExpandFetches);
+    // Do not allow the user to start a search until this operation is finished.
+    // Port: done here, the original did it in the fetch thread.
+    AdvancedEdit.Enabled := False;
+    try
+      // Port: other schemata may be fetched at the same time (AllowDuplicatedKindOfData); the original dropped the
+      // request and left the node empty.
+      FMySQLConnection.FetchData(dkSchemaTables,
+        FetchSchemaTables, SchemaTablesFetched,
+        SchemaNode, _('Fetching assets ...'),
+        False, True);
+    except
+      EndTablesFetch(SchemaNode);
+      raise;
+    end;
+  end
   else
   begin
     //If ThreadsDisabled is turned on, fetch SchemaTables now
     if (SchemaNode.schema.schema_tables = nil) and (ThreadsDisabled) then
-      FetchSchemaTablesFromNode(FMySQLConnection, SchemaNode);
+    begin
+      // Port: unless a fetch thread is fetching it; that fills the node when it returns.
+      if FPendingSchemas.IndexOf(SchemaNode.Schema) >= 0 then
+      begin
+        SchemaNode.Free;
+        Exit;
+      end;
+      try
+        FetchSchemaTablesFromNode(FMySQLConnection, SchemaNode);
+      except
+        SchemaNode.Free;
+        raise;
+      end;
+    end;
 
-    FSearchLock.Acquire;
     try
       CatalogVST.BeginUpdate;
       try
@@ -1330,10 +1742,9 @@ begin
         CatalogVST.Expanded[SchemaNode.Node] := WasExpanded;
       finally
         CatalogVST.EndUpdate;
-        SchemaNode.Free;
       end;
     finally
-      FSearchLock.Release;
+      SchemaNode.Free;
     end;
   end;
 end;
@@ -1378,22 +1789,38 @@ end;
 
 procedure TSchemataFrame.FetchSchemaIndices(Sender: TObject);
 
+// Port: runs in the fetch thread; see FetchSchemaTables for the lock and the error.
+
 var
   SchemaIndices: PMYX_SCHEMA_INDICES;
+  SchemaNode: TSchemaVirtualNode;
 
 begin
-  SchemaIndices := myx_get_schema_indices(TFetchDataThread(Sender).Connection.MySQL,
-    '', TSchemaVirtualNode(TFetchDataThread(Sender).Target).Schema.schema_name);
-  if (SchemaIndices = nil) then
-    raise EMyxSQLError.Create(_('Could not fetch Schema Indices.'),
-      myx_mysql_errno(TFetchDataThread(Sender).Connection.MySQL),
-      myx_mysql_error(TFetchDataThread(Sender).Connection.MySQL));
-
+  SchemaNode := TSchemaVirtualNode(TFetchDataThread(Sender).Target);
   try
-    TSchemaVirtualNode(TFetchDataThread(Sender).Target).Schema.schema_indices := 
-      TMYX_SCHEMA_INDICES.create(SchemaIndices);
-  finally
-    myx_free_schema_indices(SchemaIndices);
+    FFetchLock.Acquire;
+    try
+      if SchemaNode.Schema.schema_indices <> nil then
+        Exit;
+
+      SchemaIndices := myx_get_schema_indices(TFetchDataThread(Sender).Connection.MySQL,
+        '', SchemaNode.Schema.schema_name);
+      if (SchemaIndices = nil) then
+        raise EMyxSQLError.Create(_('Could not fetch Schema Indices.'),
+          myx_mysql_errno(TFetchDataThread(Sender).Connection.MySQL),
+          myx_mysql_error(TFetchDataThread(Sender).Connection.MySQL));
+
+      try
+        SchemaNode.Schema.schema_indices :=
+          TMYX_SCHEMA_INDICES.create(SchemaIndices);
+      finally
+        myx_free_schema_indices(SchemaIndices);
+      end;
+    finally
+      FFetchLock.Release;
+    end;
+  except
+    SchemaNode.FetchError := AcquireExceptionObject;
   end;
 end;
 
@@ -1401,8 +1828,28 @@ end;
 
 procedure TSchemataFrame.SchemaIndicesFetched(Sender: TObject);
 
+var
+  SchemaNode: TSchemaVirtualNode;
+  Error: TObject;
+
 begin
-  RefreshIndicesNames(TSchemaVirtualNode(TFetchDataThread(Sender).Target));
+  SchemaNode := TSchemaVirtualNode(TFetchDataThread(Sender).Target);
+  Error := SchemaNode.FetchError;
+  SchemaNode.FetchError := nil;
+  try
+    // Port: a node that is gone is not filled.
+    if (Error = nil) and NodeIsCurrent(SchemaNode) then
+    begin
+      RefreshIndicesNames(SchemaNode); // Frees SchemaNode.
+      SchemaNode := nil;
+    end;
+  finally
+    SchemaNode.Free;
+    EndFetch;
+  end;
+
+  if Assigned(Error) then
+    raise Error;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1415,13 +1862,21 @@ var
 
 begin
   if (SchemaNode.schema.schema_indices = nil) then
-    FMySQLConnection.FetchData(dkSchemaIndices,
-      FetchSchemaIndices, SchemaIndicesFetched,
-      SchemaNode, 'Fetching Indices ...',
-      False, True)
+  begin
+    BeginFetch(SchemaNode);
+    try
+      FMySQLConnection.FetchData(dkSchemaIndices,
+        FetchSchemaIndices, SchemaIndicesFetched,
+        SchemaNode, 'Fetching Indices ...',
+        False, True);
+    except
+      SchemaNode.Free;
+      EndFetch;
+      raise;
+    end;
+  end
   else
   begin
-    FSearchLock.Acquire;
     try
       CatalogVST.BeginUpdate;
       try
@@ -1440,10 +1895,9 @@ begin
         end;
       finally
         CatalogVST.EndUpdate;
-        SchemaNode.Free;
       end;
     finally
-      FSearchLock.Release;
+      SchemaNode.Free;
     end;
   end;
 end;
@@ -1823,7 +2277,13 @@ begin
       if (NodeData^ is TMYX_SCHEMA) then
       begin
         CurrentSchema := TMYX_SCHEMA(NodeData^);
-        if (TMYX_SCHEMA(NodeData^).schema_tables = nil) then
+        // Port: also when the tables are there but the node still has its placeholder child (the tree was rebuilt
+        // while they were fetched).
+        ChildNodeData := nil;
+        if Assigned(Node.FirstChild) then
+          ChildNodeData := Sender.GetNodeData(Node.FirstChild);
+        if (TMYX_SCHEMA(NodeData^).schema_tables = nil) or
+          (Assigned(ChildNodeData) and (ChildNodeData^ = nil)) then
           RefreshTableNames(TSchemaVirtualNode.Create(Node, TMYX_SCHEMA(NodeData^)));
       end
       else
@@ -1918,15 +2378,24 @@ begin
 end;
 
 procedure TSchemataFrame.ClearCatalogTree;
+var
+  I: Integer;
 begin
-  FSearchLock.Acquire;
-  try
-    CatalogVST.Clear;
-    //Free mem for AddedSchemata
+  // Port: nodes kept by fetches in progress are gone now.
+  Inc(FTreeGeneration);
+  CatalogVST.Clear;
+  //Free mem for AddedSchemata
+  // Port: unless fetch threads may still fill them.
+  if FPendingFetches > 0 then
+  begin
+    AddedSchemataList.OwnsObjects := False;
+    for I := 0 to AddedSchemataList.Count - 1 do
+      RetireObject(AddedSchemataList[I]);
     AddedSchemataList.Clear;
-  finally
-    FSearchLock.Release;
-  end;
+    AddedSchemataList.OwnsObjects := True;
+  end
+  else
+    AddedSchemataList.Clear;
 end;
 
 function TSchemataFrame.GetCatalogVSTFocusedObject(MatchClass: TClass = nil): TObject;
@@ -2177,116 +2646,111 @@ begin
 
   if CatalogVST.SelectedCount > 0 then
   begin
-    FSearchLock.Acquire;
-    try
-      SelectedNodes := CatalogVST.GetSortedSelection(True);
-      Names := '';
-      SchemaListChanged := False;
+    SelectedNodes := CatalogVST.GetSortedSelection(True);
+    Names := '';
+    SchemaListChanged := False;
 
-      for I := 0 to High(SelectedNodes) do
+    for I := 0 to High(SelectedNodes) do
+    begin
+      NodeData := CatalogVST.GetNodeData(SelectedNodes[I]);
+
+      if NodeData^ is TMYX_SCHEMA then
+        Names := Names + TMYX_SCHEMA(NodeData^).schema_name
+      else
+        if NodeData^ is TMYX_SCHEMA_TABLE then
+          Names := Names + TMYX_SCHEMA_TABLE(NodeData^).table_name
+        else
+          if NodeData^ is TMYX_SCHEMA_STORED_PROCEDURE then
+            Names := Names + TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name;
+
+      Names := Names + #13#10;
+    end;
+
+    if Length(SelectedNodes) = 1 then
+    begin
+      // Remove trailing new line. We don't need it here.
+      SetLength(Names, Length(Names) - 2);
+      Question := _('Are you sure you want to delete the object') + ' "' + Names + '"?';
+    end
+    else
+      Question := _('Are you sure you want to delete these objects') + #13#10#13#10 + Names + '?';
+
+    if ShowModalDialog(_('Delete Objects'), Question + #13#10#13#10 +
+      _('Attention: this action cannot be rolled back!'), myx_mtConfirmation,
+      _('OK') + #13#10 + _('Cancel')) = 1 then
+    begin
+      for I := 0 to CatalogVST.SelectedCount-1 do
       begin
         NodeData := CatalogVST.GetNodeData(SelectedNodes[I]);
 
         if NodeData^ is TMYX_SCHEMA then
-          Names := Names + TMYX_SCHEMA(NodeData^).schema_name
-        else
-          if NodeData^ is TMYX_SCHEMA_TABLE then
-            Names := Names + TMYX_SCHEMA_TABLE(NodeData^).table_name
-          else
-            if NodeData^ is TMYX_SCHEMA_STORED_PROCEDURE then
-              Names := Names + TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name;
-
-        Names := Names + #13#10;
-      end;
-
-      if Length(SelectedNodes) = 1 then
-      begin
-        // Remove trailing new line. We don't need it here.
-        SetLength(Names, Length(Names) - 2);
-        Question := _('Are you sure you want to delete the object') + ' "' + Names + '"?';
-      end
-      else
-        Question := _('Are you sure you want to delete these objects') + #13#10#13#10 + Names + '?';
-
-      if ShowModalDialog(_('Delete Objects'), Question + #13#10#13#10 +
-        _('Attention: this action cannot be rolled back!'), myx_mtConfirmation,
-        _('OK') + #13#10 + _('Cancel')) = 1 then
-      begin
-        for I := 0 to CatalogVST.SelectedCount-1 do
         begin
-          NodeData := CatalogVST.GetNodeData(SelectedNodes[I]);
-
-          if NodeData^ is TMYX_SCHEMA then
+          if (CompareText(TMYX_SCHEMA(NodeData^).schema_name,
+            'mysql') = 0) then
+            ShowModalDialog(_('Cannot Drop MySQL Schema'),
+              _('You cannot drop the MySQL schema'),
+              myx_mtError, 'OK')
+          else
           begin
-            if (CompareText(TMYX_SCHEMA(NodeData^).schema_name,
-              'mysql') = 0) then
-              ShowModalDialog(_('Cannot Drop MySQL Schema'),
-                _('You cannot drop the MySQL schema'),
-                myx_mtError, 'OK')
-            else
+            SchemaPrivCount := 0;
+            FMySQLConnection.ExecuteDirectQuery('SELECT COUNT(*) FROM mysql.db WHERE db='''+TMYX_SCHEMA(NodeData^).schema_name+'''', self.SchemaPrivCountCallback);
+            if(SchemaPrivCount > 0) then
             begin
-              SchemaPrivCount := 0;
-              FMySQLConnection.ExecuteDirectQuery('SELECT COUNT(*) FROM mysql.db WHERE db='''+TMYX_SCHEMA(NodeData^).schema_name+'''', self.SchemaPrivCountCallback);
-              if(SchemaPrivCount > 0) then
-              begin
-                if (ShowModalDialog(_('Delete Objects'),
-                  Format(_('Do you want do remove the associated schema privileges?'#13#10#13#10 +
-                  'Please note that this action cannot be rolled back.'),
-                  []),
-                  myx_mtConfirmation, 'Yes'#13#10'No') = 1) then
-                  begin
-                    EscapedSchemaName := Tnt_WideStringReplace(TMYX_SCHEMA(NodeData^).schema_name,
-                      '_', '\_', [rfReplaceAll]);
-                    FMySQLConnection.ExecuteDirect('DELETE FROM mysql.db WHERE db=''' + EscapedSchemaName + '''');
-                    FMySQLConnection.ExecuteDirect('FLUSH PRIVILEGES');
-                  end;
-              end;
-
-              //If the user deleted the current default schema, reset it
-              if WideSameStr(FMySQLConnection.DefaultSchema, TMYX_SCHEMA(NodeData^).schema_name) then
-                FMySQLConnection.DefaultSchema := '';
-
-              FMySQLConnection.ExecuteDirect('/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;');
-              FMySQLConnection.ExecuteDirect('DROP DATABASE `' + TMYX_SCHEMA(NodeData^).schema_name + '`');
-              FMySQLConnection.ExecuteDirect('/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;');
-
-              SchemaListChanged := True;
+              if (ShowModalDialog(_('Delete Objects'),
+                Format(_('Do you want do remove the associated schema privileges?'#13#10#13#10 +
+                'Please note that this action cannot be rolled back.'),
+                []),
+                myx_mtConfirmation, 'Yes'#13#10'No') = 1) then
+                begin
+                  EscapedSchemaName := Tnt_WideStringReplace(TMYX_SCHEMA(NodeData^).schema_name,
+                    '_', '\_', [rfReplaceAll]);
+                  FMySQLConnection.ExecuteDirect('DELETE FROM mysql.db WHERE db=''' + EscapedSchemaName + '''');
+                  FMySQLConnection.ExecuteDirect('FLUSH PRIVILEGES');
+                end;
             end;
+
+            //If the user deleted the current default schema, reset it
+            if WideSameStr(FMySQLConnection.DefaultSchema, TMYX_SCHEMA(NodeData^).schema_name) then
+              FMySQLConnection.DefaultSchema := '';
+
+            FMySQLConnection.ExecuteDirect('/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;');
+            FMySQLConnection.ExecuteDirect('DROP DATABASE `' + TMYX_SCHEMA(NodeData^).schema_name + '`');
+            FMySQLConnection.ExecuteDirect('/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;');
+
+            SchemaListChanged := True;
+          end;
+        end
+        else
+        begin
+          if NodeData^ is TMYX_SCHEMA_TABLE then
+          begin
+            if TMYX_SCHEMA_TABLE(NodeData^).table_type = MSTT_BASE_TABLE then
+              FMySQLConnection.ExecuteDirect('DROP TABLE `' + CurrentSchema.schema_name + '`.' + '`' +
+                TMYX_SCHEMA_TABLE(NodeData^).table_name + '`')
+            else
+              FMySQLConnection.ExecuteDirect('DROP VIEW `' + CurrentSchema.schema_name + '`.' + '`' +
+                TMYX_SCHEMA_TABLE(NodeData^).table_name + '`');
+
           end
           else
           begin
-            if NodeData^ is TMYX_SCHEMA_TABLE then
+            if NodeData^ is TMYX_SCHEMA_STORED_PROCEDURE then
             begin
-              if TMYX_SCHEMA_TABLE(NodeData^).table_type = MSTT_BASE_TABLE then
-                FMySQLConnection.ExecuteDirect('DROP TABLE `' + CurrentSchema.schema_name + '`.' + '`' +
-                  TMYX_SCHEMA_TABLE(NodeData^).table_name + '`')
+              if TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).sp_type=MSPT_PROCEDURE then
+                FMySQLConnection.ExecuteDirect('DROP PROCEDURE `' +
+                  CurrentSchema.schema_name + '`.' + '`' + TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name + '`')
               else
-                FMySQLConnection.ExecuteDirect('DROP VIEW `' + CurrentSchema.schema_name + '`.' + '`' +
-                  TMYX_SCHEMA_TABLE(NodeData^).table_name + '`');
-
-            end
-            else
-            begin
-              if NodeData^ is TMYX_SCHEMA_STORED_PROCEDURE then
-              begin
-                if TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).sp_type=MSPT_PROCEDURE then
-                  FMySQLConnection.ExecuteDirect('DROP PROCEDURE `' +
-                    CurrentSchema.schema_name + '`.' + '`' + TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name + '`')
-                else
-                  FMySQLConnection.ExecuteDirect('DROP FUNCTION `' +
-                    CurrentSchema.schema_name + '`.' + '`' + TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name + '`');
-              end;
+                FMySQLConnection.ExecuteDirect('DROP FUNCTION `' +
+                  CurrentSchema.schema_name + '`.' + '`' + TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name + '`');
             end;
           end;
         end;
-
-        if SchemaListChanged then
-          FMySQLConnection.SchemaListChanged;
-
-        ReloadSchemaTree;
       end;
-    finally
-      FSearchLock.Release;
+
+      if SchemaListChanged then
+        FMySQLConnection.SchemaListChanged;
+
+      ReloadSchemaTree;
     end;
   end;
 end;
@@ -2590,7 +3054,7 @@ begin
       begin
         KillTimer(Handle, SearchTimer);
         Application.CancelHint;
-        SearchThread := TSearchThread.Create(DoSearch);
+        SearchThread := TSearchThread.Create(Self, DoSearch);
         SearchThread.OnTerminate := SearchTerminated;
         SearchThread.Resume;
       end;

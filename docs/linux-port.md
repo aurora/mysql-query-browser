@@ -141,6 +141,48 @@ depends on the server's latency or the size of the schema. If it happens again: 
 hangs (`gdb -batch -p <pid> -ex "set debuginfod enabled off" -ex "thread apply all bt 15"`), and start with
 `QBR_TRACE=1`.
 
+Crash while scrolling the Schemata tree (2026-11-12): the program aborted with
+`Gdk:ERROR:gdkregion-generic.c:1110:miUnionNonO: assertion failed: (y1 < y2)`. The core dump's stack (scanned by hand,
+GDK has no symbols) leads from the main loop through `TSchemataFrame.RefreshTableNames` (tables of a schema arriving
+from the fetch thread) into a tree invalidation. The LCL's GTK2 `ScrollWindowEx` was suspected first;
+`VTCompat.TVirtualStringTree` overrides `DoSetOffsetXY` outside Windows and repaints the whole tree instead of scrolling
+pixels (no visible change; Windows unchanged). That was not the cause, see the next paragraph.
+
+**Schemata tree hangs and crashes, reproduced and fixed (2026-11-13).** The developer mode `--stress-schemata <seconds>
+<file>` (with `--shot-main`; `QBR_STRESS_OPS` picks from t(oggle) s(croll) r(eload) f(ind) c(ollapse)) drives the tree
+in random order against a server with 8 schemata of 300 tables. Before the fix, every run with reloads hung within
+90 s (8 of 12) or aborted with the GDK assertion above or `double free or corruption`; after it, 24 of 24 runs passed.
+Four causes, all in the threads that fetch the schema data (the original code relied on the VCL tolerating them):
+
+1. *GUI calls from worker threads.* `TFetchDataThread` set `Screen.Cursor` (GTK2: `gdk_window_set_cursor` on every
+   window) and, through the `StatusBarText` property, repainted the status bar from the thread; `FetchSchemaTables`
+   disabled the search field from the thread; the search thread changed the tree directly. Xlib/GDK are not used
+   from two threads at once safely: this corrupted the C heap. Now all of it happens in the main thread
+   (`Synchronize`); the search thread only waits for fetches and lets `SearchStart/SearchStep/SearchFetched` walk the
+   tree in the main thread. **Changes the Windows build** (same behaviour, now correct there too).
+2. *Lock held by the main thread while a worker waited for it.* `FSearchLock` was taken by the main thread for every
+   tree change and held by the search and fetch threads during network work (main thread blocked, and a deadlock
+   with `Synchronize`). It is gone; `FFetchLock` only serializes the fetching itself.
+3. *Kept tree nodes and freed schema objects.* A fetch kept the `PVirtualNode` and `TMYX_SCHEMA` it was started for;
+   a reload in the meantime freed both, and the refresh wrote into freed memory. The tree now has a generation
+   counter (`ClearCatalogTree`), a late result looks the node up again (`FindTablesNode`) or is dropped, and
+   replaced catalog lists are freed only when no fetch is pending (`RetireObject`). Fetch errors are kept and raised
+   again in the main thread after cleaning up. Expanding a second schema while the first one loaded used to be
+   dropped silently (empty node); both are fetched now, one after the other.
+4. *Scroll bar loop in VirtualTreeView under GTK2.* `WMSize` updates the scroll bars, which changes the client size
+   again. Windows sends that `WM_SIZE` inside `ShowScrollBar`, where the tree ignores it; GTK2 delivers it later, and
+   since the horizontal range depends on the nodes in view, the bars could toggle forever (main loop busy in
+   `WMSize`/`UpdateScrollBars`/`ShowScrollBar`). `VTCompat` lets a size change show bars but not hide them
+   (non-Windows only).
+
+Also: each reload of the tree queued another catalog fetch, and each of them rebuilt the tree in turn (after
+many reloads the tree kept changing for up to two minutes). Reloads during a catalog fetch now only cause one more
+fetch after it (`FCatalogFetching`, `FReloadAgain`); the final tree is the same, it settled after 6-12 s instead of
+33-118 s in the stress test.
+
+These most likely explain the crash of 2026-10-31 and the hang of 2026-11-03 above. Not checked: a real desktop
+session and a remote server with real latency.
+
 ## AppImage (2026-11-04)
 
 `tools/package-appimage.sh` builds `dist/MySQL_Query_Browser-<version>-x86_64.AppImage` (ADR-0027): backend and

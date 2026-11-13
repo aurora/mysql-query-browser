@@ -222,6 +222,8 @@ type
       ARefreshMethod: TThreadExecMethod; ATarget: TObject; AStatusBarText: WideString; AAllowParallelExecution,
       ShowWaitCursor: Boolean);
     procedure UpdateStatusBar;
+    procedure BeginWaitCursor;
+    procedure EndWaitCursor;
     procedure ShowError;
     procedure ExecuteSynchronized(SynchronizedMethod: TThreadExecMethod);
     procedure ExecuteSynchronizedMethod;
@@ -1349,7 +1351,12 @@ begin
   FFetchMethod := AFetchMethod;
   FRefreshMethod := ARefreshMethod;
   FTarget := ATarget;
-  StatusBarText := AStatusBarText;
+  // Port: the search creates fetch threads from its own thread; the status bar is only updated in the main thread
+  // (Execute shows the text through Synchronize anyway).
+  if GetCurrentThreadId = MainThreadID then
+    StatusBarText := AStatusBarText
+  else
+    FStatusBarText := AStatusBarText;
   FSynchronizedMethod := nil;
   FAllowParallelExecution := AAllowParallelExecution;
   FShowWaitCursor := ShowWaitCursor;
@@ -1369,8 +1376,10 @@ begin
 
   InterlockedIncrement(DataThreadCount);
 
+  // Port: the cursor belongs to the main thread. Set from here, GTK2 called X11 from two threads at once while the
+  // schemata tree was scrolled and hung or aborted in GDK.
   if FShowWaitCursor then
-    Screen.Cursor := crAppStart;
+    Synchronize(BeginWaitCursor);
 
   try
     try
@@ -1422,14 +1431,32 @@ begin
     if (not (FAllowParallelExecution)) then
       FConnection.FFetchDataLock.Release;
 
-    StatusBarText := '';
+    // Port: not through the property, which updates the status bar at once, i.e. from this thread.
+    FStatusBarText := '';
     Synchronize(UpdateStatusBar);
 
     if DataThreadCount > 0 then
       InterlockedDecrement(DataThreadCount);
-    if (DataThreadCount = 0) and FShowWaitCursor then
-      Screen.Cursor := crDefault;
+    if FShowWaitCursor then
+      Synchronize(EndWaitCursor);
   end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TFetchDataThread.BeginWaitCursor;
+
+begin
+  Screen.Cursor := crAppStart;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TFetchDataThread.EndWaitCursor;
+
+begin
+  if DataThreadCount = 0 then
+    Screen.Cursor := crDefault;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
