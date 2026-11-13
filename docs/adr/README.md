@@ -37,6 +37,7 @@ Related.
 | [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle) |
 | [0027](0027-linux-appimage-built-on-almalinux-9.md) | Linux release as an AppImage, bundled GTK2 and backend built on AlmaLinux 9 | Accepted |
 | [0028](0028-bundled-tahoma-substitute-outside-windows.md) | Ship Wine's Tahoma stand-in and use it for the forms outside Windows | Accepted |
+| [0029](0029-search-fields-match-parts-of-names.md) | Search fields: input without wildcards matches parts of names | Proposed |
 
 ## Numbering
 
