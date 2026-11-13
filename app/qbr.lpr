@@ -86,10 +86,27 @@ type
   end;
 
 procedure TModalShooter.Fire(Sender: TObject);
+var
+  M: Integer;
 begin
   Timer.Enabled := False;
   if (Screen.ActiveForm <> nil) and (Screen.ActiveForm <> Application.MainForm) then
   begin
+    // where the dialog and the main window are, for checks with several monitors
+    with TStringList.Create do
+    try
+      Add(Format('dialog=%d,%d monitor=%d', [Screen.ActiveForm.Left, Screen.ActiveForm.Top,
+        Screen.ActiveForm.Monitor.MonitorNum]));
+      Add(Format('main=%d,%d monitor=%d', [Application.MainForm.Left, Application.MainForm.Top,
+        Application.MainForm.Monitor.MonitorNum]));
+      Add(Format('monitors=%d', [Screen.MonitorCount]));
+      for M := 0 to Screen.MonitorCount - 1 do
+        with Screen.Monitors[M].BoundsRect do
+          Add(Format('monitor %d: %d,%d-%d,%d', [M, Left, Top, Right, Bottom]));
+      SaveToFile(ChangeFileExt(FileName, '.txt'));
+    finally
+      Free;
+    end;
     CaptureWindowToPng(Screen.ActiveForm, FileName);
     Screen.ActiveForm.ModalResult := mrCancel;
   end

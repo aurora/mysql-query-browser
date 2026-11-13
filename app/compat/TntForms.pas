@@ -8,17 +8,80 @@ unit TntForms;
 interface
 
 uses
-  Forms;
+  Types, Forms;
 
 type
-  TTntForm = TForm;
   TTntFrame = TFrame;
   TTntScrollBox = TScrollBox;
+
+  { The VCL shows a form whose Position is poDesigned on the monitor that DefaultMonitor names (dmActiveForm by
+    default); the LCL ignores DefaultMonitor for poDesigned. With several monitors such dialogs therefore opened at
+    their designed coordinates, usually on the primary monitor, wherever the main window was. On its first show the
+    form is now moved to that monitor, keeping its position relative to the monitor. A position restored from the
+    options (PositionRestored, set by SetWinPos) is left alone. }
+  TTntForm = class(TForm)
+  private
+    FMonitorPlaced: Boolean;
+  protected
+    procedure MoveToDefaultPosition; override;
+  public
+    PositionRestored: Boolean;
+  end;
 
 { TNT's TntApplication gave access to Unicode versions of the Application methods }
 function TntApplication: TApplication;
 
 implementation
+
+procedure TTntForm.MoveToDefaultPosition;
+var
+  Target, Current: TMonitor;
+  Work: TRect;
+  X, Y: Integer;
+begin
+  inherited MoveToDefaultPosition;
+
+  if FMonitorPlaced or not Visible then
+    Exit;
+  FMonitorPlaced := True;
+  if (Position <> poDesigned) or (DefaultMonitor = dmDesktop) or PositionRestored or (Screen.MonitorCount < 2) or
+    (Parent <> nil) or (ParentWindow <> 0) or (WindowState <> wsNormal) or (Application.MainForm = nil) or
+    (Application.MainForm = Self) then
+    Exit;
+
+  case DefaultMonitor of
+    dmPrimary:
+      Target := Screen.PrimaryMonitor;
+    dmMainForm:
+      Target := Application.MainForm.Monitor;
+  else
+    if (Screen.ActiveCustomForm <> nil) and (Screen.ActiveCustomForm <> Self) then
+      Target := Screen.ActiveCustomForm.Monitor
+    else
+      Target := Application.MainForm.Monitor;
+  end;
+  Current := Screen.MonitorFromRect(BoundsRect);
+  if (Target = nil) or (Target = Current) then
+    Exit;
+
+  X := Left;
+  Y := Top;
+  if Current <> nil then
+  begin
+    X := X - Current.Left + Target.Left;
+    Y := Y - Current.Top + Target.Top;
+  end;
+  Work := Target.WorkareaRect;
+  if X + Width > Work.Right then
+    X := Work.Right - Width;
+  if X < Work.Left then
+    X := Work.Left;
+  if Y + Height > Work.Bottom then
+    Y := Work.Bottom - Height;
+  if Y < Work.Top then
+    Y := Work.Top;
+  SetBounds(X, Y, Width, Height);
+end;
 
 function TntApplication: TApplication;
 begin

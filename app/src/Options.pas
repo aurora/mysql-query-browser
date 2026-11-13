@@ -667,6 +667,9 @@ begin
   end;
 
   Win.WindowState := WinPos.State;
+
+  // Port: a restored position stays where the user put it (TTntForm moves designed positions to the active monitor).
+  Win.PositionRestored := True;
 end;
 
 //----------------- TMYXCommonOptions ----------------------------------------------------------------------------------

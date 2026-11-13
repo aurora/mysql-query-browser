@@ -2232,6 +2232,18 @@ begin
           SaveResultsetAs(Copy(Name, 8, Pos('=', Name) - 8), Copy(Name, Pos('=', Name) + 1, MaxInt));
         end
         else
+        if Copy(Name, 1, 12) = 'mainmonitor:' then
+        begin
+          // mainmonitor:<n> puts the main window on monitor n (checks with several monitors)
+          P := StrToIntDef(Copy(Name, 13, MaxInt), 0);
+          if P < Screen.MonitorCount then
+          begin
+            Application.MainForm.Left := Screen.Monitors[P].Left + 40;
+            Application.MainForm.Top := Screen.Monitors[P].Top + 30;
+            Application.MainForm.SetFocus;
+          end;
+        end
+        else
         if SameText(Name, 'viewfield') or SameText(Name, 'editfield') then
         begin
           // the context menu entries "View/Edit Field in Popup Editor" on the second cell of the first row
