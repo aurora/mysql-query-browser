@@ -880,7 +880,6 @@ object EditorTableForm: TEditorTableForm
             VertScrollBar.Smooth = True
             VertScrollBar.Tracking = True
             Align = alClient
-            BevelOuter = bvNone
             BorderStyle = bsNone
             TabOrder = 0
             object ScrollSpacerTableOptionsShape: TShape
@@ -1001,7 +1000,6 @@ object EditorTableForm: TEditorTableForm
             VertScrollBar.Smooth = True
             VertScrollBar.Tracking = True
             Align = alClient
-            BevelOuter = bvNone
             BorderStyle = bsNone
             TabOrder = 0
             object ScrollSpacerAdvOptShape: TShape

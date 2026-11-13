@@ -307,6 +307,9 @@ DROP_ALWAYS = {
 # Properties that only exist on some classes in the LCL.
 DROP_BY_CLASS = {
     "TPanel": {"AutoScroll"},
+    # the LCL's TScrollBox has no bevels (the table editor's options page set BevelOuter = bvNone, and loading
+    # the frame failed with "Unknown property")
+    "TScrollBox": {"BevelOuter"},
     "TVirtualStringTree": {"HintAnimation"},
 }
 
