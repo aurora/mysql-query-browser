@@ -237,6 +237,9 @@ type
   end;
 
   TUniCodeEdit = class(TCustomUnicodeEdit)
+  published
+    // Set by MySQLResultSetFieldViewer.lfm; without it loading the form failed and the popup editor never opened.
+    property OnScroll;
   end;
 
 implementation

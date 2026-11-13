@@ -2232,6 +2232,20 @@ begin
           SaveResultsetAs(Copy(Name, 8, Pos('=', Name) - 8), Copy(Name, Pos('=', Name) + 1, MaxInt));
         end
         else
+        if SameText(Name, 'viewfield') or SameText(Name, 'editfield') then
+        begin
+          // the context menu entries "View/Edit Field in Popup Editor" on the second cell of the first row
+          with ActiveResultsetPanel.RSGrid do
+          begin
+            FocusedNode := GetFirst;
+            FocusedColumn := 2;
+          end;
+          if SameText(Name, 'viewfield') then
+            ViewFieldinPopupEditorMIClick(nil)
+          else
+            EditFieldinPopupEditorMIClick(nil);
+        end
+        else
         if SameText(Name, 'setcell') then
           TGridAccess(ActiveResultsetPanel.RSGrid).DoNewText(ActiveResultsetPanel.RSGrid.GetFirst, 1, 'EDITED')
         else

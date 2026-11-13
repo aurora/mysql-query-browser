@@ -188,7 +188,12 @@ executed (stopped or not), typing e.g. ` LIMIT 5` and executing again ran the ol
 `UpdateCommandDisplay` kept the old command end and cut the new text to the old length. A changed line is now
 validated again on its next access, as in the original. Reproduced and checked with the developer mode
 `--stop-and-edit <schema> <table> <ms|-1> <addition> <file>` (double click, execute, stop after <ms>, type, execute);
-the script tab (statement markers, error line, breakpoint) still works. Not checked: a real desktop
+the script tab (statement markers, error line, breakpoint) still works.
+
+**Field popup editor did not open (2026-11-13, fixed).** "View/Edit Field in Popup Editor" in the result grid's
+context menu did nothing: loading `MySQLResultSetFieldViewer.lfm` raised `EReadError: Unknown property "OnScroll"`
+because the compat `TUniCodeEdit` had the event only as public. It is published now; both dialogs open and show
+the field (checked with `--cmd viewfield` / `--cmd editfield` and `--modal-shot`). Not checked: a real desktop
 session and a remote server with real latency.
 
 ## AppImage (2026-11-04)
