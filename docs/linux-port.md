@@ -205,7 +205,13 @@ monitor; positions restored from the options (`SetWinPos`) are left alone. **Cha
 behaviour there). Checked under Xvfb only that one monitor is unchanged: Xvfb puts its Xinerama screens on top of
 each other, so two monitors side by side need a real desktop (or Xephyr / the Xorg dummy driver). `--modal-shot`
 now also writes the positions of the dialog, the main window and the monitors next to the screenshot
-(`<name>.txt`), and `--cmd mainmonitor:<n>` puts the main window on monitor n. Not checked: a real desktop
+(`<name>.txt`), and `--cmd mainmonitor:<n>` puts the main window on monitor n.
+
+**Search fields lost their bottom line (2026-11-13, fixed).** The search fields above the schemata, bookmarks and
+history trees (`TAdvancedEditFrame`, 23 pixels high) draw their own border around a borderless edit at `Top = 5`.
+GTK2 makes that edit 20 pixels high instead of the original 15, so it covered the bottom line and the text sat low.
+Outside Windows the edit is now centered within the border (`FrameResize`). Checked by screenshot (`--cmd search:<text>`
+types into the schemata search field; `DevDump` writes the field's geometry). Not checked: a real desktop
 session and a remote server with real latency.
 
 ## AppImage (2026-11-04)

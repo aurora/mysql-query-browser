@@ -178,7 +178,15 @@ end;
 procedure TAdvancedEditFrame.FrameResize(Sender: TObject);
 
 begin
+  {$IFDEF MSWINDOWS}
   SearchEd.Top := 5;
+  {$ELSE}
+  // Port: GTK2 does not make a borderless edit smaller than its text needs (20 instead of 15 pixels for the 23 pixel
+  // frame), so at Top 5 it covered the frame's bottom line and the text sat low. Center it within the border instead.
+  if SearchEd.Height > Height - 2 then
+    SearchEd.Height := Height - 2;
+  SearchEd.Top := (Height - SearchEd.Height) div 2;
+  {$ENDIF}
   SearchEd.Left := 26;
   SearchEd.Width := Width - 186 + 138;
 end;

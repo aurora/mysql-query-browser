@@ -2232,6 +2232,10 @@ begin
           SaveResultsetAs(Copy(Name, 8, Pos('=', Name) - 8), Copy(Name, Pos('=', Name) + 1, MaxInt));
         end
         else
+        if Copy(Name, 1, 7) = 'search:' then
+          // search:<text> types into the schemata search field
+          SchemataFrame.AdvancedEdit.SearchEd.Text := Copy(Name, 8, MaxInt)
+        else
         if Copy(Name, 1, 12) = 'mainmonitor:' then
         begin
           // mainmonitor:<n> puts the main window on monitor n (checks with several monitors)
@@ -2304,6 +2308,9 @@ begin
       Node := SchemataFrame.CatalogVST.GetNext(Node);
     end;
     L.Add('visible=' + IntToStr(SchemataFrame.CatalogVST.VisibleCount));
+    with SchemataFrame.AdvancedEdit do
+      L.Add(Format('search frame %dx%d, edit %d,%d %dx%d', [Width, Height, SearchEd.Left, SearchEd.Top,
+        SearchEd.Width, SearchEd.Height]));
     if ActiveResultsetPanel <> nil then
       with ActiveResultsetPanel do
       begin
