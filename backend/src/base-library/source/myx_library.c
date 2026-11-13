@@ -1362,8 +1362,11 @@ int myx_match_pattern(const char *text, const char *search, int case_sensitive, 
   #endif
     int stackp= 0;
     const char *search_begin= search;
-    const char *tend= text+g_utf8_strlen(text, (gssize)strlen(text));
-    const char *send= search+g_utf8_strlen(text, (gssize)strlen(search));
+    /* The original computed both ends from the number of characters (send even from text), so for non-ASCII text
+       the lengths passed to g_utf8_get_char_validated were too short and no name with such characters matched,
+       not even itself. The ends are byte positions. */
+    const char *tend= text+strlen(text);
+    const char *send= search+strlen(search);
 
     gunichar (*normcase)(gunichar)= case_sensitive ? dummy : g_unichar_toupper;
 
@@ -1375,7 +1378,8 @@ int myx_match_pattern(const char *text, const char *search, int case_sensitive, 
         search= g_utf8_next_char(search);
         if (*search != '?')
         {
-          gunichar norm_search= normcase(*search);
+          /* the character after '*', not its first byte (the original read *search) */
+          gunichar norm_search= normcase(g_utf8_get_char_validated(search, (gssize)(send-search)));
           stack[stackp++]= search;
           while (*text && normcase(g_utf8_get_char_validated(text, (gssize)(tend - text))) != norm_search)
             text= g_utf8_next_char(text);
@@ -1388,7 +1392,8 @@ int myx_match_pattern(const char *text, const char *search, int case_sensitive, 
         break;
       
        default:
-        if (normcase(g_utf8_get_char_validated(text, (gssize)(tend-search))) != normcase(g_utf8_get_char_validated(search, (gssize)(send-search))))
+        /* the length left of text, not of search (the original passed tend-search) */
+        if (normcase(g_utf8_get_char_validated(text, (gssize)(tend-text))) != normcase(g_utf8_get_char_validated(search, (gssize)(send-search))))
         {
           if (stackp==0)
           {

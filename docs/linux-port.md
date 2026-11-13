@@ -214,6 +214,13 @@ Outside Windows the edit is now centered within the border (`FrameResize`). Chec
 types into the schemata search field; `DevDump` writes the field's geometry). Not checked: a real desktop
 session and a remote server with real latency.
 
+**Search did not find names with non-ASCII characters (2026-11-14, fixed; all platforms).** `myx_match_pattern`
+computed the end of the text and of the pattern from the number of characters instead of bytes, read the character
+after `*` as a single byte and gave the text's character the pattern's remaining length. A schema `bär` was not found
+even by `bär`. Fixed in `backend/src/base-library/source/myx_library.c`; ASCII behaviour unchanged (whole names, `*`
+and `?`, see ADR-0029). FPCUnit test `test_match_pattern` (no server needed); checked in the app with `--cmd
+search:<text>` (`searchall` selects the menu entry "All", `wait:<ms>` waits for background work).
+
 **Menu smoke test (2026-11-14).** `--menu-smoke list|run <report>` (unit `DevMenuSmoke`, runs after the other
 developer steps, e.g. `--sql`) clicks every entry of all main and popup menus, frames included, after running what
 opening the menu runs (`OnPopup`, the parent entries' `OnClick`). A timer closes modal dialogs, exceptions are recorded
