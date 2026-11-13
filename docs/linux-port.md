@@ -214,6 +214,25 @@ Outside Windows the edit is now centered within the border (`FrameResize`). Chec
 types into the schemata search field; `DevDump` writes the field's geometry). Not checked: a real desktop
 session and a remote server with real latency.
 
+**Menu smoke test (2026-11-14).** `--menu-smoke list|run <report>` (unit `DevMenuSmoke`, runs after the other
+developer steps, e.g. `--sql`) clicks every entry of all main and popup menus, frames included, after running what
+opening the menu runs (`OnPopup`, the parent entries' `OnClick`). A timer closes modal dialogs, exceptions are recorded
+with a stack trace instead of ending the program, the report is written after every entry. Entries that open native
+file dialogs or the browser, or end the program, are skipped. First run: 7 exceptions in 137 entries; fixed:
+
+- *Table editor did not open* (Create New Table, Edit Table): `EditorTable.lfm` set `BevelOuter` on a `TScrollBox`,
+  which the LCL does not have (the frame was never loaded by the converter's viewer). `dfm2lfm.py` drops it.
+- *Create View from Select* without a result in the tab, *Refresh Parameters* without an active result set,
+  *Edit All Stored Procedures / Functions* without loaded procedures: access violations, the same code as the
+  original. Now the original's error message, the global parameters, and the procedures fetched on demand.
+- *Freed schema objects*: `CurrentSchema`/`CurrentTable` and the default schema node kept pointing into the catalog
+  list that a refresh of the tree had freed (found through "Edit All Stored Procedures" after "Refresh"). Reset when
+  the tree is cleared.
+
+Left as they are: "Copy Query as PHP/Java Code" crash without a pasted code template only when clicked while
+disabled (the popup disables them, as in the original); "Compare Resultsets" with one grid raises the original's
+message. `--cmd click:<menu entry name>` clicks one entry (with `--modal-shot` to photograph the window it opens).
+
 ## AppImage (2026-11-04)
 
 `tools/package-appimage.sh` builds `dist/MySQL_Query_Browser-<version>-x86_64.AppImage` (ADR-0027): backend and

@@ -18,7 +18,7 @@ uses
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
   UCEShared, UCEHighlighter, UniCodeEditor, UCEEditorKeyCommands, UniCodeConsole,
-  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main{$IFNDEF MSWINDOWS}, GtkDpi, AppFonts, Math{$ENDIF};
+  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main, DevMenuSmoke{$IFNDEF MSWINDOWS}, GtkDpi, AppFonts, Math{$ENDIF};
 
 {$IFNDEF MSWINDOWS}
 procedure xmlInitParser; cdecl; external 'xml2';
@@ -391,6 +391,13 @@ begin
             end;
             Dlg.Close;
           end;
+        end;
+      for I := 1 to ParamCount - 2 do
+        if ParamStr(I) = '--menu-smoke' then
+        begin
+          // --menu-smoke list|run <report file>; runs after the other steps (e.g. --sql)
+          for K := 1 to 10 do begin Application.ProcessMessages; CheckSynchronize; Sleep(50); end;
+          RunMenuSmoke(ParamStr(I + 1), ParamStr(I + 2));
         end;
       Trace('shot: capture');
       CaptureWindowToPng(MainForm, ShotFile);

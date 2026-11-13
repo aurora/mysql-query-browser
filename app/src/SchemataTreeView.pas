@@ -2384,6 +2384,13 @@ begin
   // Port: nodes kept by fetches in progress are gone now.
   Inc(FTreeGeneration);
   CatalogVST.Clear;
+  // Port: so are the nodes and, on a reload, the schema objects these refer to. The original kept them, and e.g.
+  // "Edit All Stored Procedures" after a refresh of the tree read a freed schema. The selection and SetDefaultSchema
+  // set them again when the tree is rebuilt.
+  CurrentSchema := nil;
+  CurrentTable := nil;
+  FDefaultSchemaNode.Schema := nil;
+  FDefaultSchemaNode.Node := nil;
   //Free mem for AddedSchemata
   // Port: unless fetch threads may still fill them.
   if FPendingFetches > 0 then

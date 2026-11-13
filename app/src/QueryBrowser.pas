@@ -2164,6 +2164,28 @@ end;
 type
   TGridAccess = class(TMySQLRSGrid);
 
+function FindMenuItemByName(Owner: TComponent; const Name: String): TMenuItem;
+
+// developer mode: the menu entry of that name owned by Owner or one of the frames it owns
+
+var
+  I: Integer;
+
+begin
+  Result := nil;
+  for I := 0 to Owner.ComponentCount - 1 do
+  begin
+    if (Owner.Components[I] is TMenuItem) and SameText(Owner.Components[I].Name, Name) then
+      Exit(TMenuItem(Owner.Components[I]));
+    if Owner.Components[I].ComponentCount > 0 then
+    begin
+      Result := FindMenuItemByName(Owner.Components[I], Name);
+      if Result <> nil then
+        Exit;
+    end;
+  end;
+end;
+
 procedure TQueryBrowserForm.DevCommand(const Name: String);
 
 var
@@ -2231,6 +2253,33 @@ begin
           // export:<format>=<file>
           SaveResultsetAs(Copy(Name, 8, Pos('=', Name) - 8), Copy(Name, Pos('=', Name) + 1, MaxInt));
         end
+        else
+        if Copy(Name, 1, 5) = 'wait:' then
+        begin
+          // wait:<ms> lets background work (e.g. a search fetching tables) finish
+          P := StrToIntDef(Copy(Name, 6, MaxInt), 1000) div 20;
+          while P > 0 do
+          begin
+            Application.ProcessMessages;
+            CheckSynchronize(20);
+            Dec(P);
+          end;
+        end
+        else
+        if Copy(Name, 1, 6) = 'click:' then
+        begin
+          // click:<component name> clicks the menu entry of that name on any open form or frame
+          for P := 0 to Screen.FormCount - 1 do
+            if FindMenuItemByName(Screen.Forms[P], Copy(Name, 7, MaxInt)) <> nil then
+            begin
+              FindMenuItemByName(Screen.Forms[P], Copy(Name, 7, MaxInt)).Click;
+              Break;
+            end;
+        end
+        else
+        if Name = 'searchall' then
+          // the search field's menu entry "All" (schemata, tables, columns, ...)
+          SchemataFrame.SearchMIClick(SchemataFrame.SearchAllMI)
         else
         if Copy(Name, 1, 7) = 'search:' then
           // search:<text> types into the schemata search field
@@ -3092,7 +3141,9 @@ var
 
 begin
   Resultset := ActiveResultset;
-  if (Resultset = Sender) then
+  // Port: without an active result set (Sender nil, as RefreshParametersMIClick passes it) only the global parameters
+  // are shown; the original compared nil with nil and read the parameters of no result set.
+  if Assigned(Resultset) and (Resultset = Sender) then
   begin
     ParamVT.DeleteChildren(GlobalParamsNode);
     if Assigned(Resultset.GlobalParams) then
@@ -7948,7 +7999,9 @@ var
   ViewName: WideString;
 
 begin
-  if Assigned(ActiveResultset) and (ActiveResultset.ResultSet.query.query_type = MYX_QT_SELECT)then
+  // Port: also when the tab has no result yet (the original read the query of no result set).
+  if Assigned(ActiveResultset) and Assigned(ActiveResultset.ResultSet) and Assigned(ActiveResultset.ResultSet.query) and
+    (ActiveResultset.ResultSet.query.query_type = MYX_QT_SELECT)then
   begin
     if ShowModalEditDialog(_('Enter View Name'),
       _('Please enter the name of the VIEW you want '+
@@ -7969,10 +8022,36 @@ end;
 
 procedure TQueryBrowserForm.SQLEditSPClick(Sender: TObject);
 
+// Port: the original read the procedures the schemata tree had loaded and crashed when it had not loaded them yet
+// (schema not expanded) or no schema was selected. They are fetched here in that case.
+
+var
+  SPs: PMYX_SCHEMA_STORED_PROCEDURES;
+
 begin
-  EditScript(SchemataFrame.CurrentSchema.schema_name+' procedures',
-    myx_dbm_make_script_from_sps(MySQLConn.MySQL, '',
-      MySQLConn.DefaultSchema, SchemataFrame.CurrentSchema.schema_sps.get_record_pointer, '`'));
+  if SchemataFrame.CurrentSchema = nil then
+  begin
+    ShowError(_('Error'), _('Please select a schema first.'), []);
+    Exit;
+  end;
+
+  if Assigned(SchemataFrame.CurrentSchema.schema_sps) then
+    EditScript(SchemataFrame.CurrentSchema.schema_name+' procedures',
+      myx_dbm_make_script_from_sps(MySQLConn.MySQL, '',
+        MySQLConn.DefaultSchema, SchemataFrame.CurrentSchema.schema_sps.get_record_pointer, '`'))
+  else
+  begin
+    SPs := myx_get_schema_sps(MySQLConn.MySQL, '', SchemataFrame.CurrentSchema.schema_name);
+    if SPs = nil then
+      raise EMyxSQLError.Create(_('Could not fetch stored procedures.'), myx_mysql_errno(MySQLConn.MySQL),
+        myx_mysql_error(MySQLConn.MySQL));
+    try
+      EditScript(SchemataFrame.CurrentSchema.schema_name+' procedures',
+        myx_dbm_make_script_from_sps(MySQLConn.MySQL, '', MySQLConn.DefaultSchema, SPs, '`'));
+    finally
+      myx_free_schema_sps(SPs);
+    end;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
