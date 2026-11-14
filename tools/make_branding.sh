@@ -19,13 +19,17 @@ FONT="$(fc-match -f '%{file}' 'Liberation Sans:style=Regular')"
 
 mkdir -p "$OUT"
 
-# About dialog and splash screen (444x341). The background behind the logo is a vertical gradient, so
-# a clean column (x = 262, left of the bolt) stretched over the logo area removes it.
-magick "$SRC/about.png" \
-  \( "$SRC/about.png" -crop 1x110+262+125 +repage -scale '245x110!' \) \
-  -geometry +15+125 -composite \
-  -font "$FONT" -pointsize 40 -fill "$BLUE" -annotate +24+219 "$NAME" \
-  -strip "$OUT/about.png"
+# About dialog (720x341, ADR-0032): the QueryMole artwork (assets/querymole-about.png) scaled to 720x277, on its
+# background colour, the lowest rows faded into the band below. The dialog writes its texts into the empty area
+# right of the mole, below the line under the slogan (x >= 468, y >= 104; CommonFuncs.CreateAboutForm, which also
+# sets the text colours). If the artwork changes, check those numbers.
+NAVY="rgb(13,32,53)"             # background of the artwork
+magick -size 720x341 "xc:$NAVY" \
+  \( "$ROOT/assets/querymole-about.png" -resize 720x -alpha set \
+     \( -size 720x261 xc:white -size 720x16 gradient:white-black -append \) \
+     -compose CopyOpacity -composite \) \
+  -compose Over -geometry +0+0 -composite \
+  -alpha off -depth 8 -strip "$OUT/about.png"
 
 # Header of the connect dialog (418x67). The logo and the words sit on white; the blue line at the
 # bottom (y >= 61) stays.

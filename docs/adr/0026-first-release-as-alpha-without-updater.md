@@ -1,6 +1,6 @@
 # ADR-0026 — First public release as an alpha: no updater, own version, About dialog with the revival's credits
 
-- Status: Accepted (principle); packaging for Linux and macOS is not done yet; the sentence on the copyright line is amended by ADR-0031
+- Status: Accepted (principle); packaging for Linux and macOS is not done yet; the sentence on the copyright line is amended by ADR-0031; credits layout and licence note amended by ADR-0032
 - Date: 2026-11-03
 - Deciders: Harald Lapp (project owner)
 

@@ -34,12 +34,13 @@ Related.
 | [0023](0023-pin-gtk-dpi-to-96.md) | Pin GTK's dpi setting to 96 on Linux | Accepted (GTK2) |
 | [0024](0024-gtk2-for-the-first-release-then-qt.md) | GTK2 for the first release, a move to Qt afterwards | Accepted (principle) |
 | [0025](0025-keep-the-package-id-when-renaming.md) | Keep the Velopack package id and the update feed when the application is renamed | Superseded by ADR-0030 |
-| [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle); copyright sentence amended by ADR-0031 |
+| [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle); copyright sentence amended by ADR-0031, credits and licence note by ADR-0032 |
 | [0027](0027-linux-appimage-built-on-almalinux-9.md) | Linux release as an AppImage, bundled GTK2 and backend built on AlmaLinux 9 | Accepted |
 | [0028](0028-bundled-tahoma-substitute-outside-windows.md) | Ship Wine's Tahoma stand-in and use it for the forms outside Windows | Accepted |
 | [0029](0029-search-fields-match-parts-of-names.md) | Search fields: input without wildcards matches parts of names | Proposed |
-| [0030](0030-rename-to-querymole.md) | Rename the application to QueryMole before the public announcement | Accepted (implemented; icon and busy animation open) |
+| [0030](0030-rename-to-querymole.md) | Rename the application to QueryMole before the public announcement | Accepted (implemented; icon and busy animation open; About picture: ADR-0032) |
 | [0031](0031-copyright-notice-of-the-maintainer.md) | Copyright notice of the project maintainer in NOTICE and the About dialog | Accepted |
+| [0032](0032-querymole-artwork-in-the-about-dialog.md) | QueryMole artwork in the About dialog | Accepted (implemented) |
 
 ## Numbering
 

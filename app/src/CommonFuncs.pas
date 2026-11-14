@@ -21,8 +21,9 @@ const
 // version of the original this program is based on.
 function RevivalVersionText: WideString;
 
-// Texts of the About dialog (version line and credits, ADR-0026).
+// Texts of the About dialog (version line, the original it is based on, credits; ADR-0026, ADR-0030).
 function AboutVersionText: WideString;
+function AboutBasedOnText: WideString;
 function AboutCreditsText: WideString;
 
 procedure CheckCommonCommandlineParameter;
@@ -34,7 +35,7 @@ function ShowSplashScreen(Caption: WideString): TAboutForm;
 implementation
 
 uses
-  Classes;
+  Classes, Graphics, StdCtrls;
 
 // -----------------------------------------------------------------------------
 
@@ -49,8 +50,15 @@ end;
 function AboutVersionText: WideString;
 
 begin
-  Result := RevivalVersionText + ' (' + _('based on') + ' MySQL Query Browser ' + product_version + ' ' +
-    product_build_level + ')';
+  Result := RevivalVersionText;
+end;
+
+// -----------------------------------------------------------------------------
+
+function AboutBasedOnText: WideString;
+
+begin
+  Result := _('based on') + ' MySQL Query Browser ' + product_version + ' ' + product_build_level;
 end;
 
 // -----------------------------------------------------------------------------
@@ -65,8 +73,81 @@ begin
     'Victor Vagin, library coding, QA | ' +
     'Ulrich Bayer, library coding, WIX | ' +
     'Brian Aker, main concept | ' +
-    'Mike Hillyer, documentation | ' +
-    'Revival (Free Pascal / Lazarus): Harald Lapp, with the help of Claude Code (Anthropic), an AI coding assistant';
+    'Mike Hillyer, documentation';
+end;
+
+// -----------------------------------------------------------------------------
+
+function AboutRevivalCreditsText: WideString;
+
+begin
+  Result := 'Harald Lapp, port to Free Pascal / Lazarus, maintenance, with the help of Claude Code (Anthropic), an ' +
+    'AI coding assistant';
+end;
+
+// -----------------------------------------------------------------------------
+
+type
+  // The credits view of the About dialog has two sections (ADR-0032); the labels added for them are shown and
+  // hidden together with the original's credits label.
+  TAboutCreditsToggle = class(TComponent)
+  public
+    Form: TAboutForm;
+    Labels: array of TLabel;
+    procedure CreditsClick(Sender: TObject);
+  end;
+
+procedure TAboutCreditsToggle.CreditsClick(Sender: TObject);
+
+var
+  I: Integer;
+
+begin
+  Form.CreditsBtnClick(Sender);
+  for I := 0 to High(Labels) do
+    Labels[I].Visible := Form.TextLbl.Visible;
+end;
+
+// -----------------------------------------------------------------------------
+
+// Height of Text wrapped into Width pixels in Font.
+function WrappedTextHeight(Font: TFont; const Text: String; Width: Integer): Integer;
+
+var
+  Bitmap: TBitmap;
+  R: TRect;
+
+begin
+  Bitmap := TBitmap.Create;
+  try
+    Bitmap.SetSize(1, 1);
+    Bitmap.Canvas.Font := Font;
+    R := Rect(0, 0, Width, 0);
+    DrawText(Bitmap.Canvas.Handle, PChar(Text), Length(Text), R, DT_CALCRECT or DT_WORDBREAK or DT_NOPREFIX);
+    Result := R.Bottom - R.Top;
+  finally
+    Bitmap.Free;
+  end;
+end;
+
+// -----------------------------------------------------------------------------
+
+function AddAboutLabel(Form: TAboutForm; Template: TLabel; Bold: Boolean; Top: Integer; const Caption: String): TLabel;
+
+begin
+  Result := TLabel.Create(Form);
+  Result.Parent := Form;
+  Result.Transparent := True;
+  Result.Font := Template.Font;
+  if Bold then
+    Result.Font.Style := [fsBold];
+  Result.AutoSize := False;
+  Result.WordWrap := True;
+  Result.Left := Template.Left;
+  Result.Width := Template.Width;
+  Result.Top := Top;
+  Result.Height := WrappedTextHeight(Result.Font, Caption, Result.Width);
+  Result.Caption := Caption;
 end;
 
 // -----------------------------------------------------------------------------
@@ -164,30 +245,86 @@ end;
 
 function CreateAboutForm(Caption: WideString; Version: WideString; Credits: WideString): TAboutForm;
 
+var
+  W, Grow, I: Integer;
+  BasedOnLbl, Heading: TLabel;
+  Toggle: TAboutCreditsToggle;
+
 begin
   Result := TAboutForm.Create(nil);
   Result.Caption := _('About ') + Caption;
   Result.VersionLbl.Caption := _('version') + ' ' + Version;
   Result.TextLbl.Caption := Credits;
-  // The revival adds lines to the original's texts (ADR-0026): the credits get the space down to the button line
-  // and the licence note names the source.
-  Result.TextLbl.Top := 254;
-  Result.TextLbl.Height := 85;
-  // The original's copyright line stays as it is; the project's own notice goes below it (ADR-0031).
-  Result.CopyrightLbl.Top := 254;
-  Result.CopyrightLbl.Height := 28;
-  Result.CopyrightLbl.WordWrap := True;
-  Result.CopyrightLbl.Caption := Result.CopyrightLbl.Caption + LineEnding + RevivalProductName + ' ' +
-    #$C2#$A9 + ' 2026 Harald Lapp and contributors.';
+  // The QueryMole picture (ADR-0032) is wider than the original's and dark: the dialog takes its width, the texts
+  // are light and stand in a column right of the mole, below the line under the slogan (the numbers belong to the
+  // picture that tools/make_branding.sh writes). The lines are set by hand instead of wrapped where they can be.
+  W := Result.AboutImg.Picture.Width;
+  if W < Result.AboutImg.Width then
+    W := Result.AboutImg.Width;
+  Grow := W - Result.AboutImg.Width;
+  Result.ClientWidth := Result.ClientWidth + Grow;
+  Result.AboutImg.Width := W;
+  Result.TntBevel1.Width := Result.TntBevel1.Width + Grow;
+  Result.CloseBtn.Left := Result.CloseBtn.Left + Grow;
+  Result.CreditsBtn.Left := Result.CreditsBtn.Left + Grow;
+  Result.VersionLbl.Left := 468;
+  Result.CopyrightLbl.Left := 468;
+  Result.LicenceLbl.Left := 468;
+  Result.TextLbl.Left := 468;
+  Result.VersionLbl.Width := 240;
+  Result.CopyrightLbl.Width := 240;
+  Result.LicenceLbl.Width := 240;
+  Result.TextLbl.Width := 240;
+  Result.VersionLbl.Font.Color := RGBToColor(206, 218, 232);
+  Result.CopyrightLbl.Font.Color := RGBToColor(160, 178, 200);
+  Result.LicenceLbl.Font.Color := RGBToColor(160, 178, 200);
+  Result.TextLbl.Font.Color := RGBToColor(160, 178, 200);
   {$IFNDEF MSWINDOWS}
   // Port: the substitute for Tahoma is wider; one pixel less keeps the texts above the button line
   Result.TextLbl.Font.Height := -10;
   Result.LicenceLbl.Font.Height := -10;
   Result.CopyrightLbl.Font.Height := -10;
   {$ENDIF}
-  Result.LicenceLbl.Caption := _('This software is released under the GNU General Public License, version 2 or ' +
-    '(at your option) any later version, and comes with NO WARRANTY. Source code and bug reports: ' +
-    RevivalProjectUrl + '. Not affiliated with Oracle.');
+  // Version of QueryMole (bold), below it the original it is based on (ADR-0030), in the plain font.
+  Result.VersionLbl.Top := 106;
+  BasedOnLbl := TLabel.Create(Result);
+  BasedOnLbl.Parent := Result;
+  BasedOnLbl.Transparent := True;
+  BasedOnLbl.Font := Result.TextLbl.Font;
+  BasedOnLbl.Left := 468;
+  BasedOnLbl.Top := 122;
+  BasedOnLbl.Caption := AboutBasedOnText;
+  // Credits in two sections (ADR-0032): the original's authors, unchanged, under a heading that says what they
+  // worked on, then the people of QueryMole. Heights are measured, so each section follows the previous one.
+  Heading := AddAboutLabel(Result, Result.TextLbl, True, 146, _('Original: MySQL Query Browser (MySQL AB)'));
+  Result.TextLbl.Top := Heading.Top + Heading.Height + 1;
+  Result.TextLbl.Height := WrappedTextHeight(Result.TextLbl.Font, Result.TextLbl.Caption, Result.TextLbl.Width);
+  Toggle := TAboutCreditsToggle.Create(Result);
+  Toggle.Form := Result;
+  SetLength(Toggle.Labels, 3);
+  Toggle.Labels[0] := Heading;
+  Toggle.Labels[1] := AddAboutLabel(Result, Result.TextLbl, True,
+    Result.TextLbl.Top + Result.TextLbl.Height + 8, RevivalProductName);
+  Toggle.Labels[2] := AddAboutLabel(Result, Result.TextLbl, False,
+    Toggle.Labels[1].Top + Toggle.Labels[1].Height + 1, UTF8Encode(AboutRevivalCreditsText));
+  for I := 0 to High(Toggle.Labels) do
+    Toggle.Labels[I].Visible := Result.TextLbl.Visible;
+  Result.CreditsBtn.OnClick := Toggle.CreditsClick;
+  // The original's copyright line stays as it is (only broken after its first sentence); the project's own notice
+  // goes below it (ADR-0031).
+  Result.CopyrightLbl.Top := 146;
+  Result.CopyrightLbl.Height := 56;
+  Result.CopyrightLbl.WordWrap := True;
+  Result.CopyrightLbl.Caption := StringReplace(Result.CopyrightLbl.Caption, '. All', '.' + LineEnding + 'All', []) +
+    LineEnding + RevivalProductName + ' ' + #$C2#$A9 + ' 2026 Harald Lapp and contributors.';
+  // GPLv2 2(c): copyright (above), no warranty, redistribution under the licence, where to find more.
+  Result.LicenceLbl.Top := 202;
+  Result.LicenceLbl.Height := 134;
+  Result.LicenceLbl.Caption := _('Free software under the GNU GPL, version 2') + LineEnding +
+    _('or later; you may redistribute it under its') + LineEnding +
+    _('terms. It comes with NO WARRANTY.') + LineEnding +
+    StringReplace(RevivalProjectUrl, 'https://', '', []) + LineEnding +
+    _('Not affiliated with Oracle.');
 end;
 
 // -----------------------------------------------------------------------------

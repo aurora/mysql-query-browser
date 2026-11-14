@@ -25,7 +25,8 @@ Anything that changes what a user sees needs an ADR first.
 | `app/` | Lazarus project (`qbr.lpi`), `src/` ported units, `compat/` replacement units, `forms/` `.lfm` files, `res/` compiled resources | see below |
 | `app/forms/*.lfm`, `app/compat/Tnt*.pas` (aliases) | converted forms / generated aliases | **No, generated** (`tools/convert_forms.py`, `tools/gen_tnt_shims.py`) |
 | `app/res/` | compiled `.res` files (git-ignored) | no, `tools/build_resources.py` |
-| `app/images/` | the original's pictures with the MySQL logo replaced by the product name (ADR-0030); used instead of the originals by `build_resources.py` | **No, generated** by `tools/make_branding.sh` (committed) |
+| `app/images/` | the original's pictures with the MySQL logo replaced by the product name (ADR-0030), the About picture from the QueryMole artwork (ADR-0032); used instead of the originals by `build_resources.py` | **No, generated** by `tools/make_branding.sh` (committed) |
+| `assets/` | QueryMole artwork, full-size masters (`querymole-about.png`) | yes (replace the master, then run `make_branding.sh`) |
 | `third_party/velopack-pas` | git submodule: the Velopack binding (MIT, own project); `src/` is on the unit path (ADR-0018) | **No**, change it in its own repository |
 | `tools/` | generators, converter, `lfmview` (form viewer), analysis scripts | yes |
 | `tests/` | FPCUnit tests that run against real servers | yes |

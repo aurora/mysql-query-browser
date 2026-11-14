@@ -377,7 +377,7 @@ begin
           begin
             Dlg := CreateAboutForm(RevivalProductName, AboutVersionText, AboutCreditsText);
             if ParamStr(I + 1) = 'credits' then
-              TAboutForm(Dlg).CreditsBtnClick(nil);
+              TAboutForm(Dlg).CreditsBtn.Click;      // the handler set by CreateAboutForm, not the form's own
           end;
           if Dlg <> nil then
           begin
