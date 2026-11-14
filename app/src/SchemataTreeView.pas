@@ -335,6 +335,13 @@ uses
   
 {$R ../forms/SchemataTreeView.lfm}
 
+// Port: the original put object names between backticks as they are; a name containing a backtick ended the
+// identifier early and the rest of the name became part of the statement.
+function QuoteIdentifier(const Name: WideString): WideString;
+begin
+  Result := '`' + Tnt_WideStringReplace(Name, '`', '``', [rfReplaceAll]) + '`';
+end;
+
 // Port: the OnGetText event of the newer VirtualTreeView takes a String variable
 procedure CallOnGetText(Tree: TVirtualStringTree; Node: PVirtualNode; var Caption: WideString);
 
@@ -2647,6 +2654,8 @@ var
   SchemaListChanged: Boolean;
   EscapedSchemaName: string;
   Question: WideString;
+  ParentData: ^TObject;
+  SchemaName: WideString;
 
 begin
   SelectedNodes := nil;
@@ -2690,6 +2699,21 @@ begin
       begin
         NodeData := CatalogVST.GetNodeData(SelectedNodes[I]);
 
+        // Port: the original used CurrentSchema (the schema of the last clicked node) for every selected
+        // table, view and routine; with nodes of several schemata selected it dropped same-named objects
+        // in the wrong schema. Take the schema from the node's parent (a schema or one of its groups).
+        SchemaName := '';
+        if CatalogVST.NodeParent[SelectedNodes[I]] <> nil then
+        begin
+          ParentData := CatalogVST.GetNodeData(CatalogVST.NodeParent[SelectedNodes[I]]);
+          if (ParentData <> nil) and (ParentData^ <> nil) then
+            if ParentData^ is TSchemaSubNode then
+              SchemaName := TSchemaSubNode(ParentData^).Schema.schema_name
+            else
+              if ParentData^ is TMYX_SCHEMA then
+                SchemaName := TMYX_SCHEMA(ParentData^).schema_name;
+        end;
+
         if NodeData^ is TMYX_SCHEMA then
         begin
           if (CompareText(TMYX_SCHEMA(NodeData^).schema_name,
@@ -2700,7 +2724,7 @@ begin
           else
           begin
             SchemaPrivCount := 0;
-            FMySQLConnection.ExecuteDirectQuery('SELECT COUNT(*) FROM mysql.db WHERE db='''+TMYX_SCHEMA(NodeData^).schema_name+'''', self.SchemaPrivCountCallback);
+            FMySQLConnection.ExecuteDirectQuery('SELECT COUNT(*) FROM mysql.db WHERE db='''+escape_string(TMYX_SCHEMA(NodeData^).schema_name)+'''', self.SchemaPrivCountCallback);
             if(SchemaPrivCount > 0) then
             begin
               if (ShowModalDialog(_('Delete Objects'),
@@ -2709,8 +2733,9 @@ begin
                 []),
                 myx_mtConfirmation, 'Yes'#13#10'No') = 1) then
                 begin
-                  EscapedSchemaName := Tnt_WideStringReplace(TMYX_SCHEMA(NodeData^).schema_name,
-                    '_', '\_', [rfReplaceAll]);
+                  // Port: escape_string_for_search escapes quotes and backslashes as well as '_' (which the
+                  // original replaced by '\_' alone)
+                  EscapedSchemaName := escape_string_for_search(TMYX_SCHEMA(NodeData^).schema_name);
                   FMySQLConnection.ExecuteDirect('DELETE FROM mysql.db WHERE db=''' + EscapedSchemaName + '''');
                   FMySQLConnection.ExecuteDirect('FLUSH PRIVILEGES');
                 end;
@@ -2721,22 +2746,23 @@ begin
               FMySQLConnection.DefaultSchema := '';
 
             FMySQLConnection.ExecuteDirect('/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;');
-            FMySQLConnection.ExecuteDirect('DROP DATABASE `' + TMYX_SCHEMA(NodeData^).schema_name + '`');
+            FMySQLConnection.ExecuteDirect('DROP DATABASE ' + QuoteIdentifier(TMYX_SCHEMA(NodeData^).schema_name));
             FMySQLConnection.ExecuteDirect('/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;');
 
             SchemaListChanged := True;
           end;
         end
         else
+        if SchemaName <> '' then
         begin
           if NodeData^ is TMYX_SCHEMA_TABLE then
           begin
             if TMYX_SCHEMA_TABLE(NodeData^).table_type = MSTT_BASE_TABLE then
-              FMySQLConnection.ExecuteDirect('DROP TABLE `' + CurrentSchema.schema_name + '`.' + '`' +
-                TMYX_SCHEMA_TABLE(NodeData^).table_name + '`')
+              FMySQLConnection.ExecuteDirect('DROP TABLE ' + QuoteIdentifier(SchemaName) + '.' +
+                QuoteIdentifier(TMYX_SCHEMA_TABLE(NodeData^).table_name))
             else
-              FMySQLConnection.ExecuteDirect('DROP VIEW `' + CurrentSchema.schema_name + '`.' + '`' +
-                TMYX_SCHEMA_TABLE(NodeData^).table_name + '`');
+              FMySQLConnection.ExecuteDirect('DROP VIEW ' + QuoteIdentifier(SchemaName) + '.' +
+                QuoteIdentifier(TMYX_SCHEMA_TABLE(NodeData^).table_name));
 
           end
           else
@@ -2744,11 +2770,11 @@ begin
             if NodeData^ is TMYX_SCHEMA_STORED_PROCEDURE then
             begin
               if TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).sp_type=MSPT_PROCEDURE then
-                FMySQLConnection.ExecuteDirect('DROP PROCEDURE `' +
-                  CurrentSchema.schema_name + '`.' + '`' + TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name + '`')
+                FMySQLConnection.ExecuteDirect('DROP PROCEDURE ' +
+                  QuoteIdentifier(SchemaName) + '.' + QuoteIdentifier(TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name))
               else
-                FMySQLConnection.ExecuteDirect('DROP FUNCTION `' +
-                  CurrentSchema.schema_name + '`.' + '`' + TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name + '`');
+                FMySQLConnection.ExecuteDirect('DROP FUNCTION ' +
+                  QuoteIdentifier(SchemaName) + '.' + QuoteIdentifier(TMYX_SCHEMA_STORED_PROCEDURE(NodeData^).name));
             end;
           end;
         end;

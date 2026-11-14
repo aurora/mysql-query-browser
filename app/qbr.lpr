@@ -108,7 +108,15 @@ begin
       Free;
     end;
     CaptureWindowToPng(Screen.ActiveForm, FileName);
-    Screen.ActiveForm.ModalResult := mrCancel;
+    // QBR_MODAL_ANSWER=<modal result> answers the dialog (and the ones after it) instead of cancelling it,
+    // e.g. 1 for the first button of ShowModalDialog
+    if SysUtils.GetEnvironmentVariable('QBR_MODAL_ANSWER') <> '' then
+    begin
+      Screen.ActiveForm.ModalResult := StrToIntDef(SysUtils.GetEnvironmentVariable('QBR_MODAL_ANSWER'), mrCancel);
+      Timer.Enabled := True;
+    end
+    else
+      Screen.ActiveForm.ModalResult := mrCancel;
   end
   else
     Timer.Enabled := True;

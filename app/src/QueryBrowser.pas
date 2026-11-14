@@ -2190,6 +2190,7 @@ procedure TQueryBrowserForm.DevCommand(const Name: String);
 
 var
   P: Integer;
+  Node, Child: PVirtualNode;
   PMyxList: PMYX_STRINGLIST;
   MyxList: TMYX_STRINGLIST;
 
@@ -2275,6 +2276,62 @@ begin
               FindMenuItemByName(Screen.Forms[P], Copy(Name, 7, MaxInt)).Click;
               Break;
             end;
+        end
+        else
+        if Copy(Name, 1, 7) = 'expand:' then
+        begin
+          // expand:<schema> opens a schema in the schemata tree (its tables are fetched; follow with wait:)
+          Node := SchemataFrame.CatalogVST.GetFirst;
+          while Node <> nil do
+          begin
+            if SchemataFrame.CatalogVST.Text[Node, 0] = Copy(Name, 8, MaxInt) then
+              SchemataFrame.CatalogVST.Expanded[Node] := True;
+            Node := SchemataFrame.CatalogVST.GetNextSibling(Node);
+          end;
+        end
+        else
+        if Copy(Name, 1, 7) = 'select:' then
+        begin
+          // select:<schema>/<name>[;<schema>[/<name>]...] selects these nodes (any depth below the expanded
+          // schema) as a multi-selection, e.g. to check actions on objects of several schemata
+          SchemataFrame.CatalogVST.ClearSelection;
+          with TStringList.Create do
+          try
+            Delimiter := ';';
+            StrictDelimiter := True;
+            DelimitedText := Copy(Name, 8, MaxInt);
+            for P := 0 to Count - 1 do
+            begin
+              Node := SchemataFrame.CatalogVST.GetFirst;
+              while Node <> nil do
+              begin
+                if (Pos('/', Strings[P]) = 0) and (SchemataFrame.CatalogVST.Text[Node, 0] = Strings[P]) then
+                begin
+                  // select:<schema> selects the schema itself
+                  SchemataFrame.CatalogVST.Selected[Node] := True;
+                  SchemataFrame.CatalogVST.FocusedNode := Node;
+                end
+                else
+                if (Pos('/', Strings[P]) > 0) and
+                  (SchemataFrame.CatalogVST.Text[Node, 0] = Copy(Strings[P], 1, Pos('/', Strings[P]) - 1)) then
+                begin
+                  Child := SchemataFrame.CatalogVST.GetNext(Node);
+                  while (Child <> nil) and SchemataFrame.CatalogVST.HasAsParent(Child, Node) do
+                  begin
+                    if SchemataFrame.CatalogVST.Text[Child, 0] = Copy(Strings[P], Pos('/', Strings[P]) + 1, MaxInt) then
+                    begin
+                      SchemataFrame.CatalogVST.Selected[Child] := True;
+                      SchemataFrame.CatalogVST.FocusedNode := Child;
+                    end;
+                    Child := SchemataFrame.CatalogVST.GetNext(Child);
+                  end;
+                end;
+                Node := SchemataFrame.CatalogVST.GetNextSibling(Node);
+              end;
+            end;
+          finally
+            Free;
+          end;
         end
         else
         if Name = 'searchall' then
