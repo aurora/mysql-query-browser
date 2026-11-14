@@ -21,7 +21,7 @@ unit Options;
 interface
 
 uses
-  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases{$ENDIF}, Classes, TntClasses, Forms, TntForms, SysUtils, Messages, ComCtrls,
+  {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases{$ENDIF}, {$IFDEF UNIX}BaseUnix,{$ENDIF} Classes, TntClasses, Forms, TntForms, SysUtils, Messages, ComCtrls,
   TntComCtrls, myx_util_public_interface, myx_public_interface, AuxFuncs, Types, StrUtils,
   TntSystem, TntSysUtils;
 
@@ -696,17 +696,20 @@ var
   OptionName,
   OptionValue: WideString;
   ExePath: WideString;
+  UserDataDirGiven: Boolean;
 
 begin
   ExePath := WideExtractFilePath(TntApplication.ExeName);
 
   NoRegistry := False;
+  UserDataDirGiven := False;
 
   //check if a UserDataDir was given as command line param
   for i := 1 to WideParamCount do
     if (WideSameText(WideParamStr(I), '-datadir')) and (I+1 <= WideParamCount) then
     begin
       UserDataDir := WideIncludeTrailingBackslash(WideParamStr(I + 1));
+      UserDataDirGiven := True;
 
       // Port: on Windows a leading (back)slash means "relative to the program folder"; elsewhere it is
       // an absolute path.
@@ -728,6 +731,16 @@ begin
     {$ELSE}
     UserDataDir := GetApplicationDataDir + ('MySQL' + PathDelim);
     {$ENDIF}
+  {$IFDEF UNIX}
+  // Port: the folder holds the saved connections (passwords included, only obscured) and the query history.
+  // The original created it with the umask (usually 0755, readable by every user of the machine); the
+  // default folder is made private to the user. A folder given with -datadir is left as it is.
+  if not UserDataDirGiven then
+  begin
+    ForceDirectories(UserDataDir);
+    FpChmod(UTF8Encode(ExcludeTrailingPathDelimiter(UserDataDir)), &700);
+  end;
+  {$ENDIF}
   ForceDirectories(UserDataDir);
 
   //Detect if XPStyle is enabled
