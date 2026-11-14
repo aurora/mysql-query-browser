@@ -69,7 +69,7 @@ implementation
 //----------------------------------------------------------------------------------------------------------------------
 
 uses
-  ApplicationDataModule;
+  ApplicationDataModule, CommonFuncs;
 
 {$R ../forms/QueryBrowserOptionPages.lfm}
 
@@ -79,6 +79,9 @@ procedure TQueryBrowserOptionPagesForm.FormCreate(Sender: TObject);
 
 begin
   InitForm(self);
+  // Port: the product's name in the (translated) caption (ADR-0030)
+  AssociateFileExtensionsCBox.Caption := StringReplace(AssociateFileExtensionsCBox.Caption, 'Query Browser',
+    RevivalProductName, []);
 
   OptionsImgNames.Add('options_querybrowser');
 

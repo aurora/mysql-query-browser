@@ -1,6 +1,6 @@
 # ADR-0019 — User data directory: the original's folder on each platform
 
-- Status: Accepted (implemented and checked on Linux; macOS not built)
+- Status: Superseded in part by ADR-0030 (new folder named after the product, one-time import from the original's folder)
 - Date: 2026-10-31
 - Deciders: Harald Lapp (project owner)
 

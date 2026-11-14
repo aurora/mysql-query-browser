@@ -27,17 +27,18 @@ Related.
 | [0016](0016-help-from-the-connected-server.md) | Help reference from the connected server | Accepted by implementation (to confirm) |
 | [0017](0017-trim-menus-for-first-release.md) | Trim the menus for the first release | Accepted |
 | [0018](0018-update-check-with-velopack-pas.md) | Update check with velopack-pas and GitHub releases | Accepted (implemented, not yet built) |
-| [0019](0019-user-data-directory-of-the-original.md) | User data directory: the original's folder on each platform | Accepted (implemented and checked on Linux) |
+| [0019](0019-user-data-directory-of-the-original.md) | User data directory: the original's folder on each platform | Superseded in part by ADR-0030 (new folder with import) |
 | [0020](0020-cancel-queries-on-the-server.md) | Cancel queries on the server, never the wrong one | Accepted (implemented; Windows cross-built only) |
 | [0021](0021-no-os-specific-password-storage-outside-windows.md) | No "OS Specific" password storage outside Windows (for now) | Accepted (implemented on Linux) |
 | [0022](0022-global-copy-paste-hotkeys-on-windows-only.md) | Global copy/paste hot keys on Windows only | Accepted |
 | [0023](0023-pin-gtk-dpi-to-96.md) | Pin GTK's dpi setting to 96 on Linux | Accepted (GTK2) |
 | [0024](0024-gtk2-for-the-first-release-then-qt.md) | GTK2 for the first release, a move to Qt afterwards | Accepted (principle) |
-| [0025](0025-keep-the-package-id-when-renaming.md) | Keep the Velopack package id and the update feed when the application is renamed | Accepted (principle); Velopack behaviour not verified |
+| [0025](0025-keep-the-package-id-when-renaming.md) | Keep the Velopack package id and the update feed when the application is renamed | Superseded by ADR-0030 |
 | [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle) |
 | [0027](0027-linux-appimage-built-on-almalinux-9.md) | Linux release as an AppImage, bundled GTK2 and backend built on AlmaLinux 9 | Accepted |
 | [0028](0028-bundled-tahoma-substitute-outside-windows.md) | Ship Wine's Tahoma stand-in and use it for the forms outside Windows | Accepted |
 | [0029](0029-search-fields-match-parts-of-names.md) | Search fields: input without wildcards matches parts of names | Proposed |
+| [0030](0030-rename-to-querymole.md) | Rename the application to QueryMole before the public announcement | Accepted (principle); not implemented |
 
 ## Numbering
 

@@ -3,7 +3,7 @@
 # Builds the Linux AppImage (ADR-0027). Run on the host (needs podman, distrobox with the "freepascal" container
 # from tools/distrobox-setup.sh, and icotool).
 #
-#   tools/package-appimage.sh              build everything, write dist/MySQL_Query_Browser-<version>-x86_64.AppImage
+#   tools/package-appimage.sh              build everything, write dist/QueryMole-<version>-x86_64.AppImage
 #   tools/package-appimage.sh --no-build   reuse app/bin/qbr and backend/build-el9, only stage and pack
 #
 # 1. the C backend is built in tools/appimage/Containerfile (AlmaLinux 9, glibc 2.34), so the image runs on
@@ -19,7 +19,7 @@ TOOL="$ROOT/tools/cache/appimagetool-x86_64.AppImage"
 IMAGE=qbr-appimage-el9
 VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
 DIST="$ROOT/dist"
-OUT="$DIST/MySQL_Query_Browser-$VERSION-x86_64.AppImage"
+OUT="$DIST/QueryMole-$VERSION-x86_64.AppImage"
 
 do_build=1
 for a in "$@"; do
@@ -60,8 +60,8 @@ install -m 644 "$ROOT/tools/appimage/qbr.desktop" "$APPDIR/qbr.desktop"
 # icon: the 48x48 frame with an alpha channel of the original program's icon
 icons=$(mktemp -d)
 icotool -x -w 48 -h 48 -b 32 -o "$icons" "$ROOT/legacy/mysql-query-browser/images/icons/MySQLQueryBrowser.ico"
-cp "$icons"/*.png "$APPDIR/mysql-query-browser.png"
-ln -sf mysql-query-browser.png "$APPDIR/.DirIcon"
+cp "$icons"/*.png "$APPDIR/querymole.png"
+ln -sf querymole.png "$APPDIR/.DirIcon"
 rm -rf "$icons"
 
 # licence files of what is linked statically into the program (Lazarus/FPC) and of the shipped font

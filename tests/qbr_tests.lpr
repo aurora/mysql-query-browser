@@ -7,7 +7,7 @@ uses
   {$IFDEF UNIX}cthreads,{$ENDIF} // threads on Unix (test_cancel); must come first
   {$IFDEF UNIX}cwstring,{$ENDIF} // UTF-8 aware WideString manager; LCL programs get it through LazUTF8
   Classes, consoletestrunner, test_connect, test_catalog, test_schema_info, test_classes, test_gettext,
-  test_cancel, test_match_pattern, test_local_infile, test_edit_escaping;
+  test_cancel, test_match_pattern, test_local_infile, test_edit_escaping, test_user_data;
 
 var
   App: TTestRunner;
@@ -17,7 +17,7 @@ begin
   SetMultiByteConversionCodePage(CP_UTF8);
   App := TTestRunner.Create(nil);
   App.Initialize;
-  App.Title := 'Query Browser Revival tests';
+  App.Title := 'QueryMole tests';
   App.Run;
   App.Free;
 end.

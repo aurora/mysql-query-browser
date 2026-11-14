@@ -49,6 +49,7 @@ How it is done:
 Interim behaviour until the decisions in section 4:
 
 - Data directory: `~/.mysqlgui/`, the folder of the original Linux version (ADR-0019, decision 4.1).
+  Since ADR-0030: `$XDG_CONFIG_HOME/querymole/`, with a one-time copy from `~/.mysqlgui/`.
 - Long statements are cancelled on the server with `KILL QUERY` over a second connection, guarded so
   that no other statement can be hit (ADR-0020, decision 4.2), on Linux and Windows. The connect and
   ping threads of the connect dialog are still not killed outside Windows; freeing them waits.
@@ -341,7 +342,8 @@ are listed so that each guard is a deliberate choice.
 
 ## 4. Needs a decision (ADR candidates)
 
-1. **User data directory (decided: ADR-0019, the original's folder).** Windows: `%APPDATA%\MySQL\` (`Options.TMyxOptions.Create`). The original
+1. **User data directory (decided: ADR-0019, the original's folder; changed by ADR-0030 to
+   `$XDG_CONFIG_HOME/querymole/` with a one-time import).** Windows: `%APPDATA%\MySQL\` (`Options.TMyxOptions.Create`). The original
    Linux Query Browser used `~/.mysqlgui` (`legacy/mysql-gui-common/source/linux/MGPreferences.cc`), the
    desktop convention is `$XDG_CONFIG_HOME/<name>`. Reading an existing `~/.mysqlgui` would carry
    over connections from the old Linux version.

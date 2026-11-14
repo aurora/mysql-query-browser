@@ -1,6 +1,6 @@
 # ADR-0025 — Keep the Velopack package id and the update feed when the application is renamed
 
-- Status: Accepted (principle); the behaviour of Velopack on a changed title and executable name is not verified
+- Status: Superseded by ADR-0030 (new package id `QueryMole`, chosen before any Velopack package was released)
 - Date: 2026-11-02
 - Deciders: Harald Lapp (project owner)
 

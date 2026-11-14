@@ -17,7 +17,7 @@ uses
   Classes, SysUtils, Graphics, ExtCtrls, PNGImage, PNGTools, TntExtCtrls;
 
 const
-  ResourceNames: array[0..5] of String = ('connection_dialog_header', 'mysql_logo', 'connect_to_instance',
+  ResourceNames: array[0..5] of String = ('connection_dialog_header', 'about', 'connect_to_instance',
     'clear_search', 'magnify_glass', 'magnify_glass_with_popup');
 
 procedure RunResourceSelfTest(const OutFile: String);

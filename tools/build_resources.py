@@ -28,6 +28,33 @@ SCRIPTS = {
 }
 
 
+# ADR-0030: resources that carry the MySQL logo or the old product name. OVERRIDES replaces the file
+# of a resource (pictures made by tools/make_branding.sh), DROPPED leaves it out of the .res.
+IMAGES = os.path.join(ROOT, "app", "images")
+OVERRIDES = {
+    "about": os.path.join(IMAGES, "about.png"),                                   # About dialog, splash
+    "connection_dialog_header": os.path.join(IMAGES, "connect_header_qb.png"),    # connect dialog
+}
+DROPPED = {
+    "dolphin_loop",     # the MySQL dolphin as busy animation (AVI; TAnimate does not play it yet)
+    "mysql_logo",       # the MySQL logo; the Query Browser does not show it
+}
+
+
+def rebrand_rc(text):
+    """Applies OVERRIDES and DROPPED to the text of a .rc script (lines `name TYPE "file"`)."""
+    out = []
+    for line in text.split("\n"):
+        m = re.match(r'(\s*)(\w+)(\s+\w+\s+)"([^"]*)"(.*)$', line)
+        if m and m.group(2) in DROPPED:
+            continue
+        if m and m.group(2) in OVERRIDES:
+            line = '%s%s%s"%s"%s' % (m.group(1), m.group(2), m.group(3),
+                                     OVERRIDES[m.group(2)].replace("\\", "/"), m.group(5))
+        out.append(line)
+    return "\n".join(out)
+
+
 def make_app_rc():
     """Icon and version information of qbr.exe, from the VERSION file. No copyright holder is
     invented: that string is left out."""
@@ -35,9 +62,9 @@ def make_app_rc():
     nums = (re.findall(r"[0-9]+", ver.split("-")[0]) + ["0", "0", "0", "0"])[:4]
     icon = os.path.join(ROOT, "legacy", "mysql-query-browser", "images", "icons", "MySQLQueryBrowser.ico")
     rc = os.path.join(OUT, "qbr.rc")
-    strings = (("FileDescription", "Query Browser (revival of the MySQL Query Browser)"),
+    strings = (("FileDescription", "QueryMole SQL client"),
                ("FileVersion", ver), ("InternalName", "qbr"), ("OriginalFilename", "qbr.exe"),
-               ("ProductName", "MySQL Query Browser"), ("ProductVersion", ver))
+               ("ProductName", "QueryMole"), ("ProductVersion", ver))
     lines = ['MAINICON ICON "%s"' % icon.replace("\\", "/"),
              "1 VERSIONINFO",
              "FILEVERSION %s" % ",".join(nums),
@@ -74,6 +101,7 @@ def main():
         # brcc32 accepted backslashes in paths; the C preprocessor of windres reads them as escapes
         text = open(rc, encoding="cp1252").read()
         text = re.sub(r'"([^"\n]*)"', lambda m: '"' + m.group(1).replace("\\", "/") + '"', text)
+        text = rebrand_rc(text)
         tmp_rc = os.path.join(os.path.dirname(rc), "_" + os.path.basename(rc))
         with open(tmp_rc, "w", encoding="cp1252", newline="\n") as fh:
             fh.write(text)

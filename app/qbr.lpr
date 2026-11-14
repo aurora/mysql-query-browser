@@ -167,7 +167,7 @@ begin
   if MYXCommonOptions.Language <> '-' then
     UseLanguage(MYXCommonOptions.Language);
 
-  Application.Title := 'MySQL Query Browser';
+  Application.Title := RevivalProductName;
   {$IFNDEF MSWINDOWS}PinGtkDpiTo96; AddBundledTahoma;{$ENDIF}   // Port: see units GtkDpi, AppFonts
   Application.Initialize;
   InitGlobalVars;
@@ -375,7 +375,7 @@ begin
             Dlg := TSchemaSelectionForm.Create(MainForm, MainForm.MySQLConn)
           else if (ParamStr(I + 1) = 'about') or (ParamStr(I + 1) = 'credits') then
           begin
-            Dlg := CreateAboutForm('MySQL Query Browser', AboutVersionText, AboutCreditsText);
+            Dlg := CreateAboutForm(RevivalProductName, AboutVersionText, AboutCreditsText);
             if ParamStr(I + 1) = 'credits' then
               TAboutForm(Dlg).CreditsBtnClick(nil);
           end;

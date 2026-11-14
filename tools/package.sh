@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Builds a release package of the Windows application.
 #
-#   tools/package.sh                 stage dist/app and write dist/qbr-<version>-win64.zip (portable)
+#   tools/package.sh                 stage dist/app and write dist/QueryMole-<version>-win64.zip (portable)
 #   tools/package.sh --velopack      additionally run `vpk pack` on dist/app (installer + update feed in dist/Releases)
 #   tools/package.sh --no-build      reuse the existing app/bin/qbr.exe instead of building first
 #
@@ -123,7 +123,7 @@ if ! (cd "$APP" && PATH="/c/Windows/System32:/c/Windows" ./qbr.exe --selftest-re
   echo "warning: the staged qbr.exe did not start cleanly with a minimal PATH (missing DLL?)" >&2
 fi
 
-ZIP="$DIST/qbr-$VERSION-win64.zip"
+ZIP="$DIST/QueryMole-$VERSION-win64.zip"
 rm -f "$ZIP"
 (cd "$APP" && powershell.exe -NoProfile -Command "Compress-Archive -Path * -DestinationPath '$(cygpath -w "$ZIP")'")
 echo "portable package: $ZIP ($(du -h "$ZIP" | cut -f1))"
@@ -131,7 +131,7 @@ echo "portable package: $ZIP ($(du -h "$ZIP" | cut -f1))"
 if [ "$do_velopack" = 1 ]; then
   command -v vpk >/dev/null || { echo "vpk (Velopack CLI) not found: dotnet tool install -g vpk" >&2; exit 1; }
   echo "== velopack"
-  vpk pack --packId QueryBrowserRevival --packVersion "$VERSION" --packDir "$(cygpath -w "$APP")" \
-    --mainExe qbr.exe --packTitle "Query Browser" --outputDir "$(cygpath -w "$DIST/Releases")" \
+  vpk pack --packId QueryMole --packVersion "$VERSION" --packDir "$(cygpath -w "$APP")" \
+    --mainExe qbr.exe --packTitle "QueryMole" --outputDir "$(cygpath -w "$DIST/Releases")" \
     --icon "$(cygpath -w "$ROOT/legacy/mysql-query-browser/images/icons/MySQLQueryBrowser.ico")"
 fi

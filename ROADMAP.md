@@ -99,8 +99,8 @@ waits until after parity and gets its own decision.
 
 ## Open questions
 
-- **Name.** "MySQL" cannot be used. Working name `query-browser-revival`;
-  candidates floated: SeaQuel, Querius, Plainbrowser. Needs a trademark check.
+- ~~**Name.**~~ Decided: **QueryMole** (ADR-0030). Open: a QueryMole logo and application icon, a neutral
+  busy animation, renaming the GitHub repository to `querymole` (the program already links there).
 - Where the project is hosted; copyright holder line and contribution policy
   (licence is decided: ADR-0011).
 - Whether to ship an installer that bundles glib/libxml2/PCRE/Connector DLLs or

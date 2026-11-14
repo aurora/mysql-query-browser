@@ -875,7 +875,9 @@ begin
 
   HelpTabSheetIndex := -1;
 
-  BusyAnimate.ResName := 'dolphin_loop';
+  // Port: the original played the MySQL dolphin ('dolphin_loop'); it is not shipped (ADR-0030).
+  // A neutral busy animation comes with the rebuilt TAnimate (TntComCtrls).
+  BusyAnimate.ResName := '';
   FQueryRunningCount := 0;
 
   DockPnl.FullRepaint := False;

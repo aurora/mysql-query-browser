@@ -190,7 +190,7 @@ var
 implementation
 
 uses
-  gnugettext;
+  gnugettext, UserDataImport;
 
 {$IFDEF MSWINDOWS}
 const
@@ -697,6 +697,7 @@ var
   OptionValue: WideString;
   ExePath: WideString;
   UserDataDirGiven: Boolean;
+  ImportFromLegacy: Boolean;
 
 begin
   ExePath := WideExtractFilePath(TntApplication.ExeName);
@@ -723,14 +724,15 @@ begin
         NoRegistry := True;
 
 
-  // Port: the folder of the original Query Browser on each platform, so that existing files are used as they are
-  // (ADR-0019). Windows: %APPDATA%\MySQL, macOS: ~/Library/Application Support/MySQL, Linux: ~/.mysqlgui.
+  // Port: the folder of QueryMole (ADR-0030; the original's folder until then, ADR-0019). Windows:
+  // %APPDATA%\QueryMole, macOS: ~/Library/Application Support/QueryMole, Linux: $XDG_CONFIG_HOME/querymole.
+  // When it does not exist yet, the files of the original's folder are copied into it once (below).
+  ImportFromLegacy := False;
   if (UserDataDir = '') then
-    {$IFDEF LINUX}
-    UserDataDir := IncludeTrailingPathDelimiter(UTF8Decode(GetUserDir) + '.mysqlgui');
-    {$ELSE}
-    UserDataDir := GetApplicationDataDir + ('MySQL' + PathDelim);
-    {$ENDIF}
+  begin
+    UserDataDir := UTF8Decode(DefaultUserDataDir(UTF8Encode(GetApplicationDataDir)));
+    ImportFromLegacy := not DirectoryExists(ExcludeTrailingPathDelimiter(UTF8Encode(UserDataDir)));
+  end;
   {$IFDEF UNIX}
   // Port: the folder holds the saved connections (passwords included, only obscured) and the query history.
   // The original created it with the umask (usually 0755, readable by every user of the machine); the
@@ -742,6 +744,8 @@ begin
   end;
   {$ENDIF}
   ForceDirectories(UserDataDir);
+  if ImportFromLegacy then
+    ImportUserData(LegacyUserDataDir(UTF8Encode(GetApplicationDataDir)), UTF8Encode(UserDataDir));
 
   //Detect if XPStyle is enabled
   XPStyleEnabled := getXPStyleEnabled;

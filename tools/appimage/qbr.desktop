@@ -1,10 +1,10 @@
 [Desktop Entry]
 Type=Application
-Name=MySQL Query Browser
+Name=QueryMole
 GenericName=SQL client
-Comment=Revival of the MySQL Query Browser (alpha)
+Comment=SQL client for MySQL and MariaDB, based on MySQL Query Browser (alpha)
 Exec=qbr
-Icon=mysql-query-browser
+Icon=querymole
 Categories=Development;Database;
 Terminal=false
 StartupWMClass=qbr

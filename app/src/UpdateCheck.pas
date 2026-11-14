@@ -10,7 +10,7 @@ unit UpdateCheck;
 interface
 
 const
-  UpdateRepositoryUrl = 'https://github.com/aurora/mysql-query-browser';
+  UpdateRepositoryUrl = 'https://github.com/aurora/querymole';     // CommonFuncs.RevivalProjectUrl (ADR-0030)
 
   // The beta releases have no update mechanism (ADR-0026): the menu item stays hidden until it is switched on.
   UpdateMenuVisible = False;

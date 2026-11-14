@@ -1,13 +1,13 @@
-# MySQL Query Browser, revived
+# QueryMole
 
-A revival of the classic **MySQL Query Browser** (2006) as a cross-platform program for current MySQL (5.7 to 9)
-and MariaDB (10.11, 11.4): the original Windows user interface, rebuilt with Free Pascal and Lazarus, so that it
-runs on Windows and Linux (macOS later).
+**QueryMole** is a revival of the classic **MySQL Query Browser** (2006) as a cross-platform program for current
+MySQL (5.7 to 9) and MariaDB (10.11, 11.4): the original Windows user interface, rebuilt with Free Pascal and
+Lazarus, so that it runs on Windows and Linux (macOS later).
 
 > **Status: alpha (0.1.0-alpha.2).** The program connects, runs queries, shows and edits results, runs scripts and
-> exports. It has known faults and is not yet worked through on every platform; see "Known problems" below. The
-> name "MySQL Query Browser" is a working title: "MySQL" is a trademark of Oracle, this project is not affiliated
-> with it, and it will get its own name.
+> exports. It has known faults and is not yet worked through on every platform; see "Known problems" below.
+> QueryMole is not affiliated with or endorsed by Oracle; "MySQL" is a trademark of Oracle and names only the
+> product this project is based on (ADR-0030).
 
 ## What works
 
@@ -43,21 +43,22 @@ Details and the state of the Linux port: [docs/linux-port.md](docs/linux-port.md
 ## Download and run
 
 Releases are published as GitHub pre-releases at
-<https://github.com/aurora/mysql-query-browser/releases>.
+<https://github.com/aurora/querymole/releases>.
 
 - **Windows (64 bit):** unpack the zip and run `qbr.exe`. Settings and connections are kept in
-  `%APPDATA%\MySQL\`, the folder of the original, so a configuration of the old program is found as it is.
+  `%APPDATA%\QueryMole\`. On the first start, the settings of the original MySQL Query Browser are copied from
+  `%APPDATA%\MySQL\`; that folder is left as it is.
 - **Linux (x86_64):** make the AppImage executable and run it (`chmod +x`, then start it). It brings GTK2 and the
   other libraries it needs and runs on distributions with glibc 2.34 or newer (RHEL 9, Ubuntu 22.04, Debian 12,
   Fedora 35 and newer); it needs libstdc++ and an X server (XWayland on a Wayland desktop). Without FUSE 2 on the
-  system, start it with `--appimage-extract-and-run`. Settings are kept in `~/.mysqlgui/`, the folder of the
-  original Linux version.
+  system, start it with `--appimage-extract-and-run`. Settings are kept in `~/.config/querymole/`
+  (`$XDG_CONFIG_HOME`); on the first start, those of the original Linux version are copied from `~/.mysqlgui/`.
 
 Use a throw-away or test account when you try the alpha on a server that matters.
 
 ## Reporting problems
 
-Please report them at <https://github.com/aurora/mysql-query-browser/issues> with:
+Please report them at <https://github.com/aurora/querymole/issues> with:
 
 - the version (Help > About), the operating system and, on Linux, the desktop;
 - the server and its version;
@@ -83,7 +84,7 @@ About dialog.
 | Directory  | Purpose |
 |------------|---------|
 | `legacy/`  | Original sources (GPL), kept unchanged as reference |
-| `backend/` | New CMake build of the C libraries the Query Browser needs |
+| `backend/` | New CMake build of the C libraries of the original Query Browser |
 | `bindings/`| Generated Pascal bindings for the backend |
 | `app/`     | Lazarus / Free Pascal application (ported from the Delphi UI) |
 | `docs/`    | Reference screenshots of the original, porting notes |
@@ -97,4 +98,4 @@ databases (e.g. PostgreSQL) can follow later (ADR-0010).
 
 GPL-2.0-or-later, like the original MySQL Query Browser; see [LICENSE](LICENSE) and
 [NOTICE](NOTICE) (inherited PCRE exception, third-party components). "MySQL" is a trademark
-of Oracle; this project is not affiliated with it and needs its own name.
+of Oracle; this project is not affiliated with it.

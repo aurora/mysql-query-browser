@@ -230,7 +230,7 @@ begin
     RegisterMySQLApplication(Application.Title,
       product_version, ExtractFilePath(Application.ExeName));
 
-  Application.Title := _('MySQL Query Browser');
+  Application.Title := RevivalProductName;
 
   if (not (ApplicationDM.Options.RestoreWindowPos(self))) then
   begin
@@ -360,7 +360,7 @@ end;
 procedure TMainForm.PrepareGUI;
 
 begin
-  Caption := _('MySQL Query Browser') + ' - ' + MySQLConn.GetConnectionCaption;
+  Caption := RevivalProductName + ' - ' + MySQLConn.GetConnectionCaption;
 
   //Build the Section List
   BuildSectionTree;
@@ -686,7 +686,7 @@ end;
 procedure TMainForm.ReportBugMIClick(Sender: TObject);
 
 begin
-  BrowseWebPage('https://github.com/aurora/mysql-query-browser/issues/new');
+  BrowseWebPage(RevivalProjectUrl + '/issues/new');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1013,7 +1013,7 @@ begin
       begin
         MySQLConn.DefaultSchema := SchemaSelectionForm.SelectedSchema.schema_name;
         MySQLConn.UserConnection.schema := SchemaSelectionForm.SelectedSchema.schema_name;
-        Application.MainForm.Caption := _('MySQL Query Browser') + ' - ' + MySQLConn.GetConnectionCaption;
+        Application.MainForm.Caption := RevivalProductName + ' - ' + MySQLConn.GetConnectionCaption;
       end;
     end;
   finally
@@ -1050,7 +1050,7 @@ end;
 procedure TMainForm.AboutMIClick(Sender: TObject);
 
 begin
-  ShowAboutDialog('MySQL Query Browser', AboutVersionText, AboutCreditsText);
+  ShowAboutDialog(RevivalProductName, AboutVersionText, AboutCreditsText);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1058,7 +1058,7 @@ end;
 procedure TMainForm.ListreportedBugsMIClick(Sender: TObject);
 
 begin
-  BrowseWebPage('https://github.com/aurora/mysql-query-browser/issues');
+  BrowseWebPage(RevivalProjectUrl + '/issues');
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -1067,10 +1067,10 @@ procedure TMainForm.DefaultSchemaChanged(var Message: TMessage);
 
 begin
   if MySQLConn.GetConnectionCaption <> '' then
-    MainForm.Caption := _('MySQL Query Browser') + ' - ' +
+    MainForm.Caption := RevivalProductName + ' - ' +
       MySQLConn.GetConnectionCaption
   else
-    MainForm.Caption := _('MySQL Query Browser');
+    MainForm.Caption := RevivalProductName;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

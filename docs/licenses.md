@@ -88,9 +88,10 @@ Recommendation: ask the Lazarus maintainers before the first public release.
 
 ## 5. Trademarks
 
-"MySQL" is Oracle's trademark. The working name, window title, version resource and installer title
-still say "MySQL Query Browser" (ROADMAP: name decision postponed). That is a naming issue, not a
-copyright one, and must be resolved before a public release.
+"MySQL" is Oracle's trademark. Resolved by ADR-0030: the program is called QueryMole; window title,
+version resource, package title and the pictures with the MySQL logo were changed. "MySQL Query Browser"
+remains only where the program says what it is based on (About dialog) and where it looks for an
+installed original.
 
 ## 6. What changed because of this review
 

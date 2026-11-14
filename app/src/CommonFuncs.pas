@@ -11,6 +11,12 @@ uses
 {$include Consts.ini}
 {$include RevivalInfo.inc}
 
+const
+  // Name of the product and its home (ADR-0030). The original's name appears only where the program
+  // says what it is based on, and where it looks for an installed original.
+  RevivalProductName = 'QueryMole';
+  RevivalProjectUrl = 'https://github.com/aurora/querymole';
+
 // Version shown to the user: that of the revival, e.g. "0.1.0 beta.1" (VERSION file). product_version is the
 // version of the original this program is based on.
 function RevivalVersionText: WideString;
@@ -43,7 +49,8 @@ end;
 function AboutVersionText: WideString;
 
 begin
-  Result := RevivalVersionText + ' (' + _('based on') + ' ' + product_version + ' ' + product_build_level + ')';
+  Result := RevivalVersionText + ' (' + _('based on') + ' MySQL Query Browser ' + product_version + ' ' +
+    product_build_level + ')';
 end;
 
 // -----------------------------------------------------------------------------
@@ -174,7 +181,7 @@ begin
   {$ENDIF}
   Result.LicenceLbl.Caption := _('This software is released under the GNU General Public License, version 2 or ' +
     '(at your option) any later version, and comes with NO WARRANTY. Source code and bug reports: ' +
-    'https://github.com/aurora/mysql-query-browser');
+    RevivalProjectUrl + '. Not affiliated with Oracle.');
 end;
 
 // -----------------------------------------------------------------------------
