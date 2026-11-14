@@ -173,6 +173,12 @@ begin
   // and the licence note names the source.
   Result.TextLbl.Top := 254;
   Result.TextLbl.Height := 85;
+  // The original's copyright line stays as it is; the project's own notice goes below it (ADR-0031).
+  Result.CopyrightLbl.Top := 254;
+  Result.CopyrightLbl.Height := 28;
+  Result.CopyrightLbl.WordWrap := True;
+  Result.CopyrightLbl.Caption := Result.CopyrightLbl.Caption + LineEnding + RevivalProductName + ' ' +
+    #$C2#$A9 + ' 2026 Harald Lapp and contributors.';
   {$IFNDEF MSWINDOWS}
   // Port: the substitute for Tahoma is wider; one pixel less keeps the texts above the button line
   Result.TextLbl.Font.Height := -10;

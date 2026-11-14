@@ -142,7 +142,9 @@ not just on one server (version differences are where the bugs were).
   units are copied with it, byte for byte). New files get only the SPDX line, not a
   "Copyright ... MySQL AB" (or any other holder) line, even when they replace or are modelled on a
   legacy file. Code that is a substantial derivative of third-party code (e.g. UniCodeEditor, MIT)
-  is credited in `NOTICE` instead.
+  is credited in `NOTICE` instead. The one exception: the project's own notice ("QueryMole, Copyright
+  (C) <year> Harald Lapp and contributors") in `NOTICE` and the About dialog (ADR-0031), never in file
+  headers.
 - **Third-party code and content:** before adding a library, unit, font, image or document, check its licence
   against `docs/licenses.md` (GPL-2.0-or-later program; MPL-1.1-only is a problem) and add it there and to
   `NOTICE` where needed.

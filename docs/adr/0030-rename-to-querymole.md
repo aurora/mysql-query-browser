@@ -1,6 +1,6 @@
 # ADR-0030 — Rename the application to QueryMole before the public announcement
 
-- Status: Accepted (principle); not implemented
+- Status: Accepted (implemented; QueryMole icon and busy animation open)
 - Date: 2026-11-14
 - Deciders: Harald Lapp (project owner)
 
