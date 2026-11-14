@@ -923,44 +923,28 @@ static void prepare_value(MYSQL *mysql, const char *value, unsigned int value_le
   }
   else
   {
-    /* locate field name */
-    switch (coltype)
+    /* revival: every type goes through mysql_real_escape_string. The original copied numbers, dates,
+       ENUM and SET values between quotes as they were (bug #14841 added the quotes), so a value with a
+       quote in it ended the literal and the rest became part of the UPDATE/INSERT/DELETE statement. */
     {
-      case MYX_RSCT_INTEGER:
-      case MYX_RSCT_FLOAT:
-      case MYX_RSCT_DECIMAL:
-      case MYX_RSCT_NEWDECIMAL:
-      case MYX_RSCT_BIT:
-      // we need to quote numbers as well. see bug #14841
-
-      //memcpy(buffer, value, value_length);
-      //buffer[value_length]= 0;
-      //break;
-
-    case MYX_RSCT_ENUM:
-    case MYX_RSCT_SET:
-
-      case MYX_RSCT_TIME:
-      case MYX_RSCT_DATE:
-      case MYX_RSCT_DATETIME:
-      case MYX_RSCT_TIMESTAMP:
-      case MYX_RSCT_YEAR:
-      case MYX_RSCT_NEWDATE:
-        g_snprintf(buffer, value_length*2 + 2 + 1, "'%s'", value);
-        break;
-
-      case MYX_RSCT_STRING:
-      case MYX_RSCT_TEXT:
-      case MYX_RSCT_BLOB:
-        {
-          int l;
-          strcpy(buffer, "'");
-          l= mysql_real_escape_string(mysql, buffer+1, value, value_length);
-          strcpy(buffer+1+l, "'");
-        }
-        break;
+      unsigned long l;
+      (void)coltype;
+      strcpy(buffer, "'");
+      l= mysql_real_escape_string(mysql, buffer+1, value, value_length);
+      strcpy(buffer+1+l, "'");
     }
   }
+}
+
+
+/* revival: `schema`.`table` (or `table`); g_free the result. The names come from the query parser, which keeps
+   them as written in the statement: a backtick inside a quoted name is already doubled there. The column names
+   come from the server and are quoted with quote_identifier. */
+static char *quoted_table(MYX_Q_TABLE *table)
+{
+  if (table->schema)
+    return g_strdup_printf("`%s`.`%s`", table->schema, table->name);
+  return g_strdup_printf("`%s`", table->name);
 }
 
 
@@ -1018,9 +1002,11 @@ static char *prepare_pks(MYX_RESULTSET *rs, MYX_RS_ACTION *action)
       }
       if (is_pk)
       {
-        char *tmp= g_malloc(row->fields[i].value_length*2+strlen(rs->columns[i].name)+8);
+        char *column= quote_identifier(rs->columns[i].name, '`');
+        char *tmp= g_malloc(row->fields[i].value_length*2+strlen(column)+8);
 
-        sprintf(tmp, "`%s`=", rs->columns[i].name);
+        sprintf(tmp, "%s=", column);
+        g_free(column);
       
         prepare_value(rs->mysql, row->fields[i].value, row->fields[i].value_length,
                       rs->columns[i].column_type, tmp+strlen(tmp));
@@ -1349,15 +1335,13 @@ static int do_update_value(MYX_RESULTSET *resultset, const char *pks,
 
   prepare_action_value(resultset->mysql, action, buffer);
 
-  if(action->column->table->schema)
-    query= g_strdup_printf("UPDATE `%s`.`%s` SET `%s`=%s WHERE %s;",
-                           action->column->table->schema,
-                           action->column->table->name,
-                           action->column->name, buffer, pks);
-  else
-    query= g_strdup_printf("UPDATE `%s` SET `%s`=%s WHERE %s;",
-                           action->column->table->name,
-                           action->column->name, buffer, pks);
+  {
+    char *table= quoted_table(action->column->table);
+    char *column= quote_identifier(action->column->name, '`');
+    query= g_strdup_printf("UPDATE %s SET %s=%s WHERE %s;", table, column, buffer, pks);
+    g_free(table);
+    g_free(column);
+  }
         
   // for blobs, we need to set the connection charset to binary
   // otherwise, the server will interpret the binary data as utf8
@@ -1476,15 +1460,11 @@ MYX_RS_ACTION_ERRORS *myx_query_apply_actions(MYX_RESULTSET *resultset)
         g_strfreev(keys_arr);
         g_strfreev(values_arr);
 
-        if(action->column->table->schema)
-          query= g_strdup_printf("INSERT INTO `%s`.`%s` (%s) VALUES (%s);",
-                                action->column->table->schema,
-                                action->column->table->name,
-                                keys, values);
-        else
-          query= g_strdup_printf("INSERT INTO `%s` (%s) VALUES (%s);",
-                                action->column->table->name,
-                                keys, values);
+        {
+          char *table= quoted_table(action->column->table);
+          query= g_strdup_printf("INSERT INTO %s (%s) VALUES (%s);", table, keys, values);
+          g_free(table);
+        }
         g_free(keys);
         g_free(values);
 
@@ -1571,10 +1551,12 @@ MYX_RS_ACTION_ERRORS *myx_query_apply_actions(MYX_RESULTSET *resultset)
               prepare_value(resultset->mysql, action2->new_value, action2->new_value_length, 
                             action2->column->column_type, buffer);
 
+              char *column= quote_identifier(action2->column->name, '`');
               if (action2->column->column_type == MYX_RSCT_STRING && mysql_is_41)
-                val= g_strdup_printf("`%s`=_utf8%s", action2->column->name, buffer);
+                val= g_strdup_printf("%s=_utf8%s", column, buffer);
               else
-                val= g_strdup_printf("`%s`=%s", action2->column->name, buffer);
+                val= g_strdup_printf("%s=%s", column, buffer);
+              g_free(column);
               
               pks= str_g_append_and_free(pks, val);
             }
@@ -1630,15 +1612,11 @@ MYX_RS_ACTION_ERRORS *myx_query_apply_actions(MYX_RESULTSET *resultset)
         {
           MYX_Q_TABLE *table= resultset->columns[0].table;
           
-          if(table->schema)
-            query= g_strdup_printf("DELETE FROM `%s`.`%s` WHERE %s;",
-                                  table->schema,
-                                  table->name,
-                                  pks);
-          else
-            query= g_strdup_printf("DELETE FROM `%s` WHERE %s;",
-                                  table->name,
-                                  pks);
+          {
+            char *qtable= quoted_table(table);
+            query= g_strdup_printf("DELETE FROM %s WHERE %s;", qtable, pks);
+            g_free(qtable);
+          }
 
           // execute query
           if (myx_mysql_query(resultset->mysql, query)!=0)
@@ -1703,15 +1681,11 @@ MYX_RS_ACTION_ERRORS *myx_query_apply_actions(MYX_RESULTSET *resultset)
       g_strfreev(keys_arr);
       g_strfreev(values_arr);
 
-      if(action->column->table->schema)
-        query= g_strdup_printf("UPDATE `%s`.`%s` SET %s WHERE %s;",
-                               action->column->table->schema,
-                               action->column->table->name,
-                               str, pks);
-      else
-        query= g_strdup_printf("UPDATE `%s` SET %s WHERE %s;",
-                               action->column->table->name,
-                               str, pks);
+      {
+        char *table= quoted_table(action->column->table);
+        query= g_strdup_printf("UPDATE %s SET %s WHERE %s;", table, str, pks);
+        g_free(table);
+      }
       g_free(pks);
       g_free(str);
 

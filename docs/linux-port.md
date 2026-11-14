@@ -240,6 +240,30 @@ Left as they are: "Copy Query as PHP/Java Code" crash without a pasted code temp
 disabled (the popup disables them, as in the original); "Compare Resultsets" with one grid raises the original's
 message. `--cmd click:<menu entry name>` clicks one entry (with `--modal-shot` to photograph the window it opens).
 
+**Security review (2026-11-14, fixed; all platforms, backend and Pascal).** Things that could read files or change
+the database without the user asking for it:
+
+- *LOAD DATA LOCAL*: the server may ask for a local file in the reply to any statement. Connector/C in its "auto"
+  mode (the default of the builds used: Fedora 3.4, AlmaLinux 3.2, MSYS2) only answers after a statement starting with
+  `LOAD`, but then sends whatever file the server names: a server could swap the user's file for another one (checked
+  with a fake server). `myx_library.c` installs its own handler: a file is sent only while a statement runs through
+  `myx_mysql_query`/`myx_mysql_real_query` and only the one that statement names after `LOCAL INFILE`
+  (`tests/test_local_infile.pas`).
+- *User data folder*: `~/.mysqlgui` (saved connections with obscured passwords, history) was created with the umask,
+  usually `755`. The default folder is set to `700` at start; a folder given with `-datadir` is left alone.
+- *Drop with several schemata selected*: tables, views and routines were dropped in `CurrentSchema` (the schema of
+  the focused node), i.e. a same-named object in the wrong schema; the schema now comes from each node's parent.
+  Names are quoted with doubled backticks, the schema name in the `mysql.db` queries is escaped.
+- *Grid edits*: values of numeric, date, ENUM and SET columns went into UPDATE/INSERT/DELETE between quotes without
+  escaping; a date typed as `2026-03-03' -- ` commented out the `WHERE` and changed every row
+  (`tests/test_edit_escaping.pas`, which fails against the old library). All values are escaped now, column names
+  quoted; table names come from the query parser already in quoted form.
+
+Not changed: the plaintext fallback of ADR-0005 (a man in the middle can suppress TLS; needs its own ADR), and the
+"obscured" password storage (reversible by design, as in the original). For checks of the drop: `--cmd
+expand:<schema>,wait:3000,select:<schema>/<name>;<schema>[/<name>],click:DropMI --modal-shot x.png` with
+`QBR_MODAL_ANSWER=1`, which answers the dialogs with their first button instead of cancelling them.
+
 ## AppImage (2026-11-04)
 
 `tools/package-appimage.sh` builds `dist/MySQL_Query_Browser-<version>-x86_64.AppImage` (ADR-0027): backend and
