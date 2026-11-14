@@ -4,7 +4,7 @@ A revival of the classic **MySQL Query Browser** (2006) as a cross-platform prog
 and MariaDB (10.11, 11.4): the original Windows user interface, rebuilt with Free Pascal and Lazarus, so that it
 runs on Windows and Linux (macOS later).
 
-> **Status: alpha (0.1.0-alpha.1).** The program connects, runs queries, shows and edits results, runs scripts and
+> **Status: alpha (0.1.0-alpha.2).** The program connects, runs queries, shows and edits results, runs scripts and
 > exports. It has known faults and is not yet worked through on every platform; see "Known problems" below. The
 > name "MySQL Query Browser" is a working title: "MySQL" is a trademark of Oracle, this project is not affiliated
 > with it, and it will get its own name.
