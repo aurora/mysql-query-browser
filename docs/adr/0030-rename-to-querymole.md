@@ -58,6 +58,8 @@ Alpha builds tagged `v0.1.0-alpha.1` and `v0.1.0-alpha.2` exist under the old na
     (`connection_dialog_header`, `connect_header_qb.png`): the logo and the words "MySQL Query Browser" are
     removed and "QueryMole" is set in their place; gradient and lightning bolt stay (`tools/make_branding.sh`
     writes `app/images/`, `tools/build_resources.py` uses those files instead of the originals);
+  - the dolphin's still picture top right in the main window (`sakila`; overlooked at first, added the same day):
+    replaced by the lightning bolt of the application icon on a transparent background;
   - the busy animation (`dolphin_loop`, an AVI) and `mysql_logo`: left out of the resources. `TAnimate` does not
     play animations yet, so nothing visible is lost; a neutral animation comes with it.
 

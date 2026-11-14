@@ -34,6 +34,7 @@ IMAGES = os.path.join(ROOT, "app", "images")
 OVERRIDES = {
     "about": os.path.join(IMAGES, "about.png"),                                   # About dialog, splash
     "connection_dialog_header": os.path.join(IMAGES, "connect_header_qb.png"),    # connect dialog
+    "sakila": os.path.join(IMAGES, "sakila.png"),       # main window, top right: the dolphin's still picture
 }
 DROPPED = {
     "dolphin_loop",     # the MySQL dolphin as busy animation (AVI; TAnimate does not play it yet)

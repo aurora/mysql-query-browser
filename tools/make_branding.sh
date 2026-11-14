@@ -6,7 +6,7 @@
 # their place. The rest of each picture (gradient, lightning bolt) is the original artwork.
 # build_resources.py uses these files instead of the originals.
 #
-# Needs ImageMagick 7 (`magick`) and the Liberation Sans font. Run it again after changing it; the
+# Needs ImageMagick 7 (`magick`), icotool (icoutils) and the Liberation Sans font. Run it again after changing it; the
 # results are committed.
 set -euo pipefail
 
@@ -34,4 +34,11 @@ magick "$SRC/connect_header_qb.png" \
   -font "$FONT" -pointsize 26 -fill "$BLUE" -annotate +8+44 "$NAME" \
   -strip "$OUT/connect_header_qb.png"
 
-echo "written: $OUT/about.png $OUT/connect_header_qb.png"
+# Still picture top right in the main window (sakila, 56x54; the original shows the MySQL dolphin there): the
+# lightning bolt of the application icon, centred on a transparent canvas. Placeholder until QueryMole has a logo.
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+icotool -x -w 32 -h 32 -b 32 -o "$tmp" "$SRC/icons/MySQLQueryBrowser.ico"
+magick -size 56x54 xc:none "$tmp"/*.png -gravity center -composite -strip "$OUT/sakila.png"
+
+echo "written: $OUT/about.png $OUT/connect_header_qb.png $OUT/sakila.png"

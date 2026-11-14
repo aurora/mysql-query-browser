@@ -94,6 +94,10 @@ waits until after parity and gets its own decision.
 - PostgreSQL and other databases via a driver seam (ADR-0010); candidate
   libraries: FPC `postgres` units, ZEOS.
 - Replace C pieces by Pascal behind that seam, SQL parser last (ADR-0003).
+- Show what the connection is to in the picture top right of the main window (where the original had the
+  dolphin): server type and version as text or tooltip ("MariaDB 11.4"). Not the databases' logos: the MySQL
+  logo needs a written agreement with Oracle outside websites; the MariaDB sea lion is CC BY-SA 4.0 as a picture
+  but a trademark of MariaDB Corporation, and CC BY-SA 4.0 does not combine with GPL-2.0 (checked 2026-11-14).
 - Dark mode; MySQL 8 specifics the original never had (JSON, CTEs and window
   functions in highlighting and statement splitting; `utf8mb4` collations).
 
