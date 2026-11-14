@@ -1024,6 +1024,8 @@ function myx_get_application_options(const filename: WideString; error_code: PMY
 function myx_free_application_options(options: PMYX_APPLICATION_OPTIONS): cint; cdecl; external LIB_MYSQLX;
 function _myx_match_pattern(text: PAnsiChar; search: PAnsiChar; case_insensitive: cint; strict: cint): cint; cdecl; external LIB_MYSQLX name 'myx_match_pattern';
 function myx_match_pattern(const text: WideString; const search: WideString; case_insensitive: cint; strict: cint): cint;
+function _myx_local_infile_allowed(statement: PAnsiChar; filename: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_local_infile_allowed';
+function myx_local_infile_allowed(const statement: WideString; const filename: WideString): cint;
 function _myx_check_utf8_convertible(str: PAnsiChar; encoding: PAnsiChar): cint; cdecl; external LIB_MYSQLX name 'myx_check_utf8_convertible';
 function myx_check_utf8_convertible(const str: WideString; const encoding: WideString): cint;
 function myx_refresh_dbinfo(mysql: PMYSQL; _syn: PMYX_SYN): PMYX_SYN; cdecl; external LIB_MYSQLX;
@@ -2934,6 +2936,11 @@ end;
 function myx_match_pattern(const text: WideString; const search: WideString; case_insensitive: cint; strict: cint): cint;
 begin
   Result := _myx_match_pattern(PAnsiChar(UTF8Encode(text)), PAnsiChar(UTF8Encode(search)), case_insensitive, strict);
+end;
+
+function myx_local_infile_allowed(const statement: WideString; const filename: WideString): cint;
+begin
+  Result := _myx_local_infile_allowed(PAnsiChar(UTF8Encode(statement)), PAnsiChar(UTF8Encode(filename)));
 end;
 
 function myx_check_utf8_convertible(const str: WideString; const encoding: WideString): cint;

@@ -53,6 +53,8 @@ typedef float   pfloat;         /* Mixed prototypes can take float */
 #endif
 
 #include <mysql_version.h>
+#include <errno.h>
+#include <glib/gstdio.h>
 
 
 void myx_get_mysql_version(MYSQL *mysql);
@@ -522,8 +524,237 @@ void myx_mysql_set_query_hooks(MYSQL *mysql, MYX_QUERY_CALLBACK pre_hook,
 #ifdef CLIENT_MULTI_RESULTS
 #define EXTRA_CONNECT_FLAGS CLIENT_INTERACTIVE | CLIENT_LOCAL_FILES | CLIENT_MULTI_RESULTS /*| CLIENT_MULTI_STATEMENTS*/
 #else
-#define EXTRA_CONNECT_FLAGS CLIENT_INTERACTIVE | CLIENT_LOCAL_FILES 
+#define EXTRA_CONNECT_FLAGS CLIENT_INTERACTIVE | CLIENT_LOCAL_FILES
 #endif
+
+/* LOAD DATA LOCAL INFILE (revival): the protocol lets the server ask for a local file by name in the reply to
+   any statement, and the default handler of the client library sends whatever it is asked for. A malicious
+   server (or anyone between client and server) could read every file of the user that way. The handler below
+   sends a file only while a statement is executed through myx_mysql_query/myx_mysql_real_query, and only the
+   file that this statement itself names after LOCAL INFILE. The server receives the request in the same call
+   as the statement, so a per-thread pointer to the statement is enough. */
+#if defined(_MSC_VER)
+static __declspec(thread) const char *local_infile_statement= NULL;
+static __declspec(thread) size_t local_infile_statement_len= 0;
+#else
+static __thread const char *local_infile_statement= NULL;
+static __thread size_t local_infile_statement_len= 0;
+#endif
+
+typedef struct
+{
+  FILE *file;
+  int error_num;
+  char error[LOCAL_INFILE_ERROR_LEN];
+} MYX_LOCAL_INFILE;
+
+/* skips white space and comments; returns the position of the next token */
+static const char *infile_skip_space(const char *p, const char *end)
+{
+  for (;;)
+  {
+    while (p < end && isspace((unsigned char)*p))
+      p++;
+    if (p + 1 < end && p[0] == '/' && p[1] == '*')
+    {
+      const char *c= p + 2;
+      while (c + 1 < end && !(c[0] == '*' && c[1] == '/'))
+        c++;
+      p= (c + 1 < end) ? c + 2 : end;
+    }
+    else if ((p < end && *p == '#') || (p + 2 < end && p[0] == '-' && p[1] == '-' && isspace((unsigned char)p[2])))
+    {
+      while (p < end && *p != '\n')
+        p++;
+    }
+    else
+      return p;
+  }
+}
+
+static int infile_is_word(const char *p, const char *end, const char *word)
+{
+  size_t n= strlen(word);
+  if ((size_t)(end - p) < n || g_ascii_strncasecmp(p, word, n) != 0)
+    return 0;
+  return p + n == end || !(isalnum((unsigned char)p[n]) || p[n] == '_' || p[n] == '$');
+}
+
+/* Returns the file names a LOAD ... LOCAL INFILE 'name' statement names (the literal as written and with
+   backslash escapes resolved, since that depends on the sql_mode), or 0 if the statement is no such statement.
+   The caller frees both with g_free. */
+static int infile_named_file(const char *stmt, size_t len, char **raw, char **unescaped)
+{
+  const char *end= stmt + len;
+  const char *p= infile_skip_space(stmt, end);
+  char quote;
+  int seen_local= 0;
+  GString *r, *u;
+
+  *raw= *unescaped= NULL;
+  if (!infile_is_word(p, end, "load"))
+    return 0;
+  // find the keyword INFILE outside of strings and comments, after LOCAL
+  while (p < end)
+  {
+    p= infile_skip_space(p, end);
+    if (p >= end)
+      return 0;
+    if (*p == '\'' || *p == '"' || *p == '`')
+      return 0; // a string before INFILE: not the statement form we expect
+    if (infile_is_word(p, end, "local"))
+      seen_local= 1;
+    else if (infile_is_word(p, end, "infile"))
+    {
+      p+= 6;
+      break;
+    }
+    while (p < end && !isspace((unsigned char)*p) && *p != '\'' && *p != '"' && *p != '/' && *p != '#')
+      p++;
+    if (p < end && *p == '/' && !(p + 1 < end && p[1] == '*'))
+      p++;
+  }
+  if (!seen_local)
+    return 0;
+  p= infile_skip_space(p, end);
+  if (p >= end || (*p != '\'' && *p != '"'))
+    return 0;
+  quote= *p++;
+  r= g_string_new(NULL);
+  u= g_string_new(NULL);
+  while (p < end)
+  {
+    if (*p == quote)
+    {
+      if (p + 1 < end && p[1] == quote) // doubled quote
+      {
+        g_string_append_c(r, quote);
+        g_string_append_c(u, quote);
+        p+= 2;
+        continue;
+      }
+      *raw= g_string_free(r, FALSE);
+      *unescaped= g_string_free(u, FALSE);
+      return 1;
+    }
+    if (*p == '\\' && p + 1 < end)
+    {
+      char c= p[1];
+      switch (c)
+      {
+        case 'n': g_string_append_c(u, '\n'); break;
+        case 't': g_string_append_c(u, '\t'); break;
+        case 'r': g_string_append_c(u, '\r'); break;
+        case 'b': g_string_append_c(u, '\b'); break;
+        case '0': g_string_append_c(u, '\0'); break;
+        case 'Z': g_string_append_c(u, '\032'); break;
+        default: g_string_append_c(u, c);
+      }
+      g_string_append_len(r, p, 2);
+      p+= 2;
+      continue;
+    }
+    g_string_append_c(r, *p);
+    g_string_append_c(u, *p);
+    p++;
+  }
+  g_string_free(r, TRUE);
+  g_string_free(u, TRUE);
+  return 0;
+}
+
+static int myx_local_infile_init(void **ptr, const char *filename, void *userdata)
+{
+  MYX_LOCAL_INFILE *info= (MYX_LOCAL_INFILE *)g_malloc0(sizeof(MYX_LOCAL_INFILE));
+  char *raw, *unescaped;
+  int allowed= 0;
+
+  (void)userdata;
+  *ptr= info;
+  if (local_infile_statement &&
+      infile_named_file(local_infile_statement, local_infile_statement_len, &raw, &unescaped))
+  {
+    allowed= strcmp(filename, raw) == 0 || strcmp(filename, unescaped) == 0;
+    g_free(raw);
+    g_free(unescaped);
+  }
+  if (!allowed)
+  {
+    info->error_num= 2000; // CR_UNKNOWN_ERROR
+    g_snprintf(info->error, sizeof(info->error),
+               "The server asked for the local file '%s', which the statement does not name; it was not sent.",
+               filename);
+    return 1;
+  }
+  info->file= g_fopen(filename, "rb");
+  if (!info->file)
+  {
+    info->error_num= 29; // EE_FILENOTFOUND, as the default handler
+    g_snprintf(info->error, sizeof(info->error), "File '%s' not found (Errcode: %d)", filename, errno);
+    return 1;
+  }
+  return 0;
+}
+
+static int myx_local_infile_read(void *ptr, char *buf, unsigned int buf_len)
+{
+  MYX_LOCAL_INFILE *info= (MYX_LOCAL_INFILE *)ptr;
+  size_t n= fread(buf, 1, buf_len, info->file);
+  if (n == 0 && ferror(info->file))
+  {
+    info->error_num= 2; // EE_READ
+    g_snprintf(info->error, sizeof(info->error), "Error reading file (Errcode: %d)", errno);
+    return -1;
+  }
+  return (int)n;
+}
+
+static void myx_local_infile_end(void *ptr)
+{
+  MYX_LOCAL_INFILE *info= (MYX_LOCAL_INFILE *)ptr;
+  if (info)
+  {
+    if (info->file)
+      fclose(info->file);
+    g_free(info);
+  }
+}
+
+static int myx_local_infile_error(void *ptr, char *error_msg, unsigned int error_msg_len)
+{
+  MYX_LOCAL_INFILE *info= (MYX_LOCAL_INFILE *)ptr;
+  if (!info)
+  {
+    g_strlcpy(error_msg, "Out of memory", error_msg_len);
+    return 2000;
+  }
+  g_strlcpy(error_msg, info->error, error_msg_len);
+  return info->error_num;
+}
+
+/* installs the handler above on a connection; called before connecting */
+static void myx_restrict_local_infile(MYSQL *mysql)
+{
+  unsigned int on= 1;
+  // the client library's own default (and its "auto" mode) differs between builds; the handler decides
+  mysql_options(mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&on);
+  mysql_set_local_infile_handler(mysql, myx_local_infile_init, myx_local_infile_read,
+                                 myx_local_infile_end, myx_local_infile_error, NULL);
+}
+
+/* for tests: whether a statement may make the client send the file 'filename' */
+int myx_local_infile_allowed(const char *statement, const char *filename)
+{
+  char *raw, *unescaped;
+  int allowed= 0;
+  if (infile_named_file(statement, strlen(statement), &raw, &unescaped))
+  {
+    allowed= strcmp(filename, raw) == 0 || strcmp(filename, unescaped) == 0;
+    g_free(raw);
+    g_free(unescaped);
+  }
+  return allowed;
+}
 
 
 static void modify_sql_mode(MYSQL *mysql, int ansi_quotes)
@@ -677,6 +908,8 @@ int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
     mysql_ssl_set(mysql, connect_options.ssl_key, connect_options.ssl_cert,
       connect_options.ssl_ca, NULL, NULL);
   }
+
+  myx_restrict_local_infile(mysql);
 
   connected= mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
                           user_conn->password, user_conn->schema,
@@ -1860,7 +2093,10 @@ int myx_mysql_query(MYSQL *mysql, const char *cmd)
     if (priv && priv->pre_query_hook)
       (*priv->pre_query_hook)(mysql, priv->client_data, cmd, cmdlen);
 
+    local_infile_statement= cmd;
+    local_infile_statement_len= cmdlen;
     rc= mysql_query(mysql, cmd);
+    local_infile_statement= NULL;
     
     if (priv && priv->post_query_hook)
       (*priv->post_query_hook)(mysql, priv->client_data, cmd, cmdlen);
@@ -1879,7 +2115,10 @@ int myx_mysql_query(MYSQL *mysql, const char *cmd)
       if (priv && priv->pre_query_hook)
         (*priv->pre_query_hook)(mysql, priv->client_data, conv_cmd, cmdlen);
 
+      local_infile_statement= conv_cmd;
+      local_infile_statement_len= cmdlen;
       rc= mysql_query(mysql, conv_cmd);
+      local_infile_statement= NULL;
 
       if (priv && priv->post_query_hook)
         (*priv->post_query_hook)(mysql, priv->client_data, conv_cmd, cmdlen);
@@ -1934,7 +2173,10 @@ int myx_mysql_real_query(MYSQL *mysql, const char *cmd, unsigned int len)
 
     //g_assert(g_utf8_validate(cmd, -1, 0));
 
+    local_infile_statement= cmd;
+    local_infile_statement_len= len;
     rc= mysql_real_query(mysql, cmd, len);
+    local_infile_statement= NULL;
     
     if (priv && priv->post_query_hook)
       (*priv->post_query_hook)(mysql, priv->client_data, cmd, len);
@@ -1954,7 +2196,10 @@ int myx_mysql_real_query(MYSQL *mysql, const char *cmd, unsigned int len)
       if (priv && priv->post_query_hook)
         (*priv->post_query_hook)(mysql, priv->client_data, conv_cmd, new_length);
 
+      local_infile_statement= conv_cmd;
+      local_infile_statement_len= new_length;
       rc= mysql_real_query(mysql, conv_cmd, new_length);
+      local_infile_statement= NULL;
       
       if (priv && priv->post_query_hook)
         (*priv->post_query_hook)(mysql, priv->client_data, conv_cmd, new_length);

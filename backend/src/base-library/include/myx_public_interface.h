@@ -1219,6 +1219,7 @@ MYX_PUBLIC_FUNC int myx_free_application_options(MYX_APPLICATION_OPTIONS *option
 //Various
 //Check if a string matches a given search string
 MYX_PUBLIC_FUNC int myx_match_pattern(const char *text, const char *search, int case_insensitive, int strict);
+MYX_PUBLIC_FUNC int myx_local_infile_allowed(const char *statement, const char *filename);
 
 //Check whether a given string can be properly converted to an encoding
 MYX_PUBLIC_FUNC int myx_check_utf8_convertible(const char *str, const char *encoding);
