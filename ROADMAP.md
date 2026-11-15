@@ -103,8 +103,8 @@ waits until after parity and gets its own decision.
 
 ## Open questions
 
-- ~~**Name.**~~ Decided: **QueryMole** (ADR-0030). The About dialog shows the QueryMole artwork (ADR-0032). Open:
-  the artwork in the connect dialog header and top right in the main window, an application icon, a neutral busy
+- ~~**Name.**~~ Decided: **QueryMole** (ADR-0030). The About dialog shows the QueryMole artwork (ADR-0032), the
+  icon replaces the lightning bolt everywhere (ADR-0033). Open: hand-drawn 16/24 pixel icon variants, a neutral busy
   animation, renaming the GitHub repository to `querymole` (the program already links there).
 - Where the project is hosted; copyright holder line and contribution policy
   (licence is decided: ADR-0011).

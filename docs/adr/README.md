@@ -38,9 +38,10 @@ Related.
 | [0027](0027-linux-appimage-built-on-almalinux-9.md) | Linux release as an AppImage, bundled GTK2 and backend built on AlmaLinux 9 | Accepted |
 | [0028](0028-bundled-tahoma-substitute-outside-windows.md) | Ship Wine's Tahoma stand-in and use it for the forms outside Windows | Accepted |
 | [0029](0029-search-fields-match-parts-of-names.md) | Search fields: input without wildcards matches parts of names | Proposed |
-| [0030](0030-rename-to-querymole.md) | Rename the application to QueryMole before the public announcement | Accepted (implemented; icon and busy animation open; About picture: ADR-0032) |
+| [0030](0030-rename-to-querymole.md) | Rename the application to QueryMole before the public announcement | Accepted (implemented; busy animation open; About picture: ADR-0032; icon: ADR-0033) |
 | [0031](0031-copyright-notice-of-the-maintainer.md) | Copyright notice of the project maintainer in NOTICE and the About dialog | Accepted |
 | [0032](0032-querymole-artwork-in-the-about-dialog.md) | QueryMole artwork in the About dialog | Accepted (implemented) |
+| [0033](0033-querymole-icon-replaces-the-lightning-bolt.md) | The QueryMole icon replaces the lightning bolt | Accepted (implemented; Windows not verified) |
 
 ## Numbering
 

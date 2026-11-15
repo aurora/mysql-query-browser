@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Builds the Linux AppImage (ADR-0027). Run on the host (needs podman, distrobox with the "freepascal" container
-# from tools/distrobox-setup.sh, and icotool).
+# from tools/distrobox-setup.sh).
 #
 #   tools/package-appimage.sh              build everything, write dist/QueryMole-<version>-x86_64.AppImage
 #   tools/package-appimage.sh --no-build   reuse app/bin/qbr and backend/build-el9, only stage and pack
@@ -32,7 +32,6 @@ done
 
 [ -x "$TOOL" ] || { echo "appimagetool is missing: download appimagetool-x86_64.AppImage from" \
   "https://github.com/AppImage/appimagetool/releases (continuous) to $TOOL and make it executable" >&2; exit 1; }
-command -v icotool >/dev/null || { echo "icotool (icoutils) is needed to extract the icon" >&2; exit 1; }
 
 run_el9() {
   podman run --rm --security-opt label=disable -v "$ROOT":/src -v "$DIST":/out -w /src "$IMAGE" "$@"
@@ -57,12 +56,9 @@ APPDIR="$DIST/AppDir"
 install -m 755 "$ROOT/tools/appimage/AppRun" "$APPDIR/AppRun"
 install -m 644 "$ROOT/tools/appimage/qbr.desktop" "$APPDIR/qbr.desktop"
 
-# icon: the 48x48 frame with an alpha channel of the original program's icon
-icons=$(mktemp -d)
-icotool -x -w 48 -h 48 -b 32 -o "$icons" "$ROOT/legacy/mysql-query-browser/images/icons/MySQLQueryBrowser.ico"
-cp "$icons"/*.png "$APPDIR/querymole.png"
+# icon: the QueryMole icon, 256x256 (ADR-0033, written by tools/make_branding.sh)
+install -m 644 "$ROOT/app/images/querymole.png" "$APPDIR/querymole.png"
 ln -sf querymole.png "$APPDIR/.DirIcon"
-rm -rf "$icons"
 
 # licence files of what is linked statically into the program (Lazarus/FPC) and of the shipped font
 mkdir -p "$APPDIR/licenses/lazarus" "$APPDIR/licenses/fonts"

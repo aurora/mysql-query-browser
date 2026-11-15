@@ -133,5 +133,5 @@ if [ "$do_velopack" = 1 ]; then
   echo "== velopack"
   vpk pack --packId QueryMole --packVersion "$VERSION" --packDir "$(cygpath -w "$APP")" \
     --mainExe qbr.exe --packTitle "QueryMole" --outputDir "$(cygpath -w "$DIST/Releases")" \
-    --icon "$(cygpath -w "$ROOT/legacy/mysql-query-browser/images/icons/MySQLQueryBrowser.ico")"
+    --icon "$(cygpath -w "$ROOT/app/images/querymole.ico")"
 fi

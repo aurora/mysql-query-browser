@@ -61,7 +61,7 @@ def make_app_rc():
     invented: that string is left out."""
     ver = open(os.path.join(ROOT, "VERSION"), encoding="utf-8").read().strip()
     nums = (re.findall(r"[0-9]+", ver.split("-")[0]) + ["0", "0", "0", "0"])[:4]
-    icon = os.path.join(ROOT, "legacy", "mysql-query-browser", "images", "icons", "MySQLQueryBrowser.ico")
+    icon = os.path.join(IMAGES, "querymole.ico")        # ADR-0033, written by tools/make_branding.sh
     rc = os.path.join(OUT, "qbr.rc")
     strings = (("FileDescription", "QueryMole SQL client"),
                ("FileVersion", ver), ("InternalName", "qbr"), ("OriginalFilename", "qbr.exe"),
