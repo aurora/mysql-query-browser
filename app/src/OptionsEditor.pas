@@ -891,6 +891,16 @@ begin
         (CodeFontLU.Items.IndexOf('Bitstream Vera Sans Mono') = -1) then
         CodeFontLU.Items.Add('Bitstream Vera Sans Mono');
 
+      // Port: the same for the default and data font: "MS Sans Serif" (the default) is not in Screen.Fonts outside
+      // Windows, no entry was selected and Apply saved an empty name, which crashed the program at the next
+      // start. A name that is not in the list is added so that it is shown and kept.
+      if (MYXCommonOptions.DefaultFontName <> '') and
+        (DefaultFontLU.Items.IndexOf(MYXCommonOptions.DefaultFontName) = -1) then
+        DefaultFontLU.Items.Add(MYXCommonOptions.DefaultFontName);
+      if (MYXCommonOptions.DataFontName <> '') and
+        (DataFontLU.Items.IndexOf(MYXCommonOptions.DataFontName) = -1) then
+        DataFontLU.Items.Add(MYXCommonOptions.DataFontName);
+
       DefaultFontLU.ItemIndex := DefaultFontLU.Items.IndexOf(
         MYXCommonOptions.DefaultFontName);
       if (DefaultFontLU.ItemIndex = -1) then

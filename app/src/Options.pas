@@ -917,11 +917,20 @@ begin
                 else
                   if (CompareText(OptionGroupName, 'Fonts') = 0) then
                   begin
+                    // Port: an empty name keeps the default. Before the options page kept fonts missing from
+                    // Screen.Fonts (OptionsEditor), it saved "MS Sans Serif" as '' outside Windows, and a
+                    // font named '' makes the GTK2 widgetset fail with an access violation.
                     if (CompareText(OptionName, 'DefaultFontName') = 0) then
-                      DefaultFontName := OptionValue
+                    begin
+                      if OptionValue <> '' then
+                        DefaultFontName := OptionValue;
+                    end
                     else
                       if (CompareText(OptionName, 'DataFontName') = 0) then
-                        DataFontName := OptionValue
+                      begin
+                        if OptionValue <> '' then
+                          DataFontName := OptionValue;
+                      end
                       else
                         if (CompareText(OptionName, 'CodeFontName') = 0) then
                           CodeFontName := OptionValue
