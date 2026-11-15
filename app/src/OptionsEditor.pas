@@ -632,17 +632,52 @@ procedure TOptionsForm.ConnsTreeViewDragDrop(Sender, Source: TObject; X, Y: Inte
 
 var
   Connection: TMYX_USER_CONNECTION;
+  Target,
+  Group: TTreeNode;
 
 begin
   // Since we checked it in drag over we can safely assume the sender is the connections treeview.
 
+  // Port: the original only reordered (and used the drop target's index within its group as index into the
+  // list of all connections); a connection could not be dropped on a group node and kept its storage type,
+  // so a history entry dropped among the stored connections went back to the history on the next load. The
+  // drop target may now be a group node (the connection is appended to it), and the storage type follows
+  // the group.
+  Target := ConnsTreeview.DropTarget;
+  if Target.Parent = nil then
+    Group := Target
+  else
+    Group := Target.Parent;
+
   // First move the node in our storage...
   Connection := TMYX_USER_CONNECTION(ConnsTreeview.Selected.Data);
   FStoredConnections.user_connections.Extract(Connection);
-  FStoredConnections.user_connections.Insert(ConnsTreeview.DropTarget.Index, Connection);
+  if Target.Parent = nil then
+    FStoredConnections.user_connections.Add(Connection)
+  else
+    FStoredConnections.user_connections.Insert(
+      FStoredConnections.user_connections.IndexOf(TMYX_USER_CONNECTION(Target.Data)), Connection);
+
+  if Group.Index = 0 then
+  begin
+    if Connection.storage_type <> MYX_FAVORITE_USER_CONNECTION then
+    begin
+      Connection.storage_type := MYX_FAVORITE_USER_CONNECTION;
+      // Stored connections are listed and chosen by name; history entries usually have none.
+      if ConnectionEd.Text = '' then
+        ConnectionEd.Text := Connection.username + '@' + Connection.hostname;
+      Connection.connection_name := ConnectionEd.Text;
+      ConnsTreeView.Selected.Text := ConnectionEd.Text;
+    end;
+  end
+  else
+    Connection.storage_type := MYX_HISTORY_USER_CONNECTION;
 
   // ..then in the treeview.
-  ConnsTreeView.Selected.MoveTo(ConnsTreeview.DropTarget, naInsert);
+  if Target.Parent = nil then
+    ConnsTreeView.Selected.MoveTo(Target, naAddChild)
+  else
+    ConnsTreeView.Selected.MoveTo(Target, naInsert);
 
   DoPageContentChanged(Self);
 end;
@@ -662,7 +697,8 @@ begin
     with ConnsTreeview do
     begin
       Node := DropTarget;
-      Accept := (Selected <> DropTarget) and (Selected.Parent <> nil) and Assigned(Node) and (Node.Parent <> nil);
+      // Port: group nodes are drop targets too (see ConnsTreeViewDragDrop).
+      Accept := Assigned(Selected) and (Selected <> DropTarget) and (Selected.Parent <> nil) and Assigned(Node);
     end;
 end;
 
