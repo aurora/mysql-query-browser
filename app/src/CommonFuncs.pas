@@ -87,6 +87,13 @@ end;
 
 // -----------------------------------------------------------------------------
 
+const
+  // Column of the About dialog's texts: below the wordmark that tools/make_branding.sh sets into the picture
+  // (left edge and width of the rule under the slogan, top just below it; ADR-0032).
+  AboutColLeft = 405;
+  AboutColTop = 108;
+  AboutColWidth = 242;
+
 type
   // The credits view of the About dialog has two sections (ADR-0032); the labels added for them are shown and
   // hidden together with the original's credits label.
@@ -267,14 +274,14 @@ begin
   Result.TntBevel1.Width := Result.TntBevel1.Width + Grow;
   Result.CloseBtn.Left := Result.CloseBtn.Left + Grow;
   Result.CreditsBtn.Left := Result.CreditsBtn.Left + Grow;
-  Result.VersionLbl.Left := 468;
-  Result.CopyrightLbl.Left := 468;
-  Result.LicenceLbl.Left := 468;
-  Result.TextLbl.Left := 468;
-  Result.VersionLbl.Width := 240;
-  Result.CopyrightLbl.Width := 240;
-  Result.LicenceLbl.Width := 240;
-  Result.TextLbl.Width := 240;
+  Result.VersionLbl.Left := AboutColLeft;
+  Result.CopyrightLbl.Left := AboutColLeft;
+  Result.LicenceLbl.Left := AboutColLeft;
+  Result.TextLbl.Left := AboutColLeft;
+  Result.VersionLbl.Width := AboutColWidth;
+  Result.CopyrightLbl.Width := AboutColWidth;
+  Result.LicenceLbl.Width := AboutColWidth;
+  Result.TextLbl.Width := AboutColWidth;
   Result.VersionLbl.Font.Color := RGBToColor(206, 218, 232);
   Result.CopyrightLbl.Font.Color := RGBToColor(160, 178, 200);
   Result.LicenceLbl.Font.Color := RGBToColor(160, 178, 200);
@@ -286,17 +293,17 @@ begin
   Result.CopyrightLbl.Font.Height := -10;
   {$ENDIF}
   // Version of QueryMole (bold), below it the original it is based on (ADR-0030), in the plain font.
-  Result.VersionLbl.Top := 106;
+  Result.VersionLbl.Top := AboutColTop;
   BasedOnLbl := TLabel.Create(Result);
   BasedOnLbl.Parent := Result;
   BasedOnLbl.Transparent := True;
   BasedOnLbl.Font := Result.TextLbl.Font;
-  BasedOnLbl.Left := 468;
-  BasedOnLbl.Top := 122;
+  BasedOnLbl.Left := AboutColLeft;
+  BasedOnLbl.Top := AboutColTop + 16;
   BasedOnLbl.Caption := AboutBasedOnText;
   // Credits in two sections (ADR-0032): the original's authors, unchanged, under a heading that says what they
   // worked on, then the people of QueryMole. Heights are measured, so each section follows the previous one.
-  Heading := AddAboutLabel(Result, Result.TextLbl, True, 146, _('Original: MySQL Query Browser (MySQL AB)'));
+  Heading := AddAboutLabel(Result, Result.TextLbl, True, AboutColTop + 40, _('Original: MySQL Query Browser (MySQL AB)'));
   Result.TextLbl.Top := Heading.Top + Heading.Height + 1;
   Result.TextLbl.Height := WrappedTextHeight(Result.TextLbl.Font, Result.TextLbl.Caption, Result.TextLbl.Width);
   Toggle := TAboutCreditsToggle.Create(Result);
@@ -312,13 +319,13 @@ begin
   Result.CreditsBtn.OnClick := Toggle.CreditsClick;
   // The original's copyright line stays as it is (only broken after its first sentence); the project's own notice
   // goes below it (ADR-0031).
-  Result.CopyrightLbl.Top := 146;
+  Result.CopyrightLbl.Top := AboutColTop + 40;
   Result.CopyrightLbl.Height := 56;
   Result.CopyrightLbl.WordWrap := True;
   Result.CopyrightLbl.Caption := StringReplace(Result.CopyrightLbl.Caption, '. All', '.' + LineEnding + 'All', []) +
     LineEnding + RevivalProductName + ' ' + #$C2#$A9 + ' 2026 Harald Lapp and contributors.';
   // GPLv2 2(c): copyright (above), no warranty, redistribution under the licence, where to find more.
-  Result.LicenceLbl.Top := 202;
+  Result.LicenceLbl.Top := AboutColTop + 96;
   Result.LicenceLbl.Height := 134;
   Result.LicenceLbl.Caption := _('Free software under the GNU GPL, version 2') + LineEnding +
     _('or later; you may redistribute it under its') + LineEnding +

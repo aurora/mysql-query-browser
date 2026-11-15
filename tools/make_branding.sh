@@ -16,16 +16,13 @@ OUT="$ROOT/app/images"
 
 mkdir -p "$OUT"
 
-# About dialog (720x341, ADR-0032): the QueryMole artwork (assets/querymole-about.png) scaled to 720x277, on its
-# background colour, the lowest rows faded into the band below. The dialog writes its texts into the empty area
-# right of the mole, below the line under the slogan (x >= 468, y >= 104; CommonFuncs.CreateAboutForm, which also
-# sets the text colours). If the artwork changes, check those numbers.
-NAVY="rgb(13,32,53)"             # background of the artwork
-magick -size 720x341 "xc:$NAVY" \
-  \( "$ROOT/assets/querymole-about.png" -resize 720x -alpha set \
-     \( -size 720x261 xc:white -size 720x16 gradient:white-black -append \) \
-     -compose CopyOpacity -composite \) \
-  -compose Over -geometry +0+0 -composite \
+# About dialog (ADR-0032): the QueryMole artwork (assets/querymole-about.png, the mole on the left, empty navy on
+# the right) scaled to the height of the dialog's picture (341), and the wordmark with slogan and rule
+# (assets/querymole-text-1.png, transparent) set top right, 250 pixels wide at x 400, y 14. The dialog writes its
+# texts below the rule (x 405-647, y 100) in a column of its width (AboutColLeft/Top/Width in CommonFuncs, which
+# also sets the text colours); change both together.
+magick "$ROOT/assets/querymole-about.png" -resize x341 \
+  \( "$ROOT/assets/querymole-text-1.png" -resize 250x \) -geometry +400+14 -composite \
   -alpha off -depth 8 -strip "$OUT/about.png"
 
 # The QueryMole icon (ADR-0033) from assets/querymole-icon.png, made square on a transparent canvas. It replaces

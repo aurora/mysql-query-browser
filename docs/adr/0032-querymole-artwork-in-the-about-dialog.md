@@ -1,14 +1,14 @@
 # ADR-0032 — QueryMole artwork in the About dialog
 
-- Status: Accepted (implemented)
+- Status: Accepted (implemented; second version of the artwork, with a separate wordmark, the same day)
 - Date: 2026-11-15
 - Deciders: Harald Lapp (project owner)
 
 ## Context
 
 ADR-0030 removed the MySQL logo from the About picture and set the word "QueryMole" on the original's gradient as
-a placeholder; the final logo was deferred. The owner has now supplied a QueryMole artwork
-(`assets/querymole-about.png`, 1423x547, generated with an OpenAI image model; `docs/licenses.md`): a mole with a
+a placeholder; the final logo was deferred. The owner has now supplied a QueryMole artwork (first
+version: `assets/querymole-about.png`, 1423x547, generated with an OpenAI image model; `docs/licenses.md`): a mole with a
 magnifier and SQL snippets on a dark navy background, on the right the "QueryMole" wordmark, the line "Explore.
 Query. Understand." and a thin rule below it, and empty background under that.
 
@@ -18,15 +18,19 @@ pixels it would be 171 pixels high and the wordmark hard to read; grey text on n
 
 ## Decision
 
-- **Picture.** `tools/make_branding.sh` writes `app/images/about.png` at **720x341**: the artwork scaled to 720x277
-  on its background colour (`rgb(13,32,53)`), its lowest rows faded into the 64-pixel band below. The master stays
-  in `assets/`; the generated file is committed like the other branding images (ADR-0030).
-- **Dialog.** `CommonFuncs.CreateAboutForm` takes the dialog's width from the picture (720 instead of 444; buttons
-  and bevel follow) and puts the texts in a column right of the mole, **below the rule under the slogan** (x = 468,
-  from y = 106, 240 pixels wide, down to the button line). The texts are light (`rgb(206,218,232)` for the
-  version, `rgb(160,178,200)` for the rest) instead of `clGray`. `About.lfm` stays as converted; the changes are
-  made at run time like those of ADR-0026 and ADR-0031.
-- **Lines set by hand.** A 240-pixel column wraps long sentences at random places, so the lines are broken in the
+- **Picture** (second version of the artwork, the same day). The owner replaced the first artwork, which had the
+  wordmark painted in, by two images: the mole on the left of an empty navy background (`assets/querymole-about.png`,
+  1210x620) and the wordmark with slogan and rule on a transparent background (`assets/querymole-text-1.png`).
+  `tools/make_branding.sh` scales the artwork to the dialog's picture height (**666x341**, no band needed at about
+  2:1) and sets the wordmark top right (250 pixels wide at x 400, y 14). Kept apart, the wordmark stays sharp and can
+  be placed exactly over the text column. The masters stay in `assets/`; the generated file is committed like the
+  other branding images (ADR-0030).
+- **Dialog.** `CommonFuncs.CreateAboutForm` takes the dialog's width from the picture (666 instead of 444; buttons
+  and bevel follow) and puts the texts in a column right of the mole, **below the rule under the slogan**, aligned
+  with it (`AboutColLeft`/`AboutColTop`/`AboutColWidth`: x = 405, from y = 108, 242 pixels wide, down to the button
+  line). The texts are light (`rgb(206,218,232)` for the version, `rgb(160,178,200)` for the rest) instead of
+  `clGray`. `About.lfm` stays as converted; the changes are made at run time like those of ADR-0026 and ADR-0031.
+- **Lines set by hand.** A 242-pixel column wraps long sentences at random places, so the lines are broken in the
   text where possible:
 
   ```
@@ -81,11 +85,11 @@ Positive:
 Negative / costs:
 
 - A further visible deviation from the original (size, layout, colours of the dialog), on top of ADR-0030's.
-- The dialog is 276 pixels wider than the original; the splash code (`ShowSplashScreen`, unused) would show the
+- The dialog is 222 pixels wider than the original; the splash code (`ShowSplashScreen`, unused) would show the
   picture with the version only, in the old place.
 - The column's position and the text colours are numbers in code that belong to the picture: a new artwork with
   the wordmark elsewhere needs them changed (the script's comment says so).
-- The column is narrow: the hand-set lines only fit as long as each line fits 240 pixels; a translation or a wider
+- The column is narrow: the hand-set lines only fit as long as each line fits 242 pixels; a translation or a wider
   font wraps them again (still readable, but no longer tidy). The credits view is the fullest (two headings and
   about 10 lines); there is room left above the button line, but not much. Checked under Linux (GTK2, Wine's Tahoma at -10); the Windows layout with Microsoft's Tahoma at
   -11 is not verified yet.
@@ -94,6 +98,8 @@ Negative / costs:
 
 - **Keep the 444-pixel dialog, artwork on top.** Rejected: at 171 pixels height the wordmark and the mole are too
   small to read.
+- **The first artwork with the wordmark painted in (720x341, a band below it).** Replaced by the owner: the wordmark
+  could not be moved or kept sharp, and the picture needed a band to reach the dialog's height.
 - **560-pixel dialog, texts in the dark band below the artwork** (implemented first). Works, but the texts stand
   apart from the artwork and the empty area under the wordmark stays empty; the owner preferred the column.
 - **Column with the texts as wrapped paragraphs** (first version of the column). Rejected: the version line broke
