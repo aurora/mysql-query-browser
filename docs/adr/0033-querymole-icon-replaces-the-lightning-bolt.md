@@ -1,6 +1,6 @@
 # ADR-0033 — The QueryMole icon replaces the lightning bolt
 
-- Status: Accepted (implemented; Windows not verified; wordmark in the connect header added the same day)
+- Status: Accepted (implemented; Windows not verified; wordmark in the connect header and the small icon added the same day)
 - Date: 2026-11-15
 - Deciders: Harald Lapp (project owner)
 
@@ -19,12 +19,14 @@ makes the master square and writes, into `app/images/`:
 
 | File | Used for |
 |---|---|
-| `querymole.ico` (256, 128, 64, 48, 32, 24, 16) | `MAINICON` of `qbr.exe` (`build_resources.py`): Explorer, task bar, window icon on every platform (the LCL loads `MAINICON`); Velopack `--icon` (`package.sh`) |
+| `querymole.ico` (256, 128, 64, 48, 32 from the icon; 24, 16 from the small icon) | `MAINICON` of `qbr.exe` (`build_resources.py`): Explorer, task bar, window icon on every platform (the LCL loads `MAINICON`); Velopack `--icon` (`package.sh`) |
 | `querymole.png` (256x256) | AppImage icon and `.DirIcon` (`package-appimage.sh`) |
 | `sakila.png` (56x54) | the picture top right in the main window: the icon at 48 pixels |
 | `connect_header_qb.png` | connect dialog header: the bolt painted over with the gradient left of it, the icon at 50 pixels in its place; on the left the QueryMole wordmark (`assets/querymole-text.png`, background made transparent, 30 pixels high) instead of the word set in Liberation Sans by ADR-0030 (added the same day) |
 
-All sizes are scaled from the one master (the wordmark from its own); there is no hand-drawn small variant. `icotool` and the Liberation Sans font are no
+The sizes from 32 pixels up are scaled from the icon. For 24 and 16 pixels, where the mole is no longer recognisable,
+the owner made a simplified icon without the mole (`assets/querymole-icon-small.png`: database and magnifier on the
+same navy square; added the same day). The wordmark is scaled from its own master. `icotool` and the Liberation Sans font are no
 longer needed for the branding or the AppImage.
 
 Not changed: the document icons `QueryFile.ico` and `SQLScriptFile.ico` (a page with a small bolt) are not compiled
@@ -40,8 +42,8 @@ Positive:
 
 Negative / costs:
 
-- At 16 pixels the detailed picture is only the orange nose and the database on navy; a simplified small variant
-  (e.g. only the head) would read better. Left for later.
+- The icon looks different at 16/24 pixels (title bar, Explorer details view) than at 32 and above (task bar, desktop):
+  database and magnifier without the mole. Same colours and square, so it reads as the same mark.
 - The 256-pixel frame is PNG-compressed inside the `.ico` (the standard since Windows Vista); checked with windres
   and the LCL under Linux, not yet in Windows Explorer.
 - Another visible deviation from the original (ADR-0001), like ADR-0030.
@@ -51,8 +53,9 @@ Negative / costs:
 
 - **Keep the bolt as application icon (ADR-0030).** Rejected now that the project has its own icon: the bolt is the
   original's mark and recognisably "MySQL Query Browser".
-- **Hand-drawn 16 and 24 pixel variants.** Better, but needs drawing work; can replace the scaled frames later without
-  changing anything else.
+- **All sizes scaled from the one icon** (implemented first). Rejected: at 16 pixels it was only the orange nose and
+  the database on navy.
+- **The small icon also for 32 pixels.** Not needed: at 32 pixels the mole is recognisable.
 - **Leave the connect header with the bolt.** Rejected: the header would show the word "QueryMole" next to the
   original's mark.
 

@@ -30,8 +30,13 @@ magick "$ROOT/assets/querymole-about.png" -resize x341 \
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 magick "$ROOT/assets/querymole-icon.png" -background none -gravity center -extent 304x304 "$tmp/icon.png"
+# The simplified icon without the mole (assets/querymole-icon-small.png: database and magnifier) for 16 and 24
+# pixels, where the mole is no longer recognisable.
+magick "$ROOT/assets/querymole-icon-small.png" -background none -gravity center -extent 150x150 "$tmp/small.png"
 # application icon (qbr.exe, window icon, Velopack) and the picture for the AppImage
-magick "$tmp/icon.png" -define icon:auto-resize=256,128,64,48,32,24,16 "$OUT/querymole.ico"
+magick \( "$tmp/icon.png" -resize 256x256 \) \( "$tmp/icon.png" -resize 128x128 \) \( "$tmp/icon.png" -resize 64x64 \) \
+  \( "$tmp/icon.png" -resize 48x48 \) \( "$tmp/icon.png" -resize 32x32 \) \
+  \( "$tmp/small.png" -resize 24x24 \) \( "$tmp/small.png" -resize 16x16 \) "$OUT/querymole.ico"
 magick "$tmp/icon.png" -resize 256x256 -strip "$OUT/querymole.png"
 
 # The QueryMole wordmark (assets/querymole-text.png, on an off-white background): background made
