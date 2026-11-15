@@ -1,6 +1,6 @@
 # ADR-0033 — The QueryMole icon replaces the lightning bolt
 
-- Status: Accepted (implemented; Windows not verified)
+- Status: Accepted (implemented; Windows not verified; wordmark in the connect header added the same day)
 - Date: 2026-11-15
 - Deciders: Harald Lapp (project owner)
 
@@ -22,10 +22,10 @@ makes the master square and writes, into `app/images/`:
 | `querymole.ico` (256, 128, 64, 48, 32, 24, 16) | `MAINICON` of `qbr.exe` (`build_resources.py`): Explorer, task bar, window icon on every platform (the LCL loads `MAINICON`); Velopack `--icon` (`package.sh`) |
 | `querymole.png` (256x256) | AppImage icon and `.DirIcon` (`package-appimage.sh`) |
 | `sakila.png` (56x54) | the picture top right in the main window: the icon at 48 pixels |
-| `connect_header_qb.png` | connect dialog header: the bolt painted over with the gradient left of it, the icon at 50 pixels in its place |
+| `connect_header_qb.png` | connect dialog header: the bolt painted over with the gradient left of it, the icon at 50 pixels in its place; on the left the QueryMole wordmark (`assets/querymole-text.png`, background made transparent, 30 pixels high) instead of the word set in Liberation Sans by ADR-0030 (added the same day) |
 
-All sizes are scaled from the one master; there is no hand-drawn small variant. `icotool` is no longer needed for
-the branding or the AppImage.
+All sizes are scaled from the one master (the wordmark from its own); there is no hand-drawn small variant. `icotool` and the Liberation Sans font are no
+longer needed for the branding or the AppImage.
 
 Not changed: the document icons `QueryFile.ico` and `SQLScriptFile.ico` (a page with a small bolt) are not compiled
 into the program and not used by anything; they stay in `legacy/`.
