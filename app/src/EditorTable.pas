@@ -914,7 +914,9 @@ begin
       '', MYX_DBM_TMI_NO,
       '', '',
       MYX_DBM_TPK_DEFAULT, MYX_DBM_TRT_NONE, '2',
-      '64', 0, MYX_DBM_TRF_DEFAULT, '', '', '', ''));
+      '64', 0, MYX_DBM_TRF_DEFAULT, '', '', '', '',
+      // Port: engine_name (added to the backend's table model); empty, the engine comes from TableEngine
+      ''));
   end;
 end;
 
@@ -1789,7 +1791,9 @@ begin
             1,
             1,
             '', 0,
-            '');
+            '',
+            // Port: generated, on_update, invisible, check_constraint (added to the backend's column model)
+            '', '', 0, '');
 
           NewPKColumn := True;
         end
@@ -1801,7 +1805,9 @@ begin
             Ord(MYXCommonOptions.EditorTableAllColumnsNotNullPerDef),
             0,
             '', 0,
-            '');
+            '',
+            // Port: generated, on_update, invisible, check_constraint (added to the backend's column model)
+            '', '', 0, '');
 
 
         //Add new column to TableData.columns

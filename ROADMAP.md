@@ -80,6 +80,22 @@ waits until after parity and gets its own decision.
   sockets) are not built; decide whether the features are needed.
 - Review each of the 29 `char*`-returning functions for the `g_free` contract
   (ADR-0006).
+- **Table editor on current servers.** `tests/test_table_editor.pas` reads a table through the editor's model
+  (`myx_database_model.c` and the Pascal class) and checks on the matrix that an unchanged table gives no SQL, that
+  editing the table comment and a comment on every column has the same effect as plain `ALTER TABLE` on a twin
+  table, and that the table written as a new one (`CREATE TABLE`) equals the twin. It covers InnoDB, MyISAM,
+  MEMORY, Aria, foreign keys with actions, many data types, JSON, generated, invisible and `ON UPDATE` columns,
+  CHECK, column collations and functional indices; all pass on the six servers since 2026-11-15 (fixes in the
+  backend, marked `revival:`). Still open:
+  - the model has no table CHECK constraints: edits keep them, the editor cannot create them;
+  - generated expressions, `ON UPDATE`, `INVISIBLE` and column CHECKs are kept but not shown or editable in the
+    editor; expression defaults (`DEFAULT (expr)`, MySQL 8.0.13+) are not tested;
+  - not tested: editing indices and foreign keys in the editor, the default engine for new tables
+    (`myx_dbm_get_default_storage_engine` reads `storage_engine`, gone since 5.7), the data type list
+    (`mysqlx_dbm_datatypes.xml` has no JSON, YEAR, BINARY, VARBINARY; such columns keep their type as text);
+  - the editor itself was checked by opening a table, not by editing through its grid; the Windows backend build
+    with these changes is not checked yet.
+  The model is the natural seam for other databases later (ADR-0010).
 
 **Fidelity**
 - Reference screenshots from a user who still runs the original, for side by

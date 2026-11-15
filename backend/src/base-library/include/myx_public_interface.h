@@ -879,6 +879,13 @@ typedef struct {
 
   char *comment;
 
+  /* revival: column attributes newer than MySQL 5.0, taken from the column's line in SHOW CREATE TABLE as the
+     server writes them, so that editing a column keeps them. The table editor does not show them. */
+  char *generated;          /* "GENERATED ALWAYS AS (expr) VIRTUAL|STORED|PERSISTENT" */
+  char *on_update;          /* the expression after ON UPDATE, e.g. "CURRENT_TIMESTAMP" */
+  unsigned char invisible;  /* INVISIBLE (MySQL 8.0.23+, MariaDB 10.3+) */
+  char *check_constraint;   /* a column CHECK, e.g. MariaDB's "CHECK (json_valid(`doc`))" */
+
 } MYX_DBM_COLUMN_DATA;
 
   
@@ -967,6 +974,10 @@ typedef struct {
   MYX_DBM_INDEX_DATA *indices;
 
   char *federated_connection;
+
+  /* revival: the engine as the server names it; table_engine falls back to MyISAM for engines it does not know
+     (Aria, RocksDB, ...), and the name is written instead while table_engine still maps to it */
+  char *engine_name;
 } MYX_DBM_TABLE_DATA;
 
 /// [SCRIPT::LibInterfaceMapper] -generate_classes MYX_DBM_STORED_PROCEDURE_DATA

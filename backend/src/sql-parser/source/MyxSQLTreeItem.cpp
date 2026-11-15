@@ -787,22 +787,32 @@ void tree_item_list_add_all(void *tree_item_list, void *tree_item)
   list->insert(list->end(), item_from->get_subitems()->begin(), item_from->get_subitems()->end());
 }
 
+/* revival: the C callers (myx_database_model.c) walk the tree without checking each step, so a missing node
+   (a statement the parser does not know, e.g. newer SHOW CREATE TABLE output) is passed in as NULL; return NULL
+   instead of calling a method on it. tree_item_get_name/_value had no return statement (undefined behaviour;
+   with current compilers it crashes the table editor). */
 const void *tree_item_get_subitem_by_name(const void *tree_item, const char *name, int pos)
 {
+  if(tree_item == 0)
+    return 0;
   const MyxSQLTreeItem* item= static_cast<const MyxSQLTreeItem *>(tree_item);
   return item->get_subitem_by_name(name, pos);
 }
 
 const char *tree_item_get_name(const void *tree_item)
 {
+  if(tree_item == 0)
+    return 0;
   const MyxSQLTreeItem* item= static_cast<const MyxSQLTreeItem *>(tree_item);
-  item->get_name();
+  return item->get_name();
 }
 
 const char *tree_item_get_value(const void *tree_item)
 {
+  if(tree_item == 0)
+    return 0;
   const MyxSQLTreeItem* item= static_cast<const MyxSQLTreeItem *>(tree_item);
-  item->get_value();
+  return item->get_value();
 }
 
 void tree_item_dump_xml_to_file(const void *tree_item, const char *filename)

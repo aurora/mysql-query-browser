@@ -299,6 +299,7 @@ static void parse_foreign_keys(MYSQL *mysql, const char *table_def, MYX_DBM_TABL
 
   rex= ".*?constraint\\s+(" IDENTIFIER_PCRE ")\\s+foreign\\s+key\\s+\\(" COLUMN_LIST_PCRE "\\)"
     "\\s+REFERENCES\\s+" QUALIFIED_IDENTIFIER_PCRE "\\s+\\(" COLUMN_LIST_PCRE "\\)" MATCH_PCRE
+    "(?:\\s+on\\s+(delete|update)\\s+(restrict|cascade|set\\s+null|no\\s+action))?"
     "(?:\\s+on\\s+(delete|update)\\s+(restrict|cascade|set\\s+null|no\\s+action))?";
 
   pcre_exp= pcre_compile(rex, PCRE_CASELESS|PCRE_UTF8|PCRE_DOTALL, &error_str, &erroffset, NULL);
@@ -323,7 +324,10 @@ static void parse_foreign_keys(MYSQL *mysql, const char *table_def, MYX_DBM_TABL
 
       // source columns
       pcre_get_substring(table_def, o_vector, rc, 2, &value);
-      src= g_strsplit(value, ", ", 0);
+      /* revival: MySQL 8 lists the columns without a blank after the comma */
+      src= g_strsplit(value, ",", 0);
+      for (i= 0; src[i]; i++)
+        g_strstrip(src[i]);
       pcre_free_substring(value);
 
       // Referenced schema (optional)
@@ -338,7 +342,9 @@ static void parse_foreign_keys(MYSQL *mysql, const char *table_def, MYX_DBM_TABL
 
       // target columns
       pcre_get_substring(table_def, o_vector, rc, 5, &value);
-      dst= g_strsplit(value, ", ", 0);
+      dst= g_strsplit(value, ",", 0);
+      for (i= 0; dst[i]; i++)
+        g_strstrip(dst[i]);
       pcre_free_substring(value);
 
       for (i= 0; src[i] && dst[i]; i++);
@@ -357,39 +363,34 @@ static void parse_foreign_keys(MYSQL *mysql, const char *table_def, MYX_DBM_TABL
       fk.on_update= MYX_DBM_FA_RESTRICT;
       fk.on_delete= MYX_DBM_FA_RESTRICT;
 
-      // actions
-      if (rc > 7)
+      /* revival: actions; the original read only the first ON clause and compared with "DELETE " (trailing
+         blank), so ON DELETE was always taken as RESTRICT and written back that way */
       {
-        pcre_get_substring(table_def, o_vector, rc, 6, &value);
-        pcre_get_substring(table_def, o_vector, rc, 7, &option);
-
-        if (strcasecmp(value, "UPDATE") == 0)
+        int g;
+        for (g= 6; g + 1 < rc; g+= 2)
         {
-          for (i= 0; fk_actions[i].kw; i++)
+          pcre_get_substring(table_def, o_vector, rc, g, &value);
+          pcre_get_substring(table_def, o_vector, rc, g + 1, &option);
+
+          if (*value)
           {
-            if (strncasecmp(option, fk_actions[i].kw, strlen(fk_actions[i].kw)) == 0)
+            for (i= 0; fk_actions[i].kw; i++)
             {
-              fk.on_update= fk_actions[i].action;
-              break;
+              if (strncasecmp(option, fk_actions[i].kw, strlen(fk_actions[i].kw)) == 0)
+              {
+                if (strcasecmp(value, "UPDATE") == 0)
+                  fk.on_update= fk_actions[i].action;
+                else if (strcasecmp(value, "DELETE") == 0)
+                  fk.on_delete= fk_actions[i].action;
+                break;
+              }
             }
           }
-        };
 
-        if (strcasecmp(value, "DELETE ") == 0)
-        {
-          for (i= 0; fk_actions[i].kw; i++)
-          {
-            if (strncasecmp(option, fk_actions[i].kw, strlen(fk_actions[i].kw))==0)
-            {
-              fk.on_delete= fk_actions[i].action;
-              break;
-            }
-          }
+          pcre_free_substring(value);
+          pcre_free_substring(option);
         }
-
-        pcre_free_substring(value);
-        pcre_free_substring(option);
-      };  
+      }
 
       table->fks_num++;
       table->fks= g_realloc(table->fks, sizeof(MYX_DBM_FK_DATA) * table->fks_num);
@@ -400,6 +401,213 @@ static void parse_foreign_keys(MYSQL *mysql, const char *table_def, MYX_DBM_TABL
     }
     pcre_free(pcre_exp);
   }
+}
+
+/* revival: helpers that read a column's attributes from its line in SHOW CREATE TABLE ("  `name` type ...,"),
+   for what SHOW FULL COLUMNS does not report in a usable form (generated columns, ON UPDATE, INVISIBLE, column
+   CHECK, whether the character set was given). */
+
+/* skips a quoted string or identifier starting at p (', " or `); returns the position after it */
+static const char *skip_quoted(const char *p)
+{
+  char q= *p++;
+  while(*p)
+  {
+    if(*p == '\\' && q != '`' && p[1])
+      p+= 2;
+    else if(*p == q)
+    {
+      if(p[1] == q)
+        p+= 2;
+      else
+        return p + 1;
+    }
+    else
+      p++;
+  }
+  return p;
+}
+
+/* p points at "("; returns the position after the matching ")" */
+static const char *skip_parens(const char *p)
+{
+  int depth= 0;
+  while(*p)
+  {
+    if(*p == '\'' || *p == '"' || *p == '`')
+    {
+      p= skip_quoted(p);
+      continue;
+    }
+    if(*p == '(')
+      depth++;
+    else if(*p == ')')
+    {
+      depth--;
+      if(depth == 0)
+        return p + 1;
+    }
+    p++;
+  }
+  return p;
+}
+
+/* finds keyword (case-insensitive, at a word start, outside quotes and parentheses) in [start, end); NULL if none */
+static const char *find_keyword(const char *start, const char *end, const char *keyword)
+{
+  size_t len= strlen(keyword);
+  const char *p= start;
+  while(p < end && *p)
+  {
+    if(*p == '\'' || *p == '"' || *p == '`')
+    {
+      p= skip_quoted(p);
+      continue;
+    }
+    if(*p == '(')
+    {
+      p= skip_parens(p);
+      continue;
+    }
+    if((p == start || p[-1] == ' ') && (size_t)(end - p) >= len && g_ascii_strncasecmp(p, keyword, len) == 0 &&
+      (p[len] == ' ' || p[len] == '(' || p + len == end))
+      return p;
+    p++;
+  }
+  return NULL;
+}
+
+/* the column's definition from SHOW CREATE TABLE without name and trailing comma; g_free it; NULL if not found */
+static char *create_table_column_def(const char *create_sql, const char *name)
+{
+  char *quoted, *needle, *result= NULL;
+  const char *p, *e;
+
+  if(create_sql == NULL || name == NULL)
+    return NULL;
+  quoted= str_g_replace(g_strdup(name), "`", "``");
+  needle= g_strdup_printf("\n  `%s` ", quoted);
+  p= strstr(create_sql, needle);
+  if(p)
+  {
+    p+= strlen(needle);
+    e= strchr(p, '\n');
+    if(!e)
+      e= p + strlen(p);
+    if(e > p && e[-1] == ',')
+      e--;
+    result= g_strndup(p, e - p);
+  }
+  g_free(needle);
+  g_free(quoted);
+  return result;
+}
+
+/* fills the revival attributes of column from its SHOW CREATE TABLE line */
+static void read_column_create_attributes(MYX_DBM_COLUMN_DATA *column, const char *create_sql)
+{
+  char *def= create_table_column_def(create_sql, column->name);
+  const char *end, *p, *q, *comment;
+
+  if(def == NULL)
+    return;
+  end= def + strlen(def);
+  // a column CHECK stands at the end, after the comment (MariaDB)
+  p= find_keyword(def, end, "CHECK");
+  if(p)
+  {
+    column->check_constraint= g_strdup(p);
+    end= p;
+  }
+  comment= find_keyword(def, end, "COMMENT");
+  if(comment)
+    end= comment;
+
+  p= find_keyword(def, end, "GENERATED");
+  if(p)
+  {
+    q= find_keyword(p, end, "AS");
+    if(q)
+    {
+      q+= 2;
+      while(*q == ' ')
+        q++;
+      if(*q == '(')
+      {
+        q= skip_parens(q);
+        while(*q == ' ')
+          q++;
+        // VIRTUAL, STORED or PERSISTENT
+        while(q < end && *q != ' ')
+          q++;
+        column->generated= g_strndup(p, q - p);
+      }
+    }
+  }
+
+  p= find_keyword(def, end, "ON UPDATE");
+  if(p)
+  {
+    p+= strlen("ON UPDATE ");
+    q= p;
+    while(q < end && *q != ' ' && *q != '(')
+      q++;
+    if(*q == '(')
+      q= skip_parens(q);
+    column->on_update= g_strndup(p, q - p);
+  }
+
+  // MySQL writes "/*!80023 INVISIBLE */", MariaDB "INVISIBLE"
+  column->invisible= (find_keyword(def, end, "INVISIBLE") != NULL) || (strstr(def, " INVISIBLE */") != NULL);
+
+  // a character set the column inherits from the table is not shown; do not write it out when the column is edited
+  if(find_keyword(def, end, "CHARACTER SET") == NULL && find_keyword(def, end, "COLLATE") == NULL)
+  {
+    g_free(column->charset);
+    column->charset= NULL;
+    g_free(column->collation);
+    column->collation= NULL;
+  }
+
+  g_free(def);
+}
+
+/* whether the index's line in SHOW CREATE TABLE names an index type (USING ...); SHOW INDEX always reports one,
+   also the engine's default, and writing that pinned it */
+static int create_table_index_has_using(const char *create_sql, const char *index_name)
+{
+  char *quoted, *needle;
+  const char *p, *e;
+  int result= 1;
+
+  if(create_sql == NULL || index_name == NULL)
+    return 1;
+  if(strcmp(index_name, "PRIMARY") == 0)
+    needle= g_strdup("\n  PRIMARY KEY ");
+  else
+  {
+    quoted= str_g_replace(g_strdup(index_name), "`", "``");
+    needle= g_strdup_printf("KEY `%s` ", quoted);
+    g_free(quoted);
+  }
+  p= strstr(create_sql, needle);
+  if(p)
+  {
+    e= strchr(p + 1, '\n');
+    if(!e)
+      e= p + strlen(p);
+    result= g_strstr_len(p, e - p, " USING ") != NULL;
+  }
+  g_free(needle);
+  return result;
+}
+
+/* an index part: `column` or, for a functional key part (MySQL 8.0.13+), the expression in parentheses */
+static char *index_part_sql(const char *name)
+{
+  if(name && name[0] == '(')
+    return g_strdup(name);
+  return g_strdup_printf("`%s`", name ? name : "");
 }
 
 static int is_pk_column(const void *tree, const char *col_name)
@@ -552,6 +760,7 @@ MYX_DBM_TABLE_DATA * myx_dbm_retrieve_table_data(MYSQL *mysql, MYX_DBM_DATATYPES
           if ((strcmp(fields[i].name, "Type") == 0) ||
             (strcmp(fields[i].name, "Engine") == 0))
           {
+            table_data->engine_name= g_strdup(row[i]);
             if(strcmp2(row[i], "InnoDB")==0)
               table_data->table_engine= MYX_DBM_TE_INNODB;
             else if((strcmp2(row[i], "HEAP")==0)||(strcmp2(row[i], "MEMORY")==0))
@@ -675,11 +884,19 @@ MYX_DBM_TABLE_DATA * myx_dbm_retrieve_table_data(MYSQL *mysql, MYX_DBM_DATATYPES
     table_data->avg_row_length= get_value_from_text(tbl_options, len, "AVG_ROW_LENGTH\\s*=\\s*(\\w+)");
     table_data->min_rows= get_value_from_text(tbl_options, len, "MIN_ROWS\\s*=\\s*(\\w+)");
     table_data->max_rows= get_value_from_text(tbl_options, len, "MAX_ROWS\\s*=\\s*(\\w+)");
-    tmp= get_value_from_text(tbl_options, len, "CHECKSUM=\\s*(0|1)");
+    /* revival: not PAGE_CHECKSUM (Aria) */
+    tmp= get_value_from_text(tbl_options, len, "(?:^|[\\s,])CHECKSUM\\s*=\\s*(0|1)");
     if(strcmp2(tmp, "1") == 0)
       table_data->checksum= 1;
     else
       table_data->checksum= 0;
+    g_free(tmp);
+
+    /* revival: the row format only when the table was created with one (Create_options); Row_format is the
+       format the engine chose (Dynamic for every InnoDB table since 5.7), and writing it pinned it */
+    tmp= get_value_from_text(tbl_options, len, "(?:^|[\\s,])ROW_FORMAT\\s*=\\s*(\\w+)");
+    if(tmp == NULL)
+      table_data->row_format= MYX_DBM_TRF_DEFAULT;
     g_free(tmp);
 
     g_free(tbl_options);
@@ -826,8 +1043,10 @@ MYX_DBM_TABLE_DATA * myx_dbm_retrieve_table_data(MYSQL *mysql, MYX_DBM_DATATYPES
 
             column->default_value= myx_convert_dbstr_utf8(mysql, row[i]);
 
+            /* revival: also CURRENT_TIMESTAMP(3) (MySQL 5.6+) and current_timestamp() (MariaDB 10.2+), which were
+               written back as the string 'current_timestamp()' */
             if (column->default_value &&
-              (strcmp2(column->default_value, "CURRENT_TIMESTAMP") != 0) &&
+              (g_ascii_strncasecmp(column->default_value, "CURRENT_TIMESTAMP", 17) != 0) &&
               !str_is_numeric(column->default_value))
             {
               char *quoted_default= g_strdup_printf("'%s'", column->default_value);
@@ -838,7 +1057,8 @@ MYX_DBM_TABLE_DATA * myx_dbm_retrieve_table_data(MYSQL *mysql, MYX_DBM_DATATYPES
           }
           else if (strcmp(fields[i].name, "Extra")==0)
           {
-            if(strcmp2(row[i], "auto_increment") == 0)
+            /* revival: Extra may list more than one attribute ("auto_increment INVISIBLE") */
+            if(row[i] && strstr(row[i], "auto_increment"))
               column->auto_inc= 1;
             else
               column->auto_inc= 0;
@@ -885,6 +1105,10 @@ MYX_DBM_TABLE_DATA * myx_dbm_retrieve_table_data(MYSQL *mysql, MYX_DBM_DATATYPES
     return NULL;
   }
   g_free(query);
+
+  /* revival: attributes SHOW FULL COLUMNS does not report usably */
+  for(i= 0; i < table_data->columns_num; i++)
+    read_column_create_attributes(table_data->columns + i, sql_create_table);
 
 
   //-----------------
@@ -1002,11 +1226,29 @@ MYX_DBM_TABLE_DATA * myx_dbm_retrieve_table_data(MYSQL *mysql, MYX_DBM_DATATYPES
           table_index->columns[table_index->columns_num].value_order= g_strdup(row[k]);
         }
       }
+      /* revival: a functional key part (MySQL 8.0.13+) has no column but an expression; keep it as "(expr)",
+         which index_part_sql writes back as it is. Without it the part had no name and every diff dropped and
+         re-added the index with an empty column. */
+      for(k=0;k<num_fields;k++)
+      {
+        if ((strcmp(fields[k].name, "Expression")==0) && row[k] &&
+          (table_index->columns[table_index->columns_num].name == NULL))
+        {
+          char *expr= myx_convert_dbstr_utf8(mysql, row[k]);
+          table_index->columns[table_index->columns_num].name= g_strdup_printf("(%s)", expr);
+          g_free(expr);
+        }
+      }
       table_index->columns_num++;
     }
     while (1);
 
     table_data->indices_num= cur_index;
+
+    /* revival: keep the index type only where the table was created with one */
+    for(k= 0; k < (unsigned int)cur_index; k++)
+      if(!create_table_index_has_using(sql_create_table, table_data->indices[k].name))
+        table_data->indices[k].index_type= MYX_DBM_IT_DEFAULT;
     table_data->indices= g_realloc(table_data->indices, sizeof(MYX_TABLE_INDEX)*table_data->indices_num);
 
     mysql_free_result(res);
@@ -1059,6 +1301,9 @@ void myx_dbm_free_table_data(MYX_DBM_TABLE_DATA *table_data)
 
     g_free(column->default_value);
     g_free(column->comment);
+    g_free(column->generated);
+    g_free(column->on_update);
+    g_free(column->check_constraint);
 
     for(j= 0; j < column->datatype_flags_num; j++)
     {
@@ -1100,6 +1345,7 @@ void myx_dbm_free_table_data(MYX_DBM_TABLE_DATA *table_data)
   g_free(table_data->fks);
 
   g_free(table_data->federated_connection);
+  g_free(table_data->engine_name);
 
   g_free(table_data);
 }
@@ -1292,10 +1538,19 @@ char * dbm_get_sql_column_create_code(MYX_DBM_COLUMN_DATA *column, MYX_DBM_SERVE
     }
   }
 
+  /* revival: a generated column comes before NOT NULL and has no default */
+  if(!STR_EMPTY(column->generated))
+  {
+    col_def= str_g_append(col_def, " ");
+    col_def= str_g_append(col_def, column->generated);
+  }
+
   if(column->not_null)
     col_def= str_g_append(col_def, " NOT NULL");
 
-  if(!column->default_value_is_null && column->default_value && column->default_value[0])
+  if(!STR_EMPTY(column->generated))
+    ;
+  else if(!column->default_value_is_null && column->default_value && column->default_value[0])
   {
     tmp = col_def;
     if((column->datatype_pointer) && (column->datatype_pointer->group == MYX_DBM_DTG_NUMERIC))
@@ -1322,11 +1577,23 @@ char * dbm_get_sql_column_create_code(MYX_DBM_COLUMN_DATA *column, MYX_DBM_SERVE
       
     g_free(tmp);
   }
-  else if (column->default_value_is_null)
+  /* revival: servers since 5.0 report no default (NULL) for a NOT NULL column without one, where older ones
+     reported an implicit '' or 0; "NOT NULL DEFAULT NULL" is rejected ("Invalid default value"), so editing any
+     such column failed. Leave the default out then. */
+  else if (column->default_value_is_null && !column->not_null)
     col_def= str_g_append(col_def, " DEFAULT NULL");
+
+  if(!STR_EMPTY(column->on_update))
+  {
+    col_def= str_g_append(col_def, " ON UPDATE ");
+    col_def= str_g_append(col_def, column->on_update);
+  }
 
   if(column->auto_inc)
     col_def= str_g_append(col_def, " AUTO_INCREMENT");
+
+  if(column->invisible)
+    col_def= str_g_append(col_def, " INVISIBLE");
 
   /*if((column->primary_key)&&(pk_clause==1))
     col_def= str_g_append(col_def, " PRIMARY KEY");*/
@@ -1338,6 +1605,12 @@ char * dbm_get_sql_column_create_code(MYX_DBM_COLUMN_DATA *column, MYX_DBM_SERVE
     col_def= str_g_append(col_def, tmp);
     col_def= str_g_append(col_def, "'");
     g_free(tmp);
+  }
+
+  if(!STR_EMPTY(column->check_constraint))
+  {
+    col_def= str_g_append(col_def, " ");
+    col_def= str_g_append(col_def, column->check_constraint);
   }
 
   return col_def;
@@ -1413,7 +1686,7 @@ char * myx_dbm_get_sql_index_create_code(MYX_DBM_INDEX_DATA *index, MYX_DBM_SERV
       tmp= g_strdup("");
       for(j= 0; j < index->columns_num; j++)
       {
-        tmp= str_g_append_and_free(tmp, g_strdup_printf("`%s`", index->columns[j].name));
+        tmp= str_g_append_and_free(tmp, index_part_sql(index->columns[j].name));
 
         //Index column length
         if(index->columns[j].len && *index->columns[j].len)
@@ -1522,7 +1795,13 @@ char * myx_dbm_get_sql_option_create_code(MYX_DBM_TABLE_DATA *table, MYX_DBM_SER
   char *sql= NULL;
   char *tmp;
 
-  if((version->major_version >= 5) || ((version->major_version >= 4) && (version->minor_version >= 1)))
+  if(!STR_EMPTY(table->engine_name) && (parse_table_engine(table->engine_name) == table->table_engine) &&
+    ((version->major_version >= 5) || ((version->major_version >= 4) && (version->minor_version >= 1))))
+  {
+    /* revival: the server's own name, so that an engine the model does not know (Aria) is not written as MyISAM */
+    sql= str_g_append_and_free(sql, g_strdup_printf("ENGINE = %s" _br, table->engine_name));
+  }
+  else if((version->major_version >= 5) || ((version->major_version >= 4) && (version->minor_version >= 1)))
   {
     //Engine
     switch (table->table_engine)
@@ -1813,7 +2092,15 @@ MYX_PUBLIC_FUNC char * myx_dbm_get_table_sql_diff(MYX_DBM_TABLE_DATA *existing_t
         if(strcmp3(column->comment, ex_column->comment) != 0)
           column_changed= 1;
 
-        if(((strcmp3(column->charset ? column->charset : "", ex_column->charset ? column->charset : "") != 0) ||
+        /* revival: attributes newer than MySQL 5.0 (see MYX_DBM_COLUMN_DATA) */
+        if((strcmp3(column->generated, ex_column->generated) != 0) ||
+          (strcmp3(column->on_update, ex_column->on_update) != 0) ||
+          (column->invisible != ex_column->invisible) ||
+          (strcmp3(column->check_constraint, ex_column->check_constraint) != 0))
+          column_changed= 1;
+
+        /* revival: compared the edited character set with itself (ex_column ? column) */
+        if(((strcmp3(column->charset ? column->charset : "", ex_column->charset ? ex_column->charset : "") != 0) ||
           (strcmp3(column->collation ? column->collation : "", ex_column->collation ? ex_column->collation : "") != 0)) &&
           !((column->charset == NULL) && (strcmp3(altered_table->charset, ex_column->charset) == 0) &&
           (strcmp3(altered_table->collation ? altered_table->collation : "", ex_column->collation ? ex_column->collation : "") == 0)))
@@ -2084,10 +2371,9 @@ MYX_PUBLIC_FUNC char * myx_dbm_get_table_sql_diff(MYX_DBM_TABLE_DATA *existing_t
         {
           for(j= 0; j<altered_table->indices[i].columns_num; j++)
           {
-            if(!tmp3)
-              tmp2= g_strdup_printf("`%s`", altered_table->indices[i].columns[j].name);
-            else
-              tmp2= g_strdup_printf(", `%s`", altered_table->indices[i].columns[j].name);
+            tmp2= index_part_sql(altered_table->indices[i].columns[j].name);
+            if(tmp3)
+              tmp2= str_g_append_and_free(g_strdup(", "), tmp2);
 
             if (altered_table->indices[i].columns[j].len && altered_table->indices[i].columns[j].len[0])
               tmp2= str_g_append_and_free(tmp2, g_strdup_printf("(%s)", altered_table->indices[i].columns[j].len));

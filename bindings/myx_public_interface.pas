@@ -767,6 +767,10 @@ type
     default_value: PAnsiChar;
     default_value_is_null: cint;
     comment: PAnsiChar;
+    generated: PAnsiChar;
+    on_update: PAnsiChar;
+    invisible: cuchar;
+    check_constraint: PAnsiChar;
   end;
 
   MYX_DBM_INDEX_COLUMN_DATA = record
@@ -828,6 +832,7 @@ type
     indices_num: cuint;
     indices: PMYX_DBM_INDEX_DATA;
     federated_connection: PAnsiChar;
+    engine_name: PAnsiChar;
   end;
 
   MYX_DBM_STORED_PROCEDURE_DATA = record
@@ -2354,9 +2359,13 @@ type
     Fdefault_value: String;
     Fdefault_value_is_null: Integer;
     Fcomment: String;
+    Fgenerated: String;
+    Fon_update: String;
+    Finvisible: cuchar;
+    Fcheck_constraint: String;
   public
     datatype_flags: TStringList;
-    constructor Create(name: String; original_name: String; datatype_pointer: PMYX_DBM_DATATYPE; datatype_name: String; datatype_params: String; charset: String; collation: String; primary_key: cuchar; not_null: cuchar; auto_inc: cuchar; default_value: String; default_value_is_null: Integer; comment: String); overload;
+    constructor Create(name: String; original_name: String; datatype_pointer: PMYX_DBM_DATATYPE; datatype_name: String; datatype_params: String; charset: String; collation: String; primary_key: cuchar; not_null: cuchar; auto_inc: cuchar; default_value: String; default_value_is_null: Integer; comment: String; generated: String; on_update: String; invisible: cuchar; check_constraint: String); overload;
     constructor Create(ARecord: PMYX_DBM_COLUMN_DATA); overload;
     destructor Destroy; override;
     function get_record_pointer: PMYX_DBM_COLUMN_DATA;
@@ -2374,6 +2383,10 @@ type
     property default_value: String read Fdefault_value write Fdefault_value;
     property default_value_is_null: Integer read Fdefault_value_is_null write Fdefault_value_is_null;
     property comment: String read Fcomment write Fcomment;
+    property generated: String read Fgenerated write Fgenerated;
+    property on_update: String read Fon_update write Fon_update;
+    property invisible: cuchar read Finvisible write Finvisible;
+    property check_constraint: String read Fcheck_constraint write Fcheck_constraint;
   end;
 
   TMYX_DBM_COLUMN_DATA_List = class(TObjectList)
@@ -2526,11 +2539,12 @@ type
     Fmin_rows: String;
     Fmax_rows: String;
     Ffederated_connection: String;
+    Fengine_name: String;
   public
     fks: TMYX_DBM_FK_DATA_List;
     columns: TMYX_DBM_COLUMN_DATA_List;
     indices: TMYX_DBM_INDEX_DATA_List;
-    constructor Create(name: String; original_name: String; schema: String; catalog: String; create_table_stmt: String; table_engine: MYX_DBM_TABLE_ENGINE; next_auto_inc: String; password: String; delay_key_write: Integer; charset: String; collation: String; comment: String; merge_union: String; merge_insert: MYX_DBM_TABLE_MERGE_INSERT; table_data_dir: String; table_index_dir: String; pack_keys: MYX_DBM_TABLE_PACK_KEYS; raid_type: MYX_DBM_TABLE_RAID_TYPE; raid_chunks: String; raid_chunk_size: String; checksum: Integer; row_format: MYX_DBM_TABLE_ROW_FORMAT; avg_row_length: String; min_rows: String; max_rows: String; federated_connection: String); overload;
+    constructor Create(name: String; original_name: String; schema: String; catalog: String; create_table_stmt: String; table_engine: MYX_DBM_TABLE_ENGINE; next_auto_inc: String; password: String; delay_key_write: Integer; charset: String; collation: String; comment: String; merge_union: String; merge_insert: MYX_DBM_TABLE_MERGE_INSERT; table_data_dir: String; table_index_dir: String; pack_keys: MYX_DBM_TABLE_PACK_KEYS; raid_type: MYX_DBM_TABLE_RAID_TYPE; raid_chunks: String; raid_chunk_size: String; checksum: Integer; row_format: MYX_DBM_TABLE_ROW_FORMAT; avg_row_length: String; min_rows: String; max_rows: String; federated_connection: String; engine_name: String); overload;
     constructor Create(ARecord: PMYX_DBM_TABLE_DATA); overload;
     destructor Destroy; override;
     function get_record_pointer: PMYX_DBM_TABLE_DATA;
@@ -2561,6 +2575,7 @@ type
     property min_rows: String read Fmin_rows write Fmin_rows;
     property max_rows: String read Fmax_rows write Fmax_rows;
     property federated_connection: String read Ffederated_connection write Ffederated_connection;
+    property engine_name: String read Fengine_name write Fengine_name;
   end;
 
   TMYX_DBM_TABLE_DATA_List = class(TObjectList)
@@ -7753,7 +7768,7 @@ begin
   Result := TMYX_DBM_DATATYPES(inherited Last);
 end;
 
-constructor TMYX_DBM_COLUMN_DATA.Create(name: String; original_name: String; datatype_pointer: PMYX_DBM_DATATYPE; datatype_name: String; datatype_params: String; charset: String; collation: String; primary_key: cuchar; not_null: cuchar; auto_inc: cuchar; default_value: String; default_value_is_null: Integer; comment: String);
+constructor TMYX_DBM_COLUMN_DATA.Create(name: String; original_name: String; datatype_pointer: PMYX_DBM_DATATYPE; datatype_name: String; datatype_params: String; charset: String; collation: String; primary_key: cuchar; not_null: cuchar; auto_inc: cuchar; default_value: String; default_value_is_null: Integer; comment: String; generated: String; on_update: String; invisible: cuchar; check_constraint: String);
 begin
   inherited Create;
   Self.Fname := name;
@@ -7769,6 +7784,10 @@ begin
   Self.Fdefault_value := default_value;
   Self.Fdefault_value_is_null := default_value_is_null;
   Self.Fcomment := comment;
+  Self.Fgenerated := generated;
+  Self.Fon_update := on_update;
+  Self.Finvisible := invisible;
+  Self.Fcheck_constraint := check_constraint;
   Self.datatype_flags := TStringList.Create;
 end;
 
@@ -7777,9 +7796,9 @@ var
   I: Integer;
 begin
   if ARecord <> nil then
-    Create(ConvertString(ARecord^.name), ConvertString(ARecord^.original_name), ARecord^.datatype_pointer, ConvertString(ARecord^.datatype_name), ConvertString(ARecord^.datatype_params), ConvertString(ARecord^.charset), ConvertString(ARecord^.collation), ARecord^.primary_key, ARecord^.not_null, ARecord^.auto_inc, ConvertString(ARecord^.default_value), ARecord^.default_value_is_null, ConvertString(ARecord^.comment))
+    Create(ConvertString(ARecord^.name), ConvertString(ARecord^.original_name), ARecord^.datatype_pointer, ConvertString(ARecord^.datatype_name), ConvertString(ARecord^.datatype_params), ConvertString(ARecord^.charset), ConvertString(ARecord^.collation), ARecord^.primary_key, ARecord^.not_null, ARecord^.auto_inc, ConvertString(ARecord^.default_value), ARecord^.default_value_is_null, ConvertString(ARecord^.comment), ConvertString(ARecord^.generated), ConvertString(ARecord^.on_update), ARecord^.invisible, ConvertString(ARecord^.check_constraint))
   else
-    Create('', '', Default(PMYX_DBM_DATATYPE), '', '', '', '', Default(cuchar), Default(cuchar), Default(cuchar), '', Default(Integer), '');
+    Create('', '', Default(PMYX_DBM_DATATYPE), '', '', '', '', Default(cuchar), Default(cuchar), Default(cuchar), '', Default(Integer), '', '', '', Default(cuchar), '');
   Self.record_pointer := nil;
   if ARecord <> nil then
   begin
@@ -7805,6 +7824,9 @@ begin
     FreeCString(record_pointer^.collation);
     FreeCString(record_pointer^.default_value);
     FreeCString(record_pointer^.comment);
+    FreeCString(record_pointer^.generated);
+    FreeCString(record_pointer^.on_update);
+    FreeCString(record_pointer^.check_constraint);
     FreeMem(record_pointer);
   end;
   inherited Destroy;
@@ -7834,6 +7856,10 @@ begin
   SetCString(record_pointer^.default_value, Self.Fdefault_value);
   record_pointer^.default_value_is_null := cint(Self.Fdefault_value_is_null);
   SetCString(record_pointer^.comment, Self.Fcomment);
+  SetCString(record_pointer^.generated, Self.Fgenerated);
+  SetCString(record_pointer^.on_update, Self.Fon_update);
+  record_pointer^.invisible := cuchar(Self.Finvisible);
+  SetCString(record_pointer^.check_constraint, Self.Fcheck_constraint);
   SetCStringArray(record_pointer^.datatype_flags, record_pointer^.datatype_flags_num, Self.datatype_flags);
   Result := record_pointer;
 end;
@@ -7856,6 +7882,10 @@ begin
       Self.Fdefault_value := Fdefault_value;
       Self.Fdefault_value_is_null := Fdefault_value_is_null;
       Self.Fcomment := Fcomment;
+      Self.Fgenerated := Fgenerated;
+      Self.Fon_update := Fon_update;
+      Self.Finvisible := Finvisible;
+      Self.Fcheck_constraint := Fcheck_constraint;
       Self.datatype_flags.Assign(datatype_flags);
     end
   else
@@ -8315,7 +8345,7 @@ begin
   Result := TMYX_DBM_FK_DATA(inherited Last);
 end;
 
-constructor TMYX_DBM_TABLE_DATA.Create(name: String; original_name: String; schema: String; catalog: String; create_table_stmt: String; table_engine: MYX_DBM_TABLE_ENGINE; next_auto_inc: String; password: String; delay_key_write: Integer; charset: String; collation: String; comment: String; merge_union: String; merge_insert: MYX_DBM_TABLE_MERGE_INSERT; table_data_dir: String; table_index_dir: String; pack_keys: MYX_DBM_TABLE_PACK_KEYS; raid_type: MYX_DBM_TABLE_RAID_TYPE; raid_chunks: String; raid_chunk_size: String; checksum: Integer; row_format: MYX_DBM_TABLE_ROW_FORMAT; avg_row_length: String; min_rows: String; max_rows: String; federated_connection: String);
+constructor TMYX_DBM_TABLE_DATA.Create(name: String; original_name: String; schema: String; catalog: String; create_table_stmt: String; table_engine: MYX_DBM_TABLE_ENGINE; next_auto_inc: String; password: String; delay_key_write: Integer; charset: String; collation: String; comment: String; merge_union: String; merge_insert: MYX_DBM_TABLE_MERGE_INSERT; table_data_dir: String; table_index_dir: String; pack_keys: MYX_DBM_TABLE_PACK_KEYS; raid_type: MYX_DBM_TABLE_RAID_TYPE; raid_chunks: String; raid_chunk_size: String; checksum: Integer; row_format: MYX_DBM_TABLE_ROW_FORMAT; avg_row_length: String; min_rows: String; max_rows: String; federated_connection: String; engine_name: String);
 begin
   inherited Create;
   Self.Fname := name;
@@ -8344,6 +8374,7 @@ begin
   Self.Fmin_rows := min_rows;
   Self.Fmax_rows := max_rows;
   Self.Ffederated_connection := federated_connection;
+  Self.Fengine_name := engine_name;
   Self.fks := TMYX_DBM_FK_DATA_List.Create;
   Self.columns := TMYX_DBM_COLUMN_DATA_List.Create;
   Self.indices := TMYX_DBM_INDEX_DATA_List.Create;
@@ -8354,9 +8385,9 @@ var
   I: Integer;
 begin
   if ARecord <> nil then
-    Create(ConvertString(ARecord^.name), ConvertString(ARecord^.original_name), ConvertString(ARecord^.schema), ConvertString(ARecord^.catalog), ConvertString(ARecord^.create_table_stmt), ARecord^.table_engine, ConvertString(ARecord^.next_auto_inc), ConvertString(ARecord^.password), ARecord^.delay_key_write, ConvertString(ARecord^.charset), ConvertString(ARecord^.collation), ConvertString(ARecord^.comment), ConvertString(ARecord^.merge_union), ARecord^.merge_insert, ConvertString(ARecord^.table_data_dir), ConvertString(ARecord^.table_index_dir), ARecord^.pack_keys, ARecord^.raid_type, ConvertString(ARecord^.raid_chunks), ConvertString(ARecord^.raid_chunk_size), ARecord^.checksum, ARecord^.row_format, ConvertString(ARecord^.avg_row_length), ConvertString(ARecord^.min_rows), ConvertString(ARecord^.max_rows), ConvertString(ARecord^.federated_connection))
+    Create(ConvertString(ARecord^.name), ConvertString(ARecord^.original_name), ConvertString(ARecord^.schema), ConvertString(ARecord^.catalog), ConvertString(ARecord^.create_table_stmt), ARecord^.table_engine, ConvertString(ARecord^.next_auto_inc), ConvertString(ARecord^.password), ARecord^.delay_key_write, ConvertString(ARecord^.charset), ConvertString(ARecord^.collation), ConvertString(ARecord^.comment), ConvertString(ARecord^.merge_union), ARecord^.merge_insert, ConvertString(ARecord^.table_data_dir), ConvertString(ARecord^.table_index_dir), ARecord^.pack_keys, ARecord^.raid_type, ConvertString(ARecord^.raid_chunks), ConvertString(ARecord^.raid_chunk_size), ARecord^.checksum, ARecord^.row_format, ConvertString(ARecord^.avg_row_length), ConvertString(ARecord^.min_rows), ConvertString(ARecord^.max_rows), ConvertString(ARecord^.federated_connection), ConvertString(ARecord^.engine_name))
   else
-    Create('', '', '', '', '', Default(MYX_DBM_TABLE_ENGINE), '', '', Default(Integer), '', '', '', '', Default(MYX_DBM_TABLE_MERGE_INSERT), '', '', Default(MYX_DBM_TABLE_PACK_KEYS), Default(MYX_DBM_TABLE_RAID_TYPE), '', '', Default(Integer), Default(MYX_DBM_TABLE_ROW_FORMAT), '', '', '', '');
+    Create('', '', '', '', '', Default(MYX_DBM_TABLE_ENGINE), '', '', Default(Integer), '', '', '', '', Default(MYX_DBM_TABLE_MERGE_INSERT), '', '', Default(MYX_DBM_TABLE_PACK_KEYS), Default(MYX_DBM_TABLE_RAID_TYPE), '', '', Default(Integer), Default(MYX_DBM_TABLE_ROW_FORMAT), '', '', '', '', '');
   Self.record_pointer := nil;
   if ARecord <> nil then
   begin
@@ -8406,6 +8437,7 @@ begin
     FreeCString(record_pointer^.min_rows);
     FreeCString(record_pointer^.max_rows);
     FreeCString(record_pointer^.federated_connection);
+    FreeCString(record_pointer^.engine_name);
     FreeMem(record_pointer);
   end;
   inherited Destroy;
@@ -8448,6 +8480,7 @@ begin
   SetCString(record_pointer^.min_rows, Self.Fmin_rows);
   SetCString(record_pointer^.max_rows, Self.Fmax_rows);
   SetCString(record_pointer^.federated_connection, Self.Ffederated_connection);
+  SetCString(record_pointer^.engine_name, Self.Fengine_name);
   record_pointer^.fks_num := Self.fks.Count;
   if Self.fks.Count = 0 then
   begin
@@ -8538,6 +8571,7 @@ begin
       Self.Fmin_rows := Fmin_rows;
       Self.Fmax_rows := Fmax_rows;
       Self.Ffederated_connection := Ffederated_connection;
+      Self.Fengine_name := Fengine_name;
       Self.fks.Clear;
       for I := 0 to fks.Count - 1 do
       begin
