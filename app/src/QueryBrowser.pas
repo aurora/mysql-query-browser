@@ -5027,6 +5027,14 @@ var
   TxtRect: TRect;
   
 begin
+  // Port: with toRightClickSelect the tree also starts its automatic drag on a right click. Under the LCL (GTK2)
+  // the popup menu then takes the mouse, the drag stays pending and the drag cursor shows. This handler runs
+  // before the tree's own mouse down handling, so only the left button may start a drag.
+  if Button = mbLeft then
+    SchemataFrame.CatalogVST.DragMode := dmAutomatic
+  else
+    SchemataFrame.CatalogVST.DragMode := dmManual;
+
   SchemataFrame.CatalogVSTMouseDown(Sender, Button, Shift, X, Y);
 
   //Keep code for expanding the nodes
