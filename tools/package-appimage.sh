@@ -5,6 +5,12 @@
 #
 #   tools/package-appimage.sh              build everything, write dist/QueryMole-<version>-x86_64.AppImage
 #   tools/package-appimage.sh --no-build   reuse app/bin/qbr and backend/build-el9, only stage and pack
+#   tools/package-appimage.sh --velopack   additionally pack the same AppDir with `vpk pack` (ADR-0037): an AppImage
+#                                          that updates itself, plus the update feed, in dist/Releases-linux
+#
+# For --velopack: VELOPACK_LIBRARY may name a libvelopack_libc.so to ship; otherwise it is built in the AlmaLinux 9
+# container (tools/appimage/build-velopack.sh). VPK names the vpk program; otherwise `vpk` from PATH or
+# tools/cache/vpk/vpk (dotnet tool install vpk --version <see ADR-0037> --tool-path tools/cache/vpk).
 #
 # 1. the C backend is built in tools/appimage/Containerfile (AlmaLinux 9, glibc 2.34), so the image runs on
 #    every distribution with that glibc or a newer one (RHEL 9, Ubuntu 22.04, Debian 12, Fedora 44, ...);
@@ -21,11 +27,12 @@ VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
 DIST="$ROOT/dist"
 OUT="$DIST/QueryMole-$VERSION-x86_64.AppImage"
 
-do_build=1
+do_build=1 do_velopack=0
 for a in "$@"; do
   case "$a" in
     --no-build) do_build=0 ;;
-    -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
+    --velopack) do_velopack=1 ;;
+    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
     *) echo "unknown option: $a" >&2; exit 2 ;;
   esac
 done
@@ -72,3 +79,34 @@ echo "== packing"
 rm -f "$OUT"
 ARCH=x86_64 "$TOOL" --appimage-extract-and-run --no-appstream "$APPDIR" "$OUT"
 echo "AppImage: $OUT ($(du -h "$OUT" | cut -f1))"
+
+if [ "$do_velopack" = 1 ]; then
+  VPK="${VPK:-$(command -v vpk || echo "$ROOT/tools/cache/vpk/vpk")}"
+  [ -x "$VPK" ] || { echo "vpk (Velopack CLI) not found, see the header of this script" >&2; exit 1; }
+  echo "== velopack"
+  # vpk takes a ready AppDir as it is when the folder name ends in .AppDir; it adds usr/bin/UpdateNix and
+  # usr/bin/sq.version and packs the AppImage itself
+  VAPPDIR="$DIST/QueryMole.AppDir"
+  rm -rf "$VAPPDIR"
+  cp -a "$APPDIR" "$VAPPDIR"
+  # Velopack's native library next to the program: velopack-pas loads it from there (ADR-0018)
+  native="${VELOPACK_LIBRARY:-}"
+  if [ -z "$native" ]; then
+    echo "== velopack native library (AlmaLinux 9)"
+    run_el9 sh tools/appimage/build-velopack.sh | tail -2
+    native="$ROOT/tools/cache/velopack/target/release/libvelopack_libc.so"
+  fi
+  [ -f "$native" ] || { echo "libvelopack_libc.so not found: $native" >&2; exit 1; }
+  install -m 755 "$native" "$VAPPDIR/usr/bin/libvelopack_libc.so"
+  strip --strip-debug "$VAPPDIR/usr/bin/libvelopack_libc.so"
+  mkdir -p "$VAPPDIR/licenses/velopack"
+  cp "$ROOT/third_party/velopack-pas/LICENSE" "$VAPPDIR/licenses/velopack/LICENSE-velopack-pas.txt"
+  cp "$ROOT/tools/cache/velopack/LICENSE" "$VAPPDIR/licenses/velopack/LICENSE-velopack.txt" 2>/dev/null || true
+  echo "usr/bin/libvelopack_libc.so | Velopack (native update library, MIT), used through velopack-pas (MIT)" \
+    >> "$VAPPDIR/THIRD-PARTY-LIBS.txt"
+  DOTNET_ROLL_FORWARD=Major "$VPK" pack --packId QueryMole --packVersion "$VERSION" --packTitle QueryMole \
+    --packAuthors "QueryMole contributors" --packDir "$VAPPDIR" --mainExe qbr --channel linux \
+    --outputDir "$DIST/Releases-linux"
+  rm -rf "$VAPPDIR"
+  echo "Velopack release: $DIST/Releases-linux"
+fi

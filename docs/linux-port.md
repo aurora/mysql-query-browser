@@ -281,6 +281,18 @@ Fedora's and cut off the connect dialog's "Stored Connection:" label. The progra
 and uses it for the forms (ADR-0028); the dialog fits on Ubuntu and Fedora. Not tried: the AppImage on a real desktop session
 (mouse, themes, file dialog), on RHEL 9 / Ubuntu 22.04 / Debian 12 themselves.
 
+## Updates with Velopack (2026-11-16)
+
+`tools/package-appimage.sh --velopack` (ADR-0037) packs a copy of the AppDir with `vpk pack` 1.3.39 into
+`dist/Releases-linux` (`QueryMole.AppImage`, full and delta packages, `releases.linux.json`). `libvelopack_libc.so`
+is built from the Velopack commit velopack-pas pins, in the AlmaLinux 9 container (`tools/appimage/build-velopack.sh`;
+newest glibc symbol 2.34); vpk's `UpdateNix` is statically linked. Checked under Xvfb in the `freepascal` container:
+an alpha.2 AppImage with `QBR_UPDATE_URL` pointing at a feed holding alpha.2 and alpha.3 reported
+`installed 0.1.0-alpha.2`, `available 0.1.0-alpha.3`, downloaded and started the updater; the file was replaced, the
+next run reported `installed 0.1.0-alpha.3` and `no update`, and the connect dialog of the updated image opened.
+Not tried: the GitHub feed (`vpk upload github`), the dialogs of "Check for Updates ..." by hand, an AppImage in a
+folder that needs `pkexec`, a real desktop session.
+
 ## Summary before the port (2026-10-30)
 
 - 40 files have Windows units in their `uses` clauses.

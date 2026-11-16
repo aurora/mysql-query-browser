@@ -78,6 +78,8 @@ git submodule update --init                      # once after cloning (third_par
 tools/package.sh [--velopack] [--no-build]       # release package in dist/ (version from VERSION, ADR-0014)
 tools/package-appimage.sh [--no-build]           # Linux AppImage in dist/, run on the host (ADR-0027; needs podman, the
                                                  #   freepascal distrobox and tools/cache/appimagetool-x86_64.AppImage)
+tools/package-appimage.sh --velopack             # plus the self-updating AppImage and feed in dist/Releases-linux (ADR-0037;
+                                                 #   needs vpk in tools/cache/vpk, see the script header)
 
 # backend (needs C:\msys64\mingw64\bin on PATH)
 cmake -S backend -B backend/build -G Ninja && cmake --build backend/build
@@ -119,6 +121,7 @@ qbr.exe -datadir <tmp> --shot-options <base>                        # options di
 qbr ... --shot-main x.png --stress-schemata 90 out.txt              # schemata tree stress test (docs/linux-port.md)
 qbr ... --shot-main x.png --stop-and-edit 0 0 700 " LIMIT 5" out.txt # double click, run, stop, edit, run again
 qbr ... --shot-main x.png --sql "select ..." --menu-smoke run out.txt # click every menu entry, report exceptions
+QBR_UPDATE_URL=dist/Releases-linux QueryMole.AppImage --selftest-update out.txt  # check/download/apply without dialogs
 # unhandled exceptions are written with a stack trace to bin/qbr.error.txt (program exits with 3);
 # QBR_TRACE=1 adds a flow trace in bin/qbr.trace.txt
 ```

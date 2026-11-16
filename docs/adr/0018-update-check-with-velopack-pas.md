@@ -1,6 +1,6 @@
 # ADR-0018 — Update check with velopack-pas and GitHub releases
 
-- Status: Accepted (implemented, not yet built or run: see Consequences)
+- Status: Accepted (implemented, not yet built or run: see Consequences); pre-release rule of the feed amended by ADR-0037 (update cycle verified on Linux)
 - Date: 2026-10-17
 - Deciders: Harald Lapp (project owner)
 

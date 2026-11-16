@@ -197,6 +197,11 @@ begin
     begin
       RunConnectSelftest(ParamStr(I + 1));
       Exit;
+    end
+    else if ParamStr(I) = '--selftest-update' then
+    begin
+      RunUpdateSelftest(ParamStr(I + 1));
+      Exit;
     end;
 
   // normal start, as the original program file

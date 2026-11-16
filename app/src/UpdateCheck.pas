@@ -12,8 +12,13 @@ interface
 const
   UpdateRepositoryUrl = 'https://github.com/aurora/querymole';     // CommonFuncs.RevivalProjectUrl (ADR-0030)
 
-  // The beta releases have no update mechanism (ADR-0026): the menu item stays hidden until it is switched on.
-  UpdateMenuVisible = False;
+  // Switched on again by ADR-0037 (ADR-0026 had hidden it for the first alpha). The item is disabled when the
+  // Velopack library is missing (development builds, packages built without --velopack).
+  UpdateMenuVisible = True;
+
+  // Developer override of the feed (ADR-0037): a local folder or URL with a vpk release instead of the GitHub
+  // releases, for testing an update cycle without publishing.
+  UpdateUrlEnvironment = 'QBR_UPDATE_URL';
 
 // First statement of the program, before the GUI is initialised: lets Velopack handle the install, update
 // and uninstall launches (it may end the process) and applies a downloaded update on startup.
@@ -26,11 +31,16 @@ function UpdatesAvailable: Boolean;
 // program and lets Velopack replace the installation.
 procedure CheckForUpdatesInteractive;
 
+// Developer mode --selftest-update <report> (ADR-0037): the same steps without dialogs. Writes the installed
+// version and the result of the check to the report; if there is an update, downloads it and starts the
+// updater, which replaces the installation after this process has ended (no restart).
+procedure RunUpdateSelftest(const ReportFile: String);
+
 implementation
 
 uses
-  Classes, SysUtils, Controls, Forms, StdCtrls, ComCtrls, Dialogs, gnugettext,
-  Velopack.Types, Velopack.App, Velopack.Updater;
+  Classes, SysUtils, Controls, Forms, StdCtrls, ComCtrls, Dialogs, gnugettext, CommonFuncs,
+  Velopack.Types, Velopack.App, Velopack.Updater, Velopack.Manager;
 
 type
   TUpdateDialogs = class
@@ -72,6 +82,49 @@ begin
   GDialogs.Run;
 end;
 
+procedure RunUpdateSelftest(const ReportFile: String);
+var
+  Report: TStringList;
+  Manager: TUpdateManager;
+  Info: TUpdateInfo;
+  Url: String;
+begin
+  Report := TStringList.Create;
+  try
+    try
+      if not GLibraryFound then
+        raise Exception.Create('Velopack library not found');
+      Url := GetEnvironmentVariable(UpdateUrlEnvironment);
+      if Url = '' then
+        raise Exception.Create(UpdateUrlEnvironment + ' is not set');
+      Manager := TUpdateManager.Create(Url);
+      try
+        Report.Add('installed ' + Manager.CurrentVersion);
+        if Manager.CheckForUpdates(Info) <> ucUpdateAvailable then
+          Report.Add('no update')
+        else
+          try
+            Report.Add('available ' + Info.TargetFullRelease.Version);
+            Manager.DownloadUpdates(Info);
+            Report.Add('downloaded');
+            Manager.WaitExitThenApplyUpdates(Info.TargetFullRelease, True, False);
+            Report.Add('updater started');
+          finally
+            Info.Free;
+          end;
+      finally
+        Manager.Free;
+      end;
+    except
+      on E: Exception do
+        Report.Add('error ' + E.ClassName + ': ' + E.Message);
+    end;
+    Report.SaveToFile(ReportFile);
+  finally
+    Report.Free;
+  end;
+end;
+
 { TUpdateDialogs }
 
 destructor TUpdateDialogs.Destroy;
@@ -86,7 +139,14 @@ begin
   if FUpdater = nil then
   begin
     FUpdater := TVelopackUpdater.Create(nil);
-    FUpdater.GitHubRepoUrl := UpdateRepositoryUrl;
+    if GetEnvironmentVariable(UpdateUrlEnvironment) <> '' then
+      FUpdater.UpdateUrl := GetEnvironmentVariable(UpdateUrlEnvironment)
+    else
+    begin
+      FUpdater.GitHubRepoUrl := UpdateRepositoryUrl;
+      // A pre-release (alpha, beta) is updated to newer pre-releases as well; a release only to releases.
+      FUpdater.GitHubPrerelease := Pos('-', revival_version) > 0;
+    end;
     FUpdater.OnCheckCompleted := HandleCheck;
     FUpdater.OnDownloadProgress := HandleProgress;
     FUpdater.OnDownloadCompleted := HandleDownloaded;

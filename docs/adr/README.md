@@ -34,7 +34,7 @@ Related.
 | [0023](0023-pin-gtk-dpi-to-96.md) | Pin GTK's dpi setting to 96 on Linux | Accepted (GTK2) |
 | [0024](0024-gtk2-for-the-first-release-then-qt.md) | GTK2 for the first release, a move to Qt afterwards | Accepted (principle) |
 | [0025](0025-keep-the-package-id-when-renaming.md) | Keep the Velopack package id and the update feed when the application is renamed | Superseded by ADR-0030 |
-| [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle); copyright sentence amended by ADR-0031, credits and licence note by ADR-0032 |
+| [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle); copyright sentence amended by ADR-0031, credits and licence note by ADR-0032; updates superseded by ADR-0037 |
 | [0027](0027-linux-appimage-built-on-almalinux-9.md) | Linux release as an AppImage, bundled GTK2 and backend built on AlmaLinux 9 | Accepted |
 | [0028](0028-bundled-tahoma-substitute-outside-windows.md) | Ship Wine's Tahoma stand-in and use it for the forms outside Windows | Accepted |
 | [0029](0029-search-fields-match-parts-of-names.md) | Search fields: input without wildcards matches parts of names | Proposed |
@@ -45,6 +45,7 @@ Related.
 | [0034](0034-table-editor-lists-follow-the-server.md) | Table editor: data types and storage engines follow current servers | Accepted |
 | [0035](0035-table-editor-controls-for-newer-server-features.md) | Table editor: controls for newer server features, after parity | Proposed (layout not designed) |
 | [0036](0036-pascal-table-model-with-server-dialects.md) | Table editor: a Pascal table model with server dialects | Proposed (after parity) |
+| [0037](0037-updates-per-platform-appimage-on-linux.md) | Updates with Velopack: AppImage on Linux, Velopack's standard packages on Windows and macOS | Accepted (principle); Linux implemented, Windows and macOS open |
 
 ## Numbering
 

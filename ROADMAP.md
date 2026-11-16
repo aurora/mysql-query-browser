@@ -64,7 +64,8 @@ waits until after parity and gets its own decision.
    work, platform guards for Windows API use). Linux so far: development container
    (`tools/distrobox-setup.sh`), backend, bindings layout check and the test suite on all six matrix
    servers (`tests/run-matrix.sh`); `build.sh` and the tools run there. The Linux release is an AppImage
-   (`tools/package-appimage.sh`, ADR-0027). The application compiles
+   (`tools/package-appimage.sh`, ADR-0027); with `--velopack` it updates itself (ADR-0037, update cycle
+   checked locally; first release through the GitHub feed and the Windows cycle open). The application compiles
    with GTK2, connects on all six servers, and the main window's features (results, editing,
    scripts, export, dialogs, help) work by screenshot. State and next steps: `docs/linux-port.md`.
 
