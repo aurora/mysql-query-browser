@@ -38,9 +38,9 @@ Mark each row `ok`, `bug` (what happened) or `n/a`.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 1 | Tab through all fields; Enter in the password field | focus order as on Windows; Enter connects | |
-| 2 | Wrong password | server error shown, dialog stays open | |
-| 3 | Save a connection, restart, pick it from the list | fields restored; password per storage type | |
+| 1 | Tab through all fields; Enter in the password field | focus order as on Windows; Enter connects |ok |
+| 2 | Wrong password | server error shown, dialog stays open |ok |
+| 3 | Save a connection, restart, pick it from the list | fields restored; password per storage type |ok |
 | 4 | Options > storage type list | `Plaintext` and `Obscured` only (ADR-0021) | |
 | 5 | Cancel while connecting to an unreachable host | the dialog stays usable | |
 
