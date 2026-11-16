@@ -4,7 +4,7 @@
 HERE="$(dirname "$(readlink -f "$0")")"
 
 # the loader cache lists absolute paths: write it for the place the image is mounted at
-RUN="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/qbr-appimage-$(id -u)"
+RUN="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/querymole-appimage-$(id -u)"
 mkdir -p "$RUN" && chmod 700 "$RUN"
 sed "s|@APPDIR@|$HERE|g" "$HERE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache.in" > "$RUN/loaders.cache"
 
@@ -13,4 +13,4 @@ export GTK_PATH="$HERE/usr/lib/gtk-2.0${GTK_PATH:+:$GTK_PATH}"
 export MARIADB_PLUGIN_DIR="$HERE/usr/lib/mariadb/plugin"
 export GDK_BACKEND=x11            # GTK2 only speaks X11: XWayland on a Wayland desktop
 
-exec "$HERE/usr/bin/qbr" "$@"
+exec "$HERE/usr/bin/querymole" "$@"

@@ -43,7 +43,7 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="bin/qbr"/>
+      <Filename Value="bin/querymole"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);src;forms"/>

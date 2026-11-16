@@ -21,7 +21,7 @@ procedure PinGtkDpiTo96;
 begin
   {$IFDEF LCLGTK2}
   // the value is in 1/1024 dpi
-  gtk_settings_set_long_property(gtk_settings_get_default, 'gtk-xft-dpi', 96 * 1024, 'qbr');
+  gtk_settings_set_long_property(gtk_settings_get_default, 'gtk-xft-dpi', 96 * 1024, 'querymole');
   {$ENDIF}
 end;
 

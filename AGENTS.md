@@ -104,7 +104,7 @@ tests/run-matrix.sh [--only mysql:8.4]   # sets LD_LIBRARY_PATH itself
 # forms: convert everything and render screenshots into docs/reconstructed/
 python tools/convert_forms.py            # needs tools/lfmview built: lazbuild tools/lfmview/lfmview.lpi
 python tools/build_resources.py          # compile the .rc files into app/res/
-python tools/prepare_runtime.py          # XML data, fonts, docs, locale/*.po next to app/bin/qbr.exe
+python tools/prepare_runtime.py          # XML data, fonts, docs, locale/*.po next to app/bin/querymole.exe
 lazbuild app/qbr.lpi                     # the application
 
 # porting a Delphi unit (see "Porting" below)
@@ -114,15 +114,15 @@ python tools/port_unit.py <Unit>         # mechanical copy to app/src (encoding,
 python tools/drop_routines.py app/src/<Unit>.pas Name1 Name2   # remove unused routines
 
 # application self-tests (GUI program: results go to files; always use a timeout)
-qbr.exe -datadir <tmp> --shot-connect out.png                     # screenshot of the dialog
-qbr.exe -datadir <tmp> -u root -p <pwd> -h 127.0.0.1 -P <port> --selftest-connect out.txt
-qbr.exe ... --selftest-dialog out.txt                              # drives the connect dialog
-qbr.exe -datadir <tmp> --shot-options <base>                        # options dialog -> <base>_default.png, _connections.png
-qbr ... --shot-main x.png --stress-schemata 90 out.txt              # schemata tree stress test (docs/linux-port.md)
-qbr ... --shot-main x.png --stop-and-edit 0 0 700 " LIMIT 5" out.txt # double click, run, stop, edit, run again
-qbr ... --shot-main x.png --sql "select ..." --menu-smoke run out.txt # click every menu entry, report exceptions
+querymole.exe -datadir <tmp> --shot-connect out.png                     # screenshot of the dialog
+querymole.exe -datadir <tmp> -u root -p <pwd> -h 127.0.0.1 -P <port> --selftest-connect out.txt
+querymole.exe ... --selftest-dialog out.txt                              # drives the connect dialog
+querymole.exe -datadir <tmp> --shot-options <base>                        # options dialog -> <base>_default.png, _connections.png
+querymole ... --shot-main x.png --stress-schemata 90 out.txt              # schemata tree stress test (docs/linux-port.md)
+querymole ... --shot-main x.png --stop-and-edit 0 0 700 " LIMIT 5" out.txt # double click, run, stop, edit, run again
+querymole ... --shot-main x.png --sql "select ..." --menu-smoke run out.txt # click every menu entry, report exceptions
 QBR_UPDATE_URL=dist/Releases-linux QueryMole.AppImage --selftest-update out.txt  # check/download/apply without dialogs
-# unhandled exceptions are written with a stack trace to bin/qbr.error.txt (program exits with 3);
+# unhandled exceptions are written with a stack trace to bin/querymole.error.txt (program exits with 3);
 # QBR_TRACE=1 adds a flow trace in bin/qbr.trace.txt
 ```
 
@@ -183,7 +183,7 @@ choice that a future contributor would ask "why?" about, write the ADR.
   The VCL tolerated it; on GTK2 it uses Xlib/GDK from two threads and corrupts the C heap, which shows
   later as GDK region assertions, `double free` or hangs (schemata tree, 2026-11-13). Use `Synchronize`.
 
-- **GUI-subsystem programs have no stdout.** `WriteLn` in `qbr.exe` (or any
+- **GUI-subsystem programs have no stdout.** `WriteLn` in `querymole.exe` (or any
   Lazarus GUI program) opens an error dialog and hangs. Report through a file,
   or build the tool as a console program (`tools/lfmview` is one).
 - **Always run GUI/test programs with a timeout** (`timeout 60 ...`): a modal

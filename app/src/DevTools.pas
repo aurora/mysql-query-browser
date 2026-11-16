@@ -3,8 +3,8 @@ unit DevTools;
 
 { Developer modes of the executable (not part of the original program):
 
-    qbr --shot-connect out.png     show the connect dialog, save a screenshot of it, exit
-    qbr -u root -p ... -h ... -P ... --selftest-connect out.txt
+    querymole --shot-connect out.png     show the connect dialog, save a screenshot of it, exit
+    querymole -u root -p ... -h ... -P ... --selftest-connect out.txt
                                    connect like the original does for command line
                                    parameters (no dialog) and report the result in out.txt
 

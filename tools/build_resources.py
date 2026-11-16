@@ -57,14 +57,14 @@ def rebrand_rc(text):
 
 
 def make_app_rc():
-    """Icon and version information of qbr.exe, from the VERSION file. No copyright holder is
+    """Icon and version information of querymole.exe, from the VERSION file. No copyright holder is
     invented: that string is left out."""
     ver = open(os.path.join(ROOT, "VERSION"), encoding="utf-8").read().strip()
     nums = (re.findall(r"[0-9]+", ver.split("-")[0]) + ["0", "0", "0", "0"])[:4]
     icon = os.path.join(IMAGES, "querymole.ico")        # ADR-0033, written by tools/make_branding.sh
     rc = os.path.join(OUT, "qbr.rc")
     strings = (("FileDescription", "QueryMole SQL client"),
-               ("FileVersion", ver), ("InternalName", "qbr"), ("OriginalFilename", "qbr.exe"),
+               ("FileVersion", ver), ("InternalName", "querymole"), ("OriginalFilename", "querymole.exe"),
                ("ProductName", "QueryMole"), ("ProductVersion", ver))
     lines = ['MAINICON ICON "%s"' % icon.replace("\\", "/"),
              "1 VERSIONINFO",
@@ -94,7 +94,7 @@ def main():
     if r.returncode != 0:
         sys.stderr.write("windres failed for qbr.rc:\n%s%s\n" % (r.stdout, r.stderr))
         return 1
-    print("qbr: icon and version %s" % open(os.path.join(ROOT, "VERSION")).read().strip())
+    print("querymole: icon and version %s" % open(os.path.join(ROOT, "VERSION")).read().strip())
     for name, rc in SCRIPTS.items():
         res = os.path.join(OUT, name + ".res")
         env = dict(os.environ)

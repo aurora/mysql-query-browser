@@ -4,10 +4,10 @@
 #
 #   tools/package.sh                 stage dist/app and write dist/QueryMole-<version>-win64.zip (portable)
 #   tools/package.sh --velopack      additionally run `vpk pack` on dist/app (installer + update feed in dist/Releases)
-#   tools/package.sh --no-build      reuse the existing app/bin/qbr.exe instead of building first
+#   tools/package.sh --no-build      reuse the existing app/bin/querymole.exe instead of building first
 #
 # The version comes from the VERSION file. The staged folder holds:
-#   qbr.exe (debug info stripped; the unstripped build stays in app/bin), the backend DLLs and the
+#   querymole.exe (debug info stripped; the unstripped build stays in app/bin), the backend DLLs and the
 #   MSYS2 DLLs they need (found with ldd), XML/, doc/, fonts/, locale/, LICENSE, NOTICE.
 set -euo pipefail
 
@@ -32,19 +32,19 @@ APP="$DIST/app"
 if [ "$do_build" = 1 ]; then
   "$ROOT/build.sh" --backend --runtime
 fi
-[ -f "$ROOT/app/bin/qbr.exe" ] || { echo "app/bin/qbr.exe is missing" >&2; exit 1; }
+[ -f "$ROOT/app/bin/querymole.exe" ] || { echo "app/bin/querymole.exe is missing" >&2; exit 1; }
 
 echo "== staging $APP (version $VERSION)"
 rm -rf "$APP"
 mkdir -p "$APP"
-cp "$ROOT/app/bin/qbr.exe" "$APP/qbr.exe"
-strip --strip-debug "$APP/qbr.exe"
+cp "$ROOT/app/bin/querymole.exe" "$APP/querymole.exe"
+strip --strip-debug "$APP/querymole.exe"
 
 # backend DLLs and everything they and the program need from MSYS2
 cp "$ROOT"/backend/build/*.dll "$APP/"
 # ldd resolves some names to C:\Windows\System32 first (other software puts copies there), so go by
 # the names: whatever MSYS2 provides under that name is shipped.
-names=$( (ldd "$APP/qbr.exe"; for d in "$APP"/libmysql*.dll; do ldd "$d"; done) | awk '{print $1}' | sort -u )
+names=$( (ldd "$APP/querymole.exe"; for d in "$APP"/libmysql*.dll; do ldd "$d"; done) | awk '{print $1}' | sort -u )
 extra="libssl-3-x64.dll libcrypto-3-x64.dll"      # loaded by libmariadb/libcurl through plugins and TLS
 for n in $names $extra; do
   if [ -f "$MINGW/$n" ] && [ ! -f "$APP/$n" ]; then
@@ -69,7 +69,7 @@ cp "$ROOT/LICENSE" "$ROOT/NOTICE" "$APP/"
 # plus the licence files those packages carry. docs/licenses.md has the review behind this.
 mkdir -p "$APP/licenses/msys2" "$APP/licenses/lazarus"
 {
-  echo "Runtime libraries shipped next to qbr.exe, taken from MSYS2 mingw-w64 packages (the backend DLLs"
+  echo "Runtime libraries shipped next to querymole.exe, taken from MSYS2 mingw-w64 packages (the backend DLLs"
   echo "libmysql*.dll are built from this repository). Licence expressions are the packages' own; the"
   echo "licence texts that the packages carry are in licenses/msys2/. See docs/licenses.md for the review."
   echo
@@ -125,8 +125,8 @@ cp "$ROOT/docs/third-party/Bitstream-Vera-fonts.txt" "$APP/licenses/fonts/"
 cp "$ROOT/docs/licenses.md" "$APP/licenses/README-licenses.md"
 
 # the exe must start without the development PATH: run it with a minimal one
-if ! (cd "$APP" && PATH="/c/Windows/System32:/c/Windows" ./qbr.exe --selftest-resources "$DIST/selftest.txt" ); then
-  echo "warning: the staged qbr.exe did not start cleanly with a minimal PATH (missing DLL?)" >&2
+if ! (cd "$APP" && PATH="/c/Windows/System32:/c/Windows" ./querymole.exe --selftest-resources "$DIST/selftest.txt" ); then
+  echo "warning: the staged querymole.exe did not start cleanly with a minimal PATH (missing DLL?)" >&2
 fi
 
 ZIP="$DIST/QueryMole-$VERSION-win64.zip"
@@ -138,6 +138,6 @@ if [ "$do_velopack" = 1 ]; then
   command -v vpk >/dev/null || { echo "vpk (Velopack CLI) not found: dotnet tool install -g vpk" >&2; exit 1; }
   echo "== velopack"
   vpk pack --packId QueryMole --packVersion "$VERSION" --packDir "$(cygpath -w "$APP")" \
-    --mainExe qbr.exe --packTitle "QueryMole" --outputDir "$(cygpath -w "$DIST/Releases")" \
+    --mainExe querymole.exe --packTitle "QueryMole" --outputDir "$(cygpath -w "$DIST/Releases")" \
     --icon "$(cygpath -w "$ROOT/app/images/querymole.ico")"
 fi

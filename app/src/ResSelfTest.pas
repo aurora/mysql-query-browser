@@ -1,7 +1,7 @@
 { SPDX-License-Identifier: GPL-2.0-or-later }
 unit ResSelfTest;
 
-{ Developer check: qbr --selftest-resources out.png
+{ Developer check: querymole --selftest-resources out.png
   Loads a few of the embedded PNG resources through PNGTools and writes them into one
   picture, so a change in resource handling or image drawing can be reviewed by eye. }
 

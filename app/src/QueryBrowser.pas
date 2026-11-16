@@ -1960,7 +1960,7 @@ procedure TQueryBrowserForm.DevStressSchemata(Seconds: Integer; const OutFile: S
 
 // Developer mode (--stress-schemata <seconds> <file>): expands and collapses schema nodes, scrolls, reloads and
 // searches the schemata tree in random order while the fetch threads run, then expands every schema and counts the
-// nodes that still show no tables. Reports to OutFile. A hang or crash shows as a timeout or qbr.error.txt.
+// nodes that still show no tables. Reports to OutFile. A hang or crash shows as a timeout or querymole.error.txt.
 
   procedure Settle(Count: Integer);
 

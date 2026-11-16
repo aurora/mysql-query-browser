@@ -66,7 +66,7 @@ Releases are published as GitHub pre-releases: **<https://github.com/aurora/quer
 <tr><th>Platform</th><th>How</th></tr>
 <tr><td><b>Windows</b><br>64 bit</td><td>
 
-Unpack the zip and run `qbr.exe`. Settings and connections are kept in `%APPDATA%\QueryMole\`. On the first
+Unpack the zip and run `querymole.exe`. Settings and connections are kept in `%APPDATA%\QueryMole\`. On the first
 start, the settings of the original MySQL Query Browser are copied from `%APPDATA%\MySQL\` (that folder is left
 as it is). The zip does not update itself; download the new version and replace the old one.
 
@@ -116,7 +116,7 @@ Please open an issue at **<https://github.com/aurora/querymole/issues>** with:
 - the version (Help > About), the operating system and, on Linux, the desktop;
 - the server and its version;
 - what you did in the last seconds before the problem;
-- if the program ended: the file `qbr.error.txt` next to the program, if there is one, and, if you can, a run with
+- if the program ended: the file `querymole.error.txt` next to the program, if there is one, and, if you can, a run with
   `QBR_TRACE=1` (this writes `qbr.trace.txt` next to the program).
 
 ## Building from source

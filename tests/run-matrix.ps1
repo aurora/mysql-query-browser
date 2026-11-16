@@ -65,8 +65,8 @@ foreach ($m in $matrix) {
   $status = if ($run -and $err -eq '0' -and $fail -eq '0') { 'PASS' } else { 'FAIL' }
   $details = if ($status -eq 'FAIL') { ($log -split "`n" | Select-String 'Failed:|Exception|Assertion|Message' | Select-Object -First 5) -join ' | ' } else { '' }
   # the application itself: connect through the ported code, once via the command line path and
-  # once by driving the connect dialog (needs app/bin/qbr.exe and `python tools/prepare_runtime.py`)
-  $app = Join-Path $root 'app\bin\qbr.exe'
+  # once by driving the connect dialog (needs app/bin/querymole.exe and `python tools/prepare_runtime.py`)
+  $app = Join-Path $root 'app\bin\querymole.exe'
   $appResult = 'n/a'
   if (Test-Path $app) {
     $dataDir = Join-Path ([IO.Path]::GetTempPath()) "qbr-matrix-data"

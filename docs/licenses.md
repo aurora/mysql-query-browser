@@ -20,7 +20,7 @@ shipped with, a program under that licence?
 | PCRE exception from MySQL AB | In `NOTICE`, unchanged. |
 | New files | SPDX line only; no invented copyright holders (`AGENTS.md`). |
 
-## 2. Libraries shipped next to `qbr.exe` (dynamic linking)
+## 2. Libraries shipped next to `querymole.exe` (dynamic linking)
 
 From the MSYS2 packages the DLLs come from (`pacman -Qi`); `THIRD-PARTY-DLLS.txt` in the package
 lists the exact names and versions, `licenses/msys2/` carries the licence files that the packages
@@ -46,7 +46,7 @@ Not a licence matter but relevant: libcurl, libssh2, nghttp*, ngtcp2 and their d
 there because libmariadb is built with them; a smaller package needs a different Connector/C
 build (ADR-0003/ADR-0014).
 
-## 3. Pascal components linked into `qbr.exe` (static linking)
+## 3. Pascal components linked into `querymole.exe` (static linking)
 
 Found by listing the units in the executable and reading their headers.
 

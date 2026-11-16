@@ -46,6 +46,7 @@ Related.
 | [0035](0035-table-editor-controls-for-newer-server-features.md) | Table editor: controls for newer server features, after parity | Proposed (layout not designed) |
 | [0036](0036-pascal-table-model-with-server-dialects.md) | Table editor: a Pascal table model with server dialects | Proposed (after parity) |
 | [0037](0037-updates-per-platform-appimage-on-linux.md) | Updates with Velopack: AppImage on Linux, Velopack's standard packages on Windows and macOS | Accepted (principle); Linux implemented, Windows and macOS open |
+| [0038](0038-program-file-named-querymole.md) | The program file is named `querymole` | Accepted |
 
 ## Numbering
 

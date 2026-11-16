@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Builds the application (and, on request, the backend) on Windows (MSYS2) or Linux (distrobox).
 #
-#   ./build.sh              build app/bin/qbr.exe (Windows) or app/bin/qbr (Linux)
+#   ./build.sh              build app/bin/querymole.exe (Windows) or app/bin/querymole (Linux)
 #   ./build.sh --backend    also (re)build the C backend libraries first
 #   ./build.sh --runtime    also refresh app/bin (XML, doc, fonts, locale) and the compiled resources
 #   ./build.sh --run [args] start the application afterwards (arguments are passed on)
@@ -24,13 +24,13 @@ if [ "$windows" = 1 ]; then
   LAZARUS="${LAZARUS_DIR:-/c/lazarus}"
   MINGW="${MINGW_BIN:-/c/msys64/mingw64/bin}"
   BACKEND_BUILD="$ROOT/backend/build"
-  EXE=qbr.exe
+  EXE=querymole.exe
   export PATH="$MINGW:$BACKEND_BUILD:$LAZARUS:$PATH"
   LAZBUILD=("$LAZARUS/lazbuild.exe" --lazarusdir="$(cygpath -m "$LAZARUS")")
 else
   # own build directory: backend/build may hold a Windows build of the same checkout
   BACKEND_BUILD="${QBR_BACKEND_BUILD:-$ROOT/backend/build-linux}"
-  EXE=qbr
+  EXE=querymole
   export LD_LIBRARY_PATH="$BACKEND_BUILD${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   # the Linux linker resolves the backend libraries at link time
   LAZBUILD=(lazbuild "--opt=-Fl$BACKEND_BUILD")
@@ -49,8 +49,8 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-if [ "$windows" = 1 ] && tasklist //FI "IMAGENAME eq qbr.exe" 2>/dev/null | grep -qi "qbr.exe"; then
-  echo "qbr.exe is running and locks app/bin/qbr.exe; close it first." >&2
+if [ "$windows" = 1 ] && tasklist //FI "IMAGENAME eq querymole.exe" 2>/dev/null | grep -qi "querymole.exe"; then
+  echo "querymole.exe is running and locks app/bin/querymole.exe; close it first." >&2
   exit 1
 fi
 

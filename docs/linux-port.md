@@ -132,7 +132,7 @@ under Xvfb at 1280x1024 and 3840x2160, at 192 dpi, with gdb; valgrind did not ge
 with `MALLOC_CHECK_=3` failed to connect with "MySQL Error Number 0" when no default schema was given; this
 was not isolated further and may point at an uninitialised value in the connect code. If it happens
 again: save the core (`coredumpctl dump <pid> -o core`), start with `QBR_TRACE=1` (flow trace in
-`app/bin/qbr.trace.txt`) and note what was done in the last seconds.
+`app/bin/querymole.trace.txt`) and note what was done in the last seconds.
 
 Still open, sporadic hang (2026-11-03): once, while scrolling the Schemata tree of a database with many tables
 (real KDE/XWayland session, remote server), the main window stopped responding; the console showed only the

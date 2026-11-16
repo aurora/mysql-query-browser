@@ -6,7 +6,7 @@
 #   tests/run-matrix.sh [--only mysql:8.4,mariadb:11.4] [--keep] [--app-only]
 #
 # --app-only skips the FPCUnit tests and only runs the application self-tests; QBR_APP names the program to run
-# (default app/bin/qbr), e.g. dist/AppDir/AppRun to check the AppImage's libraries against every server.
+# (default app/bin/querymole), e.g. dist/AppDir/AppRun to check the AppImage's libraries against every server.
 #
 # Prerequisites: backend built (backend/build-linux), tests built (tests/bin/qbr_tests):
 #   fpc -Fubindings -Fuapp/compat -Fuapp/src -Flbackend/build-linux -FUtests/lib -FEtests/bin \
@@ -15,7 +15,7 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXE="$ROOT/tests/bin/qbr_tests"
-APP="${QBR_APP:-$ROOT/app/bin/qbr}"
+APP="${QBR_APP:-$ROOT/app/bin/querymole}"
 
 only="" keep=0 app_only=0
 while [ $# -gt 0 ]; do
@@ -87,7 +87,7 @@ for entry in "${matrix[@]}"; do
   fi
 
   # the application itself: connect through the ported code, once via the command line path and
-  # once by driving the connect dialog (needs app/bin/qbr and `python tools/prepare_runtime.py`)
+  # once by driving the connect dialog (needs app/bin/querymole and `python tools/prepare_runtime.py`)
   app_result="n/a"
   # a virtual X server keeps the windows off the desktop (and works without one)
   xvfb=(); if command -v xvfb-run >/dev/null; then xvfb=(xvfb-run -a); fi

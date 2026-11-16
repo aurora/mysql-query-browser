@@ -26,8 +26,8 @@ waits until after parity and gets its own decision.
   `OptionsEditor`, `AuxFuncs` (pruned to what the Query Browser uses), `CommonFuncs`, `About`,
   `MyxError`, `AuxApplicationFuncs`. The dialog shows with the original banner and translations,
   and the original code path connects to all six matrix servers, both from the command line and by
-  driving the dialog (`qbr --selftest-connect/--selftest-dialog`, part of `tests/run-matrix.ps1`).
-- **Main window ported and running** (`qbr -h ... --shot-main file.png` writes a screenshot):
+  driving the dialog (`querymole --selftest-connect/--selftest-dialog`, part of `tests/run-matrix.ps1`).
+- **Main window ported and running** (`querymole -h ... --shot-main file.png` writes a screenshot):
   all units of the main window compile (`LexicalTools` without its x86 assembler, `ScriptPanel`,
   `SqlCmdPanel`, `QueryBrowser`, `Main`, `TableDrag`, `StringContainers`), the editor layer on SynEdit
   has per-line data/states/styles/gutter markers, and the schema tree, tabs, toolbar and help pane

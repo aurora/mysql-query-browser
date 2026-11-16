@@ -14,8 +14,8 @@ BACKEND=$SRC/backend/build-el9
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/lib"
 
-install -m 755 "$SRC/app/bin/qbr" "$APPDIR/usr/bin/qbr"
-strip --strip-debug "$APPDIR/usr/bin/qbr"
+install -m 755 "$SRC/app/bin/querymole" "$APPDIR/usr/bin/querymole"
+strip --strip-debug "$APPDIR/usr/bin/querymole"
 cp "$BACKEND"/*.so "$APPDIR/usr/lib/"
 for d in XML doc fonts locale; do
   cp -r "$SRC/app/bin/$d" "$APPDIR/usr/bin/$d"
@@ -54,7 +54,7 @@ excluded() {
 # closure over ldd, repeated until nothing new turns up
 for pass in 1 2 3 4 5 6; do
   added=0
-  for f in $(find "$APPDIR/usr" -type f \( -name '*.so' -o -name '*.so.*' -o -name qbr \)); do
+  for f in $(find "$APPDIR/usr" -type f \( -name '*.so' -o -name '*.so.*' -o -name querymole \)); do
     new=$(ldd "$f" 2>/dev/null | awk '/=> \// {print $1, $3}' | while read -r name path; do
       excluded "$name" && continue
       [ -e "$APPDIR/usr/lib/$name" ] && continue
@@ -69,7 +69,7 @@ done
 # Each file finds its neighbours through its own run path: LD_LIBRARY_PATH would leak into the programs the
 # application starts (web browser, file manager).
 chmod -R u+w "$APPDIR"
-patchelf --set-rpath '$ORIGIN/../lib' "$APPDIR/usr/bin/qbr"
+patchelf --set-rpath '$ORIGIN/../lib' "$APPDIR/usr/bin/querymole"
 for f in "$APPDIR"/usr/lib/*.so "$APPDIR"/usr/lib/*.so.*; do
   patchelf --set-rpath '$ORIGIN' "$f"
 done

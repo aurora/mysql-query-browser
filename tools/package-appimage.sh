@@ -4,7 +4,7 @@
 # from tools/distrobox-setup.sh).
 #
 #   tools/package-appimage.sh              build everything, write dist/QueryMole-<version>-x86_64.AppImage
-#   tools/package-appimage.sh --no-build   reuse app/bin/qbr and backend/build-el9, only stage and pack
+#   tools/package-appimage.sh --no-build   reuse app/bin/querymole and backend/build-el9, only stage and pack
 #   tools/package-appimage.sh --velopack   additionally pack the same AppDir with `vpk pack` (ADR-0037): an AppImage
 #                                          that updates itself, plus the update feed, in dist/Releases-linux
 #
@@ -57,13 +57,13 @@ if [ "$do_build" = 1 ]; then
   touch "$ROOT/app/qbr.lpr"
   (cd "$ROOT" && distrobox enter freepascal -- env QBR_BACKEND_BUILD="$ROOT/backend/build-el9" bash ./build.sh --runtime)
 fi
-[ -f "$ROOT/app/bin/qbr" ] && [ -d "$ROOT/backend/build-el9" ] || { echo "app/bin/qbr or backend/build-el9 is missing" >&2; exit 1; }
+[ -f "$ROOT/app/bin/querymole" ] && [ -d "$ROOT/backend/build-el9" ] || { echo "app/bin/querymole or backend/build-el9 is missing" >&2; exit 1; }
 
 echo "== staging"
 run_el9 sh tools/appimage/stage.sh
 APPDIR="$DIST/AppDir"
 install -m 755 "$ROOT/tools/appimage/AppRun" "$APPDIR/AppRun"
-install -m 644 "$ROOT/tools/appimage/qbr.desktop" "$APPDIR/qbr.desktop"
+install -m 644 "$ROOT/tools/appimage/querymole.desktop" "$APPDIR/querymole.desktop"
 
 # icon: the QueryMole icon, 256x256 (ADR-0033, written by tools/make_branding.sh)
 install -m 644 "$ROOT/app/images/querymole.png" "$APPDIR/querymole.png"
@@ -120,7 +120,7 @@ if [ "$do_velopack" = 1 ]; then
   echo "usr/bin/libvelopack_libc.so | Velopack (native update library, MIT), used through velopack-pas (MIT)" \
     >> "$VAPPDIR/THIRD-PARTY-LIBS.txt"
   DOTNET_ROLL_FORWARD=Major "$VPK" pack --packId QueryMole --packVersion "$VERSION" --packTitle QueryMole \
-    --packAuthors "QueryMole contributors" --packDir "$VAPPDIR" --mainExe qbr --channel linux \
+    --packAuthors "QueryMole contributors" --packDir "$VAPPDIR" --mainExe querymole --channel linux \
     --outputDir "$DIST/Releases-linux"
   rm -rf "$VAPPDIR" "$DIST/velopack-native"
   echo "Velopack release: $DIST/Releases-linux"
