@@ -30,8 +30,9 @@ def copy(src, dst_dir, name=None):
 def main():
     out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "app", "bin")
     n = 0
-    for f in ("mysqlx_dbm_charsets.xml", "mysqlx_dbm_datatypes.xml"):
-        copy(os.path.join(COMMON, "res", f), os.path.join(out, "XML")); n += 1
+    copy(os.path.join(COMMON, "res", "mysqlx_dbm_charsets.xml"), os.path.join(out, "XML")); n += 1
+    # the program's own data type list: the original's plus the types every supported server has (ADR-0034)
+    copy(os.path.join(ROOT, "app", "xml", "mysqlx_dbm_datatypes.xml"), os.path.join(out, "XML")); n += 1
     for f in ("mysqlqb_functions.xml", "mysqlqb_statements.xml"):
         copy(os.path.join(QB, "res", f), os.path.join(out, "XML")); n += 1
     # Only the program's own quick start guide. The MySQL 5.0 manual extract (statements/functions pages) is not

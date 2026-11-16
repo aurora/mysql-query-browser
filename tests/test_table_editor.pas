@@ -56,6 +56,8 @@ type
     procedure TestAria;
     procedure TestInvisibleColumn;
     procedure TestFunctionalIndex;
+    procedure TestEngineChange;
+    procedure TestCharsets;
   end;
 
 implementation
@@ -87,7 +89,7 @@ begin
 
   Err := MYX_NO_ERROR;
   FDatatypes := myx_datatype_load(Env('QBR_TEST_XMLDIR', ExtractFilePath(ParamStr(0)) +
-    '../../legacy/mysql-gui-common/res/') + 'mysqlx_dbm_datatypes.xml', @Err);
+    '../../app/xml/') + 'mysqlx_dbm_datatypes.xml', @Err);
   AssertNotNull('datatypes loaded', FDatatypes);
   FVersion := myx_dbm_retrieve_server_version(FMy);
 
@@ -374,8 +376,11 @@ begin
 end;
 
 procedure TTableEditorTest.TestNewerTypes;
+var
+  T: TMYX_DBM_TABLE_DATA;
+  I, N: Integer;
 begin
-  // in MySQL 5.0 already, but missing from mysqlx_dbm_datatypes.xml
+  // not in the original's mysqlx_dbm_datatypes.xml, added by ADR-0034
   CheckTable('te_newer',
     'id INT NOT NULL PRIMARY KEY, ' +
     'y YEAR NULL, ' +
@@ -383,6 +388,22 @@ begin
     'vb VARBINARY(10) NULL, ' +
     'ms DATETIME(3) NULL',
     'ENGINE=InnoDB');
+  ExecSQL(FMy, 'CREATE TABLE te_newer_json (id INT NOT NULL PRIMARY KEY, doc JSON NULL)');
+  for N := 0 to 1 do
+  begin
+    if N = 0 then
+      T := ReadTable('te_newer')
+    else
+      T := ReadTable('te_newer_json');
+    try
+      for I := 0 to T.columns.Count - 1 do
+        // MariaDB reports JSON as longtext, which is in the list anyway
+        AssertTrue(T.name + '.' + T.columns[I].name + ': the type is in the data type list (' +
+          T.columns[I].datatype_name + ')', T.columns[I].datatype_pointer <> nil);
+    finally
+      T.Free;
+    end;
+  end;
 end;
 
 procedure TTableEditorTest.TestJson;
@@ -451,6 +472,85 @@ begin
     Exit;
   CheckTable('te_funcindex', 'id INT NOT NULL PRIMARY KEY, name VARCHAR(50) NOT NULL, KEY idx_lower ((LOWER(name)))',
     'ENGINE=InnoDB');
+end;
+
+// what EditorTable sets when another engine is chosen (ADR-0034): the enumeration value and the engine's name
+procedure TTableEditorTest.TestEngineChange;
+
+  procedure ChangeEngine(const Table: string; Engine: MYX_DBM_TABLE_ENGINE; const EngineName, Expected: string);
+  var
+    Edited: TMYX_DBM_TABLE_DATA;
+    Sql: string;
+  begin
+    Edited := ReadTable(Table);
+    try
+      Edited.table_engine := Engine;
+      Edited.engine_name := EngineName;
+      Sql := DiffSQL(Table, Edited);
+    finally
+      Edited.Free;
+    end;
+    AssertTrue(Table + ' to ' + EngineName + ' gives SQL', Sql <> '');
+    ExecScript(Sql);
+    AssertTrue(Table + ' is ' + Expected + ' now' + LineEnding + 'SQL: ' + Sql,
+      Pos('ENGINE=' + Expected + ' ', ShowCreate(Table)) > 0);
+    // reading it again gives no SQL
+    Edited := ReadTable(Table);
+    try
+      AssertEquals(Table + ' as ' + Expected + ' unchanged', '', DiffSQL(Table, Edited));
+    finally
+      Edited.Free;
+    end;
+  end;
+
+begin
+  ExecSQL(FMy, 'CREATE TABLE te_engine (id INT NOT NULL PRIMARY KEY, name VARCHAR(20)) ENGINE=MyISAM');
+  ChangeEngine('te_engine', MYX_DBM_TE_INNODB, 'INNODB', 'InnoDB');
+  if FMariaDB then
+  begin
+    // Aria has no value of its own; the name decides
+    ChangeEngine('te_engine', MYX_DBM_TE_MYISAM, 'Aria', 'Aria');
+    ChangeEngine('te_engine', MYX_DBM_TE_MYISAM, 'MYISAM', 'MyISAM');
+  end
+  else
+    ChangeEngine('te_engine', MYX_DBM_TE_MYISAM, 'MYISAM', 'MyISAM');
+end;
+
+// the editor reads all character sets and collations when it opens; MariaDB 10.10+ lists collations without
+// character set and id, which crashed it (nothing happened on "Edit Table")
+procedure TTableEditorTest.TestCharsets;
+var
+  Err: MYX_LIB_ERROR;
+  Cs: PMYX_DBM_CHARSETS;
+  C: PMYX_DBM_CHARSET;
+  Col: PMYX_DBM_COLLATION;
+  I, J: Integer;
+  FoundUtf8mb4: Boolean;
+begin
+  Err := MYX_NO_ERROR;
+  Cs := myx_dbm_retrieve_charsets(FMy, @Err);
+  AssertTrue('character sets read', (Cs <> nil) and (Err = MYX_NO_ERROR));
+  try
+    FoundUtf8mb4 := False;
+    for I := 0 to Integer(Cs^.charsets_num) - 1 do
+    begin
+      C := Cs^.charsets + I;
+      if C^.name = 'utf8mb4' then
+      begin
+        FoundUtf8mb4 := True;
+        AssertTrue('utf8mb4 has collations', C^.collations_num > 0);
+      end;
+      for J := 0 to Integer(C^.collations_num) - 1 do
+      begin
+        Col := C^.collations + J;
+        AssertTrue(string(C^.name) + ': collation ' + string(Col^.name) + ' belongs to it',
+          (string(Col^.name) = string(C^.name)) or (Pos(string(C^.name) + '_', string(Col^.name)) = 1));
+      end;
+    end;
+    AssertTrue('utf8mb4 found', FoundUtf8mb4);
+  finally
+    myx_free_charsets(Cs);
+  end;
 end;
 
 initialization

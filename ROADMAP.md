@@ -90,9 +90,10 @@ waits until after parity and gets its own decision.
   - the model has no table CHECK constraints: edits keep them, the editor cannot create them;
   - generated expressions, `ON UPDATE`, `INVISIBLE` and column CHECKs are kept but not shown or editable in the
     editor; expression defaults (`DEFAULT (expr)`, MySQL 8.0.13+) are not tested;
-  - not tested: editing indices and foreign keys in the editor, the default engine for new tables
-    (`myx_dbm_get_default_storage_engine` reads `storage_engine`, gone since 5.7), the data type list
-    (`mysqlx_dbm_datatypes.xml` has no JSON, YEAR, BINARY, VARBINARY; such columns keep their type as text);
+  - not tested: editing indices and foreign keys in the editor;
+  - data types and engines: ADR-0034 (JSON, YEAR, BINARY, VARBINARY added; engines from `SHOW ENGINES`).
+    Server-specific types (MariaDB UUID, INET4/6; MySQL 9 VECTOR) wait for the dialects of ADR-0010.
+    `myx_dbm_get_default_storage_engine` still reads `storage_engine` (gone since 5.7) but is not used;
   - the editor itself was checked by opening a table, not by editing through its grid; the Windows backend build
     with these changes is not checked yet.
   The model is the natural seam for other databases later (ADR-0010).

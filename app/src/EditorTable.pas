@@ -373,6 +373,12 @@ type
 
     FTableEngineList: TObjectList;
     FInitControls: Boolean;
+    // Port: engines from the server (ADR-0034)
+    FOriginalEngineCount: Integer;
+    FServerEnginesLoaded: Boolean;
+    FServerDefaultEngine: TObject;
+    procedure LoadServerEngines;
+    function EngineByServerName(const ServerName: string): Integer;
 
     procedure SetModified(Modified: Boolean);
     procedure AssignDatatypeToColumn(Datatype: WideString; column: TMYX_DBM_COLUMN_DATA; PDatatypes: PMYX_DBM_DATATYPES);
@@ -572,6 +578,7 @@ begin
       TTableEngine(FTableEngineList.Items[I]).Caption,
       FTableEngineList.Items[I]);
   end;
+  FOriginalEngineCount := FTableEngineList.Count;
 
 
   StdInsertsTabSheet.TabVisible := False;
@@ -582,6 +589,134 @@ begin
   HeightWithoutDetails := 448;
 
   ShowHideDetails(False);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+// Port (ADR-0034): the engine list follows the server. Engines of the original's list are shown when the server
+// supports them (SHOW ENGINES, Support YES or DEFAULT); engines the server has beyond them are appended with the
+// server's name and comment. Without an answer the original list stays.
+
+function ServerEngineMatches(const ListName, ServerName: string): Boolean;
+begin
+  Result := SameText(ListName, ServerName) or
+    (SameText(ListName, 'MERGE') and SameText(ServerName, 'MRG_MyISAM')) or
+    (SameText(ListName, 'MERGE') and SameText(ServerName, 'MRG_MYISAM')) or
+    (SameText(ListName, 'MEMORY') and SameText(ServerName, 'HEAP')) or
+    (SameText(ListName, 'BDB') and SameText(ServerName, 'BerkeleyDB')) or
+    (SameText(ListName, 'NDB') and SameText(ServerName, 'ndbcluster'));
+end;
+
+function TEditorTableForm.EngineByServerName(const ServerName: string): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  if ServerName = '' then
+    Exit;
+  for I := 0 to TableEngineLU.Items.Count - 1 do
+    if ServerEngineMatches(TTableEngine(TableEngineLU.Items.Objects[I]).Name, ServerName) then
+    begin
+      Result := I;
+      Exit;
+    end;
+end;
+
+procedure TEditorTableForm.LoadServerEngines;
+var
+  RS: PMYX_RESULTSET;
+  ErrorCode: MYX_LIB_ERROR;
+  R, I: Integer;
+  Row: PMYX_RS_ROW;
+  Names, Supports, Comments: TStringList;
+  Found: Boolean;
+  Engine: TTableEngine;
+
+  function FieldText(Row: PMYX_RS_ROW; C: Integer): string;
+  var
+    Field: PMYX_RS_FIELD;
+  begin
+    Field := PMYX_RS_FIELD(PByte(Row^.fields) + C * SizeOf(MYX_RS_FIELD));
+    if Field^.value = nil then
+      Result := ''
+    else
+      SetString(Result, Field^.value, Field^.value_length);
+  end;
+
+begin
+  FServerEnginesLoaded := True;
+  FServerDefaultEngine := nil;
+  ErrorCode := MYX_NO_ERROR;
+  RS := myx_query_execute(FMySQLConn.MySQL, 'SHOW ENGINES', 0, nil, @ErrorCode, nil, nil, nil, nil);
+  if (RS = nil) or (ErrorCode <> MYX_NO_ERROR) or (RS^.columns_num < 3) or (RS^.rows_num = 0) then
+  begin
+    if RS <> nil then
+      myx_query_free_resultset(RS);
+    Exit;
+  end;
+
+  Names := TStringList.Create;
+  Supports := TStringList.Create;
+  Comments := TStringList.Create;
+  try
+    try
+      for R := 0 to Integer(RS^.rows_num) - 1 do
+      begin
+        Row := PMYX_RS_ROW(PByte(RS^.rows) + R * SizeOf(MYX_RS_ROW));
+        Names.Add(FieldText(Row, 0));
+        Supports.Add(FieldText(Row, 1));
+        Comments.Add(FieldText(Row, 2));
+      end;
+    finally
+      myx_query_free_resultset(RS);
+    end;
+
+    // engines appended by an earlier connection
+    while FTableEngineList.Count > FOriginalEngineCount do
+      FTableEngineList.Delete(FTableEngineList.Count - 1);
+
+    TableEngineLU.Items.Clear;
+    for I := 0 to FOriginalEngineCount - 1 do
+    begin
+      Engine := TTableEngine(FTableEngineList.Items[I]);
+      for R := 0 to Names.Count - 1 do
+        if ServerEngineMatches(Engine.Name, Names[R]) and
+          (SameText(Supports[R], 'YES') or SameText(Supports[R], 'DEFAULT')) then
+        begin
+          TableEngineLU.Items.AddObject(Engine.Caption, Engine);
+          if SameText(Supports[R], 'DEFAULT') then
+            FServerDefaultEngine := Engine;
+          Break;
+        end;
+    end;
+    for R := 0 to Names.Count - 1 do
+    begin
+      if not (SameText(Supports[R], 'YES') or SameText(Supports[R], 'DEFAULT')) then
+        Continue;
+      // engines of the server's own tables, not for a table the user creates
+      if SameText(Names[R], 'PERFORMANCE_SCHEMA') or SameText(Names[R], 'SEQUENCE') then
+        Continue;
+      Found := False;
+      for I := 0 to FOriginalEngineCount - 1 do
+        if ServerEngineMatches(TTableEngine(FTableEngineList.Items[I]).Name, Names[R]) then
+          Found := True;
+      if Found then
+        Continue;
+      Engine := TTableEngine.Create(Names[R], Names[R], Comments[R]);
+      FTableEngineList.Add(Engine);
+      TableEngineLU.Items.AddObject(Engine.Caption, Engine);
+      if SameText(Supports[R], 'DEFAULT') then
+        FServerDefaultEngine := Engine;
+    end;
+    // nothing matched (unexpected answer): the original list
+    if TableEngineLU.Items.Count = 0 then
+      for I := 0 to FOriginalEngineCount - 1 do
+        TableEngineLU.Items.AddObject(TTableEngine(FTableEngineList.Items[I]).Caption, FTableEngineList.Items[I]);
+  finally
+    Names.Free;
+    Supports.Free;
+    Comments.Free;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -828,6 +963,9 @@ begin
   if(PServerVersion=nil)then
     PServerVersion := myx_dbm_retrieve_server_version(FMySQLConn.MySQL);
 
+  if not FServerEnginesLoaded then
+    LoadServerEngines;
+
   if(Charsets=nil)then
   begin
     if(DBMajorVersion > 4) or ((DBMajorVersion = 4) and (DBMinorVersion >= 1)) then
@@ -959,6 +1097,10 @@ begin
 
     CommentEd.Text := TableData.comment;
 
+    // Port: by the server's name first, so that an engine the enumeration does not know (Aria) is shown as itself
+    // (ADR-0034); the original's mapping below for new tables
+    TableEngineLU.ItemIndex := EngineByServerName(TableData.engine_name);
+    if TableEngineLU.ItemIndex = -1 then
     case TableData.table_engine of
       MYX_DBM_TE_MYISAM:
         TableEngineLU.ItemIndex  := 
@@ -991,6 +1133,9 @@ begin
         TableEngineLU.ItemIndex  := 
           TableEngineLU.Items.IndexOf('FEDERATED');
     end;
+    // Port: the engine of the options is not on this server: the server's default (ADR-0034)
+    if (TableEngineLU.ItemIndex = -1) and (FServerDefaultEngine <> nil) then
+      TableEngineLU.ItemIndex := TableEngineLU.Items.IndexOfObject(FServerDefaultEngine);
     TableEngineLUChange(Self);
 
 
@@ -3110,6 +3255,9 @@ begin
       TableData.table_engine := MYX_DBM_TE_FEDERATED
     else
       TableData.table_engine := MYX_DBM_TE_MYISAM;
+    // Port: the chosen engine by name; engines from the server beyond the original's list (Aria) have no value of
+    // their own in table_engine (MyISAM) and are written by this name (ADR-0034)
+    TableData.engine_name := TTableEngine(TableEngineLU.Items.Objects[TableEngineLU.ItemIndex]).Name;
   end;
 
   TableData.next_auto_inc := AutoIncEd.Text;
@@ -3706,7 +3854,8 @@ begin
   if (TableEngineLU.ItemIndex = -1) then
     TableEngineLU.ItemIndex := 0;
 
-  TableEngineDescLbl.Caption := TTableEngine(FTableEngineList.Items[TableEngineLU.ItemIndex]).Description;
+  // Port: the item's own engine; the list is filtered by the server, so its index is not the list's (ADR-0034)
+  TableEngineDescLbl.Caption := TTableEngine(TableEngineLU.Items.Objects[TableEngineLU.ItemIndex]).Description;
 
   Modified := True;
 end;

@@ -42,6 +42,7 @@ Related.
 | [0031](0031-copyright-notice-of-the-maintainer.md) | Copyright notice of the project maintainer in NOTICE and the About dialog | Accepted |
 | [0032](0032-querymole-artwork-in-the-about-dialog.md) | QueryMole artwork in the About dialog | Accepted (implemented) |
 | [0033](0033-querymole-icon-replaces-the-lightning-bolt.md) | The QueryMole icon replaces the lightning bolt | Accepted (implemented; Windows not verified) |
+| [0034](0034-table-editor-lists-follow-the-server.md) | Table editor: data types and storage engines follow current servers | Accepted |
 
 ## Numbering
 

@@ -148,32 +148,57 @@ MYX_DBM_DATATYPE * myx_dbm_get_datatype(MYX_DBM_DATATYPES *datatypes, char **dty
   return NULL;
 }
 
+/* revival: case-insensitive (MySQL 8 reports MRG_MYISAM) */
+#define STR_OR_EMPTY(s) ((s) ? (s) : "")
 static MYX_DBM_TABLE_ENGINE parse_table_engine(const char *engine)
 {
-  if(strcmp2(engine, "InnoDB")==0)
+  if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "InnoDB")==0)
     return MYX_DBM_TE_INNODB;
-  else if((strcmp2(engine, "HEAP")==0)||(strcmp2(engine, "MEMORY")==0))
+  else if((g_ascii_strcasecmp(STR_OR_EMPTY(engine), "HEAP")==0)||(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "MEMORY")==0))
     return MYX_DBM_TE_MEMORY;
-  else if((strcmp2(engine, "MERGE")==0)||(strcmp2(engine, "MRG_MyISAM")==0))
+  else if((g_ascii_strcasecmp(STR_OR_EMPTY(engine), "MERGE")==0)||(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "MRG_MyISAM")==0))
     return MYX_DBM_TE_MERGE;
-  else if(strcmp2(engine, "BDB")==0)
+  else if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "BDB")==0)
     return MYX_DBM_TE_BDB;
-  else if(strcmp2(engine, "ISAM")==0)
+  else if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "ISAM")==0)
     return MYX_DBM_TE_ISAM;
-  else if(strcmp2(engine, "NDB")==0)
+  else if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "NDB")==0)
     return MYX_DBM_TE_NDB;
-  else if(strcasecmp(engine, "JSTAR")==0||strcasecmp(engine, "FALCON")==0)
+  else if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "JSTAR")==0||g_ascii_strcasecmp(STR_OR_EMPTY(engine), "FALCON")==0)
     return MYX_DBM_TE_FALCON;
-  else if(strcmp2(engine, "ARCHIVE")==0)
+  else if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "ARCHIVE")==0)
               return MYX_DBM_TE_ARCHIVE;
-  else if(strcmp2(engine, "CSV")==0)
+  else if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "CSV")==0)
     return MYX_DBM_TE_CSV;
-  else if(strcmp2(engine, "BLACKHOLE")==0)
+  else if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "BLACKHOLE")==0)
     return MYX_DBM_TE_BLACKHOLE;
-  else if(strcmp2(engine, "FEDERATED")==0)
+  else if(g_ascii_strcasecmp(STR_OR_EMPTY(engine), "FEDERATED")==0)
     return MYX_DBM_TE_FEDERATED;
   else
     return MYX_DBM_TE_MYISAM;
+}
+
+/* revival (ADR-0034): the engine as it is written into SQL: the server's name (engine_name) while table_engine still
+   maps to it, otherwise the name of table_engine (the user chose another engine of the original's list) */
+static const char *effective_engine_name(MYX_DBM_TABLE_DATA *table)
+{
+  if(!STR_EMPTY(table->engine_name) && (parse_table_engine(table->engine_name) == table->table_engine))
+    return table->engine_name;
+  switch (table->table_engine)
+  {
+    case MYX_DBM_TE_INNODB:    return "InnoDB";
+    case MYX_DBM_TE_MEMORY:    return "MEMORY";
+    case MYX_DBM_TE_MERGE:     return "MERGE";
+    case MYX_DBM_TE_BDB:       return "BDB";
+    case MYX_DBM_TE_ISAM:      return "ISAM";
+    case MYX_DBM_TE_NDB:       return "NDB";
+    case MYX_DBM_TE_FALCON:    return "JSTAR";
+    case MYX_DBM_TE_ARCHIVE:   return "ARCHIVE";
+    case MYX_DBM_TE_CSV:       return "CSV";
+    case MYX_DBM_TE_BLACKHOLE: return "BLACKHOLE";
+    case MYX_DBM_TE_FEDERATED: return "FEDERATED";
+    default:                   return "MYISAM";
+  }
 }
 
 
@@ -761,30 +786,7 @@ MYX_DBM_TABLE_DATA * myx_dbm_retrieve_table_data(MYSQL *mysql, MYX_DBM_DATATYPES
             (strcmp(fields[i].name, "Engine") == 0))
           {
             table_data->engine_name= g_strdup(row[i]);
-            if(strcmp2(row[i], "InnoDB")==0)
-              table_data->table_engine= MYX_DBM_TE_INNODB;
-            else if((strcmp2(row[i], "HEAP")==0)||(strcmp2(row[i], "MEMORY")==0))
-              table_data->table_engine= MYX_DBM_TE_MEMORY;
-            else if((strcmp2(row[i], "MERGE")==0)||(strcmp2(row[i], "MRG_MyISAM")==0))
-              table_data->table_engine= MYX_DBM_TE_MERGE;
-            else if(strcmp2(row[i], "BDB")==0)
-              table_data->table_engine= MYX_DBM_TE_BDB;
-            else if(strcmp2(row[i], "ISAM")==0)
-              table_data->table_engine= MYX_DBM_TE_ISAM;
-            else if(strcmp2(row[i], "NDB")==0)
-              table_data->table_engine= MYX_DBM_TE_NDB;
-            else if(strcasecmp(row[i], "JSTAR")==0||strcasecmp(row[i], "FALCON")==0)
-              table_data->table_engine= MYX_DBM_TE_FALCON;
-            else if(strcmp2(row[i], "ARCHIVE")==0)
-              table_data->table_engine= MYX_DBM_TE_ARCHIVE;
-            else if(strcmp2(row[i], "CSV")==0)
-              table_data->table_engine= MYX_DBM_TE_CSV;
-            else if(strcmp2(row[i], "BLACKHOLE")==0)
-              table_data->table_engine= MYX_DBM_TE_BLACKHOLE;
-            else if(strcmp2(row[i], "FEDERATED")==0)
-              table_data->table_engine= MYX_DBM_TE_FEDERATED;
-            else
-              table_data->table_engine= MYX_DBM_TE_MYISAM;
+            /* revival: the same mapping as for writing (parse_table_engine) */
             table_data->table_engine= parse_table_engine(row[i]);
           }
           else if (strcmp(fields[i].name, "Auto_increment") == 0)
@@ -1399,9 +1401,10 @@ MYX_DBM_CHARSETS * myx_dbm_retrieve_charsets(MYSQL *mysql, MYX_LIB_ERROR *error_
           {
             charset->default_collation= myx_convert_dbstr_utf8(mysql, row[i]);
           }
-          else if (strcmp(fields[i].name, "Default collation") == 0)
+          /* revival: was "Default collation" a second time, so max_len was never read */
+          else if (strcmp(fields[i].name, "Maxlen") == 0)
           {
-            charset->max_len= atoi(row[i]);
+            charset->max_len= row[i] ? atoi(row[i]) : 0;
           }
         }
       }
@@ -1440,11 +1443,21 @@ MYX_DBM_CHARSETS * myx_dbm_retrieve_charsets(MYSQL *mysql, MYX_LIB_ERROR *error_
         num_fields = mysql_num_fields(res);
         fields = mysql_fetch_fields(res);
 
-        charset->collations_num= (unsigned int)mysql_num_rows(res);
-        charset->collations= g_malloc0(sizeof(MYX_DBM_COLLATION)*charset->collations_num);
+        charset->collations= g_malloc0(sizeof(MYX_DBM_COLLATION)*(unsigned int)mysql_num_rows(res));
+        charset->collations_num= 0;
 
-        for(collation= charset->collations; (row= mysql_fetch_row(res))!=NULL; collation++)
+        /* revival: LIKE 'utf8%' also matches the collations of utf8mb3/utf8mb4, and MariaDB 10.10+ lists the
+           uca1400 collations without character set and id (NULL; atoi(NULL) crashed the table editor). Keep only
+           the rows of this character set. */
+        for(collation= charset->collations; (row= mysql_fetch_row(res))!=NULL; )
         {
+          int belongs= 0;
+          for (i= 0; i < num_fields; i++)
+            if ((strcmp(fields[i].name, "Charset") == 0) && row[i] && (strcmp(row[i], charset->name) == 0))
+              belongs= 1;
+          if (!belongs)
+            continue;
+          charset->collations_num++;
           for (i= 0; i < num_fields; i++)
           {
             if (strcmp(fields[i].name, "Collation") == 0)
@@ -1453,7 +1466,7 @@ MYX_DBM_CHARSETS * myx_dbm_retrieve_charsets(MYSQL *mysql, MYX_LIB_ERROR *error_
             }
             else if (strcmp(fields[i].name, "Id") == 0)
             {
-              collation->id= atoi(row[i]);
+              collation->id= row[i] ? atoi(row[i]) : 0;
             }
             else if (strcmp(fields[i].name, "Default") == 0)
             {
@@ -1467,9 +1480,10 @@ MYX_DBM_CHARSETS * myx_dbm_retrieve_charsets(MYSQL *mysql, MYX_LIB_ERROR *error_
             }
             else if (strcmp(fields[i].name, "Sortlen") == 0)
             {
-              collation->sort_len= atoi(row[i]);
+              collation->sort_len= row[i] ? atoi(row[i]) : 0;
             }
           }
+          collation++;
         }
 
         mysql_free_result(res);
@@ -1795,11 +1809,11 @@ char * myx_dbm_get_sql_option_create_code(MYX_DBM_TABLE_DATA *table, MYX_DBM_SER
   char *sql= NULL;
   char *tmp;
 
-  if(!STR_EMPTY(table->engine_name) && (parse_table_engine(table->engine_name) == table->table_engine) &&
+  if(!STR_EMPTY(table->engine_name) &&
     ((version->major_version >= 5) || ((version->major_version >= 4) && (version->minor_version >= 1))))
   {
     /* revival: the server's own name, so that an engine the model does not know (Aria) is not written as MyISAM */
-    sql= str_g_append_and_free(sql, g_strdup_printf("ENGINE = %s" _br, table->engine_name));
+    sql= str_g_append_and_free(sql, g_strdup_printf("ENGINE = %s" _br, effective_engine_name(table)));
   }
   else if((version->major_version >= 5) || ((version->major_version >= 4) && (version->minor_version >= 1)))
   {
@@ -2577,28 +2591,15 @@ MYX_PUBLIC_FUNC char * myx_dbm_get_table_sql_diff(MYX_DBM_TABLE_DATA *existing_t
     //Check table option changes
 
     // Engine
-    if (existing_table->table_engine != altered_table->table_engine)
+    /* revival (ADR-0034): compare the names, so that a change between engines the enumeration does not know
+       (MyISAM and Aria are both MYX_DBM_TE_MYISAM) is written, and write the server's name */
+    if (g_ascii_strcasecmp(effective_engine_name(existing_table), effective_engine_name(altered_table)) != 0)
     {
       if ((version->major_version >= 5) || ((version->major_version == 4) && (version->minor_version > 0)))
         alter_options= str_g_append(alter_options, _br "ENGINE = ");
       else
         alter_options= str_g_append(alter_options, _br "TYPE = ");
-
-      switch (altered_table->table_engine)
-      {
-        case MYX_DBM_TE_INNODB: alter_options= str_g_append(alter_options, "InnoDB"); break;
-        case MYX_DBM_TE_MEMORY: alter_options= str_g_append(alter_options, "MEMORY"); break;
-        case MYX_DBM_TE_MERGE:  alter_options= str_g_append(alter_options, "MERGE");  break;
-        case MYX_DBM_TE_BDB:    alter_options= str_g_append(alter_options, "BDB");    break;
-        case MYX_DBM_TE_ISAM:   alter_options= str_g_append(alter_options, "ISAM");   break;
-        case MYX_DBM_TE_NDB:    alter_options= str_g_append(alter_options, "NDB");    break;
-        case MYX_DBM_TE_FALCON: alter_options= str_g_append(alter_options, "JSTAR");  break;
-        case MYX_DBM_TE_ARCHIVE:alter_options= str_g_append(alter_options, "ARCHIVE");break;
-        case MYX_DBM_TE_CSV:    alter_options= str_g_append(alter_options, "CSV");    break;
-        case MYX_DBM_TE_BLACKHOLE:    alter_options= str_g_append(alter_options, "BLACKHOLE");    break;
-        case MYX_DBM_TE_FEDERATED:    alter_options= str_g_append(alter_options, "FEDERATED");    break;
-        default:                alter_options= str_g_append(alter_options, "MYISAM"); break;
-      };
+      alter_options= str_g_append(alter_options, effective_engine_name(altered_table));
     };
 
     //auto_inc
