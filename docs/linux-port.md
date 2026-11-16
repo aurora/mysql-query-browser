@@ -285,12 +285,15 @@ and uses it for the forms (ADR-0028); the dialog fits on Ubuntu and Fedora. Not 
 
 `tools/package-appimage.sh --velopack` (ADR-0037) packs a copy of the AppDir with `vpk pack` 1.3.39 into
 `dist/Releases-linux` (`QueryMole.AppImage`, full and delta packages, `releases.linux.json`). `libvelopack_libc.so`
-is built from the Velopack commit velopack-pas pins, in the AlmaLinux 9 container (`tools/appimage/build-velopack.sh`;
-newest glibc symbol 2.34); vpk's `UpdateNix` is statically linked. Checked under Xvfb in the `freepascal` container:
+comes from the velopack-pas release the submodule is pinned to (`v0.1.0-beta.1`, built on manylinux_2_28, newest
+glibc symbol 2.28; `fetch-native.py --with-license`). If the submodule is not on a release tag, it is built from the
+pinned Velopack commit in the AlmaLinux 9 container instead (`tools/appimage/build-velopack.sh`; glibc 2.34).
+vpk's `UpdateNix` is statically linked. Checked under Xvfb in the `freepascal` container:
 an alpha.2 AppImage with `QBR_UPDATE_URL` pointing at a feed holding alpha.2 and alpha.3 reported
 `installed 0.1.0-alpha.2`, `available 0.1.0-alpha.3`, downloaded and started the updater; the file was replaced, the
 next run reported `installed 0.1.0-alpha.3` and `no update`, and the connect dialog of the updated image opened.
-Not tried: the GitHub feed (`vpk upload github`), the dialogs of "Check for Updates ..." by hand, an AppImage in a
+With the library from the release, the packed image needs glibc 2.28 for it, reports `installed 0.1.0-alpha.2` and
+`no update` against its own feed, and applied a staged alpha.3 package on startup. Not tried: the GitHub feed (`vpk upload github`), the dialogs of "Check for Updates ..." by hand, an AppImage in a
 folder that needs `pkexec`, a real desktop session.
 
 ## Summary before the port (2026-10-30)

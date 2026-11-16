@@ -1,6 +1,8 @@
 # ADR-0037 — Updates with Velopack: AppImage on Linux, Velopack's standard packages on Windows and macOS
 
-- Status: Accepted (principle); Linux implemented, Windows update cycle and macOS open
+- Status: Accepted (principle); Linux implemented, Windows update cycle and macOS open. Since velopack-pas
+  v0.1.0-beta.1 the native library comes from its release (built for glibc 2.28, the alternative named below); the
+  container build stays as fallback (`docs/linux-port.md`)
 - Date: 2026-11-16
 - Deciders: Harald Lapp (project owner)
 - Supersedes in part: ADR-0026 ("Updates": the release without an update mechanism); amends ADR-0014 and ADR-0018

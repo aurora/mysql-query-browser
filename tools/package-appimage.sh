@@ -8,8 +8,10 @@
 #   tools/package-appimage.sh --velopack   additionally pack the same AppDir with `vpk pack` (ADR-0037): an AppImage
 #                                          that updates itself, plus the update feed, in dist/Releases-linux
 #
-# For --velopack: VELOPACK_LIBRARY may name a libvelopack_libc.so to ship; otherwise it is built in the AlmaLinux 9
-# container (tools/appimage/build-velopack.sh). VPK names the vpk program; otherwise `vpk` from PATH or
+# For --velopack, the native library libvelopack_libc.so comes from, in this order: VELOPACK_LIBRARY (a ready file);
+# the velopack-pas release VELOPACK_PAS_RELEASE, by default the tag third_party/velopack-pas is pinned to (built
+# on manylinux_2_28, glibc 2.28 at most; checked against the release's SHA256SUMS); otherwise it is built in the
+# AlmaLinux 9 container (tools/appimage/build-velopack.sh). VPK names the vpk program; otherwise `vpk` from PATH or
 # tools/cache/vpk/vpk (dotnet tool install vpk --version <see ADR-0037> --tool-path tools/cache/vpk).
 #
 # 1. the C backend is built in tools/appimage/Containerfile (AlmaLinux 9, glibc 2.34), so the image runs on
@@ -32,7 +34,7 @@ for a in "$@"; do
   case "$a" in
     --no-build) do_build=0 ;;
     --velopack) do_velopack=1 ;;
-    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,22p' "$0"; exit 0 ;;
     *) echo "unknown option: $a" >&2; exit 2 ;;
   esac
 done
@@ -90,23 +92,36 @@ if [ "$do_velopack" = 1 ]; then
   rm -rf "$VAPPDIR"
   cp -a "$APPDIR" "$VAPPDIR"
   # Velopack's native library next to the program: velopack-pas loads it from there (ADR-0018)
-  native="${VELOPACK_LIBRARY:-}"
-  if [ -z "$native" ]; then
-    echo "== velopack native library (AlmaLinux 9)"
+  native="${VELOPACK_LIBRARY:-}" native_license=""
+  release="${VELOPACK_PAS_RELEASE:-$(git -C "$ROOT/third_party/velopack-pas" describe --tags --exact-match 2>/dev/null || true)}"
+  if [ -z "$native" ] && [ -n "$release" ]; then
+    echo "== velopack native library (velopack-pas release $release)"
+    rm -rf "$DIST/velopack-native"
+    python3 "$ROOT/third_party/velopack-pas/tools/fetch-native.py" --version "$release" --os linux --arch x64 \
+      --with-license --dest "$DIST/velopack-native"
+    native="$DIST/velopack-native/libvelopack_libc.so"
+    native_license="$DIST/velopack-native/LICENSE-velopack.txt"
+  elif [ -z "$native" ]; then
+    echo "== velopack native library (AlmaLinux 9; third_party/velopack-pas is not on a release tag)"
     run_el9 sh tools/appimage/build-velopack.sh | tail -2
     native="$ROOT/tools/cache/velopack/target/release/libvelopack_libc.so"
+    native_license="$ROOT/tools/cache/velopack/LICENSE"
   fi
   [ -f "$native" ] || { echo "libvelopack_libc.so not found: $native" >&2; exit 1; }
   install -m 755 "$native" "$VAPPDIR/usr/bin/libvelopack_libc.so"
   strip --strip-debug "$VAPPDIR/usr/bin/libvelopack_libc.so"
   mkdir -p "$VAPPDIR/licenses/velopack"
   cp "$ROOT/third_party/velopack-pas/LICENSE" "$VAPPDIR/licenses/velopack/LICENSE-velopack-pas.txt"
-  cp "$ROOT/tools/cache/velopack/LICENSE" "$VAPPDIR/licenses/velopack/LICENSE-velopack.txt" 2>/dev/null || true
+  if [ -n "$native_license" ] && [ -f "$native_license" ]; then
+    cp "$native_license" "$VAPPDIR/licenses/velopack/LICENSE-velopack.txt"
+  else
+    echo "warning: Velopack's licence text not found, licenses/velopack/LICENSE-velopack.txt is missing" >&2
+  fi
   echo "usr/bin/libvelopack_libc.so | Velopack (native update library, MIT), used through velopack-pas (MIT)" \
     >> "$VAPPDIR/THIRD-PARTY-LIBS.txt"
   DOTNET_ROLL_FORWARD=Major "$VPK" pack --packId QueryMole --packVersion "$VERSION" --packTitle QueryMole \
     --packAuthors "QueryMole contributors" --packDir "$VAPPDIR" --mainExe qbr --channel linux \
     --outputDir "$DIST/Releases-linux"
-  rm -rf "$VAPPDIR"
+  rm -rf "$VAPPDIR" "$DIST/velopack-native"
   echo "Velopack release: $DIST/Releases-linux"
 fi

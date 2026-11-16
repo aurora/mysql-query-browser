@@ -92,18 +92,24 @@ mkdir -p "$APP/licenses/msys2" "$APP/licenses/lazarus"
 
 # Velopack native library for "Check for Updates ..." (ADR-0018). Either VELOPACK_LIBRARY points to a
 # velopack_libc.dll for win-x64, or VELOPACK_PAS_RELEASE names a velopack-pas release tag to fetch it from
-# (checked against the release's SHA256SUMS). Without it the package works, but the menu item stays disabled.
-native=""
+# (checked against the release's SHA256SUMS); by default the tag third_party/velopack-pas is pinned to. Without it
+# the package works, but the menu item stays disabled.
+native="" native_license=""
+release="${VELOPACK_PAS_RELEASE:-$(git -C "$ROOT/third_party/velopack-pas" describe --tags --exact-match 2>/dev/null || true)}"
 if [ -n "${VELOPACK_LIBRARY:-}" ] && [ -f "$VELOPACK_LIBRARY" ]; then
   native="$VELOPACK_LIBRARY"
-elif [ -n "${VELOPACK_PAS_RELEASE:-}" ]; then
-  python "$ROOT/third_party/velopack-pas/tools/fetch-native.py" --version "$VELOPACK_PAS_RELEASE" --os windows --arch x64 \
-    --dest "$DIST/velopack-native" && native="$DIST/velopack-native/velopack_libc.dll"
+elif [ -n "$release" ]; then
+  python "$ROOT/third_party/velopack-pas/tools/fetch-native.py" --version "$release" --os windows --arch x64 \
+    --with-license --dest "$DIST/velopack-native" && native="$DIST/velopack-native/velopack_libc.dll" \
+    && native_license="$DIST/velopack-native/LICENSE-velopack.txt"
 fi
 if [ -n "$native" ] && [ -f "$native" ]; then
   cp "$native" "$APP/velopack_libc.dll"
   mkdir -p "$APP/licenses/velopack"
   cp "$ROOT/third_party/velopack-pas/LICENSE" "$APP/licenses/velopack/LICENSE-velopack-pas.txt"
+  if [ -n "$native_license" ] && [ -f "$native_license" ]; then
+    cp "$native_license" "$APP/licenses/velopack/LICENSE-velopack.txt"
+  fi
   echo "velopack_libc.dll | Velopack (native update library, MIT), used through velopack-pas (MIT)" >> "$APP/THIRD-PARTY-DLLS.txt"
 else
   echo "warning: no velopack_libc.dll (set VELOPACK_LIBRARY or VELOPACK_PAS_RELEASE): updates are disabled in this package" >&2
