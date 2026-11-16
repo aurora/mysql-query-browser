@@ -293,8 +293,10 @@ an alpha.2 AppImage with `QBR_UPDATE_URL` pointing at a feed holding alpha.2 and
 `installed 0.1.0-alpha.2`, `available 0.1.0-alpha.3`, downloaded and started the updater; the file was replaced, the
 next run reported `installed 0.1.0-alpha.3` and `no update`, and the connect dialog of the updated image opened.
 With the library from the release, the packed image needs glibc 2.28 for it, reports `installed 0.1.0-alpha.2` and
-`no update` against its own feed, and applied a staged alpha.3 package on startup. Not tried: the GitHub feed (`vpk upload github`), the dialogs of "Check for Updates ..." by hand, an AppImage in a
-folder that needs `pkexec`, a real desktop session.
+`no update` against its own feed, and applied a staged alpha.3 package on startup. On a real desktop session the
+project owner ran the whole cycle by hand through "Check for Updates ..." against a local feed (`QBR_UPDATE_URL`),
+in a folder the user can write to: it worked. Not tried: the GitHub feed (`vpk upload github`), an AppImage in a
+folder that needs `pkexec`.
 
 ## Summary before the port (2026-10-30)
 
