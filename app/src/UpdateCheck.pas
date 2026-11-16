@@ -39,8 +39,34 @@ procedure RunUpdateSelftest(const ReportFile: String);
 implementation
 
 uses
+  {$IFDEF UNIX}BaseUnix,{$ENDIF}
   Classes, SysUtils, Controls, Forms, StdCtrls, ComCtrls, Dialogs, gnugettext, CommonFuncs,
   Velopack.Types, Velopack.App, Velopack.Updater, Velopack.Manager;
+
+// An AppImage is updated by replacing its file, which needs write access to its folder. Velopack would then ask
+// for pkexec, but its confirmation dialog cannot open on Linux (vpk 1.3.39, docs/linux-port.md), so the update
+// fails after the download. Returns False and the folder if the running AppImage lies in a folder that is not
+// writable; True everywhere else (Windows, macOS, a program started outside an AppImage).
+function UpdateFolderWritable(out Folder: String): Boolean;
+begin
+  Folder := '';
+  Result := True;
+  {$IFDEF UNIX}
+  if GetEnvironmentVariable('APPIMAGE') <> '' then
+  begin
+    Folder := ExtractFileDir(GetEnvironmentVariable('APPIMAGE'));
+    Result := fpAccess(Folder, W_OK) = 0;
+  end;
+  {$ENDIF}
+end;
+
+function NotWritableMessage(const Version, Folder: String): String;
+begin
+  Result := Format(_('Version %s is available, but it cannot be installed automatically: the folder %s is not ' +
+    'writable.'), [Version, Folder]) + LineEnding + LineEnding +
+    Format(_('Move the AppImage to a folder you can write to and check again, or download the new version from %s.'),
+    [UpdateRepositoryUrl + '/releases']);
+end;
 
 type
   TUpdateDialogs = class
@@ -87,7 +113,7 @@ var
   Report: TStringList;
   Manager: TUpdateManager;
   Info: TUpdateInfo;
-  Url: String;
+  Url, Folder: String;
 begin
   Report := TStringList.Create;
   try
@@ -105,10 +131,15 @@ begin
         else
           try
             Report.Add('available ' + Info.TargetFullRelease.Version);
-            Manager.DownloadUpdates(Info);
-            Report.Add('downloaded');
-            Manager.WaitExitThenApplyUpdates(Info.TargetFullRelease, True, False);
-            Report.Add('updater started');
+            if not UpdateFolderWritable(Folder) then
+              Report.Add('not writable ' + Folder)
+            else
+            begin
+              Manager.DownloadUpdates(Info);
+              Report.Add('downloaded');
+              Manager.WaitExitThenApplyUpdates(Info.TargetFullRelease, True, False);
+              Report.Add('updater started');
+            end;
           finally
             Info.Free;
           end;
@@ -164,10 +195,15 @@ begin
 end;
 
 procedure TUpdateDialogs.HandleCheck(Sender: TObject; AResult: TUpdateCheckResult; const ATarget: TVelopackAsset);
+var
+  Folder: String;
 begin
   Screen.Cursor := crDefault;
   if AResult <> ucUpdateAvailable then
     MessageDlg(_('You are running the latest version.'), mtInformation, [mbOK], 0)
+  else
+    if not UpdateFolderWritable(Folder) then
+      MessageDlg(NotWritableMessage(ATarget.Version, Folder), mtWarning, [mbOK], 0)
   else
     if MessageDlg(Format(_('Version %s is available. Download and install it now?'), [ATarget.Version]),
       mtConfirmation, [mbYes, mbNo], 0) = mrYes then

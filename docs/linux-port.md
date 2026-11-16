@@ -295,8 +295,18 @@ next run reported `installed 0.1.0-alpha.3` and `no update`, and the connect dia
 With the library from the release, the packed image needs glibc 2.28 for it, reports `installed 0.1.0-alpha.2` and
 `no update` against its own feed, and applied a staged alpha.3 package on startup. On a real desktop session the
 project owner ran the whole cycle by hand through "Check for Updates ..." against a local feed (`QBR_UPDATE_URL`),
-in a folder the user can write to: it worked. Not tried: the GitHub feed (`vpk upload github`), an AppImage in a
-folder that needs `pkexec`.
+in a folder the user can write to: it worked. Not tried: the GitHub feed (`vpk upload github`).
+
+**AppImage in a folder the user cannot write to (2026-11-16).** Velopack's `mv` fails there, as expected; before it
+runs `pkexec` it asks for confirmation in its own dialog, and that dialog does not open (`NoBackendAvailable` in
+`/tmp/velopack_QueryMole.log`, the same for the progress window). Velopack counts that as "User cancelled", so
+`pkexec` is never run, and the downloaded package is tried again on every start. Most likely cause: vpk's `UpdateNix`
+is a static musl program, and its dialog library loads `libX11`/`libwayland-client` at run time, which a static musl
+program cannot do. QueryMole therefore checks the folder of the running AppImage (`$APPIMAGE`) before downloading
+(`UpdateCheck.UpdateFolderWritable`): if it is not writable, "Check for Updates ..." names the folder and the
+download page instead of downloading, and `--selftest-update` reports `not writable <folder>`. Checked under Xvfb:
+in a read-only folder `available 0.1.0-alpha.3`, `not writable ...`, no download; in a writable one the update was
+applied as before.
 
 ## Summary before the port (2026-10-30)
 
