@@ -96,7 +96,8 @@ waits until after parity and gets its own decision.
     `myx_dbm_get_default_storage_engine` still reads `storage_engine` (gone since 5.7) but is not used;
   - the editor itself was checked by opening a table, not by editing through its grid; the Windows backend build
     with these changes is not checked yet.
-  The model is the natural seam for other databases later (ADR-0010).
+  The model is the natural seam for other databases later (ADR-0010). Showing and editing the newer features is
+  stage 2 (ADR-0035), the Pascal model with dialects stage 3 (ADR-0036), both after parity (see "Product").
 
 **Fidelity**
 - Reference screenshots from a user who still runs the original, for side by
@@ -111,6 +112,12 @@ waits until after parity and gets its own decision.
 - PostgreSQL and other databases via a driver seam (ADR-0010); candidate
   libraries: FPC `postgres` units, ZEOS.
 - Replace C pieces by Pascal behind that seam, SQL parser last (ADR-0003).
+- Table editor, stage 3 (ADR-0036): a Pascal table model with a dialect per server family (reading, `CREATE`/
+  `ALTER` generation, capabilities incl. server-specific types such as UUID, INET6, VECTOR) replaces
+  `myx_database_model.c` for the editor; `tests/test_table_editor.pas` must pass on it on the whole matrix first.
+- Table editor, stage 2 (ADR-0035): controls for generated columns, `ON UPDATE`, `INVISIBLE`, CHECK (column and
+  table), expression defaults and functional index parts, shown by server capability. Needs a mock-up and an
+  amending ADR for the layout; preferably built on the stage 3 model.
 - Show what the connection is to in the picture top right of the main window (where the original had the
   dolphin): server type and version as text or tooltip ("MariaDB 11.4"). Not the databases' logos: the MySQL
   logo needs a written agreement with Oracle outside websites; the MariaDB sea lion is CC BY-SA 4.0 as a picture

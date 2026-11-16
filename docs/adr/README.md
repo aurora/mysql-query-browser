@@ -43,6 +43,8 @@ Related.
 | [0032](0032-querymole-artwork-in-the-about-dialog.md) | QueryMole artwork in the About dialog | Accepted (implemented) |
 | [0033](0033-querymole-icon-replaces-the-lightning-bolt.md) | The QueryMole icon replaces the lightning bolt | Accepted (implemented; Windows not verified) |
 | [0034](0034-table-editor-lists-follow-the-server.md) | Table editor: data types and storage engines follow current servers | Accepted |
+| [0035](0035-table-editor-controls-for-newer-server-features.md) | Table editor: controls for newer server features, after parity | Proposed (layout not designed) |
+| [0036](0036-pascal-table-model-with-server-dialects.md) | Table editor: a Pascal table model with server dialects | Proposed (after parity) |
 
 ## Numbering
 
