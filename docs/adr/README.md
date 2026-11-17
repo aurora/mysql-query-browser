@@ -13,7 +13,7 @@ Related.
 | [0002](0002-port-ui-to-lazarus-lcl.md) | Port the UI to Free Pascal / Lazarus (LCL) | Accepted |
 | [0003](0003-keep-c-backend-as-transition-layer.md) | Keep the C backend as a transitional layer, built with CMake | Accepted (transitional) |
 | [0004](0004-mariadb-connector-c-and-server-support-matrix.md) | MariaDB Connector/C as client library; server support matrix | Accepted |
-| [0005](0005-tls-preferred-with-plaintext-fallback.md) | TLS "preferred" with fallback to an unencrypted connection | Accepted (default); UI option deferred |
+| [0005](0005-tls-preferred-with-plaintext-fallback.md) | TLS "preferred" with fallback to an unencrypted connection | Accepted (default); UI option deferred; mechanism replaced by ADR-0042 |
 | [0006](0006-generated-pascal-interface-layer-with-original-names.md) | Generate the Pascal interface layer under the original unit and type names | Accepted |
 | [0007](0007-replace-third-party-delphi-libraries.md) | Replace third-party Delphi libraries with LCL equivalents and thin shims | Accepted |
 | [0008](0008-ui-fidelity-via-dfm-conversion-and-screenshots.md) | UI fidelity: convert the DFMs, review by screenshots | Accepted; reference screenshots outstanding |
@@ -50,6 +50,7 @@ Related.
 | [0039](0039-macos-deferred-until-the-qt-decision.md) | macOS is deferred until the widgetset decision of the Qt move | Accepted |
 | [0040](0040-releases-built-by-github-actions.md) | Releases are built and published by GitHub Actions | Proposed (not yet run on GitHub) |
 | [0041](0041-version-include-generated-at-build-time.md) | The version include is generated at build time, not committed | Accepted |
+| [0042](0042-tls-preferred-without-a-second-attempt.md) | TLS "preferred" in one attempt, without certificate verification | Accepted |
 
 ## Numbering
 

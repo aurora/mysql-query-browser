@@ -911,29 +911,27 @@ int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
 
   myx_restrict_local_infile(mysql);
 
+#ifdef MARIADB_PACKAGE_VERSION
+  /* MariaDB Connector/C >= 3.4 verifies the server certificate by default, which
+     makes TLS mandatory: connecting to a server without TLS (e.g. MariaDB 10.x
+     without certificates) fails, and on Windows, where the bundled OpenSSL does
+     not know the system's certificates, every certificate fails. Unless TLS was
+     requested explicitly, connect in the "preferred" mode of other clients from
+     the start: TLS when the server offers it, without verifying the certificate
+     (ADR-0042). A second attempt after a failed one, as before, reused the
+     handle of the failed attempt and did not connect to some cloud servers. */
+  if (connect_options.use_ssl == 0)
+  {
+    my_bool no_verify= 0;
+    mysql_optionsv(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &no_verify);
+  }
+#endif
+
   connected= mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
                           user_conn->password, user_conn->schema,
                           user_conn->port,
                           unix_socket ? unix_socket : connect_options.unix_socket,
                           connect_options.client_flag | EXTRA_CONNECT_FLAGS) != NULL;
-
-#ifdef MARIADB_PACKAGE_VERSION
-  /* MariaDB Connector/C >= 3.4 verifies the server certificate by default, which
-     makes TLS mandatory: connecting to a server without TLS (e.g. MariaDB 10.x
-     without certificates) fails. Like the "preferred" mode of other clients,
-     try TLS first and fall back to an unencrypted connection only if the
-     server does not offer TLS. */
-  if (!connected && connect_options.use_ssl == 0 && mysql_errno(mysql) == 2026 /* CR_SSL_CONNECTION_ERROR */)
-  {
-    my_bool no_verify= 0;
-    mysql_optionsv(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &no_verify);
-    connected= mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
-                          user_conn->password, user_conn->schema,
-                          user_conn->port,
-                          unix_socket ? unix_socket : connect_options.unix_socket,
-                          connect_options.client_flag | EXTRA_CONNECT_FLAGS) != NULL;
-  }
-#endif
 
   if (!connected)
   {
