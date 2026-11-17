@@ -477,6 +477,10 @@ class Emitter:
         b("{$ELSE}")
         b("  LIB_%s = '%s.so';" % (libname.upper().replace("LIB", ""), libname))
         b("{$ENDIF}{$ENDIF}")
+        b("{$IFDEF DARWIN}")
+        b("  { FPC ignores the library of 'external' declarations on macOS: link it explicitly }")
+        b("  {$LINKLIB %s}" % libname[len("lib"):])
+        b("{$ENDIF}")
         b("")
         for name, (u, v) in m.consts.items():
             if u != unit:

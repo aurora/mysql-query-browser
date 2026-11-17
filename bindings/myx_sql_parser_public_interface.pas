@@ -18,6 +18,10 @@ const
 {$ELSE}
   LIB_MYSQLSQLPARSER = 'libmysqlsqlparser.so';
 {$ENDIF}{$ENDIF}
+{$IFDEF DARWIN}
+  { FPC ignores the library of 'external' declarations on macOS: link it explicitly }
+  {$LINKLIB mysqlsqlparser}
+{$ENDIF}
 
   libmysqlsqlparser_PUBLIC_INTERFACE_VERSION = 10000;
   MYX_SPM_NORMAL_MODE = 0;

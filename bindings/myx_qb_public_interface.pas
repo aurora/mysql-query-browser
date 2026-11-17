@@ -18,6 +18,10 @@ const
 {$ELSE}
   LIB_MYSQLQB = 'libmysqlqb.so';
 {$ENDIF}{$ENDIF}
+{$IFDEF DARWIN}
+  { FPC ignores the library of 'external' declarations on macOS: link it explicitly }
+  {$LINKLIB mysqlqb}
+{$ENDIF}
 
   libmysqlqb_PUBLIC_INTERFACE_VERSION = 10001;
   MYX_QSSCL_PHP = 0;

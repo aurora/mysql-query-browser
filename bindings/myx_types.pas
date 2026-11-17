@@ -31,6 +31,10 @@ const
 {$ELSE}
   LIB_GLIB = 'libglib-2.0.so.0';
 {$ENDIF}{$ENDIF}
+{$IFDEF DARWIN}
+  { FPC ignores the library of 'external' declarations on macOS: link it explicitly }
+  {$LINKLIB glib-2.0}
+{$ENDIF}
 
 { g_free for strings the library returns that the caller has to release }
 procedure g_free(P: Pointer); cdecl; external LIB_GLIB;

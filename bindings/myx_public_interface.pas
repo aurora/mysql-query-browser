@@ -18,6 +18,10 @@ const
 {$ELSE}
   LIB_MYSQLX = 'libmysqlx.so';
 {$ENDIF}{$ENDIF}
+{$IFDEF DARWIN}
+  { FPC ignores the library of 'external' declarations on macOS: link it explicitly }
+  {$LINKLIB mysqlx}
+{$ENDIF}
 
   libmysqlx_PUBLIC_INTERFACE_VERSION = 10004;
   MYX_DEFAULT_QUOTE_CHAR = '`';

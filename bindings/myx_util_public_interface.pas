@@ -18,6 +18,10 @@ const
 {$ELSE}
   LIB_MYSQLUTIL = 'libmysqlutil.so';
 {$ENDIF}{$ENDIF}
+{$IFDEF DARWIN}
+  { FPC ignores the library of 'external' declarations on macOS: link it explicitly }
+  {$LINKLIB mysqlutil}
+{$ENDIF}
 
   libmysqlutil_PUBLIC_INTERFACE_VERSION = 10001;
   MYX_NO_ERROR = 0;
