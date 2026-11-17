@@ -77,6 +77,11 @@ waits until after parity and gets its own decision.
 - CI (hosted runner with MSYS2 + Lazarus; server matrix as containers). No
   remote exists yet, so this is not written.
 - MariaDB version detection: `5.5.5-10.x` is read as 5.5 (ADR-0004).
+- Idle CPU on Linux: `TMainForm.HandleIdle` (`Main.pas`) asks the clipboard for text on every idle pass to
+  enable Paste; under GTK2 each call is an X round trip with a nested main loop. Stack samples of an instance
+  that had become unresponsive after loading ~2 million rows (2026-11-17) showed the main thread there and in
+  GLib walking an apparently large list of event sources. Not reproduced; the link to the freeze is unclear. Fix
+  without a visible change (e.g. update Paste when the menu opens, or on clipboard change).
 - Look for further undefined behaviour in the C backend with sanitizers; more
   tests per `myx_*` area (query analysis, editable result sets, import/export).
 - `myx_pdf.c` (needs the "panda" library) and `myx_live_profiling.c` (POSIX
@@ -110,6 +115,18 @@ waits until after parity and gets its own decision.
   icons, version info and manifest.
 
 **Product (after parity; each needs a decision)**
+- Large result sets: as in the original, every row is loaded into memory (backend row array plus grid; about
+  1 KB per row was measured, 2 million rows ≈ 2 GB), with no query timeout. A table of tens of millions of rows
+  without a filter ends in swapping or the OOM killer; Stop works. Keeping "no timeout" is wanted. Options, in
+  the order to consider them:
+  - safety net: pause at a threshold (rows or memory, set in the options, can be switched off) and ask
+    "continue / stop"; small, takes nothing away;
+  - fetching on demand while scrolling: `LIMIT/OFFSET` gets slow at deep offsets and is inconsistent when data
+    changes, keyset paging needs a primary key and a plain table, a streaming cursor (`mysql_use_result`) blocks
+    the connection; sorting, searching and editing in the result assume all rows are loaded;
+  - less memory per row (moves the limit, does not remove it).
+  An automatic `LIMIT` on double click (as Workbench, DBeaver) would change the SQL users see and expect;
+  least preferred.
 - TLS mode in the connection dialog: required / preferred / off (ADR-0005).
 - HiDPI scaling, then optional vector-rendered icon set (ADR-0009).
 - PostgreSQL and other databases via a driver seam (ADR-0010); candidate
