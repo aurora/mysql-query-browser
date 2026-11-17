@@ -74,8 +74,8 @@ waits until after parity and gets its own decision.
 ## Backlog and ideas
 
 **Compatibility and quality**
-- CI (hosted runner with MSYS2 + Lazarus; server matrix as containers). No
-  remote exists yet, so this is not written.
+- CI: the release workflow exists (`.github/workflows/release.yml`, ADR-0040; first run on GitHub open). A test
+  workflow (build on push/PR, server matrix as containers) is not written yet.
 - MariaDB version detection: `5.5.5-10.x` is read as 5.5 (ADR-0004).
 - Idle CPU on Linux: `TMainForm.HandleIdle` (`Main.pas`) asks the clipboard for text on every idle pass to
   enable Paste; under GTK2 each call is an X round trip with a nested main loop. Stack samples of an instance

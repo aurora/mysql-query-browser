@@ -88,6 +88,9 @@ tools/package-appimage.sh [--no-build]           # Linux AppImage in dist/, run 
                                                  #   freepascal distrobox and tools/cache/appimagetool-x86_64.AppImage)
 tools/package-appimage.sh --velopack             # plus the self-updating AppImage and feed in dist/Releases-linux (ADR-0037;
                                                  #   needs vpk in tools/cache/vpk, see the script header)
+QBR_FPC_IMAGE=qbr-fpc-f44 tools/package-appimage.sh   # the same without distrobox (plain container, used by CI)
+git tag v$(cat VERSION) && git push origin v$(cat VERSION)   # release: GitHub Actions builds Windows + Linux and
+                                                 #   publishes them (.github/workflows/release.yml, ADR-0040)
 
 # backend (needs C:\msys64\mingw64\bin on PATH)
 cmake -S backend -B backend/build -G Ninja && cmake --build backend/build

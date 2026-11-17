@@ -48,6 +48,7 @@ Related.
 | [0037](0037-updates-per-platform-appimage-on-linux.md) | Updates with Velopack: AppImage on Linux, Velopack's standard packages on Windows and macOS | Accepted (principle); Linux implemented, Windows and macOS open |
 | [0038](0038-program-file-named-querymole.md) | The program file is named `querymole` | Accepted |
 | [0039](0039-macos-deferred-until-the-qt-decision.md) | macOS is deferred until the widgetset decision of the Qt move | Accepted |
+| [0040](0040-releases-built-by-github-actions.md) | Releases are built and published by GitHub Actions | Proposed (not yet run on GitHub) |
 
 ## Numbering
 

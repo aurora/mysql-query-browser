@@ -20,6 +20,9 @@
 #    glibc newer than 2.34);
 # 3. tools/appimage/stage.sh collects the program, the backend, GTK2 and the other libraries in an AppDir;
 # 4. appimagetool (downloaded once to tools/cache/) packs it.
+#
+# Without distrobox (CI, .github/workflows/release.yml): QBR_FPC_IMAGE=<name> runs step 2 in a plain podman
+# container of that name instead, built from tools/appimage/Containerfile.fpc if it does not exist yet.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -34,7 +37,7 @@ for a in "$@"; do
   case "$a" in
     --no-build) do_build=0 ;;
     --velopack) do_velopack=1 ;;
-    -h|--help) sed -n '2,22p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,25p' "$0"; exit 0 ;;
     *) echo "unknown option: $a" >&2; exit 2 ;;
   esac
 done
@@ -46,8 +49,22 @@ run_el9() {
   podman run --rm --security-opt label=disable -v "$ROOT":/src -v "$DIST":/out -w /src "$IMAGE" "$@"
 }
 
+# the Pascal toolchain: the distrobox, or a plain container with the repository at the same path (so that the
+# absolute paths below mean the same inside)
+FPC_IMAGE="${QBR_FPC_IMAGE:-}"
+run_fpc() {
+  if [ -n "$FPC_IMAGE" ]; then
+    podman run --rm --security-opt label=disable -v "$ROOT":"$ROOT" -w "$ROOT" "$FPC_IMAGE" "$@"
+  else
+    (cd "$ROOT" && distrobox enter freepascal -- "$@")
+  fi
+}
+
 mkdir -p "$DIST"
 podman image exists "$IMAGE" || podman build -t "$IMAGE" -f "$ROOT/tools/appimage/Containerfile" "$ROOT/tools/appimage"
+if [ -n "$FPC_IMAGE" ]; then
+  podman image exists "$FPC_IMAGE" || podman build -t "$FPC_IMAGE" -f "$ROOT/tools/appimage/Containerfile.fpc" "$ROOT/tools/appimage"
+fi
 
 if [ "$do_build" = 1 ]; then
   echo "== backend (AlmaLinux 9)"
@@ -55,7 +72,7 @@ if [ "$do_build" = 1 ]; then
   echo "== application (freepascal container)"
   # linking is only redone when a source changed: force it, the library directory is not part of the check
   touch "$ROOT/app/qbr.lpr"
-  (cd "$ROOT" && distrobox enter freepascal -- env QBR_BACKEND_BUILD="$ROOT/backend/build-el9" bash ./build.sh --runtime)
+  run_fpc env QBR_BACKEND_BUILD="$ROOT/backend/build-el9" bash ./build.sh --runtime
 fi
 [ -f "$ROOT/app/bin/querymole" ] && [ -d "$ROOT/backend/build-el9" ] || { echo "app/bin/querymole or backend/build-el9 is missing" >&2; exit 1; }
 
@@ -71,7 +88,7 @@ ln -sf querymole.png "$APPDIR/.DirIcon"
 
 # licence files of what is linked statically into the program (Lazarus/FPC) and of the shipped font
 mkdir -p "$APPDIR/licenses/lazarus" "$APPDIR/licenses/fonts"
-distrobox enter freepascal -- sh -c "cp /usr/share/licenses/lazarus-lcl/COPYING.* '$APPDIR/licenses/lazarus/'"
+run_fpc sh -c "cp /usr/share/licenses/lazarus-lcl/COPYING.* '$APPDIR/licenses/lazarus/'"
 cp "$ROOT/docs/third-party/Bitstream-Vera-fonts.txt" "$APPDIR/licenses/fonts/"
 mkdir -p "$APPDIR/licenses/fonts/wine-tahoma"
 cp "$ROOT/third_party/fonts/wine-tahoma/README.md" "$ROOT/third_party/fonts/wine-tahoma/LICENSE-LGPL-2.1.txt" "$APPDIR/licenses/fonts/wine-tahoma/"

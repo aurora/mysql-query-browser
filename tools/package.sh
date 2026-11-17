@@ -128,8 +128,9 @@ mkdir -p "$APP/licenses/fonts"
 cp "$ROOT/docs/third-party/Bitstream-Vera-fonts.txt" "$APP/licenses/fonts/"
 cp "$ROOT/docs/licenses.md" "$APP/licenses/README-licenses.md"
 
-# the exe must start without the development PATH: run it with a minimal one
-if ! (cd "$APP" && PATH="/c/Windows/System32:/c/Windows" ./querymole.exe --selftest-resources "$DIST/selftest.txt" ); then
+# the exe must start without the development PATH: run it with a minimal one (and a timeout: a modal error dialog
+# would wait forever, in CI with nobody to close it)
+if ! (cd "$APP" && PATH="/c/Windows/System32:/c/Windows" /usr/bin/timeout 120 ./querymole.exe --selftest-resources "$DIST/selftest.txt" ); then
   echo "warning: the staged querymole.exe did not start cleanly with a minimal PATH (missing DLL?)" >&2
 fi
 

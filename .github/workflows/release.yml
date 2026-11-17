@@ -1,0 +1,184 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Builds the release packages and publishes them as one GitHub release (ADR-0040).
+#
+#   push of a tag v<VERSION>   build Windows and Linux, then publish both into the release of that tag
+#   manual run (Actions tab)   build only; the packages are kept as workflow artifacts, nothing is published
+#
+# Windows: tools/package.sh --velopack -> portable zip, QueryMole-win-Setup.exe and the update feed (channel win).
+# Linux:   tools/package-appimage.sh --velopack -> AppImage, the self-updating AppImage and the feed (channel linux).
+# The tag must match the VERSION file; release notes come from docs/release-notes/<VERSION>.md if it exists.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # ADR-0037: vpk moves together with the pin of third_party/velopack-pas
+  VPK_VERSION: 1.3.39-g8d2844f
+  DOTNET_ROLL_FORWARD: Major
+  LAZARUS_INSTALLER: https://downloads.sourceforge.net/project/lazarus/Lazarus%20Windows%2064%20bits/Lazarus%204.8/lazarus-4.8-fpc-3.2.2-win64.exe
+  APPIMAGETOOL: https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-x86_64.AppImage
+
+jobs:
+  windows:
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Fetch the velopack-pas tags (the native library is taken from the pinned release)
+        shell: bash
+        run: git -C third_party/velopack-pas fetch --depth=1 origin '+refs/tags/*:refs/tags/*'
+      - name: Check the tag against VERSION
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: test "v$(tr -d '[:space:]' < VERSION)" = "${GITHUB_REF_NAME}"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      # the runner's preinstalled MSYS2 is C:\msys64, where tools/package.sh and build.sh expect it
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          release: false
+          update: false
+          path-type: inherit
+          install: >-
+            mingw-w64-x86_64-gcc mingw-w64-x86_64-binutils mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkgconf mingw-w64-x86_64-glib2 mingw-w64-x86_64-libxml2 mingw-w64-x86_64-pcre
+            mingw-w64-x86_64-libmariadbclient
+
+      - name: Cache Lazarus
+        id: lazarus
+        uses: actions/cache@v4
+        with:
+          path: C:\lazarus
+          key: lazarus-4.8-fpc-3.2.2-win64
+      - name: Install Lazarus 4.8 to C:\lazarus
+        if: steps.lazarus.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri $env:LAZARUS_INSTALLER -OutFile lazarus-setup.exe -UserAgent 'Wget'
+          Start-Process -Wait -FilePath .\lazarus-setup.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-','/DIR=C:\lazarus'
+          if (-not (Test-Path C:\lazarus\lazbuild.exe)) { throw 'Lazarus installation failed' }
+
+      - name: Install vpk
+        shell: bash
+        run: dotnet tool install vpk --version "$VPK_VERSION" --tool-path tools/cache/vpk
+
+      - name: Fetch the previous release (for the delta package)
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tools/cache/vpk/vpk.exe download github --outputDir dist/Releases --channel win \
+            --repoUrl "https://github.com/${GITHUB_REPOSITORY}" --pre --token "$GH_TOKEN" \
+            || echo "no previous release: full package only"
+
+      - name: Build and package
+        run: tools/package.sh --velopack
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          if-no-files-found: error
+          path: |
+            dist/Releases/
+            dist/QueryMole-*-win64.zip
+
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Fetch the velopack-pas tags (the native library is taken from the pinned release)
+        run: git -C third_party/velopack-pas fetch --depth=1 origin '+refs/tags/*:refs/tags/*'
+      - name: Check the tag against VERSION
+        if: startsWith(github.ref, 'refs/tags/')
+        run: test "v$(tr -d '[:space:]' < VERSION)" = "${GITHUB_REF_NAME}"
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install vpk and appimagetool
+        run: |
+          dotnet tool install vpk --version "$VPK_VERSION" --tool-path tools/cache/vpk
+          curl -fsSL -o tools/cache/appimagetool-x86_64.AppImage "$APPIMAGETOOL"
+          chmod +x tools/cache/appimagetool-x86_64.AppImage
+
+      - name: Fetch the previous release (for the delta package)
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tools/cache/vpk/vpk download github --outputDir dist/Releases-linux --channel linux \
+            --repoUrl "https://github.com/${GITHUB_REPOSITORY}" --pre --token "$GH_TOKEN" \
+            || echo "no previous release: full package only"
+
+      # podman is preinstalled; the Pascal step runs in tools/appimage/Containerfile.fpc instead of the distrobox
+      - name: Build and package
+        env:
+          QBR_FPC_IMAGE: qbr-fpc-f44
+        run: tools/package-appimage.sh --velopack
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          if-no-files-found: error
+          path: |
+            dist/Releases-linux/
+            dist/QueryMole-*-x86_64.AppImage
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [windows, linux]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install vpk
+        run: dotnet tool install vpk --version "$VPK_VERSION" --tool-path tools/cache/vpk
+
+      # one release per version for all platforms (ADR-0037): the first upload creates it, the second merges
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(tr -d '[:space:]' < VERSION)"
+          pre=""
+          case "$version" in *-*) pre="--pre" ;; esac
+          repo="https://github.com/${GITHUB_REPOSITORY}"
+          tools/cache/vpk/vpk upload github --outputDir out/windows/Releases --channel win --repoUrl "$repo" \
+            --tag "$GITHUB_REF_NAME" --releaseName "QueryMole $version" $pre --publish --token "$GH_TOKEN"
+          tools/cache/vpk/vpk upload github --outputDir out/linux/Releases-linux --channel linux --repoUrl "$repo" \
+            --tag "$GITHUB_REF_NAME" --releaseName "QueryMole $version" $pre --publish --merge --token "$GH_TOKEN"
+          # the plain packages of ADR-0026 next to Velopack's: portable zip and the AppImage without updater
+          gh release upload "$GITHUB_REF_NAME" out/windows/QueryMole-*-win64.zip out/linux/QueryMole-*-x86_64.AppImage \
+            --clobber
+          notes="docs/release-notes/$version.md"
+          if [ -f "$notes" ]; then gh release edit "$GITHUB_REF_NAME" --notes-file "$notes"; fi
