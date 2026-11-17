@@ -22,11 +22,11 @@ Related.
 | [0011](0011-license-gpl-2-or-later.md) | License: GPL-2.0-or-later, as the original | Accepted |
 | [0012](0012-sql-editor-compatibility-layer-over-synedit.md) | SQL editor: a UniCodeEditor-compatible layer over SynEdit | Accepted; visual review outstanding |
 | [0013](0013-inline-help-reference-and-multiple-servers.md) | Inline help (reference) with several servers and versions | Superseded in part by ADR-0016 |
-| [0014](0014-release-packaging-and-updates-with-velopack.md) | Release packaging and updates with Velopack | Proposed (packaging implemented) |
+| [0014](0014-release-packaging-and-updates-with-velopack.md) | Release packaging and updates with Velopack | Proposed (packaging implemented; updates in use) |
 | [0015](0015-mpl-1-1-only-components-and-the-help-viewer.md) | MPL-1.1-only components and the help viewer | Proposed (IpHtml part resolved by ADR-0016; SynEdit part open) |
 | [0016](0016-help-from-the-connected-server.md) | Help reference from the connected server | Accepted by implementation (to confirm) |
 | [0017](0017-trim-menus-for-first-release.md) | Trim the menus for the first release | Accepted |
-| [0018](0018-update-check-with-velopack-pas.md) | Update check with velopack-pas and GitHub releases | Accepted (implemented, not yet built) |
+| [0018](0018-update-check-with-velopack-pas.md) | Update check with velopack-pas and GitHub releases | Accepted (verified on Windows and Linux) |
 | [0019](0019-user-data-directory-of-the-original.md) | User data directory: the original's folder on each platform | Superseded in part by ADR-0030 (new folder with import) |
 | [0020](0020-cancel-queries-on-the-server.md) | Cancel queries on the server, never the wrong one | Accepted (implemented; Windows cross-built only) |
 | [0021](0021-no-os-specific-password-storage-outside-windows.md) | No "OS Specific" password storage outside Windows (for now) | Accepted (implemented on Linux) |
@@ -45,10 +45,10 @@ Related.
 | [0034](0034-table-editor-lists-follow-the-server.md) | Table editor: data types and storage engines follow current servers | Accepted |
 | [0035](0035-table-editor-controls-for-newer-server-features.md) | Table editor: controls for newer server features, after parity | Proposed (layout not designed) |
 | [0036](0036-pascal-table-model-with-server-dialects.md) | Table editor: a Pascal table model with server dialects | Proposed (after parity) |
-| [0037](0037-updates-per-platform-appimage-on-linux.md) | Updates with Velopack: AppImage on Linux, Velopack's standard packages on Windows and macOS | Accepted (principle); Linux implemented, Windows and macOS open |
+| [0037](0037-updates-per-platform-appimage-on-linux.md) | Updates with Velopack: AppImage on Linux, Velopack's standard packages on Windows and macOS | Accepted (principle); Linux and Windows implemented and verified, macOS open |
 | [0038](0038-program-file-named-querymole.md) | The program file is named `querymole` | Accepted |
 | [0039](0039-macos-deferred-until-the-qt-decision.md) | macOS is deferred until the widgetset decision of the Qt move | Accepted |
-| [0040](0040-releases-built-by-github-actions.md) | Releases are built and published by GitHub Actions | Proposed (not yet run on GitHub) |
+| [0040](0040-releases-built-by-github-actions.md) | Releases are built and published by GitHub Actions | Accepted |
 | [0041](0041-version-include-generated-at-build-time.md) | The version include is generated at build time, not committed | Accepted |
 | [0042](0042-tls-preferred-without-a-second-attempt.md) | TLS "preferred" in one attempt, without certificate verification | Accepted |
 

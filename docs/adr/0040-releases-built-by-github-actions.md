@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: GPL-2.0-or-later -->
 # ADR-0040 — Releases are built and published by GitHub Actions
 
-- Status: Proposed (workflow written; not yet run on GitHub)
+- Status: Accepted (first releases built and published by the workflow: 0.1.0-alpha.3 to alpha.5, 2026-11-17)
 - Date: 2026-11-17
 - Deciders: Harald Lapp (project owner)
 

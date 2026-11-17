@@ -295,7 +295,9 @@ next run reported `installed 0.1.0-alpha.3` and `no update`, and the connect dia
 With the library from the release, the packed image needs glibc 2.28 for it, reports `installed 0.1.0-alpha.2` and
 `no update` against its own feed, and applied a staged alpha.3 package on startup. On a real desktop session the
 project owner ran the whole cycle by hand through "Check for Updates ..." against a local feed (`QBR_UPDATE_URL`),
-in a folder the user can write to: it worked. Not tried: the GitHub feed (`vpk upload github`).
+in a folder the user can write to: it worked. Through the GitHub feed (releases built by
+`.github/workflows/release.yml`): an installed 0.1.0-alpha.3 updated to alpha.4, and on Windows alpha.4 to alpha.5
+(2026-11-17).
 
 **AppImage in a folder the user cannot write to (2026-11-16).** Velopack's `mv` fails there, as expected; before it
 runs `pkexec` it asks for confirmation in its own dialog, and that dialog does not open (`NoBackendAvailable` in

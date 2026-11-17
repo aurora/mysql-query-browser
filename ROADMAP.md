@@ -65,7 +65,7 @@ waits until after parity and gets its own decision.
    (`tools/distrobox-setup.sh`), backend, bindings layout check and the test suite on all six matrix
    servers (`tests/run-matrix.sh`); `build.sh` and the tools run there. The Linux release is an AppImage
    (`tools/package-appimage.sh`, ADR-0027); with `--velopack` it updates itself (ADR-0037, update cycle
-   checked locally; first release through the GitHub feed and the Windows cycle open). The application compiles
+   verified through the GitHub releases on Linux and Windows, 0.1.0-alpha.3 to alpha.5). The application compiles
    with GTK2, connects on all six servers, and the main window's features (results, editing,
    scripts, export, dialogs, help) work by screenshot. State and next steps: `docs/linux-port.md`.
    macOS is deferred (ADR-0039): the first Cocoa build runs but its dialogs are cut off; it waits for the
@@ -74,7 +74,7 @@ waits until after parity and gets its own decision.
 ## Backlog and ideas
 
 **Compatibility and quality**
-- CI: the release workflow exists (`.github/workflows/release.yml`, ADR-0040; first run on GitHub open). A test
+- CI: releases are built and published by `.github/workflows/release.yml` (ADR-0040, in use since 0.1.0-alpha.3). A test
   workflow (build on push/PR, server matrix as containers) is not written yet.
 - MariaDB version detection: `5.5.5-10.x` is read as 5.5 (ADR-0004).
 - Idle CPU on Linux: `TMainForm.HandleIdle` (`Main.pas`) asks the clipboard for text on every idle pass to
