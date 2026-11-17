@@ -752,7 +752,7 @@ implementation
 {$R ../forms/QueryBrowser.lfm}
 
 uses
-  ApplicationDataModule, Math, PNGTools,
+  ApplicationDataModule, Math, PNGTools, CommonFuncs,
   TntSysUtils, UCEEditorKeyCommands, SynEditKeyCmds;
 
 const
@@ -4821,7 +4821,9 @@ procedure TQueryBrowserForm.AnimStillImgClick(Sender: TObject);
 
 begin
   //CreateProz(GetDefaultBrowser+' http://www.mysql.com', '');
-  BrowseWebPage('http://www.mysql.com');
+  // Port: the picture is the QueryMole icon (ADR-0030, ADR-0033), so it opens the project page; ADR-0017 had
+  // already pointed the Help menu there instead of mysql.com.
+  BrowseWebPage(RevivalProjectUrl);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
