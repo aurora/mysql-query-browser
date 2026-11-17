@@ -179,8 +179,15 @@ jobs:
             --tag "$GITHUB_REF_NAME" --releaseName "QueryMole $version" $pre --publish --token "$GH_TOKEN"
           tools/cache/vpk/vpk upload github --outputDir out/linux/Releases-linux --channel linux --repoUrl "$repo" \
             --tag "$GITHUB_REF_NAME" --releaseName "QueryMole $version" $pre --publish --merge --token "$GH_TOKEN"
-          # the plain packages of ADR-0026 next to Velopack's: portable zip and the AppImage without updater
+          # the plain packages of ADR-0026 next to Velopack's: portable zip and the AppImage without updater, and the
+          # checksums of the four files users download
+          {
+            (cd out/windows/Releases && sha256sum QueryMole-win-Setup.exe)
+            (cd out/windows && sha256sum QueryMole-*-win64.zip)
+            (cd out/linux/Releases-linux && sha256sum QueryMole.AppImage)
+            (cd out/linux && sha256sum QueryMole-*-x86_64.AppImage)
+          } > SHA256SUMS
           gh release upload "$GITHUB_REF_NAME" out/windows/QueryMole-*-win64.zip out/linux/QueryMole-*-x86_64.AppImage \
-            --clobber
+            SHA256SUMS --clobber
           notes="docs/release-notes/$version.md"
           if [ -f "$notes" ]; then gh release edit "$GITHUB_REF_NAME" --notes-file "$notes"; fi
