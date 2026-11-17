@@ -1098,8 +1098,10 @@ void init_table(MYSQL * mysql, MYX_Q_TABLE * table,
 // 3: table alias
 #define RE_NAME     "(?:\\w+|`[^`]+`|\"[^\"]+\")"
 #define RE_DOTNAME  "(?:\\.\\w+|\\.`[^`]+`|\\.\"[^\"]+\")"
+/* revival: C++11 reads "..."RE_NAME as a user-defined literal suffix; GCC only warns, clang rejects it.
+   The spaces keep the same string concatenation. */
 const char * query_table_regexp_mask=
-                "(,|JOIN|STRAIGHT_JOIN)\\s*("RE_NAME""RE_DOTNAME"*)\\s*(\\w*)";
+                "(,|JOIN|STRAIGHT_JOIN)\\s*(" RE_NAME RE_DOTNAME "*)\\s*(\\w*)";
 #undef RE_NAME
 #undef RE_DOTNAME
 
@@ -1419,8 +1421,8 @@ MYX_QUERY * query_get_query_columns(MYX_QUERY * query)
 // an identifier, with optional ` or " quotes, but grouping without the quotes
 #define RE_NAME "(?:\\w+|`[^`]+`|\"[^\"]+\")"
 const char * query_column_regexp_mask=
-  "((("RE_NAME")\\.)?(\\*))|" // [X].Y
-  "((("RE_NAME")\\.)+("RE_NAME")(\\s+as\\s+(\\w+))?)|" // [X].Y as Z
+  "(((" RE_NAME ")\\.)?(\\*))|" // [X].Y
+  "(((" RE_NAME ")\\.)+(" RE_NAME ")(\\s+as\\s+(\\w+))?)|" // [X].Y as Z
   "((.*)\\s+as\\s+(\\w+))|" // ? as Y
   "(.*)"; // X
 #undef RE_NAME
