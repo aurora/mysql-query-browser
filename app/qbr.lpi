@@ -58,6 +58,10 @@
     <Other>
       <!-- String<->WideString conversions are intended: String is UTF-8 (ADR-0007) -->
       <CustomOptions Value="-vm4104,4105 -gl"/>
+      <!-- src/RevivalInfo.inc is generated from ../VERSION (not in git), also for builds from the IDE or lazbuild -->
+      <ExecuteBefore>
+        <Command Value="$(QBR_PYTHON) $(ProjPath)../tools/gen_version.py"/>
+      </ExecuteBefore>
     </Other>
     <Linking>
       <Options>
@@ -66,5 +70,14 @@
         </Win32>
       </Options>
     </Linking>
+    <!-- Python 3 for the step above: macOS has no unversioned python (as in build.sh) -->
+    <Conditionals Value="if TargetOS = 'darwin' then QBR_PYTHON := 'python3' else QBR_PYTHON := 'python';"/>
+    <BuildMacros>
+      <Count Value="1"/>
+      <Item1>
+        <Identifier Value="QBR_PYTHON"/>
+        <Description Value="Python 3 interpreter that runs tools/gen_version.py before compiling"/>
+      </Item1>
+    </BuildMacros>
   </CompilerOptions>
 </CONFIG>

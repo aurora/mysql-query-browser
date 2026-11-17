@@ -34,7 +34,7 @@ Related.
 | [0023](0023-pin-gtk-dpi-to-96.md) | Pin GTK's dpi setting to 96 on Linux | Accepted (GTK2) |
 | [0024](0024-gtk2-for-the-first-release-then-qt.md) | GTK2 for the first release, a move to Qt afterwards | Accepted (principle) |
 | [0025](0025-keep-the-package-id-when-renaming.md) | Keep the Velopack package id and the update feed when the application is renamed | Superseded by ADR-0030 |
-| [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle); copyright sentence amended by ADR-0031, credits and licence note by ADR-0032; updates superseded by ADR-0037 |
+| [0026](0026-first-release-as-alpha-without-updater.md) | First public release as an alpha: no updater, own version, About dialog with the revival's credits | Accepted (principle); copyright sentence amended by ADR-0031, credits and licence note by ADR-0032; updates superseded by ADR-0037; version include amended by ADR-0041 |
 | [0027](0027-linux-appimage-built-on-almalinux-9.md) | Linux release as an AppImage, bundled GTK2 and backend built on AlmaLinux 9 | Accepted |
 | [0028](0028-bundled-tahoma-substitute-outside-windows.md) | Ship Wine's Tahoma stand-in and use it for the forms outside Windows | Accepted |
 | [0029](0029-search-fields-match-parts-of-names.md) | Search fields: input without wildcards matches parts of names | Proposed |
@@ -49,6 +49,7 @@ Related.
 | [0038](0038-program-file-named-querymole.md) | The program file is named `querymole` | Accepted |
 | [0039](0039-macos-deferred-until-the-qt-decision.md) | macOS is deferred until the widgetset decision of the Qt move | Accepted |
 | [0040](0040-releases-built-by-github-actions.md) | Releases are built and published by GitHub Actions | Proposed (not yet run on GitHub) |
+| [0041](0041-version-include-generated-at-build-time.md) | The version include is generated at build time, not committed | Accepted |
 
 ## Numbering
 

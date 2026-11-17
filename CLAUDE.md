@@ -15,7 +15,7 @@ that are specific to working with Claude Code here:
 - **Long jobs** (server matrix, full form conversion): run them and report the
   summary table; do not paste container pull logs.
 - **Before a commit:** make sure generated files were regenerated (not edited),
-  and that `git status` shows no `app/bin`, `app/lib`, `app/res`, `backend/build`
-  or `tests/bin` (they are git-ignored; if they appear, the ignore list broke).
+  and that `git status` shows no `app/bin`, `app/lib`, `app/res`, `backend/build`,
+  `tests/bin` or `app/src/RevivalInfo.inc` (they are git-ignored; if they appear, the ignore list broke).
 - Commit messages: imperative summary line, body explains *why*, as in the
   existing history.

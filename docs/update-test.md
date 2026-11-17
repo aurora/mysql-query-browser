@@ -26,7 +26,7 @@ there) and to `/tmp/velopack_QueryMole.log` on Linux.
    `dist/Releases-linux/QueryMole.AppImage` somewhere else (the "installed" copy).
 2. Set `VERSION` to the newer version, `tools/package-appimage.sh --velopack` again (vpk adds it to the feed).
 3. `QBR_UPDATE_URL="$PWD/dist/Releases-linux" <copy>/QueryMole.AppImage`, then "Check for Updates ...".
-4. Clean up: `git checkout VERSION app/src/RevivalInfo.inc` and `rm -rf /var/tmp/velopack/QueryMole` (Velopack
+4. Clean up: `git checkout VERSION` and `rm -rf /var/tmp/velopack/QueryMole` (Velopack
    keeps downloaded packages there and applies them on the next start of any QueryMole AppImage).
 
 ## GitHub cycle with a test repository (Windows)
@@ -64,7 +64,7 @@ README), a GitHub token that may write its releases, vpk as in the header of `to
 
    "Check for Updates ..." should offer 0.1.0-alpha.4, download it, restart and show alpha.4 in the About dialog; a
    second check says it is the latest version. Without the variable the program would look at `aurora/querymole`.
-5. **Clean up:** `git checkout VERSION app/src/RevivalInfo.inc`; uninstall QueryMole in the Windows settings; delete
+5. **Clean up:** `git checkout VERSION`; uninstall QueryMole in the Windows settings; delete
    the test releases or the repository when done.
 
 The Linux AppImage can be tested against the same repository: pack it with the same versions and upload with
