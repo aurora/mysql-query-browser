@@ -122,6 +122,7 @@ querymole ... --shot-main x.png --stress-schemata 90 out.txt              # sche
 querymole ... --shot-main x.png --stop-and-edit 0 0 700 " LIMIT 5" out.txt # double click, run, stop, edit, run again
 querymole ... --shot-main x.png --sql "select ..." --menu-smoke run out.txt # click every menu entry, report exceptions
 QBR_UPDATE_URL=dist/Releases-linux QueryMole.AppImage --selftest-update out.txt  # check/download/apply without dialogs
+QBR_UPDATE_URL=owner/test-repo querymole --selftest-update out.txt  # the same against the GitHub releases of a test repository (docs/update-test.md)
 # unhandled exceptions are written with a stack trace to bin/querymole.error.txt (program exits with 3);
 # QBR_TRACE=1 adds a flow trace in bin/qbr.trace.txt
 ```

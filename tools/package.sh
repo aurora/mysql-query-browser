@@ -6,6 +6,10 @@
 #   tools/package.sh --velopack      additionally run `vpk pack` on dist/app (installer + update feed in dist/Releases)
 #   tools/package.sh --no-build      reuse the existing app/bin/querymole.exe instead of building first
 #
+# For --velopack, VPK names the vpk program; otherwise `vpk` from PATH or tools/cache/vpk/vpk.exe. It must be the
+# version ADR-0037 names (the first with the Velopack commit velopack-pas pins):
+#   dotnet tool install vpk --version 1.3.39-g8d2844f --tool-path tools/cache/vpk
+#
 # The version comes from the VERSION file. The staged folder holds:
 #   querymole.exe (debug info stripped; the unstripped build stays in app/bin), the backend DLLs and the
 #   MSYS2 DLLs they need (found with ldd), XML/, doc/, fonts/, locale/, LICENSE, NOTICE.
@@ -135,9 +139,11 @@ rm -f "$ZIP"
 echo "portable package: $ZIP ($(du -h "$ZIP" | cut -f1))"
 
 if [ "$do_velopack" = 1 ]; then
-  command -v vpk >/dev/null || { echo "vpk (Velopack CLI) not found: dotnet tool install -g vpk" >&2; exit 1; }
+  VPK="${VPK:-$(command -v vpk || echo "$ROOT/tools/cache/vpk/vpk.exe")}"
+  [ -x "$VPK" ] || { echo "vpk (Velopack CLI) not found, see the header of this script" >&2; exit 1; }
   echo "== velopack"
-  vpk pack --packId QueryMole --packVersion "$VERSION" --packDir "$(cygpath -w "$APP")" \
-    --mainExe querymole.exe --packTitle "QueryMole" --outputDir "$(cygpath -w "$DIST/Releases")" \
-    --icon "$(cygpath -w "$ROOT/app/images/querymole.ico")"
+  # channel win (ADR-0037); the Linux AppImage is packed into the same GitHub release with channel linux
+  DOTNET_ROLL_FORWARD=Major "$VPK" pack --packId QueryMole --packVersion "$VERSION" --packTitle "QueryMole" \
+    --packAuthors "QueryMole contributors" --packDir "$(cygpath -w "$APP")" --mainExe querymole.exe --channel win \
+    --outputDir "$(cygpath -w "$DIST/Releases")" --icon "$(cygpath -w "$ROOT/app/images/querymole.ico")"
 fi

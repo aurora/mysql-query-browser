@@ -16,8 +16,11 @@ const
   // Velopack library is missing (development builds, packages built without --velopack).
   UpdateMenuVisible = True;
 
-  // Developer override of the feed (ADR-0037): a local folder or URL with a vpk release instead of the GitHub
-  // releases, for testing an update cycle without publishing.
+  // Developer override of the feed (ADR-0037), for testing an update cycle without publishing on the project:
+  // - `owner/name` or `https://github.com/owner/name`: the GitHub releases of that repository, read the same way as
+  //   those of UpdateRepositoryUrl (API, pre-releases), e.g. a test repository of its own;
+  // - anything else: a local folder or URL that holds a vpk release (`releases.<channel>.json`).
+  // An existing folder always counts as a folder, so a relative path such as `dist/Releases-linux` works.
   UpdateUrlEnvironment = 'QBR_UPDATE_URL';
 
 // First statement of the program, before the GUI is initialised: lets Velopack handle the install, update
@@ -31,9 +34,10 @@ function UpdatesAvailable: Boolean;
 // program and lets Velopack replace the installation.
 procedure CheckForUpdatesInteractive;
 
-// Developer mode --selftest-update <report> (ADR-0037): the same steps without dialogs. Writes the installed
-// version and the result of the check to the report; if there is an update, downloads it and starts the
-// updater, which replaces the installation after this process has ended (no restart).
+// Developer mode --selftest-update <report> (ADR-0037): the same steps without dialogs, against QBR_UPDATE_URL (it
+// must be set, so that the self-test never runs against the project by accident). Writes the
+// feed, the installed version and the result of the check to the report; if there is an update, downloads it and
+// starts the updater, which replaces the installation after this process has ended (no restart).
 procedure RunUpdateSelftest(const ReportFile: String);
 
 implementation
@@ -58,6 +62,68 @@ begin
     Result := fpAccess(Folder, W_OK) = 0;
   end;
   {$ENDIF}
+end;
+
+// The developer override of the feed, '' if there is none.
+function UpdateOverride: String;
+begin
+  Result := Trim(GetEnvironmentVariable(UpdateUrlEnvironment));
+end;
+
+// True if the override names a GitHub repository (`owner/name` or `https://github.com/owner/name`, see
+// UpdateUrlEnvironment); Repo is then its https://github.com/ URL.
+function OverrideIsGitHub(const Value: String; out Repo: String): Boolean;
+const
+  Prefix = 'https://github.com/';
+var
+  Rest: String;
+  I, Slashes: Integer;
+begin
+  Result := False;
+  Repo := '';
+  Rest := Value;
+  if Pos(Prefix, LowerCase(Rest)) = 1 then
+    Delete(Rest, 1, Length(Prefix))
+  else
+    if (Pos('://', Rest) > 0) or DirectoryExists(Rest) then
+      Exit;
+  if (Rest <> '') and (Rest[Length(Rest)] = '/') then
+    Delete(Rest, Length(Rest), 1);
+  Slashes := 0;
+  for I := 1 to Length(Rest) do
+    if Rest[I] = '/' then
+      Inc(Slashes)
+    else
+      if not (Rest[I] in ['A'..'Z', 'a'..'z', '0'..'9', '-', '_', '.']) then
+        Exit;
+  if (Slashes <> 1) or (Rest[1] = '/') or (Rest[Length(Rest)] = '/') then
+    Exit;
+  Repo := Prefix + Rest;
+  Result := True;
+end;
+
+// What the note in the dialogs and the self-test report name as the feed: the repository URL or the override.
+function OverrideFeed: String;
+begin
+  if not OverrideIsGitHub(UpdateOverride, Result) then
+    Result := UpdateOverride;
+end;
+
+// A pre-release (alpha, beta) is updated to newer pre-releases as well; a release only to releases.
+function UpdatePrerelease: Boolean;
+begin
+  Result := Pos('-', revival_version) > 0;
+end;
+
+// An empty string normally; with the developer override (QBR_UPDATE_URL) a paragraph that names the feed and the
+// variable. Appended to every update dialog, so that a redirected update is visible before anything is
+// downloaded (someone may have been talked into setting the variable) and the source is known when debugging.
+function UpdateSourceNote: String;
+begin
+  Result := '';
+  if UpdateOverride <> '' then
+    Result := LineEnding + LineEnding + Format(_('Note: updates are not taken from the QueryMole project but from ' +
+      '%s (set by the environment variable %s).'), [OverrideFeed, UpdateUrlEnvironment]);
 end;
 
 function NotWritableMessage(const Version, Folder: String): String;
@@ -113,6 +179,7 @@ var
   Report: TStringList;
   Manager: TUpdateManager;
   Info: TUpdateInfo;
+  Source: TUpdateSource;
   Url, Folder: String;
 begin
   Report := TStringList.Create;
@@ -120,11 +187,24 @@ begin
     try
       if not GLibraryFound then
         raise Exception.Create('Velopack library not found');
-      Url := GetEnvironmentVariable(UpdateUrlEnvironment);
-      if Url = '' then
+      if UpdateOverride = '' then
         raise Exception.Create(UpdateUrlEnvironment + ' is not set');
-      Manager := TUpdateManager.Create(Url);
+      if OverrideIsGitHub(UpdateOverride, Url) then
+      begin
+        Source := TUpdateSource.FromGitHub(Url, '', UpdatePrerelease);
+        try
+          Manager := TUpdateManager.CreateWithSource(Source);
+        finally
+          Source.Free;
+        end;
+      end
+      else
+      begin
+        Url := UpdateOverride;
+        Manager := TUpdateManager.Create(Url);
+      end;
       try
+        Report.Add('feed ' + Url);
         Report.Add('installed ' + Manager.CurrentVersion);
         if Manager.CheckForUpdates(Info) <> ucUpdateAvailable then
           Report.Add('no update')
@@ -166,18 +246,24 @@ begin
 end;
 
 procedure TUpdateDialogs.Run;
+var
+  Repo: String;
 begin
   if FUpdater = nil then
   begin
     FUpdater := TVelopackUpdater.Create(nil);
-    if GetEnvironmentVariable(UpdateUrlEnvironment) <> '' then
-      FUpdater.UpdateUrl := GetEnvironmentVariable(UpdateUrlEnvironment)
+    if UpdateOverride = '' then
+      Repo := UpdateRepositoryUrl
     else
+      if not OverrideIsGitHub(UpdateOverride, Repo) then
+        Repo := '';
+    if Repo <> '' then
     begin
-      FUpdater.GitHubRepoUrl := UpdateRepositoryUrl;
-      // A pre-release (alpha, beta) is updated to newer pre-releases as well; a release only to releases.
-      FUpdater.GitHubPrerelease := Pos('-', revival_version) > 0;
-    end;
+      FUpdater.GitHubRepoUrl := Repo;
+      FUpdater.GitHubPrerelease := UpdatePrerelease;
+    end
+    else
+      FUpdater.UpdateUrl := UpdateOverride;
     FUpdater.OnCheckCompleted := HandleCheck;
     FUpdater.OnDownloadProgress := HandleProgress;
     FUpdater.OnDownloadCompleted := HandleDownloaded;
@@ -200,13 +286,13 @@ var
 begin
   Screen.Cursor := crDefault;
   if AResult <> ucUpdateAvailable then
-    MessageDlg(_('You are running the latest version.'), mtInformation, [mbOK], 0)
+    MessageDlg(_('You are running the latest version.') + UpdateSourceNote, mtInformation, [mbOK], 0)
   else
     if not UpdateFolderWritable(Folder) then
-      MessageDlg(NotWritableMessage(ATarget.Version, Folder), mtWarning, [mbOK], 0)
+      MessageDlg(NotWritableMessage(ATarget.Version, Folder) + UpdateSourceNote, mtWarning, [mbOK], 0)
   else
-    if MessageDlg(Format(_('Version %s is available. Download and install it now?'), [ATarget.Version]),
-      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    if MessageDlg(Format(_('Version %s is available. Download and install it now?'), [ATarget.Version]) +
+      UpdateSourceNote, mtConfirmation, [mbYes, mbNo], 0) = mrYes then
     begin
       ShowProgress;
       FUpdater.DownloadUpdates;
@@ -236,7 +322,8 @@ procedure TUpdateDialogs.HandleError(Sender: TObject; const AMessage: string);
 begin
   Screen.Cursor := crDefault;
   CloseProgress;
-  MessageDlg(_('The update check failed.') + LineEnding + LineEnding + AMessage, mtError, [mbOK], 0);
+  MessageDlg(_('The update check failed.') + LineEnding + LineEnding + AMessage + UpdateSourceNote, mtError,
+    [mbOK], 0);
 end;
 
 procedure TUpdateDialogs.ShowProgress;
