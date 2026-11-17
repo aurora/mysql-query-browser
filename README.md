@@ -86,7 +86,7 @@ Settings are kept in `~/.config/querymole/` (`$XDG_CONFIG_HOME`); on the first s
 version are copied from `~/.mysqlgui/`. The AppImage updates itself in place (ADR-0037).
 
 </td></tr>
-<tr><td><b>macOS</b></td><td>Not yet; the first build is being prepared (<a href="docs/macos-setup.md">docs/macos-setup.md</a>).</td></tr>
+<tr><td><b>macOS</b></td><td>Not yet. A first build runs but needs layout work; macOS follows with the move to Qt (ADR-0039, <a href="docs/macos-setup.md">docs/macos-setup.md</a>).</td></tr>
 </table>
 
 ## Known problems

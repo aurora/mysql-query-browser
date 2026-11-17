@@ -68,6 +68,8 @@ waits until after parity and gets its own decision.
    checked locally; first release through the GitHub feed and the Windows cycle open). The application compiles
    with GTK2, connects on all six servers, and the main window's features (results, editing,
    scripts, export, dialogs, help) work by screenshot. State and next steps: `docs/linux-port.md`.
+   macOS is deferred (ADR-0039): the first Cocoa build runs but its dialogs are cut off; it waits for the
+   widgetset decision of the Qt move (ADR-0024). State: `docs/macos-setup.md`.
 
 ## Backlog and ideas
 

@@ -70,6 +70,14 @@ the host. Work inside with `distrobox enter freepascal`.
   The screenshots of the developer modes work there, not on a Wayland desktop.
 - Programs using threads need `cthreads` as the first unit on Unix (`qbr.lpr` has it).
 
+## Toolchain (macOS, deferred)
+
+macOS is deferred (ADR-0039): no release and no layout work for now; changes need not be checked on a Mac.
+`tools/macos-setup.sh` installs the Homebrew packages (backend libraries, cmake/ninja, mingw-w64 for
+`windres`) and checks for the Xcode command line tools and Lazarus 4.8 / FPC (installed by hand to
+`/Applications/Lazarus`). `./build.sh` builds with the Cocoa widgetset into `backend/build-macos`.
+No container: macOS programs need the macOS SDK on the host. State and checklist: `docs/macos-setup.md`.
+
 ## Everyday commands
 
 ```bash
