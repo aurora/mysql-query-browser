@@ -318,4 +318,5 @@ x86/
 /app/lib/
 /app/res/
 /backend/build-el9/
+/backend/build-macos/
 /tools/cache/

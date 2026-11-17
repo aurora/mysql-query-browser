@@ -147,11 +147,13 @@ type
     MySQLConnectionsOnly,
     SelectSchemata: Boolean;
 
+    // Port: TThread.Handle is a TThreadID; the same as THandle on Windows, a pointer on macOS (THandle
+    // is 32 bits there and on Linux)
     ConnectToInstanceThread: TConnectToInstanceThread;
-    ConnectToInstanceThreadHandle: THandle;
+    ConnectToInstanceThreadHandle: TThreadID;
 
     PingThread: TPingThread;
-    PingThreadHandle: THandle;
+    PingThreadHandle: TThreadID;
     ping_result: PMYX_PING_RESULT;
     PingErrorMsgs: TTntStringList;
 

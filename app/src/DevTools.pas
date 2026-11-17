@@ -108,9 +108,15 @@ begin
     ScreenDC := GetDC(0);
     Shot := TBitmap.Create;
     try
-      Shot.LoadFromDevice(ScreenDC);
       Bmp.SetSize(R.Right - R.Left, R.Bottom - R.Top);
+      {$IFDEF DARWIN}
+      // Port: on macOS the screen copy shows whatever window is in front (a program started from a terminal
+      // does not come to the front); the Cocoa widgetset's PaintTo takes an image of this window only
+      Form.PaintTo(Bmp.Canvas, 0, 0);
+      {$ELSE}
+      Shot.LoadFromDevice(ScreenDC);
       Bmp.Canvas.CopyRect(Rect(0, 0, Bmp.Width, Bmp.Height), Shot.Canvas, R);
+      {$ENDIF}
     finally
       Shot.Free;
       ReleaseDC(0, ScreenDC);
