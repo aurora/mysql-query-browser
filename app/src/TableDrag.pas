@@ -104,6 +104,7 @@ procedure TTableDragForm.TntFormPaint(Sender: TObject);
 
 var
   xpos: integer;
+  DropText: WideString;  // Port: _() returns UTF-8; DrawWideStringText needs UTF-16
 
 begin
 
@@ -143,9 +144,8 @@ begin
 
       Font.Color:=clGray;
 
-      DrawWideStringText(Canvas.Handle,
-        PWideChar(_('Drop the table(s) on one of the buttons.')),
-        Length(_('Drop the table(s) on one of the buttons.')), Rect(4, 4, xpos-3, 4+10));
+      DropText := UTF8Decode(_('Drop the table(s) on one of the buttons.'));
+      DrawWideStringText(Canvas.Handle, PWideChar(DropText), Length(DropText), Rect(4, 4, xpos-3, 4+10));
 
     end
     else
@@ -161,9 +161,8 @@ begin
 
         Font.Color:=clGray;
 
-        DrawWideStringText(Canvas.Handle,
-          PWideChar(_('Drop the column(s) on one of the buttons.')),
-          Length(_('Drop the column(s) on one of the buttons.')), Rect(4, 4, xpos-3, 4+10));
+        DropText := UTF8Decode(_('Drop the column(s) on one of the buttons.'));
+        DrawWideStringText(Canvas.Handle, PWideChar(DropText), Length(DropText), Rect(4, 4, xpos-3, 4+10));
       end;
   end;
 end;

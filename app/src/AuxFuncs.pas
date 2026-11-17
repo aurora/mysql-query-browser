@@ -1393,6 +1393,7 @@ var
   Size: TSize;
   R: TRect;
   MaxMessageWidth: Integer;
+  MessageLine: WideString;
 
 begin
   CreateNew(nil);
@@ -1421,7 +1422,9 @@ begin
     MaxMessageWidth := 0;
     for I := 0 to MessageLines.Count - 1 do
     begin
-      GetTextExtentPoint32W(Canvas.Handle, PWideChar(MessageLines[I]), Length(MessageLines[I]), Size);
+      // Port: TTntStringList is TStringList, its lines are UTF-8; measure them as UTF-16
+      MessageLine := UTF8Decode(MessageLines[I]);
+      GetTextExtentPoint32W(Canvas.Handle, PWideChar(MessageLine), Length(MessageLine), Size);
       if Size.cx > MaxMessageWidth then
         MaxMessageWidth := Size.cx;
     end;

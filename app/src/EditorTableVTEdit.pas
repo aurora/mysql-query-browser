@@ -386,6 +386,7 @@ procedure TColumnGridEdit.AutoAdjustSize;
 var
   DC: HDC;
   Size: TSize;
+  WText: WideString;
   LastFont: HGDIOBJ;
 
 begin
@@ -399,7 +400,9 @@ begin
     try
       // Read needed space for the current text.
       {.$ifdef TntSupport}
-        GetTextExtentPoint32W(DC, PWideChar(Text), Length(Text), Size);
+        // Port: the LCL's Text is UTF-8; measure it as UTF-16
+        WText := UTF8Decode(Text);
+        GetTextExtentPoint32W(DC, PWideChar(WText), Length(WText), Size);
       {.$else}
         //GetTextExtentPoint32(DC, PChar(Text), Length(Text), Size);
       {.$endif TntSupport}

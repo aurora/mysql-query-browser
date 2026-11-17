@@ -3784,11 +3784,14 @@ procedure TEditorTableForm.MenuMeasureItem(Sender: TObject; ACanvas: TCanvas; va
 var
   Size: TSize;
   Item: TTntMenuItem;
+  ItemCaption: WideString;
 
 begin
   if Sender is TTntMenuItem then
   begin
     Item := Sender as TTntMenuItem;
+    // Port: the LCL's Caption is UTF-8; a PWideChar cast of it would hand the bytes to the W API as UTF-16
+    ItemCaption := UTF8Decode(Item.Caption);
     ACanvas.Font := Font;
 
     if Item.IsLine then
@@ -3798,7 +3801,7 @@ begin
     end
     else
     begin
-      GetTextExtentPoint32W(ACanvas.Handle, PWideChar(Item.Caption), Length(Item.Caption), Size);
+      GetTextExtentPoint32W(ACanvas.Handle, PWideChar(ItemCaption), Length(ItemCaption), Size);
 
       // Border around each entry.
       Width := Size.cx + 4;
@@ -3813,11 +3816,14 @@ procedure TEditorTableForm.MenuDrawItem(Sender: TObject; ACanvas: TCanvas; ARect
 
 var
   Item: TTntMenuItem;
+  ItemCaption: WideString;
 
 begin
   if Sender is TTntMenuItem then
   begin
     Item := Sender as TTntMenuItem;
+    // Port: the LCL's Caption is UTF-8; a PWideChar cast of it would hand the bytes to the W API as UTF-16
+    ItemCaption := UTF8Decode(Item.Caption);
     ACanvas.Font := Font;
 
     if Item.IsLine then
@@ -3840,7 +3846,7 @@ begin
       ACanvas.FillRect(ARect);
       Inc(ARect.Left, 8);
       SetBKMode(ACanvas.Handle, TRANSPARENT);
-      {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(ACanvas.Handle, PWideChar(Item.Caption), Length(Item.Caption), ARect, DT_LEFT + DT_SINGLELINE +
+      {$IFDEF MSWINDOWS}Windows.{$ENDIF}DrawTextW(ACanvas.Handle, PWideChar(ItemCaption), Length(ItemCaption), ARect, DT_LEFT + DT_SINGLELINE +
         DT_HIDEPREFIX + DT_VCENTER);
     end;
   end;

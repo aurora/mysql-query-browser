@@ -2385,7 +2385,7 @@ function TMySQLRSGrid.DoGetNodeTooltip(Node: PVirtualNode; Column: TColumnIndex;
 
 begin
   Result := GetNodeRSText(Node, Column, True);
-  if (Length(Result) > 200) or (StrPosW(PWideChar(Result), #10) <> nil) then
+  if (Length(Result) > 200) or (Pos(#10, Result) > 0) then
     LineBreakStyle := hlbForceMultiLine
   else
     LineBreakStyle := hlbForceSingleLine;
@@ -4209,7 +4209,7 @@ begin
     {$IFDEF MSWINDOWS}SendMessage(Handle, EM_SCROLLCARET, 0, 0);{$ENDIF}
 
         // Make the node multi-lined if there are hard line breaks in it.
-    if StrPosW(PWideChar(Text), #10) <> nil then
+    if Pos(#10, Text) > 0 then  // Port: Text is UTF-8, not UTF-16
     begin
       FLink.FTree.MultiLine[FLink.FNode] := True;
 
@@ -4234,6 +4234,7 @@ procedure TRSStringEdit.AutoAdjustSize;
 var
   DC: HDC;
   Size: TSize;
+  WText: WideString;
   LastFont: HGDIOBJ;
 
 begin
@@ -4246,7 +4247,9 @@ begin
     LastFont := SelectObject(DC, Font.Handle);
     try
       // Read needed space for the current text.
-      GetTextExtentPoint32W(DC, PWideChar(Text), Length(Text), Size);
+      // Port: the LCL's Text is UTF-8; measure it as UTF-16
+      WText := UTF8Decode(Text);
+      GetTextExtentPoint32W(DC, PWideChar(WText), Length(WText), Size);
       Inc(Size.cx, 2 * FLink.FTree.TextMargin);
 
       // Repaint associated node if the edit becomes smaller.
@@ -4452,7 +4455,7 @@ begin
 
     // Make the node multi-lined if there are hard line breaks in it. Adjust that after everything else has been
     // set for the edit window.
-    if StrPosW(PWideChar(Text), #10) <> nil then
+    if Pos(#10, Text) > 0 then  // Port: Text is UTF-8, not UTF-16
     begin
       FTree.MultiLine[FNode] := True;
 

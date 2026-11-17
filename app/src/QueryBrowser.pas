@@ -5135,14 +5135,14 @@ begin
 
       if(CompareText(DraggedSchema.schema_name, MySQLConn.DefaultSchema)=0)then
       begin
-        if(myx_identifier_needs_quotes(PWideChar(DraggedTable.table_name))=1)then
+        if(myx_identifier_needs_quotes(DraggedTable.table_name)=1)then
           identifier:='`'+DraggedTable.table_name+'`'
         else
           identifier:=DraggedTable.table_name;
       end
       else
       begin
-        if(myx_identifier_needs_quotes(PWideChar(DraggedSchema.schema_name+'.'+DraggedTable.table_name))=1)then
+        if(myx_identifier_needs_quotes(DraggedSchema.schema_name+'.'+DraggedTable.table_name)=1)then
           identifier:='`'+DraggedSchema.schema_name+'`.`'+DraggedTable.table_name+'`'
         else
           identifier:=DraggedSchema.schema_name+'.'+DraggedTable.table_name;

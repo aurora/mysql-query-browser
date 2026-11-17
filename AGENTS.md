@@ -238,6 +238,11 @@ choice that a future contributor would ask "why?" about, write the ADR.
 - **`TObject.ToString` shadows a constant named `toString`** inside methods (renamed `toStringLit` in
   LexicalTools/ScriptPanel).
 - **`set of WideChar` is not allowed in FPC**; use `WideCharIn` from `compat/Unicode.pas`.
+- **`PWideChar(S)` of a UTF-8 `String` does not convert.** In the VCL/TNT original, captions and texts were
+  `WideString`; in the LCL they are UTF-8 `String`, and the cast hands their bytes to the W API as UTF-16 (CJK
+  garbage on Windows, e.g. the owner-drawn menus of 0.1.0-alpha.4; `StrPosW` searches read past the end). Decode first
+  (`W := UTF8Decode(S)`, then `PWideChar(W), Length(W)`), or use `Pos` on the `String`. Check the type of every
+  `PWideChar(...)` argument when porting.
 - **`Width`/`Height` inside `with Canvas do` are the canvas's, not the control's.** The VCL's `TCanvas` has
   no such properties, the LCL's has (and they are not the control's size). Ported paint code that
   worked in the VCL draws in the wrong place (e.g. the result navigation bar lost its right-hand
