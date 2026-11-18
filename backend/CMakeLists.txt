@@ -21,6 +21,15 @@ include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/compat)
 # Legacy code predates -Wall hygiene; keep warnings visible but not fatal.
 add_compile_options(-Wall -Wno-unknown-pragmas)
 
+# __FILE__ (in GLib's g_return_if_fail and friends) and the debug info keep the source path in the
+# shipped libraries; strip does not remove it. Record it relative to the checkout, so a package built on a
+# developer's machine does not carry that machine's user name and folder layout.
+get_filename_component(QBR_REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/.. ABSOLUTE)
+add_compile_options(-ffile-prefix-map=${QBR_REPO_ROOT}/=)
+# Same for the run path on Unix: $ORIGIN (the libraries find each other next to themselves) instead of the
+# absolute build folder.
+set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
+
 # --- utilities -------------------------------------------------------------
 add_library(mysqlutil SHARED
     ${SRC}/utilities/source/myx_util.c
