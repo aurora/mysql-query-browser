@@ -51,6 +51,7 @@ Related.
 | [0040](0040-releases-built-by-github-actions.md) | Releases are built and published by GitHub Actions | Accepted |
 | [0041](0041-version-include-generated-at-build-time.md) | The version include is generated at build time, not committed | Accepted |
 | [0042](0042-tls-preferred-without-a-second-attempt.md) | TLS "preferred" in one attempt, without certificate verification | Accepted |
+| [0043](0043-dead-connections-do-not-block-the-window.md) | Dead connections do not block the window | Accepted (Windows backend build not checked) |
 
 ## Numbering
 

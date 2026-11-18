@@ -82,6 +82,9 @@ waits until after parity and gets its own decision.
   that had become unresponsive after loading ~2 million rows (2026-11-17) showed the main thread there and in
   GLib walking an apparently large list of event sources. Not reproduced; the link to the freeze is unclear. Fix
   without a visible change (e.g. update Paste when the menu opens, or on clipboard change).
+- Dead connections (standby, VPN gone) no longer freeze the window (ADR-0043): TCP timeouts on the socket, keep-alive
+  ping in a thread. Open: the Windows backend build with the socket options; `Ping` before a query still blocks
+  during an outage.
 - Look for further undefined behaviour in the C backend with sanitizers; more
   tests per `myx_*` area (query analysis, editable result sets, import/export).
 - `myx_pdf.c` (needs the "panda" library) and `myx_live_profiling.c` (POSIX

@@ -16,6 +16,11 @@
 
 #if defined(__WIN__) || defined(_WIN32) || defined(_WIN64)
 #include <winsock2.h>
+#include <ws2tcpip.h> /* revival: TCP_MAXRT, TCP_KEEPIDLE (dead peer detection) */
+#else
+#include <sys/socket.h> /* revival: dead peer detection */
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #endif
 
 #include <stdio.h>
@@ -824,6 +829,65 @@ static void modify_sql_mode(MYSQL *mysql, int ansi_quotes)
   }
 }
 
+/* Dead connections (revival, ADR-0043): the program pings the server every second (keep-alive, in a thread of its
+   own since ADR-0043) and the client library has no read timeout. When the network disappears under an open
+   connection (standby, VPN gone), the ping and any query wait until TCP gives up: about 15 minutes on Linux.
+   A read timeout would also end long queries, which must be able to run for hours. Instead the socket gets
+   - a limit for data the server does not acknowledge (TCP_USER_TIMEOUT on Linux, TCP_MAXRT on Windows): a
+     server that is still there acknowledges the query at once, however long it computes;
+   - TCP keep-alives, so that a connection that died while idle or while waiting for a long query is noticed.
+   Unix sockets and named pipes ignore these options; failures are ignored too. Applied after every connect and
+   after every successful ping, because mysql_ping reconnects on a new socket. */
+#define MYX_DEAD_PEER_TIMEOUT_SECONDS 30
+#define MYX_KEEPALIVE_IDLE_SECONDS    60
+#define MYX_KEEPALIVE_INTERVAL_SECONDS 10
+#define MYX_KEEPALIVE_COUNT            3
+#define MYX_DEFAULT_CONNECT_TIMEOUT_SECONDS 20
+
+static void myx_set_dead_peer_detection(MYSQL *mysql)
+{
+  my_socket sock= mysql_get_socket(mysql);
+#if defined(__WIN__) || defined(_WIN32) || defined(_WIN64)
+  DWORD on= 1;
+  if (sock == INVALID_SOCKET)
+    return;
+  setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (const char *)&on, sizeof(on));
+#ifdef TCP_KEEPIDLE
+  {
+    DWORD idle= MYX_KEEPALIVE_IDLE_SECONDS, interval= MYX_KEEPALIVE_INTERVAL_SECONDS, count= MYX_KEEPALIVE_COUNT;
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (const char *)&idle, sizeof(idle));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (const char *)&interval, sizeof(interval));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (const char *)&count, sizeof(count));
+  }
+#endif
+#ifdef TCP_MAXRT
+  {
+    DWORD maxrt= MYX_DEAD_PEER_TIMEOUT_SECONDS;
+    setsockopt(sock, IPPROTO_TCP, TCP_MAXRT, (const char *)&maxrt, sizeof(maxrt));
+  }
+#endif
+#else
+  int on= 1;
+  if ((int)sock < 0)
+    return;
+  setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on));
+#ifdef TCP_KEEPIDLE
+  {
+    int idle= MYX_KEEPALIVE_IDLE_SECONDS, interval= MYX_KEEPALIVE_INTERVAL_SECONDS, count= MYX_KEEPALIVE_COUNT;
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, &idle, sizeof(idle));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof(interval));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &count, sizeof(count));
+  }
+#endif
+#ifdef TCP_USER_TIMEOUT
+  {
+    unsigned int timeout_ms= MYX_DEAD_PEER_TIMEOUT_SECONDS * 1000;
+    setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &timeout_ms, sizeof(timeout_ms));
+  }
+#endif
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /** @brief prepare a connection to a MySQL server
     @ingroup bridge_to_MySQL_API
@@ -854,7 +918,16 @@ int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
   char **advanced_option= user_conn->advanced_options;
   char **end_advanced_option= advanced_option+user_conn->advanced_options_num;
 
-  connect_options.mysql= mysql; 
+  connect_options.mysql= mysql;
+
+  /* revival: without a connect timeout, a reconnect from the keep-alive ping to a host that has gone (standby,
+     VPN) waits for the system's SYN retries (about two minutes on Linux), and so does connecting. CONNECT_TIMEOUT in
+     the advanced options still overrides it. */
+  {
+    unsigned int connect_timeout= MYX_DEFAULT_CONNECT_TIMEOUT_SECONDS;
+    mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *)&connect_timeout);
+  }
+
   for (; advanced_option!=end_advanced_option; advanced_option++)
   {
     char *advanced_value;
@@ -947,6 +1020,8 @@ int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
   }
 
   g_free(unix_socket);
+
+  myx_set_dead_peer_detection(mysql);
 
   // set a high timeout value
   mysql_query(mysql, "SET SESSION interactive_timeout=1000000");
@@ -1228,7 +1303,12 @@ int myx_mysql_cancel(MYSQL *mysql)
 *//////////////////////////////////////////////////////////////////////////////
 MYX_PUBLIC_FUNC int myx_ping_server(MYSQL *mysql)
 {
-  return mysql_ping(mysql);
+  int result= mysql_ping(mysql);
+
+  /* revival: a ping may have reconnected on a new socket; give it the same dead peer detection. */
+  if (result == 0)
+    myx_set_dead_peer_detection(mysql);
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

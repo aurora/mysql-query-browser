@@ -672,6 +672,7 @@ type
     procedure DevExecute;                          // ... and run it
     procedure DevExpandSchema(Index: Integer);     // developer mode (--expand): open a schema node and its children
     procedure DevStressSchemata(Seconds: Integer; const OutFile: String); // (--stress-schemata)
+    procedure DevWatchConnection(Seconds: Integer; const OutFile: String); // (--watch-connection)
     procedure DevStopAndEdit(SchemaIndex, TableIndex, StopAfterMs: Integer; const Addition, OutFile: String);
     function SaveScriptAs(ScriptPanel: TScriptPanel): Boolean;
     procedure UpdateActions; override;
@@ -1948,6 +1949,54 @@ begin
     WaitIdle;
     State('executed again');
 
+    Report.SaveToFile(OutFile);
+  finally
+    Report.Free;
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TQueryBrowserForm.DevWatchConnection(Seconds: Integer; const OutFile: String);
+
+// Developer mode (--watch-connection <seconds> <file>): runs the message loop for the given time and writes one line
+// per second with the longest pause between two passes of the loop (how long the user interface did not respond) and
+// the connection state of the keep-alive ping. Used to check that a dead connection does not block the window.
+
+const
+  StateNames: array[TConnectionState] of String = ('connected', 'unclear', 'disconnected');
+
+var
+  Report: TStringList;
+  Start, Last, Tick, LineStart: QWord;
+  MaxGap, Gap: QWord;
+
+begin
+  Report := TStringList.Create;
+  try
+    Start := GetTickCount64;
+    Last := Start;
+    LineStart := Start;
+    MaxGap := 0;
+    while GetTickCount64 - Start < QWord(Seconds) * 1000 do
+    begin
+      Application.ProcessMessages;
+      CheckSynchronize(10);
+      Tick := GetTickCount64;
+      Gap := Tick - Last;
+      if Gap > MaxGap then
+        MaxGap := Gap;
+      Last := Tick;
+      if Tick - LineStart >= 1000 then
+      begin
+        Report.Add(Format('%6.1f max-gap=%dms state=%s', [(Tick - Start) / 1000, MaxGap,
+          StateNames[MySQLConn.LastConnectionState]]));
+        Report.SaveToFile(OutFile);
+        LineStart := Tick;
+        MaxGap := 0;
+      end;
+    end;
+    Report.Add('done');
     Report.SaveToFile(OutFile);
   finally
     Report.Free;

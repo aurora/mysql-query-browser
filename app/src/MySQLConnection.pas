@@ -129,10 +129,13 @@ type
 
     FErrorCode: MYX_LIB_ERROR;
     FKeepAliveTimer: TTimer;
+    FKeepAliveThread: TThread;                   // Port: runs the keep-alive ping (TKeepAliveThread).
+    FPingPending: Boolean;                       // Port: a keep-alive ping runs, its result is not handled yet.
     FLastConnectionState: TConnectionState;
     FCanceller: IQueryCanceller;                 // Port: cancels fetch threads on the server (ADR-0020).
 
     procedure KeepAliveTrigger(Sender: TObject);
+    procedure KeepAliveResult(PingResult: Integer);
     function WaitForTicket(Ticket: Int64; Timeout: Integer): Boolean;
     procedure StopThreadWork(Ticket: Int64; Timeout: Integer);
     procedure SetConnected(const Value: Boolean);
@@ -193,6 +196,7 @@ type
     property InTransaction: Boolean read FInTransaction write SetInTransaction;
     property IsLocalServer: Boolean read FIsLocalServer;
     property KeepAlive: Boolean read FKeepAlive write SetKeepAlive;
+    property LastConnectionState: TConnectionState read FLastConnectionState; // Port: for --watch-connection.
     property Lock: TConnectionLock read FFetchDataLock;
     property MajorVersion: Integer read FMajorVersion;
     property MinorVersion: Integer read FMinorVersion;
@@ -242,6 +246,191 @@ implementation
 uses
   ConnectToInstance;
 
+type
+  // Port: the keep-alive ping runs in this thread instead of in the timer event. On a connection that has died
+  // (network gone, computer back from standby) a ping waits for the TCP timeouts and then tries to reconnect, which
+  // takes tens of seconds each time; in the timer event that blocked the user interface for as long. The thread only
+  // pings; the result is handed back to the main thread (TMySQLConn.KeepAliveResult), which keeps the connection state
+  // and notifies the forms as before. There is one thread per connection object, and at most one ping is in flight.
+  // When the connection object closes its MySQL structure (Disconnect, Destroy) while a ping is running on it, the
+  // thread closes it after the ping instead (and frees the lock on Destroy), so neither has to wait for the ping.
+  TKeepAliveThread = class(TThread)
+  private
+    FConn: TMySQLConn;                           // Main thread only; nil once the connection object is gone.
+    FWake: TEvent;
+    FGuard: TCriticalSection;                    // Protects the fields below.
+    FMySQL: Pointer;                             // The structure to ping for the pending request.
+    FLock: TConnectionLock;
+    FPinging: Boolean;                           // The ping on FMySQL has started.
+    FCloseAfterPing: Boolean;
+    FFreeLockAfterPing: Boolean;
+    FResult: Integer;
+    procedure PingDone;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(AConn: TMySQLConn);
+    destructor Destroy; override;
+    procedure Request(MySQL: Pointer; Lock: TConnectionLock);
+    function HandOver(MySQL: Pointer): Boolean;
+    function Detach(MySQL: Pointer): Boolean;
+  end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+constructor TKeepAliveThread.Create(AConn: TMySQLConn);
+
+begin
+  FConn := AConn;
+  FWake := TEvent.Create(nil, False, False, '');
+  FGuard := TCriticalSection.Create;
+  inherited Create(False);
+  FreeOnTerminate := True;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+destructor TKeepAliveThread.Destroy;
+
+begin
+  inherited; // Removes queued PingDone calls.
+  FWake.Free;
+  FGuard.Free;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TKeepAliveThread.Execute;
+
+var
+  MySQL: Pointer;
+  Lock: TConnectionLock;
+  PingResult: Integer;
+
+begin
+  while True do
+  begin
+    FWake.WaitFor(INFINITE);
+    FGuard.Enter;
+    try
+      if Terminated then
+        Break;
+      MySQL := FMySQL;
+      Lock := FLock;
+      FPinging := True;
+    finally
+      FGuard.Leave;
+    end;
+
+    // Same as TMySQLConn.Ping: if the connection is busy it is obviously there.
+    if MySQL = nil then
+      PingResult := 1
+    else
+      if Lock.TryEnter then
+      try
+        PingResult := myx_ping_server(MySQL);
+      finally
+        Lock.Release;
+      end
+      else
+        PingResult := 0;
+
+    FGuard.Enter;
+    try
+      FPinging := False;
+      FResult := PingResult;
+      if FCloseAfterPing then
+        myx_mysql_close(MySQL);
+      FCloseAfterPing := False;
+      if FFreeLockAfterPing then
+        Lock.Free;
+      FFreeLockAfterPing := False;
+      if Terminated then
+        Break;
+    finally
+      FGuard.Leave;
+    end;
+    Queue(PingDone);
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TKeepAliveThread.PingDone;
+
+// Runs in the main thread.
+
+begin
+  if Assigned(FConn) then
+    FConn.KeepAliveResult(FResult);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TKeepAliveThread.Request(MySQL: Pointer; Lock: TConnectionLock);
+
+begin
+  FGuard.Enter;
+  try
+    FMySQL := MySQL;
+    FLock := Lock;
+  finally
+    FGuard.Leave;
+  end;
+  FWake.SetEvent;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+function TKeepAliveThread.HandOver(MySQL: Pointer): Boolean;
+
+// Called when the connection object is about to close MySQL. Returns True if the thread closes it after the running
+// ping; a pending request for it that has not started yet is turned into one without a connection.
+
+begin
+  Result := False;
+  FGuard.Enter;
+  try
+    if (MySQL <> nil) and (FMySQL = MySQL) then
+    begin
+      if FPinging then
+      begin
+        FCloseAfterPing := True;
+        Result := True;
+      end
+      else
+        FMySQL := nil;
+    end;
+  finally
+    FGuard.Leave;
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+function TKeepAliveThread.Detach(MySQL: Pointer): Boolean;
+
+// Called when the connection object is destroyed. The thread ends (and frees itself) after a running ping. Returns
+// True if a ping is running: the thread then also closes MySQL (if it is the one being pinged) and frees the lock,
+// which the ping holds.
+
+begin
+  FConn := nil;
+  FGuard.Enter;
+  try
+    Terminate;
+    Result := FPinging;
+    if FPinging then
+    begin
+      FCloseAfterPing := FCloseAfterPing or ((MySQL <> nil) and (FMySQL = MySQL));
+      FFreeLockAfterPing := True;
+    end;
+  finally
+    FGuard.Leave;
+  end;
+  FWake.SetEvent;
+end;
+
 //----------------------------------------------------------------------------------------------------------------------
 
 constructor TMySQLConn.Create(StatusBar: TTntStatusBar);
@@ -283,24 +472,31 @@ begin
     Interval := 1000;
     Enabled := True;
   end;
+  FKeepAliveThread := TKeepAliveThread.Create(Self);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 destructor TMySQLConn.Destroy;
 
+var
+  PingRunning: Boolean;
+
 begin
   FKeepAliveTimer.Free;
+  // Port: a running keep-alive ping is not waited for; the thread closes the structure and frees the lock after it.
+  PingRunning := TKeepAliveThread(FKeepAliveThread).Detach(FMySQL);
   ClearWorkList;
   FWorkList.Free;
-  FFetchDataLock.Free;
+  if not PingRunning then
+    FFetchDataLock.Free;
   FQueryHookMultiReadSync.Free;
   FUserConnection.Free;
   FParameters.Free;
 
   // Close connection and free memory for MySQL struct
   FCanceller.Detach;
-  if Assigned(FMySQL) then
+  if Assigned(FMySQL) and not PingRunning then
     myx_mysql_close(FMySQL);
 
   inherited;
@@ -734,7 +930,9 @@ procedure TMySQLConn.Disconnect;
 begin
   // Close connection and free memory for MySQL struct.
   FCanceller.Detach;
-  myx_mysql_close(FMySQL);
+  // Port: if the keep-alive thread is pinging this structure, it closes it when the ping returns.
+  if not TKeepAliveThread(FKeepAliveThread).HandOver(FMySQL) then
+    myx_mysql_close(FMySQL);
   FMySQL := nil;
 
   FConnected := False;
@@ -1039,8 +1237,30 @@ end;
 
 procedure TMySQLConn.KeepAliveTrigger(Sender: TObject);
 
+// Port: the ping runs in FKeepAliveThread; KeepAliveResult handles its result. A new ping is started only when the
+// previous one has returned.
+
 begin
-  if Ping <> 0 then
+  if FPingPending then
+    Exit;
+  if FMySQL = nil then
+    KeepAliveResult(1)
+  else
+  begin
+    FPingPending := True;
+    TKeepAliveThread(FKeepAliveThread).Request(FMySQL, FFetchDataLock);
+  end;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TMySQLConn.KeepAliveResult(PingResult: Integer);
+
+// Port: the body of the original KeepAliveTrigger, called in the main thread with the result of the ping.
+
+begin
+  FPingPending := False;
+  if PingResult <> 0 then
   begin
     // Don't see the server. Notify application if this happend first time since last check.
     case FLastConnectionState of
