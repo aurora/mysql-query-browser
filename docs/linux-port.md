@@ -162,6 +162,36 @@ are freed; File > Exit ends with exit code 0 under GTK2 and Qt6, and the Win64 b
 - `tests/run-matrix.sh` passes with GTK2 (all tests) and with the Qt6 build (`--app-only`, `QBR_APP`); under Qt6 the
   menu smoke test, stop and edit and the schema tree stress test pass; the Win64 build compiles (same code size).
 
+**Qt6 AppImage and the Tahoma stand-in under Qt (2026-11-19).** `QBR_WIDGETSET=qt6 tools/package-appimage.sh` builds
+the AppImage with the Qt6 widgetset (default still GTK2 until the release switches, ADR-0044):
+- Qt 6.10.3 comes from EPEL 9. EPEL has no `qt6pas`, so `tools/appimage/build-qt6pas.sh` builds libQt6Pas in the
+  AlmaLinux 9 container from the binding sources of the Lazarus in the freepascal container (6.2.10 for Lazarus 4.8;
+  copied to `tools/cache/qt6pas-src` with their timestamps, so the build in `backend/build-el9/qt6pas` stays
+  incremental: the first build takes about a quarter of an hour, later runs seconds). The binding is LGPL with the LCL's
+  linking exception (`docs/licenses.md`).
+- `stage.sh` bundles Qt Core/Gui/Widgets/PrintSupport/DBus, the xcb and Wayland platform plugins (with Wayland's shell,
+  decoration and graphics parts), compose and IBus input; no style or platform theme plugins (Fusion is built in), no
+  image format plugins. Qt finds its plugins through `usr/bin/qt.conf`, not `QT_PLUGIN_PATH`, which would leak into
+  programs the application starts. `libOpenGL.so.0` is bundled: Qt 6 needs it to load, the program does not draw with
+  OpenGL, and Ubuntu desktops often lack it (`libopengl0`). It checks that `app/bin/querymole` was built with the
+  widgetset it packs. Size: 38 MB (GTK2: 17 MB), mostly ICU.
+- The Containerfile of the AlmaLinux image gained Qt; the image tag is now a hash of the Containerfile, so a changed
+  file builds a new image. `Containerfile.fpc` (CI) installs `lazarus-lcl-qt6`.
+- Checked: newest symbols needed GLIBC_2.34 and GLIBCXX_3.4.29 (GCC 11); the app self-tests of the AppDir pass on all
+  six servers (GTK2 and Qt6 images); the Qt6 AppImage starts and draws with Fusion and the Tahoma stand-in on Ubuntu
+  22.04, Debian 12 and AlmaLinux 9 containers (Xvfb, with only libgl1/libegl1/fontconfig/harfbuzz installed, no Qt and
+  no libxkbcommon) and on Fedora 44; no Qt library comes from the host (read from `/proc/<pid>/maps`). The host
+  provides the C library, X11 core, GL/EGL (libglvnd), fontconfig/freetype/harfbuzz and libstdc++.
+- Found on the way: under Qt6 the bundled Tahoma stand-in (ADR-0028) was never used, the forms were drawn with Noto Sans
+  (Fedora) or DejaVu Sans (Ubuntu), because Qt keeps its own font database and does not see fonts added to fontconfig.
+  `AddBundledTahomaToQt` (`AppFonts`) adds the files to Qt's database after `Application.Initialize`. The connect
+  dialog and the options pages fit with it (the first layout pass above was done with Noto Sans).
+- Seen, not changed: the bundled libxkbcommon (1.0, AlmaLinux 9) prints "unrecognized keysym dead_hamza" for the
+  newer Compose file of Fedora 44 on stderr; those compose sequences are ignored, the others work.
+- Not tried: the image on a Wayland session (Qt picks the Wayland platform there unless `QT_QPA_PLATFORM` says
+  otherwise; whether the LCL's Qt6 widgetset behaves there, or AppRun should prefer xcb, is for the desktop check),
+  scaling, the file dialog, and the Velopack variant (`--velopack`) with Qt6.
+
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with
 `double free or corruption (out)`. The core dump shows `g_free` called from

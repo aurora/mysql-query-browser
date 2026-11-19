@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Build environment for the Linux AppImage: AlmaLinux 9 has glibc 2.34, so what is built and
 # bundled here runs on every distribution from RHEL 9 / Ubuntu 22.04 / Debian 12 on, Fedora 44 included.
-# Used by tools/package-appimage.sh; see ADR-0027. cargo builds Velopack's native library (ADR-0037).
+# Used by tools/package-appimage.sh; see ADR-0027. cargo builds Velopack's native library (ADR-0037). Qt 6 comes from
+# EPEL; libQt6Pas, which EPEL does not have, is built here from the Lazarus sources (build-qt6pas.sh, ADR-0044).
 FROM docker.io/library/almalinux:9
 RUN dnf -y install dnf-plugins-core epel-release \
  && dnf -y config-manager --set-enabled crb \
  && dnf -y install gcc gcc-c++ cmake ninja-build pkgconf-pkg-config make file patchelf \
       glib2-devel libxml2-devel pcre-devel mariadb-connector-c-devel \
       gtk2 gdk-pixbuf2 pango cairo atk shared-mime-info adwaita-icon-theme \
+      qt6-qtbase-devel qt6-qtbase-gui qt6-qtwayland \
       cargo git \
  && dnf clean all

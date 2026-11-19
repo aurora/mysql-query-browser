@@ -46,6 +46,17 @@ Not a licence matter but relevant: libcurl, libssh2, nghttp*, ngtcp2 and their d
 there because libmariadb is built with them; a smaller package needs a different Connector/C
 build (ADR-0003/ADR-0014).
 
+### Linux AppImage
+
+The AppImage takes its libraries from AlmaLinux 9 packages; `THIRD-PARTY-LIBS.txt` in the image lists each file with
+its package, version and the licence the package states, `licenses/rpm/` carries the packages' licence files. Added
+for the Qt6 widgetset (ADR-0044; the GTK2 image bundles GTK2 instead):
+
+| Library | Licence | Fit with GPL-2.0-or-later |
+|---|---|---|
+| Qt 6 (Core, Gui, Widgets, PrintSupport, DBus, XcbQpa, WaylandClient and the platform plugins; EPEL `qt6-qtbase`, `qt6-qtwayland`) | LGPL-3.0-only OR GPL-3.0-only WITH Qt-GPL-exception-1.0 (package metadata) | OK under LGPL-3.0, dynamic linking; like Apache-2.0 above, LGPL-3.0 parts make the combination GPL-3.0-or-later, another reason the "or later" must stay. The libraries are shipped unmodified as separate files, so a user can replace them. |
+| libQt6Pas (Free Pascal Qt6 binding, built from the Lazarus sources by `tools/appimage/build-qt6pas.sh`) | LGPL with the same linking exception as the LCL (`COPYING.TXT` of the binding, shipped in `licenses/qt6pas/`) | OK. The sources are part of the Lazarus distribution the program is built with. |
+
 ## 3. Pascal components linked into `querymole.exe` (static linking)
 
 Found by listing the units in the executable and reading their headers.
