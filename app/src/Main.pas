@@ -292,6 +292,11 @@ end;
 procedure TMainForm.FormDestroy(Sender: TObject);
 
 begin
+  // Port: the LCL keeps a merged menu linked to the main menu; freeing either while they are merged updates the
+  // other's handles during destruction (GTK2: use after free in TMenu.Destroy, Qt6: access violation). The VCL
+  // tolerated it. Unmerge first.
+  MainMenu.Merge(nil);
+
   ApplicationDM.Options.AddWindowPos(self);
 
   FStatusbarClearPNGImg.Free;

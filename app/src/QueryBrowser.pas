@@ -1217,6 +1217,10 @@ end;
 procedure TQueryBrowserForm.FormDestroy(Sender: TObject);
 
 begin
+  // Port: unmerge this form's menu from the main menu before either is freed (see TMainForm.FormDestroy).
+  if Assigned(Menu) and Assigned(Menu.Items.MergedWith) and (Menu.Items.MergedWith.GetParentMenu is TMainMenu) then
+    TMainMenu(Menu.Items.MergedWith.GetParentMenu).Unmerge(Menu);
+
   FreeAndNil(Bookmarks);
 
   if (FHistory <> nil) then
