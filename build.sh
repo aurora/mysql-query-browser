@@ -10,7 +10,7 @@
 # Windows needs Lazarus in C:\lazarus and MSYS2 mingw64 in C:\msys64; Linux needs the
 # "freepascal" container from tools/distrobox-setup.sh (see AGENTS.md); macOS needs Homebrew and Lazarus
 # (tools/macos-setup.sh, docs/macos-setup.md). The widgetset can be chosen with QBR_WIDGETSET (Linux:
-# gtk2|qt5, default the project's, gtk2; macOS: default cocoa); QBR_BACKEND_BUILD names another
+# gtk2|qt5|qt6, default the project's, gtk2; macOS: default cocoa); QBR_BACKEND_BUILD names another
 # backend build directory (tools/package-appimage.sh links against the one built in the older container).
 # macOS only: LAZARUS_DIR (default /Applications/Lazarus), HOMEBREW_PREFIX (default /opt/homebrew),
 # QBR_FPC_OPTS (extra compiler options, appended to the ones below).

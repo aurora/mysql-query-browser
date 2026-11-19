@@ -122,6 +122,26 @@ run with `QT_QPA_PLATFORM=xcb` and `unset WAYLAND_DISPLAY`, otherwise the window
 black under Qt5), the GTK2-specific adjustments (`AdjustGroupBoxes` measures GTK2; the connect dialog shows the group
 caption above its frame), dialogs other than connect, interaction, the server matrix.
 
+**Qt6 widgetset (2026-11-19, trial build for the move in ADR-0024).** Lazarus 4.8 with `lazarus-lcl-qt6` and
+`qt6pas` (Qt 6.11) builds the whole program without errors or source changes. Built apart from the GTK2 build with
+`lazbuild -B --ws=qt6 --opt=-Fl<repo>/backend/build-linux --opt=-FU<lib dir> --opt=-o<bin dir>/querymole app/qbr.lpi`
+and `python tools/prepare_runtime.py <bin dir>`; run with `QT_QPA_PLATFORM=xcb` and `WAYLAND_DISPLAY` unset as above.
+Checked under Xvfb against MySQL 8.4 (300,000 rows, UTF-8 and CJK text, NULL): the developer screenshot modes work
+under Qt6 (black under Qt5); the main window with results, schema expansion and double click on a table,
+`--stop-and-edit` (stop after 700 ms, edit, run again), `--stress-schemata 30`, the About, options (all pages),
+connections and text search dialogs, and `--menu-smoke run` (137 entries, only the expected "Only two resultsets can
+be compared" message). `tests/run-matrix.sh --app-only` with `QBR_APP` set to the Qt6 build passes on all six servers.
+Visible differences to GTK2: group box captions sit above the frame instead of in its line (the GTK2 adjustments
+do not apply), the options page header is cut at its right edge, grid lines in the result are darker. Not checked:
+interaction on a real desktop (Wayland, scaling), drag and drop, the AppImage with Qt6 libraries.
+
+Found on the way, both widgetsets: quitting crashed (exit code 217, after the main program, so without an error
+report). The query browser form's menu is merged into the main menu (`MainMenu.Merge`) and was never unmerged; when
+either form was freed, the LCL updated the other menu's handles during destruction (GTK2: use after free in
+`TMenu.Destroy` on File > Exit; Qt6: access violation in `TQtWSMenu.CreateHandle` also at the end of every developer
+mode). The VCL tolerated it. Both forms now unmerge in `OnDestroy`, which the LCL runs before handles and components
+are freed; File > Exit ends with exit code 0 under GTK2 and Qt6, and the Win64 build compiles.
+
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with
 `double free or corruption (out)`. The core dump shows `g_free` called from
