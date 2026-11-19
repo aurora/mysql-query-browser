@@ -15,13 +15,27 @@ function AddApplicationFont(const FileName: String): Boolean;
 // the LCL reads the font list once.
 procedure AddBundledTahoma;
 
+// Qt keeps its own font database and does not see fonts added to fontconfig as above (the Qt6 build drew the forms
+// with Noto Sans or DejaVu Sans instead). Under the Qt6 widgetset this adds the same files to Qt's database; it needs
+// the QApplication, so it is called after Application.Initialize. Nothing to do for other widgetsets.
+procedure AddBundledTahomaToQt;
+
 var
   BundledTahomaLoaded: Boolean = False;    // the LCL's font list does not show fonts added after the toolkit started
 
 implementation
 
 uses
-  SysUtils, DynLibs;
+  SysUtils, DynLibs{$IFDEF LCLQT6}, qt6{$ENDIF};
+
+const
+  TahomaFiles: array[0..1] of String = ('tahoma.ttf', 'tahomabd.ttf');
+
+function BundledFontDir: String;
+
+begin
+  Result := ExtractFilePath(ParamStr(0)) + 'fonts' + PathDelim;
+end;
 
 // Loaded at run time so that fontconfig's development files are not needed for building.
 function AddApplicationFont(const FileName: String): Boolean;
@@ -42,19 +56,37 @@ end;
 
 procedure AddBundledTahoma;
 
-const
-  Files: array[0..1] of String = ('tahoma.ttf', 'tahomabd.ttf');
-
 var
   I: Integer;
   Dir: String;
 
 begin
   BundledTahomaLoaded := True;
-  Dir := ExtractFilePath(ParamStr(0)) + 'fonts' + PathDelim;
-  for I := Low(Files) to High(Files) do
-    if not (FileExists(Dir + Files[I]) and AddApplicationFont(Dir + Files[I])) then
+  Dir := BundledFontDir;
+  for I := Low(TahomaFiles) to High(TahomaFiles) do
+    if not (FileExists(Dir + TahomaFiles[I]) and AddApplicationFont(Dir + TahomaFiles[I])) then
       BundledTahomaLoaded := False;
+end;
+
+procedure AddBundledTahomaToQt;
+
+{$IFDEF LCLQT6}
+var
+  I: Integer;
+  FileName: WideString;
+{$ENDIF}
+
+begin
+  {$IFDEF LCLQT6}
+  if not BundledTahomaLoaded then
+    Exit;
+  for I := Low(TahomaFiles) to High(TahomaFiles) do
+  begin
+    FileName := UTF8Decode(BundledFontDir + TahomaFiles[I]);
+    if QFontDatabase_addApplicationFont(@FileName) < 0 then
+      BundledTahomaLoaded := False;
+  end;
+  {$ENDIF}
 end;
 
 end.

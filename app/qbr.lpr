@@ -170,7 +170,7 @@ begin
   Application.Title := RevivalProductName;
   {$IFNDEF MSWINDOWS}PinGtkDpiTo96; AddBundledTahoma;{$ENDIF}   // Port: see units GtkDpi, AppFonts
   Application.Initialize;
-  {$IFNDEF MSWINDOWS}UseFusionStyle;{$ENDIF}                     // Port: see unit QtStyle (Qt6 only)
+  {$IFNDEF MSWINDOWS}UseFusionStyle; AddBundledTahomaToQt;{$ENDIF}   // Port: see units QtStyle, AppFonts (Qt6 only)
   InitGlobalVars;
 
   Trace('options loaded, command line checked; ppi=' + IntToStr(Screen.PixelsPerInch));
