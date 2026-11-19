@@ -1,6 +1,6 @@
 # ADR-0024 — GTK2 for the first release, a move to Qt afterwards
 
-- Status: Accepted (principle); the switch itself and its trigger are open
+- Status: Accepted (principle); superseded in part by ADR-0044 (Qt6 before the first release)
 - Date: 2026-11-02
 - Deciders: Harald Lapp (project owner)
 
