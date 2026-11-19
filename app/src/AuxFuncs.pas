@@ -197,7 +197,7 @@ var
 implementation
 
 uses
-  TntWindows, Types, PNGTools{$IFNDEF MSWINDOWS}, Process, AppFonts{$ENDIF}{$IFDEF LCLGTK2}, gtk2{$ENDIF};
+  TntWindows, Types, PNGTools{$IFNDEF MSWINDOWS}, Process, AppFonts{$ENDIF}{$IFDEF LCLGTK2}, gtk2{$ENDIF}{$IFDEF LCLQT6}, QtStyle{$ENDIF};
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -373,6 +373,9 @@ begin
 
   AdjustGroupBoxes(Form);
   KeepRightEdgeOfLabels(Form);
+  {$IFDEF LCLQT6}
+  ScopeTabSizeStyleSheets(Form);   // Port: see unit QtStyle
+  {$ENDIF}
 end;
 
 

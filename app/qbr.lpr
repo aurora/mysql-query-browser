@@ -18,7 +18,7 @@ uses
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
   UCEShared, UCEHighlighter, UniCodeEditor, UCEEditorKeyCommands, UniCodeConsole,
-  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main, DevMenuSmoke{$IFNDEF MSWINDOWS}, GtkDpi, AppFonts, Math{$ENDIF};
+  StringContainers, UCESQLHighlighter, MySQLResultSet, MySQLResultSetFieldViewer, MySQLResultSetControls, EditorTableVTEdit, EditorTableVTFKEdit, EditorTable, SQLErrorGrid, SchemataTreeView, SchemaSelection, EmbeddedWB, LexicalTools, SqlCmdPanel, ScriptPanel, TableDrag, QueryBrowser, UpdateCheck, Main, DevMenuSmoke{$IFNDEF MSWINDOWS}, GtkDpi, QtStyle, AppFonts, Math{$ENDIF};
 
 {$IFNDEF MSWINDOWS}
 procedure xmlInitParser; cdecl; external 'xml2';
@@ -170,6 +170,7 @@ begin
   Application.Title := RevivalProductName;
   {$IFNDEF MSWINDOWS}PinGtkDpiTo96; AddBundledTahoma;{$ENDIF}   // Port: see units GtkDpi, AppFonts
   Application.Initialize;
+  {$IFNDEF MSWINDOWS}UseFusionStyle;{$ENDIF}                     // Port: see unit QtStyle (Qt6 only)
   InitGlobalVars;
 
   Trace('options loaded, command line checked; ppi=' + IntToStr(Screen.PixelsPerInch));
