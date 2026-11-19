@@ -37,7 +37,25 @@ begin
   Result := ExtractFilePath(ParamStr(0)) + 'fonts' + PathDelim;
 end;
 
-// Loaded at run time so that fontconfig's development files are not needed for building.
+// Qt's own font database (see AddBundledTahomaToQt); only possible once the QApplication exists.
+function AddFontToQt(const FileName: String): Boolean;
+
+{$IFDEF LCLQT6}
+var
+  W: WideString;
+{$ENDIF}
+
+begin
+  Result := True;
+  {$IFDEF LCLQT6}
+  W := UTF8Decode(FileName);
+  Result := QFontDatabase_addApplicationFont(@W) >= 0;
+  {$ENDIF}
+end;
+
+// Loaded at run time so that fontconfig's development files are not needed for building. Under the Qt6 widgetset the
+// file also goes into Qt's font database once the QApplication exists (the code font of the editors, registered by
+// TMainForm.CheckFonts, was otherwise replaced by a proportional font in the editor's fixed character grid).
 function AddApplicationFont(const FileName: String): Boolean;
 
 var
@@ -52,6 +70,10 @@ begin
   @FcConfigAppFontAddFile := GetProcedureAddress(Lib, 'FcConfigAppFontAddFile');
   if Assigned(FcConfigAppFontAddFile) then
     Result := FcConfigAppFontAddFile(nil, PChar(FileName));    // nil: the current configuration
+  {$IFDEF LCLQT6}
+  if QCoreApplication_instance <> nil then
+    Result := AddFontToQt(FileName) and Result;
+  {$ENDIF}
 end;
 
 procedure AddBundledTahoma;
@@ -73,7 +95,6 @@ procedure AddBundledTahomaToQt;
 {$IFDEF LCLQT6}
 var
   I: Integer;
-  FileName: WideString;
 {$ENDIF}
 
 begin
@@ -81,11 +102,8 @@ begin
   if not BundledTahomaLoaded then
     Exit;
   for I := Low(TahomaFiles) to High(TahomaFiles) do
-  begin
-    FileName := UTF8Decode(BundledFontDir + TahomaFiles[I]);
-    if QFontDatabase_addApplicationFont(@FileName) < 0 then
+    if not AddFontToQt(BundledFontDir + TahomaFiles[I]) then
       BundledTahomaLoaded := False;
-  end;
   {$ENDIF}
 end;
 

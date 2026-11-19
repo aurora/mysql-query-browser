@@ -213,6 +213,28 @@ appear on the console, both from the LCL's Qt6 widgetset, not from the program:
 The messages are left as they are (seen only when started from a terminal); filtering them with `QT_LOGGING_RULES`
 would hide real warnings as well.
 
+**Qt6: editor font, menu bar and combo box lists (2026-11-20).** Found by the project owner on the desktop:
+- The SQL editor showed wide gaps between the letters: the code font (Bitstream Vera Sans Mono, registered by
+  `TMainForm.CheckFonts`) was only added to fontconfig, which Qt does not see, so Qt substituted a proportional font
+  in the editor's fixed character grid. `AppFonts.AddApplicationFont` now also adds every file to Qt's font database
+  once the QApplication exists (the same gap as the Tahoma stand-in the day before).
+- The menu bar looked squeezed under its drop-down menus: it inherited the form's small Tahoma and Fusion adds only a
+  few pixels to menu bar entries (bar 16 pixels, drop-down items 25). Menu bars of the original and under GTK2 use
+  the system's menu font. `QtStyle.AdjustMenuBar` (called for the main form after `PrepareGUI`) gives the bar Qt's
+  menu bar font and more padding (a style sheet on the bar, with the selection colours, which Fusion no longer
+  draws once a rule applies); the bar is about 25 pixels high, bar and drop-down menus use the same font.
+- The lists of combo boxes showed their rows without spacing (as tight as the original's on Windows, about 13 pixels
+  for Tahoma 8 pt; GTK2: about 28). An application style sheet set in `UseFusionStyle` gives those lists a few pixels
+  (rows about 22 pixels), again with the selection colours. It applies to the lists only; the main window, the
+  result grid, the options dialog and the connect dialog look as before (checked by screenshot).
+- Checked: menu smoke test (137 entries, the expected exception), the app self-tests on all six servers with Qt6 and
+  with GTK2 (where nothing changes). The changes are guarded by `LCLQT6` or `MSWINDOWS`; no Win64 cross-build was done.
+
+Reproducing under Xvfb with an open menu or list: start the program, then `xdotool` (`key alt+e`, or a click on the
+combo box arrow) and `import -window root` (both in the freepascal container). A connect dialog with stored
+connections needs a `mysqlx_user_connections.xml` in the data folder (`user_connection` elements with
+`connection_name`, `username`, `hostname`, `port` and `storage_type` 1).
+
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with
 `double free or corruption (out)`. The core dump shows `g_free` called from

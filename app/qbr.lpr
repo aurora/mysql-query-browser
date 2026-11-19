@@ -221,6 +221,7 @@ begin
   if Res = 1 then
   begin
     MainForm.PrepareGUI;
+    {$IFNDEF MSWINDOWS}AdjustMenuBar(MainForm);{$ENDIF}   // Port: see unit QtStyle (Qt6 only)
     Trace('gui prepared');
     ShotFile := '';
     for I := 1 to ParamCount - 1 do
