@@ -53,6 +53,7 @@ Related.
 | [0042](0042-tls-preferred-without-a-second-attempt.md) | TLS "preferred" in one attempt, without certificate verification | Accepted |
 | [0043](0043-dead-connections-do-not-block-the-window.md) | Dead connections do not block the window | Accepted (Windows backend build not checked) |
 | [0044](0044-qt6-on-linux-before-the-first-release.md) | Qt6 on Linux before the first release | Accepted (principle); release switch open |
+| [0045](0045-qt6-fusion-style-and-standard-palette.md) | Qt6 build draws with the Fusion style and its standard palette | Accepted |
 
 ## Numbering
 

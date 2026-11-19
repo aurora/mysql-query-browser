@@ -142,6 +142,26 @@ either form was freed, the LCL updated the other menu's handles during destructi
 mode). The VCL tolerated it. Both forms now unmerge in `OnDestroy`, which the LCL runs before handles and components
 are freed; File > Exit ends with exit code 0 under GTK2 and Qt6, and the Win64 build compiles.
 
+**Qt6, first layout pass (2026-11-19).** Build with `QBR_WIDGETSET=qt6 ./build.sh`; the units now go to
+`app/lib/<cpu>-<os>-<widgetset>`, so switching between GTK2 and Qt6 no longer mixes their units (the binary in
+`app/bin` is whichever was built last). Run under Xvfb with `QT_QPA_PLATFORM=xcb` and `WAYLAND_DISPLAY` unset.
+- Style: Fusion with its standard palette, set in `UseFusionStyle` (`app/compat/QtStyle.pas`, ADR-0045), also when
+  `QT_STYLE_OVERRIDE` is set. Compared by screenshot with GTK2 and Qt's Windows style (connect dialog, all options
+  pages, main window, about, text search, regex importer, schema selection).
+- Grid lines of the result were black: VirtualTreeView draws grid and tree lines with a monochrome pattern brush whose
+  colours come from the canvas, and the Qt6 widgetset draws the pattern as a black and white image. `VTCompat` draws
+  those lines itself under Qt6 (solid and dotted, same colours and pixel pattern as the brush).
+- The options dialog's Connections page had no "Connection Parameters"/"Advanced Parameters" tabs: for `TabHeight`
+  the Qt6 widgetset sets the style sheet `QTabBar::tab { height: 16px; width: 0px; }` on the page control, and style
+  sheets apply to child widgets, so every page control on its pages had tabs of width 0.
+  `ScopeTabSizeStyleSheets` (`QtStyle`, called from `InitForm`) limits the rule to the control's own tab bar and
+  leaves out the size 0. The outer tabs stay hidden behind `HeaderPnl` as in the original.
+- Accepted as Fusion's rendering: group box captions above the frame. Left as small differences: pages of the options
+  dialog start a few pixels higher than under GTK2, the page header is 2 pixels wider than the page frame, the
+  "FK naming" combo box shows its text scrolled.
+- `tests/run-matrix.sh` passes with GTK2 (all tests) and with the Qt6 build (`--app-only`, `QBR_APP`); under Qt6 the
+  menu smoke test, stop and edit and the schema tree stress test pass; the Win64 build compiles (same code size).
+
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with
 `double free or corruption (out)`. The core dump shows `g_free` called from

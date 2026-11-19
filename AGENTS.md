@@ -48,7 +48,7 @@ If you need a different generated result, change the generator, not its output.
 ## Toolchain (Linux, distrobox)
 
 `tools/distrobox-setup.sh` (run on the host) creates the Fedora container `freepascal` with
-Lazarus 4.8 / FPC 3.2.3 (`lazbuild`, LCL gtk2 and qt5), gcc/cmake/ninja, the backend libraries,
+Lazarus 4.8 / FPC 3.2.3 (`lazbuild`, LCL gtk2, qt5 and qt6), gcc/cmake/ninja, the backend libraries,
 Python, `x86_64-w64-mingw32-windres`, gdb and the mariadb client; `podman` inside forwards to
 the host. Work inside with `distrobox enter freepascal`.
 
@@ -59,7 +59,11 @@ the host. Work inside with `distrobox enter freepascal`.
   run it.
 - Console programs need `cwstring` in their `uses` on Unix, otherwise `String`/`WideString`
   conversions mangle non-ASCII text (LCL programs get it through LazUTF8).
-- `app/qbr.lpi` compiles with GTK2; state and open problems of the port are in
+- `app/qbr.lpi` compiles with GTK2 (default) and with Qt6 (`QBR_WIDGETSET=qt6 ./build.sh`), the widgetset Linux moves
+  to before the first release (ADR-0044; Fusion style, ADR-0045). Units go to `app/lib/<cpu>-<os>-<widgetset>`; the
+  program in `app/bin` is the last one built. Qt6-only code is guarded with `{$IFDEF LCLQT6}`, GTK2-only code with
+  `{$IFDEF LCLGTK2}` (ADR-0024). Run Qt programs with `QT_QPA_PLATFORM=xcb` and `WAYLAND_DISPLAY` unset inside the
+  distrobox, otherwise their windows open on the real desktop. State and open problems of the port are in
   `docs/linux-port.md`. Windows-only code is guarded with `{$IFDEF MSWINDOWS}` and a `// Port:`
   comment; Windows names the LCL has under another name go into `app/compat/WinAliases.pas` (only
   ones with the same meaning). `python tools/winapi_usage.py [--where] [Unit ...]` lists remaining
@@ -248,5 +252,11 @@ choice that a future contributor would ask "why?" about, write the ADR.
   no such properties, the LCL's has (and they are not the control's size). Ported paint code that
   worked in the VCL draws in the wrong place (e.g. the result navigation bar lost its right-hand
   buttons). Write `Self.Width`/`Self.Height`.
+- **Qt6 style sheets apply to child widgets.** The LCL's Qt6 widgetset implements some properties with style sheets
+  (`TabHeight` became `QTabBar::tab { height: 16px; width: 0px; }`), which then hit every widget inside the control
+  (the nested page control lost its tabs). `QtStyle.ScopeTabSizeStyleSheets` limits that one; suspect the same when a
+  nested control looks wrong only under Qt6.
+- **Monochrome pattern brushes draw black and white under Qt6** (the canvas text and background colours are ignored).
+  VirtualTreeView's grid and tree lines use one; `VTCompat` draws them itself under Qt6.
 - **`TImage.Canvas` is the picture's canvas,** not the control's: drawing on it changes the picture and
   repaints forever. A `TImage`-derived control that paints itself uses the graphic control's canvas.
