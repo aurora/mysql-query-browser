@@ -192,6 +192,27 @@ the AppImage with the Qt6 widgetset (default still GTK2 until the release switch
   otherwise; whether the LCL's Qt6 widgetset behaves there, or AppRun should prefer xcb, is for the desktop check),
   scaling, the file dialog, and the Velopack variant (`--velopack`) with Qt6.
 
+**Qt6 AppImage on a real Wayland desktop (2026-11-20).** The project owner started the Qt6 AppImage on KDE Plasma
+(Wayland, native Qt Wayland platform, no `QT_QPA_PLATFORM`): it works, no problems seen so far. Two kinds of messages
+appear on the console, both from the LCL's Qt6 widgetset, not from the program:
+- `QObject::disconnect: No such slot QComboBox::_q_returnPressed()`, once per editable combo box: `qtwidgets.pas`
+  (Lazarus 4.8, line 11391) disconnects a private slot of `QComboBox` that Qt 6 no longer has. Nothing happens; only
+  fixable in Lazarus. Harmless.
+- `This plugin supports grabbing the mouse only for popup windows`, on mouse presses: the LCL's mouse capture
+  (`SetCapture`, under Qt `QWidget::grabMouse`) is refused by Qt's Wayland plugin for normal windows. While a button is
+  held, Wayland delivers the mouse events to the window anyway, so it usually goes unnoticed. To check on the desktop
+  (the places where dragging leaves the control or the window):
+  - splitters (schema tree / editor, query / result), dragged fast and beyond the window edge;
+  - column widths in the result grid;
+  - drag and drop of a table from the schema tree into the query editor;
+  - selecting text in the editor with the mouse held beyond its edge (it should scroll);
+  - dragging a scroll bar thumb and leaving the window.
+  If one of these misbehaves under Wayland and works with `QT_QPA_PLATFORM=xcb` (XWayland), AppRun should default to
+  xcb, still overridable through `QT_QPA_PLATFORM`.
+
+The messages are left as they are (seen only when started from a terminal); filtering them with `QT_LOGGING_RULES`
+would hide real warnings as well.
+
 Still open, sporadic crash (2026-10-31): once, right after connecting through the connect dialog (typed
 values, real KDE/XWayland session, 4K display) and the main window opening, the program aborted with
 `double free or corruption (out)`. The core dump shows `g_free` called from
