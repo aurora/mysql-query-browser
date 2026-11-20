@@ -190,6 +190,14 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
   } >> "$GITHUB_STEP_SUMMARY"
 fi
 if [ -n "${GITHUB_ACTIONS:-}" ]; then
+  # the whole table as one notice (its lines joined with %0A), so passing runs can be read too, e.g. whether tests
+  # were ignored
+  table=""
+  for r in "${results[@]}"; do
+    IFS='|' read -r s res app det <<< "$r"
+    table="$table$s: $res, app $app%0A"
+  done
+  echo "::notice title=server matrix::$table"
   for r in "${results[@]}"; do
     IFS='|' read -r s res app det <<< "$r"
     case "$res $app" in *FAIL*|*"did not start"*) echo "::error title=$s::$res, app $app. $det" ;; esac
