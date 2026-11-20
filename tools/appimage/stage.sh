@@ -62,6 +62,14 @@ else
   # application starts
   printf '[Paths]\nPrefix = ..\nPlugins = lib/qt6/plugins\n' > "$APPDIR/usr/bin/qt.conf"
 fi
+# libssh built by build-libssh.sh (AlmaLinux 9's 0.10 is too old, ADR-0048), when the program or the backend uses it;
+# copied before the closure so that ldd does not take the system's copy
+if [ -n "$(for f in "$SRC/app/bin/querymole" "$BACKEND"/*.so; do readelf -d "$f"; done | grep 'NEEDED.*\[libssh\.so')" ]; then
+  [ -f "$BACKEND/libssh/lib64/libssh.so.4" ] || { echo "libssh is needed but not built (build-libssh.sh)" >&2; exit 1; }
+  cp -L "$BACKEND/libssh/lib64/libssh.so.4" "$APPDIR/usr/lib/"
+  mkdir -p "$APPDIR/licenses/libssh"
+  cp "$BACKEND/libssh/COPYING" "$APPDIR/licenses/libssh/"
+fi
 for p in caching_sha2_password client_ed25519 dialog mysql_clear_password sha256_password; do
   cp /usr/lib64/mariadb/plugin/$p.so "$APPDIR/usr/lib/mariadb/plugin/"
 done
@@ -132,6 +140,7 @@ mkdir -p "$APPDIR/licenses/rpm"
     rel=${f#$APPDIR/}
     base=$(basename "$f")
     case "$base" in libmysql*) echo "$rel | this project (GPL-2.0-or-later / LGPL-2.1-or-later parts, see NOTICE)"; continue ;; esac
+    case "$base" in libssh.so*) echo "$rel | libssh $(cat "$BACKEND/libssh/VERSION"), built from https://www.libssh.org/ | LGPL-2.1-or-later (licenses/libssh/COPYING)"; continue ;; esac
     case "$base" in libQt6Pas.so*) echo "$rel | Free Pascal Qt6 binding $(sed -n 's/^else:VERSION = //p' $SRC/tools/cache/qt6pas-src/Qt6Pas.pro), built from the Lazarus sources | LGPL with linking exception (licenses/qt6pas/COPYING.TXT)"; continue ;; esac
     # the copy keeps the name of the soname link, the package owns the real file
     owner=$(rpm -qf "$(ls /usr/lib64/$base /usr/lib64/gtk-2.0/$GTKVER/engines/$base /usr/lib64/gdk-pixbuf-2.0/$GTKVER/loaders/$base \

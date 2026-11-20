@@ -21,7 +21,8 @@
 # 2. the Pascal program is built in the freepascal container against that backend (the program itself needs no
 #    glibc newer than 2.34);
 #    For Qt6, libQt6Pas is built in the AlmaLinux 9 container first (tools/appimage/build-qt6pas.sh) from the binding
-#    sources of the Lazarus in the freepascal container;
+#    sources of the Lazarus in the freepascal container; libssh (tools/appimage/build-libssh.sh) too, since
+#    AlmaLinux 9's is too old for ADR-0048;
 # 3. tools/appimage/stage.sh collects the program, the backend, GTK2 or Qt 6 and the other libraries in an AppDir;
 # 4. appimagetool (downloaded once to tools/cache/) packs it.
 #
@@ -86,6 +87,8 @@ if [ "$do_build" = 1 ]; then
     rm -rf "$ROOT/tools/cache/qt6pas-src/attic" "$ROOT"/tools/cache/qt6pas-src/libQt6Pas.so*
     run_el9 sh tools/appimage/build-qt6pas.sh
   fi
+  echo "== libssh (AlmaLinux 9)"
+  run_el9 sh tools/appimage/build-libssh.sh
   echo "== application (freepascal container)"
   # linking is only redone when a source changed: force it, the library directory is not part of the check
   touch "$ROOT/app/qbr.lpr"

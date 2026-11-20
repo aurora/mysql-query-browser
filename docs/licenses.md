@@ -56,6 +56,7 @@ for the Qt6 widgetset (ADR-0044; the GTK2 image bundles GTK2 instead):
 |---|---|---|
 | Qt 6 (Core, Gui, Widgets, PrintSupport, DBus, XcbQpa, WaylandClient and the platform plugins; EPEL `qt6-qtbase`, `qt6-qtwayland`) | LGPL-3.0-only OR GPL-3.0-only WITH Qt-GPL-exception-1.0 (package metadata) | OK under LGPL-3.0, dynamic linking; like Apache-2.0 above, LGPL-3.0 parts make the combination GPL-3.0-or-later, another reason the "or later" must stay. The libraries are shipped unmodified as separate files, so a user can replace them. |
 | libQt6Pas (Free Pascal Qt6 binding, built from the Lazarus sources by `tools/appimage/build-qt6pas.sh`) | LGPL with the same linking exception as the LCL (`COPYING.TXT` of the binding, shipped in `licenses/qt6pas/`) | OK. The sources are part of the Lazarus distribution the program is built with. |
+| libssh 0.12 (SSH tunnel, ADR-0048; built from the libssh.org release by `tools/appimage/build-libssh.sh`, checksum checked) | LGPL-2.1-or-later (`COPYING`, shipped in `licenses/libssh/`) | OK, dynamic linking. Bundled only once the program links it; on Windows it will come from MSYS2 (`mingw-w64-x86_64-libssh`, same licence). |
 
 ## 3. Pascal components linked into `querymole.exe` (static linking)
 

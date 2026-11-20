@@ -10,5 +10,6 @@ RUN dnf -y install dnf-plugins-core epel-release \
       glib2-devel libxml2-devel pcre-devel mariadb-connector-c-devel \
       gtk2 gdk-pixbuf2 pango cairo atk shared-mime-info adwaita-icon-theme \
       qt6-qtbase-devel qt6-qtbase-gui qt6-qtwayland \
+      openssl-devel zlib-devel \
       cargo git \
  && dnf clean all
