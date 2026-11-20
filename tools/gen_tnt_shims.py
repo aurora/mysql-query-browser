@@ -41,7 +41,8 @@ UNITS = {
     "TntGrids": (["Grids"], {"TTntStringGrid": "TStringGrid"}),
     "TntMenus": (["Menus"], {"TTntMenuItem": "TMenuItem", "TTntMainMenu": "TMainMenu", "TTntPopupMenu": "TPopupMenu"}),
     "TntActnList": (["ActnList"], {"TTntAction": "TAction", "TTntActionList": "TActionList"}),
-    "TntDialogs": (["Dialogs"], {"TTntOpenDialog": "TOpenDialog", "TTntSaveDialog": "TSaveDialog"}),
+    # QBFileDialogs: the file dialogs with Qt6's doubled filter patterns removed (see that unit)
+    "TntDialogs": (["Dialogs", "QBFileDialogs"], {"TTntOpenDialog": "TQBOpenDialog", "TTntSaveDialog": "TQBSaveDialog"}),
     "TntRegistry": (["Registry"], {"TTntRegistry": "TRegistry"}),
 }
 

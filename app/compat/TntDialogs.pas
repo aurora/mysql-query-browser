@@ -8,11 +8,11 @@ unit TntDialogs;
 interface
 
 uses
-  Dialogs;
+  Dialogs, QBFileDialogs;
 
 type
-  TTntOpenDialog = TOpenDialog;
-  TTntSaveDialog = TSaveDialog;
+  TTntOpenDialog = TQBOpenDialog;
+  TTntSaveDialog = TQBSaveDialog;
 
 implementation
 
