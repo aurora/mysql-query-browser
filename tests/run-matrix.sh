@@ -208,6 +208,25 @@ for entry in "${matrix[@]}"; do
     <storage_type>1</storage_type>
     <password>$password</password>
   </user_connection>
+  <user_connection>
+    <connection_name>ssh-wrong-password</connection_name>
+    <username>root</username>
+    <hostname>127.0.0.1</hostname>
+    <port>$port</port>
+    <advanced_options>
+      <advanced_option>SSH_TUNNEL=Yes</advanced_option>
+      <advanced_option>SSH_HOST=127.0.0.1</advanced_option>
+      <advanced_option>SSH_PORT=24022</advanced_option>
+      <advanced_option>SSH_USER=qbr</advanced_option>
+      <advanced_option>SSH_AUTH=key</advanced_option>
+      <advanced_option>SSH_KEYFILE=$ssh_dir/id_ed25519</advanced_option>
+      <advanced_option>SSH_CONFIG=$ssh_dir/config_app</advanced_option>
+      <advanced_option>SSH_KNOWN_HOSTS=$ssh_dir/known_hosts_app</advanced_option>
+    </advanced_options>
+    <connection_type>0</connection_type>
+    <storage_type>1</storage_type>
+    <password>not-the-password</password>
+  </user_connection>
 </user_connections>
 XML
       # a new login on the SSH server proves the program went through the tunnel (the database port is reachable
@@ -222,6 +241,19 @@ XML
         app_result="FAIL"
         why=$(head -1 "$ssh_data/report.txt" 2>/dev/null || true)
         details="$details ssh: ${why:-no report};"
+      fi
+      # the connection manager's "Test" (ADR-0051): through the tunnel, and with a wrong password
+      run timeout 60 "${xvfb[@]}" "$APP" -datadir "$ssh_data" --selftest-test-connection ssh "$ssh_data/test-ok.txt" \
+        >/dev/null 2>&1
+      run timeout 60 "${xvfb[@]}" "$APP" -datadir "$ssh_data" --selftest-test-connection ssh-wrong-password \
+        "$ssh_data/test-wrong.txt" >/dev/null 2>&1
+      if ! grep -q '^ok: .*SSH server' "$ssh_data/test-ok.txt" 2>/dev/null; then
+        app_result="FAIL"
+        details="$details test: $(head -1 "$ssh_data/test-ok.txt" 2>/dev/null || echo no report);"
+      fi
+      if ! grep -q '^failed: .*1045' "$ssh_data/test-wrong.txt" 2>/dev/null; then
+        app_result="FAIL"
+        details="$details test with wrong password: $(head -1 "$ssh_data/test-wrong.txt" 2>/dev/null || echo no report);"
       fi
     fi
     [ "$app_result" = PASS ] || failed=1

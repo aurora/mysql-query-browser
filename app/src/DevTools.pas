@@ -5,6 +5,9 @@ unit DevTools;
 
     querymole --shot-connect out.png     show the connect dialog, save a screenshot of it (and out_details.png with
                                          "Details >>" open), exit
+    querymole --selftest-test-connection <name> out.txt
+                                         the connection manager's "Test" (ADR-0051) for the stored connection
+                                         <name>: "ok: ..." or "failed: ..." in out.txt
     querymole --shot-ssh out.png         the same for the SSH tunnel dialog (ADR-0048), filled from the stored
                                          connection named with -c
     querymole -u root -p ... -h ... -P ... --selftest-connect out.txt
@@ -23,6 +26,7 @@ procedure CaptureWindowToPng(Wnd: TObject; const FileName: String);
 procedure RunConnectDialogScreenshot(const FileName: String);
 procedure RunOptionsScreenshot(const FileBase: String);
 procedure RunSSHDialogScreenshot(const FileName: String);
+procedure RunTestConnectionSelftest(const Name, ReportFile: String);
 procedure RunConnectSelftest(const ReportFile: String);
 procedure RunDialogConnectSelftest(const ReportFile: String);
 
@@ -30,8 +34,8 @@ implementation
 
 uses
   {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Classes, SysUtils, Forms, Graphics, Controls, MySQLConnection, ConnectToInstance, Options,
-  OptionsEditor, SSHTunnelDialog,
-  myx_types, myx_public_interface;
+  OptionsEditor, SSHTunnelDialog, ConnectionTest,
+  myx_types, myx_util_public_interface, myx_public_interface;
 
 {$IFDEF MSWINDOWS}
 function PrintWindow(hwnd: HWND; hdcBlt: HDC; nFlags: UINT): BOOL; stdcall; external 'user32.dll';
@@ -212,6 +216,44 @@ begin
     CaptureWindowToPng(Dlg, FileName);
   finally
     Dlg.Free;
+  end;
+end;
+
+procedure WriteReport(const FileName, Msg: String); forward;
+
+procedure RunTestConnectionSelftest(const Name, ReportFile: String);
+var
+  Conns: PMYX_USER_CONNECTIONS;
+  Stored: TMYX_USER_CONNECTIONS;
+  Error: MYX_LIB_ERROR;
+  I: Integer;
+  Outcome: TConnectionTestResult;
+begin
+  Conns := myx_load_user_connections(MYXCommonOptions.UserDataDir + 'mysqlx_user_connections.xml', @Error);
+  if Error <> MYX_NO_ERROR then
+  begin
+    WriteReport(ReportFile, 'failed: the stored connections could not be read');
+    Exit;
+  end;
+  try
+    Stored := TMYX_USER_CONNECTIONS.Create(Conns);
+    try
+      for I := 0 to Stored.user_connections.Count - 1 do
+        if Stored.user_connections[I].connection_name = Name then
+        begin
+          Outcome := TestConnection(Stored.user_connections[I]);
+          if Outcome.OK then
+            WriteReport(ReportFile, 'ok: ' + StringReplace(Outcome.Text, LineEnding, ' ', [rfReplaceAll]))
+          else
+            WriteReport(ReportFile, 'failed: ' + StringReplace(Outcome.Text, LineEnding, ' ', [rfReplaceAll]));
+          Exit;
+        end;
+      WriteReport(ReportFile, 'failed: no stored connection named ' + Name);
+    finally
+      Stored.Free;
+    end;
+  finally
+    myx_free_user_connections(Conns);
   end;
 end;
 

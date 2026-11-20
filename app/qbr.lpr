@@ -13,7 +13,7 @@ uses
   TntClasses, TntStdCtrls, TntCheckLst, TntExtCtrls, TntForms, TntComCtrls, TntButtons, TntGrids,
   TntMenus, TntActnList, TntDialogs, TntRegistry, TntSysUtils, TntSystem, TntClipBrd,
   gnugettext, PNGImage, PNGTools, ResSelfTest, AuxFuncs, Options, MyxError, AuxApplicationFuncs,
-  MySQLConnection, QueryCancel, LibSSH, OpenSSLCrypto, PuttyKey, PageantPipe, SSHTunnel, SSHConnect, SSHConnectUI, SSHTunnelDialog, ConnectToInstance, CommonFuncs, About, DevTools,
+  MySQLConnection, QueryCancel, LibSSH, OpenSSLCrypto, PuttyKey, PageantPipe, SSHTunnel, SSHConnect, SSHConnectUI, SSHTunnelDialog, ConnectionTest, ConnectToInstance, CommonFuncs, About, DevTools,
   CommonTypes, MySQLCommonFuncs, AppInstanceMgmt, TextSearch, AdvancedEdit, TabHeader,
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
@@ -202,6 +202,11 @@ begin
     else if ParamStr(I) = '--selftest-connect' then
     begin
       RunConnectSelftest(ParamStr(I + 1));
+      Exit;
+    end
+    else if (ParamStr(I) = '--selftest-test-connection') and (I + 2 <= ParamCount) then
+    begin
+      RunTestConnectionSelftest(ParamStr(I + 1), ParamStr(I + 2));
       Exit;
     end
     else if ParamStr(I) = '--selftest-update' then

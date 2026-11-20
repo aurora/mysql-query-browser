@@ -134,6 +134,8 @@ default, in the original's style.
   - less memory per row (moves the limit, does not remove it).
   An automatic `LIMIT` on double click (as Workbench, DBeaver) would change the SQL users see and expect;
   least preferred.
+- **Connection manager** (ADR-0051, proposed): a "Test" button and groups of stored connections (folders in the tree,
+  kept in `storage_path`). Open: groups in the connect dialog's list.
 - **SSH tunnel** for connections (ADR-0048, proposed): libssh in the program, OpenSSH and PuTTY keys, agent and
   Pageant, `known_hosts` and `~/.ssh/config`; mock-up in the ADR; Pageant pipe name known; libssh 0.12.2 builds for the AppImage (`tools/appimage/build-libssh.sh`). The tunnel itself works and is
   tested on the matrix against an OpenSSH container (`app/src/SSHTunnel.pas`, `tests/test_ssh_tunnel.pas`). The program

@@ -24,7 +24,7 @@ uses
   {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, TntForms,
   Dialogs, TntStdCtrls, TntExtCtrls, TntComCtrls, ComCtrls, ImgList, AuxFuncs,
   myx_util_public_interface, myx_public_interface, Grids, ValEdit,
-  Options, PNGImage, MyxError, Forms, StdCtrls, ExtCtrls, TntClasses, SSHTunnelDialog;
+  Options, PNGImage, MyxError, Forms, StdCtrls, ExtCtrls, TntClasses, SSHTunnelDialog, ConnectionTest, Menus;
 
 type
   TOptionsForm = class(TTntForm)
@@ -178,7 +178,21 @@ type
     FApplicationOptionsForm: TApplicationOptionsForm;
     FCodeFontCharset: TFontCharset;
     FSSHRow: TSSHTunnelRow;   // revival: "Use SSH tunnel" on Connection Parameters (ADR-0048)
+    FTestConnectionBtn: TButton;   // revival: "Test" below the Notes label (ADR-0051)
+    FGroupMenu: TPopupMenu;        // revival: New / Rename / Delete Group on the connection tree (ADR-0051)
+    FNewGroupMI, FRenameGroupMI, FDeleteGroupMI: TMenuItem;
     procedure SSHRowChange(Sender: TObject);
+    procedure TestConnectionBtnClick(Sender: TObject);
+    // revival: groups of stored connections, kept in storage_path (ADR-0051)
+    function IsGroupNode(Node: TTreeNode): Boolean;
+    function GroupPathOf(Node: TTreeNode): String;
+    function GroupNodeFor(const Path: String): TTreeNode;
+    function SelectedGroupNode: TTreeNode;
+    procedure UpdateGroupPaths;
+    procedure GroupMenuPopup(Sender: TObject);
+    procedure NewGroupMIClick(Sender: TObject);
+    procedure RenameGroupMIClick(Sender: TObject);
+    procedure DeleteGroupMIClick(Sender: TObject);
   protected
     procedure LoadConnectionPage; virtual;
     procedure ApplyConnectionChanges; virtual;
@@ -245,6 +259,34 @@ begin
     Label1.Top := Label1.Top + 32;
     ConnMemo.Top := ConnMemo.Top + 32;
     ConnMemo.Height := ConnMemo.Height - 32;
+
+    // revival: "Test" in the free left column below the Notes label (ADR-0051)
+    FTestConnectionBtn := TButton.Create(Self);
+    FTestConnectionBtn.Parent := ConnGeneralTabSheet;
+    FTestConnectionBtn.SetBounds(ConnectionLbl.Left, Label1.Top + Label1.Height + 8,
+      ConnMemo.Left - ConnectionLbl.Left - 8, 25);
+    FTestConnectionBtn.Caption := _('Test');
+    FTestConnectionBtn.Hint := _('Connect with the values shown here, to check them');
+    FTestConnectionBtn.ShowHint := True;
+    FTestConnectionBtn.OnClick := TestConnectionBtnClick;
+
+    // revival: the context menu for groups of connections (ADR-0051)
+    FGroupMenu := TPopupMenu.Create(Self);
+    FGroupMenu.OnPopup := GroupMenuPopup;
+    FNewGroupMI := TMenuItem.Create(FGroupMenu);
+    FNewGroupMI.Caption := _('New Group...');
+    FNewGroupMI.OnClick := NewGroupMIClick;
+    FGroupMenu.Items.Add(FNewGroupMI);
+    FRenameGroupMI := TMenuItem.Create(FGroupMenu);
+    FRenameGroupMI.Caption := _('Rename Group...');
+    FRenameGroupMI.OnClick := RenameGroupMIClick;
+    FGroupMenu.Items.Add(FRenameGroupMI);
+    FDeleteGroupMI := TMenuItem.Create(FGroupMenu);
+    FDeleteGroupMI.Caption := _('Delete Group');
+    FDeleteGroupMI.OnClick := DeleteGroupMIClick;
+    FGroupMenu.Items.Add(FDeleteGroupMI);
+    ConnsTreeView.PopupMenu := FGroupMenu;
+    ConnsTreeView.RightClickSelect := True;
 
     OptionPageControl.Top := 20;
     OptionPageControl.Height := OptionPageControl.Height - 16;
@@ -439,6 +481,236 @@ begin
     DisableEnableControls(ConnectionPageControl.Pages[i], Enable);
   if FSSHRow <> nil then
     FSSHRow.SetEnabled(Enable);   // the summary is grey while the box is unchecked
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+// revival: groups of stored connections (ADR-0051). A group is a folder below "Connections"; a connection's group is
+// the path of folder names above it, kept in its storage_path ("Customers/ACME"). The tree is the truth while the
+// dialog is open: UpdateGroupPaths writes the paths back after every change.
+
+function TOptionsForm.IsGroupNode(Node: TTreeNode): Boolean;
+
+begin
+  Result := (Node <> nil) and (Node.Data = nil);
+end;
+
+function TOptionsForm.GroupPathOf(Node: TTreeNode): String;
+
+begin
+  Result := '';
+  if (Node <> nil) and not IsGroupNode(Node) then
+    Node := Node.Parent;
+  while (Node <> nil) and (Node.Parent <> nil) do
+  begin
+    if Result = '' then
+      Result := Node.Text
+    else
+      Result := Node.Text + '/' + Result;
+    Node := Node.Parent;
+  end;
+end;
+
+// the folder of a group path below "Connections", made when missing; an empty path is "Connections" itself
+function TOptionsForm.GroupNodeFor(const Path: String): TTreeNode;
+
+var
+  Rest, Name: String;
+  P: Integer;
+  Child: TTreeNode;
+
+begin
+  Result := ConnsTreeView.Items.GetFirstNode;
+  Rest := Path;
+  while Rest <> '' do
+  begin
+    P := Pos('/', Rest);
+    if P = 0 then
+      P := Length(Rest) + 1;
+    Name := Trim(Copy(Rest, 1, P - 1));
+    Delete(Rest, 1, P);
+    if Name = '' then
+      Continue;
+    Child := Result.GetFirstChild;
+    while (Child <> nil) and not (IsGroupNode(Child) and (Child.Text = Name)) do
+      Child := Child.GetNextSibling;
+    if Child = nil then
+      Child := AddTreeViewChildNode(ConnsTreeView, TTntTreeNode(Result), Name, 5, nil);
+    Result := Child;
+  end;
+end;
+
+// where a new connection or group goes: the selected group, the group of the selected stored connection, else
+// "Connections"
+function TOptionsForm.SelectedGroupNode: TTreeNode;
+
+var
+  Root: TTreeNode;
+
+begin
+  Result := ConnsTreeView.Selected;
+  if Result = nil then
+    Exit(ConnsTreeView.Items.GetFirstNode);
+  if not IsGroupNode(Result) then
+    Result := Result.Parent;
+  Root := Result;
+  while Root.Parent <> nil do
+    Root := Root.Parent;
+  if Root <> ConnsTreeView.Items.GetFirstNode then
+    Result := ConnsTreeView.Items.GetFirstNode;
+end;
+
+procedure TOptionsForm.UpdateGroupPaths;
+
+var
+  Node, Root: TTreeNode;
+
+begin
+  Node := ConnsTreeView.Items.GetFirstNode;
+  while Node <> nil do
+  begin
+    if not IsGroupNode(Node) then
+    begin
+      Root := Node;
+      while Root.Parent <> nil do
+        Root := Root.Parent;
+      if Root = ConnsTreeView.Items.GetFirstNode then
+        TMYX_USER_CONNECTION(Node.Data).storage_path := GroupPathOf(Node)
+      else
+        TMYX_USER_CONNECTION(Node.Data).storage_path := '';
+    end;
+    Node := Node.GetNext;
+  end;
+end;
+
+procedure TOptionsForm.GroupMenuPopup(Sender: TObject);
+
+var
+  Node: TTreeNode;
+
+begin
+  Node := ConnsTreeView.Selected;
+  // a new group goes into the selected group or "Connections" (SelectedGroupNode)
+  FNewGroupMI.Enabled := FStoredConnections <> nil;
+  // groups, not the two folders of the original
+  FRenameGroupMI.Enabled := IsGroupNode(Node) and (Node.Parent <> nil);
+  FDeleteGroupMI.Enabled := FRenameGroupMI.Enabled;
+end;
+
+function ValidGroupName(const Name: String): Boolean;
+
+begin
+  Result := (Trim(Name) <> '') and (Pos('/', Name) = 0);
+end;
+
+procedure TOptionsForm.NewGroupMIClick(Sender: TObject);
+
+var
+  Name: String;
+  Parent, Node: TTreeNode;
+
+begin
+  Name := '';
+  if not InputQuery(_('New Group'), _('Name of the group:'), Name) then
+    Exit;
+  if not ValidGroupName(Name) then
+  begin
+    ShowModalDialog(_('New Group'), _('A group needs a name without "/".'), myx_mtError, _('OK'));
+    Exit;
+  end;
+  Parent := SelectedGroupNode;
+  Node := AddTreeViewChildNode(ConnsTreeView, TTntTreeNode(Parent), Trim(Name), 5, nil);
+  Parent.Expand(False);
+  ConnsTreeView.Selected := Node;
+end;
+
+procedure TOptionsForm.RenameGroupMIClick(Sender: TObject);
+
+var
+  Name: String;
+  Node: TTreeNode;
+
+begin
+  Node := ConnsTreeView.Selected;
+  Name := Node.Text;
+  if not InputQuery(_('Rename Group'), _('Name of the group:'), Name) or (Trim(Name) = Node.Text) then
+    Exit;
+  if not ValidGroupName(Name) then
+  begin
+    ShowModalDialog(_('Rename Group'), _('A group needs a name without "/".'), myx_mtError, _('OK'));
+    Exit;
+  end;
+  Node.Text := Trim(Name);
+  UpdateGroupPaths;
+  DoPageContentChanged(Self);
+end;
+
+// the group's connections and groups move to the group above it; nothing is deleted
+procedure TOptionsForm.DeleteGroupMIClick(Sender: TObject);
+
+var
+  Node, Parent: TTreeNode;
+
+begin
+  Node := ConnsTreeView.Selected;
+  Parent := Node.Parent;
+  while Node.GetFirstChild <> nil do
+    Node.GetFirstChild.MoveTo(Parent, naAddChild);
+  ConnsTreeView.Selected := Parent;
+  Node.Delete;
+  UpdateGroupPaths;
+  DoPageContentChanged(Self);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+// revival: tests the values in the form, applied or not, in a thread; the tunnel's questions arrive through
+// Synchronize while the loop below waits (ADR-0051)
+procedure TOptionsForm.TestConnectionBtnClick(Sender: TObject);
+
+var
+  Conn: TMYX_USER_CONNECTION;
+  Test: TConnectionTestThread;
+  Password: String;
+
+begin
+  Conn := TMYX_USER_CONNECTION.Create(ConnectionEd.Text, UsernameEd.Text, PasswordEd.Text, HostnameEd.Text,
+    StrToIntDef(PortEd.Text, 3306), SchemataEd.Text, '', '', MYX_MYSQL_CONN, MYX_FAVORITE_USER_CONNECTION);
+  try
+    Conn.advanced_options.Assign(ConnValueListEditor.Strings);
+    FSSHRow.Save(Conn.advanced_options);
+    if Conn.password = '' then
+    begin
+      // not stored: asked for this test only (an empty answer tests without a password)
+      Password := '';
+      if not InputQuery(_('Test Connection'), Format(_('Password for %s@%s:'), [Conn.username, Conn.hostname]),
+        True, Password) then
+        Exit;
+      Conn.password := Password;
+    end;
+    FTestConnectionBtn.Enabled := False;
+    Screen.Cursor := crHourGlass;
+    Test := TConnectionTestThread.Create(Conn);
+    try
+      while not Test.Finished do
+      begin
+        Application.ProcessMessages;
+        CheckSynchronize(20);
+      end;
+      Test.WaitFor;
+      Screen.Cursor := crDefault;
+      if Test.Outcome.OK then
+        ShowModalDialog(_('Test Connection'), Test.Outcome.Text, myx_mtInformation, _('OK'))
+      else
+        ShowModalDialog(_('Test Connection'), Test.Outcome.Text, myx_mtError, _('OK'));
+    finally
+      Test.Free;
+      Screen.Cursor := crDefault;
+      FTestConnectionBtn.Enabled := True;
+    end;
+  finally
+    Conn.Free;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -669,16 +941,17 @@ begin
   // so a history entry dropped among the stored connections went back to the history on the next load. The
   // drop target may now be a group node (the connection is appended to it), and the storage type follows
   // the group.
+  // revival: groups of connections are folders too; the root folder decides the storage type, the folders below it
+  // the connection's group (ADR-0051)
   Target := ConnsTreeview.DropTarget;
-  if Target.Parent = nil then
-    Group := Target
-  else
-    Group := Target.Parent;
+  Group := Target;
+  while Group.Parent <> nil do
+    Group := Group.Parent;
 
   // First move the node in our storage...
   Connection := TMYX_USER_CONNECTION(ConnsTreeview.Selected.Data);
   FStoredConnections.user_connections.Extract(Connection);
-  if Target.Parent = nil then
+  if IsGroupNode(Target) then
     FStoredConnections.user_connections.Add(Connection)
   else
     FStoredConnections.user_connections.Insert(
@@ -700,10 +973,11 @@ begin
     Connection.storage_type := MYX_HISTORY_USER_CONNECTION;
 
   // ..then in the treeview.
-  if Target.Parent = nil then
+  if IsGroupNode(Target) then
     ConnsTreeView.Selected.MoveTo(Target, naAddChild)
   else
     ConnsTreeView.Selected.MoveTo(Target, naInsert);
+  UpdateGroupPaths;
 
   DoPageContentChanged(Self);
 end;
@@ -723,8 +997,9 @@ begin
     with ConnsTreeview do
     begin
       Node := DropTarget;
-      // Port: group nodes are drop targets too (see ConnsTreeViewDragDrop).
-      Accept := Assigned(Selected) and (Selected <> DropTarget) and (Selected.Parent <> nil) and Assigned(Node);
+      // Port: group nodes are drop targets too (see ConnsTreeViewDragDrop). Revival: only connections are dragged,
+      // not groups, and the History folder has no groups (ADR-0051).
+      Accept := Assigned(Selected) and (Selected <> DropTarget) and (Selected.Data <> nil) and Assigned(Node);
     end;
 end;
 
@@ -787,8 +1062,14 @@ begin
     NewConnection.connection_name := _('Copy of ') + NewConnection.connection_name;
   end;
 
-  Node := AddTreeViewChildNode(ConnsTreeView, ConnsTreeView.Items[0], NewConnection.connection_name, 6, NewConnection);
+  // revival: into the selected group, a copy into its original's group (ADR-0051)
+  if UserConn <> nil then
+    Node := AddTreeViewChildNode(ConnsTreeView, GroupNodeFor(UserConn.storage_path), NewConnection.connection_name, 6,
+      NewConnection)
+  else
+    Node := AddTreeViewChildNode(ConnsTreeView, SelectedGroupNode, NewConnection.connection_name, 6, NewConnection);
   FStoredConnections.user_connections.Add(NewConnection);
+  UpdateGroupPaths;
   ConnsTreeView.Selected := Node;
 
   ConnectionEd.SelectAll;
@@ -853,7 +1134,8 @@ begin
       if (FStoredConnections.user_connections[i].storage_type =
         MYX_FAVORITE_USER_CONNECTION) then
       begin
-        AddTreeViewChildNode(ConnsTreeView, FavoritesNode,
+        // revival: inside the folders of its group (ADR-0051)
+        AddTreeViewChildNode(ConnsTreeView, GroupNodeFor(FStoredConnections.user_connections[i].storage_path),
           FStoredConnections.user_connections[i].connection_name, 6,
           FStoredConnections.user_connections[i]);
       end
