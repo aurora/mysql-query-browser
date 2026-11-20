@@ -302,7 +302,7 @@ implementation
 
 uses
   MySQLResultSetControls, ApplicationDataModule,
-  Forms;
+  Forms, SSHConnect;
                                                    
 constructor TMySQLRS.Create;
 begin
@@ -1025,7 +1025,7 @@ begin
       raise EMyxError.Create(_('Error while allocating memory for MySQL Struct in Query Execute Thread.'));
 
 
-    if(myx_connect_to_instance(
+    if(SSHConnectToInstance(    // revival: through the SSH tunnel when asked for (ADR-0048)
       MySQLRS.MySQLConn.UserConnection.get_record_pointer,
       ThreadPMySQL)<>0)then
       raise EMyxError.Create(_('Query Execute Thread cannot connect to MySQL'));

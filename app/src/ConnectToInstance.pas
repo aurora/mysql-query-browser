@@ -184,7 +184,7 @@ type
 implementation
 
 uses
-  PNGTools, CommonFuncs;
+  PNGTools, CommonFuncs, SSHConnect;
 
 {$R ../forms/ConnectToInstance.lfm}
 
@@ -919,6 +919,13 @@ begin
 
     ModalResult := mrOK;
   end
+  // revival: the SSH tunnel could not be opened; its message instead of the MySQL error (ADR-0048)
+  else if TConnectToInstanceThread(Sender).ConnectionResult = CONNECT_SSH_FAILED then
+  begin
+    ShowSSHError;
+    myx_mysql_close(PMySQL);
+    PMySQL := nil;
+  end
   //ignore ConnectionResult -10 after warning
   else if(TConnectToInstanceThread(Sender).ConnectionResult<>-10)then
   begin
@@ -984,7 +991,8 @@ begin
   DefaultSchema := ConnectToInstanceForm.User_Connection.schema;
   ConnectToInstanceForm.User_Connection.schema := '';
 
-  ConnectionResult := myx_connect_to_instance(
+  // revival: through the SSH tunnel when the connection asks for it (ADR-0048)
+  ConnectionResult := SSHConnectToInstance(
     ConnectToInstanceForm.User_Connection.get_record_pointer,
     ConnectToInstanceForm.PMySQL);
 

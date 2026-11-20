@@ -244,7 +244,7 @@ function ExecuteMultiCmdSQL(sql: PChar; user_data: Pointer): Integer cdecl;
 implementation
 
 uses
-  ConnectToInstance;
+  ConnectToInstance, SSHConnect;
 
 type
   // Port: the keep-alive ping runs in this thread instead of in the timer event. On a connection that has died
@@ -706,7 +706,14 @@ begin
     Exit;
   end;
 
-  ConnectionResult := myx_connect_to_instance(user_conn.get_record_pointer, FMySQL);
+  // revival: through the SSH tunnel when the connection asks for it (ADR-0048)
+  ConnectionResult := SSHConnectToInstance(user_conn.get_record_pointer, FMySQL);
+  if ConnectionResult = CONNECT_SSH_FAILED then
+  begin
+    ShowSSHError;
+    Result := -1;
+    Exit;
+  end;
   if ConnectionResult = 0 then
   begin
     if SelectSchemata and (user_conn.schema <> '') then
@@ -912,7 +919,7 @@ begin
         raise EMyxError.Create('Error while allocating memory for MySQL Struct.');
     end;
 
-    ConnectionResult := myx_connect_to_instance(FUserConnection.get_record_pointer, FMySQL);
+    ConnectionResult := SSHConnectToInstance(FUserConnection.get_record_pointer, FMySQL);   // revival: ADR-0048
     if ConnectionResult = 0 then
     begin
       FConnected := True;

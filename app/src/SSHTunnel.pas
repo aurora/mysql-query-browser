@@ -33,8 +33,10 @@ type
   // without asking (as `ssh` does), the event only reports them (its result is ignored).
   TSSHVerifyHostKeyEvent = function(Sender: TObject; const Host, Fingerprint: String;
     State: TSSHHostKeyState): Boolean of object;
-  // asked for a password or a key's passphrase; False cancels
-  TSSHAskSecretEvent = function(Sender: TObject; const Prompt: String; out Secret: String): Boolean of object;
+  TSSHSecretKind = (sskPassword, sskPassphrase);
+  // asked for the password or a key's passphrase; False cancels
+  TSSHAskSecretEvent = function(Sender: TObject; Kind: TSSHSecretKind; const Prompt: String;
+    out Secret: String): Boolean of object;
 
   TSSHTunnel = class;
 
@@ -419,7 +421,8 @@ begin
       end;
     end;
     // probably encrypted: ask for the passphrase
-    if not (Assigned(OnAskSecret) and OnAskSecret(Self, Format(SAskPassphrase, [KeyFile]), Secret)) then
+    if not (Assigned(OnAskSecret)
+      and OnAskSecret(Self, sskPassphrase, Format(SAskPassphrase, [KeyFile]), Secret)) then
       Fail(SAuthCancelled);
   end;
   Fail(Format(SKeyFileRead, [KeyFile]));
@@ -436,7 +439,8 @@ begin
   for Attempt := 1 to 3 do
   begin
     if Secret = '' then
-      if not (Assigned(OnAskSecret) and OnAskSecret(Self, Format(SAskPassword, [SSHUser, SSHHost]), Secret)) then
+      if not (Assigned(OnAskSecret)
+        and OnAskSecret(Self, sskPassword, Format(SAskPassword, [SSHUser, SSHHost]), Secret)) then
         Fail(SAuthCancelled);
     Result := ssh_userauth_password(FSession, nil, PChar(Secret));
     if Result <> SSH_AUTH_DENIED then

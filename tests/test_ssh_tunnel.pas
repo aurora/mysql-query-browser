@@ -25,7 +25,7 @@ type
     function Enabled: Boolean;
     function NewTunnel: TSSHTunnel;
     function VerifyHostKey(Sender: TObject; const Host, Fingerprint: String; State: TSSHHostKeyState): Boolean;
-    function AskSecret(Sender: TObject; const Prompt: String; out Secret: String): Boolean;
+    function AskSecret(Sender: TObject; Kind: TSSHSecretKind; const Prompt: String; out Secret: String): Boolean;
     function QueryVersion(Port: Integer): String;
     procedure ExpectFailure(Tunnel: TSSHTunnel; const Part: String);
   protected
@@ -137,7 +137,8 @@ begin
   Result := FAcceptHostKey;
 end;
 
-function TSSHTunnelTest.AskSecret(Sender: TObject; const Prompt: String; out Secret: String): Boolean;
+function TSSHTunnelTest.AskSecret(Sender: TObject; Kind: TSSHSecretKind; const Prompt: String;
+  out Secret: String): Boolean;
 begin
   Inc(FAskCalls);
   Secret := FSecret;

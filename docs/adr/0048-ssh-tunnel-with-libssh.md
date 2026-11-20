@@ -56,8 +56,15 @@ library, libssh (LGPL-2.1-or-later) and libssh2 (BSD-3-Clause) were compared on 
     and Port are reached from the SSH server and that `~/.ssh/config` and `known_hosts` apply;
   - a connection without SSH shows the dialogs as before apart from that unchecked row.
 - **Storage:** the settings are stored as entries of the stored connection's existing advanced option list
-  (`SSH_TUNNEL=Yes`, `SSH_HOST=...`, `SSH_PORT=...`, `SSH_USER=...`, `SSH_AUTH=...`, `SSH_KEYFILE=...`); the
-  connect code applies only the advanced options it knows, so earlier releases keep these entries and ignore them.
+  (`SSH_TUNNEL=Yes`, `SSH_HOST=...`, `SSH_PORT=...`, `SSH_USER=...`, `SSH_AUTH=agent|key|password`,
+  `SSH_KEYFILE=...`; for special cases and the tests also `SSH_CONFIG=...` and `SSH_KNOWN_HOSTS=...` instead of the
+  user's files); the connect code applies only the advanced options it knows, so earlier releases keep these entries
+  and ignore them.
+- **One place connects:** `SSHConnectToInstance` (`app/src/SSHConnect.pas`) replaces `myx_connect_to_instance` at
+  every place the program connects (connect dialog, connect, reconnect, the threads of result tabs, query cancel).
+  Tunnels are pooled and shared by all connections with the same SSH settings and target; a broken tunnel is opened
+  again on the next connect, with the password or passphrase typed before kept in memory for that. Questions to the
+  user always run in the main thread.
 - **Packages:** Windows bundles MSYS2's libssh (0.12); the AppImage builds libssh 0.11 or later itself, as it does
   for libQt6Pas, because AlmaLinux 9's 0.10.4 has no own ProxyJump. libssh goes into `docs/licenses.md` and
   `NOTICE`.

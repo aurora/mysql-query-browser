@@ -63,6 +63,10 @@ if [ "$app_only" = 0 ]; then
       grep -q 'Server listening' <<< "$("$engine" logs qbr-sshd 2>&1)" && break
       sleep 1
     done
+    # for the program's own SSH self-test: the server's key as already known, and no ssh config
+    "$engine" exec qbr-sshd cat /etc/ssh/ssh_host_ed25519_key.pub | awk '{print "[127.0.0.1]:24022", $1, $2}' \
+      > "$ssh_dir/known_hosts_app"
+    : > "$ssh_dir/config_app"
     ssh_env=(QBR_TEST_SSH_PORT=24022 "QBR_TEST_SSH_DIR=$ssh_dir")
   else
     echo "warning: the SSH test server image did not build; the SSH tunnel tests are skipped" >&2
@@ -161,6 +165,51 @@ for entry in "${matrix[@]}"; do
         details="$details $mode: $why;"
       fi
     done
+    # the same through the SSH tunnel: a stored connection with SSH_* advanced options (ADR-0048)
+    if [ ${#ssh_env[@]} -gt 0 ]; then
+      ssh_data="$data_dir/ssh"
+      mkdir -p "$ssh_data"
+      rm -f "$ssh_data/report.txt"
+      cat > "$ssh_data/mysqlx_user_connections.xml" <<XML
+<?xml version="1.0"?>
+<user_connections>
+  <last_connection>0</last_connection>
+  <password_storage_type>2</password_storage_type>
+  <user_connection>
+    <connection_name>ssh</connection_name>
+    <username>root</username>
+    <hostname>127.0.0.1</hostname>
+    <port>$port</port>
+    <advanced_options>
+      <advanced_option>SSH_TUNNEL=Yes</advanced_option>
+      <advanced_option>SSH_HOST=127.0.0.1</advanced_option>
+      <advanced_option>SSH_PORT=24022</advanced_option>
+      <advanced_option>SSH_USER=qbr</advanced_option>
+      <advanced_option>SSH_AUTH=key</advanced_option>
+      <advanced_option>SSH_KEYFILE=$ssh_dir/id_ed25519</advanced_option>
+      <advanced_option>SSH_CONFIG=$ssh_dir/config_app</advanced_option>
+      <advanced_option>SSH_KNOWN_HOSTS=$ssh_dir/known_hosts_app</advanced_option>
+    </advanced_options>
+    <connection_type>0</connection_type>
+    <storage_type>1</storage_type>
+    <password>$password</password>
+  </user_connection>
+</user_connections>
+XML
+      # a new login on the SSH server proves the program went through the tunnel (the database port is reachable
+      # directly as well)
+      logins=$(grep -c 'Accepted publickey for qbr' <<< "$("$engine" logs qbr-sshd 2>&1)")
+      run timeout 60 "${xvfb[@]}" "$APP" -datadir "$ssh_data" -c ssh --selftest-connect "$ssh_data/report.txt" \
+        >/dev/null 2>&1
+      if [ "$(grep -c 'Accepted publickey for qbr' <<< "$("$engine" logs qbr-sshd 2>&1)")" -le "$logins" ]; then
+        app_result="FAIL"
+        details="$details ssh: no SSH login ($(head -1 "$ssh_data/report.txt" 2>/dev/null));"
+      elif ! grep -q '^connected' "$ssh_data/report.txt" 2>/dev/null; then
+        app_result="FAIL"
+        why=$(head -1 "$ssh_data/report.txt" 2>/dev/null || true)
+        details="$details ssh: ${why:-no report};"
+      fi
+    fi
     [ "$app_result" = PASS ] || failed=1
   fi
   results+=("$image|$status|$app_result|$details")

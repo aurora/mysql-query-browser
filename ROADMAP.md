@@ -136,8 +136,9 @@ default, in the original's style.
   least preferred.
 - **SSH tunnel** for connections (ADR-0048, proposed): libssh in the program, OpenSSH and PuTTY keys, agent and
   Pageant, `known_hosts` and `~/.ssh/config`; mock-up in the ADR; Pageant pipe name known; libssh 0.12.2 builds for the AppImage (`tools/appimage/build-libssh.sh`). The tunnel itself works and is
-  tested on the matrix against an OpenSSH container (`app/src/SSHTunnel.pas`, `tests/test_ssh_tunnel.pas`). Next: using
-  it when connecting (`SSH_*` advanced options), the UI, `.ppk` keys and Pageant, the Windows build with libssh.
+  tested on the matrix against an OpenSSH container (`app/src/SSHTunnel.pas`, `tests/test_ssh_tunnel.pas`). The program
+  connects through it when a stored connection has `SSH_TUNNEL=Yes` and the `SSH_*` advanced options (matrix self-test
+  proves the SSH login). Next: the UI, `.ppk` keys and Pageant, the Windows build with libssh.
 - TLS mode in the connection dialog: required / preferred / off (ADR-0005).
 - HiDPI scaling, then optional vector-rendered icon set (ADR-0009).
 - PostgreSQL and other databases via a driver seam (ADR-0010); candidate

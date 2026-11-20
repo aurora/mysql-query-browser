@@ -115,6 +115,9 @@ function IsCancelError(ErrNo: Integer): Boolean;
 
 implementation
 
+uses
+  SSHConnect;
+
 const
   // The connection id, then the server and the session owner. Both connections must report the same
   // server and owner; the user part is the name the session logged in with, which is what
@@ -298,7 +301,7 @@ begin
   if Result = nil then
     Exit;
 
-  Ok := myx_connect_to_instance(FUserConnection.get_record_pointer, Result) = 0;
+  Ok := SSHConnectToInstance(FUserConnection.get_record_pointer, Result) = 0;   // revival: ADR-0048
   Ok := Ok and ReadIdentity(Result, Format(TargetSQL, [FConnectionId]), ConnectionId, Identity);
   Ok := Ok and (Identity = FIdentity);
   if not Ok then
