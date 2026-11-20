@@ -5,6 +5,12 @@
 (`fonts/` in <https://gitlab.winehq.org/wine/wine>, taken from the GitHub mirror `wine-mirror/wine`, master at
 7692c6213e2c1c2f9cea92cc29ea13afc582865f, 2026-11-04). Unmodified copies of the prebuilt files.
 
+**Change in the packages (2026-11-20):** the copies installed next to the program (`tools/prepare_runtime.py`, and so in
+every Linux and macOS package) have the embedded bitmap glyph tables (EBDT, EBLC, EBSC) removed; outlines, metrics and
+all other tables are unchanged. FreeType takes the line metrics of a bitmap strike when the font has one for the
+requested size, and those are too small (10 pixels: ascent 8, descent 2, negative leading), so lines of wrapped text
+touched under Qt. The files here stay as Wine ships them.
+
 | File | SHA-256 |
 |---|---|
 | `tahoma.ttf` | `90f1abad4da0ce03da5d2277ee75a9600ce812d37c90eab76e0838ffa7937e55` |
