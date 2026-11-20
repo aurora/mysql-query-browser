@@ -7,6 +7,8 @@
 #
 # --app-only skips the FPCUnit tests and only runs the application self-tests; QBR_APP names the program to run
 # (default app/bin/querymole), e.g. dist/AppDir/AppRun to check the AppImage's libraries against every server.
+# QBR_EXEC is a command prefix that runs the test program and the application somewhere else, e.g. in a container
+# that sees the servers' ports and this checkout at the same path (tests/ci.sh); the servers still run here.
 #
 # Prerequisites: backend built (backend/build-linux), tests built (tests/bin/qbr_tests):
 #   fpc -Fubindings -Fuapp/compat -Fuapp/src -Flbackend/build-linux -FUtests/lib -FEtests/bin \
@@ -23,7 +25,7 @@ while [ $# -gt 0 ]; do
     --only) only="$2"; shift ;;
     --keep) keep=1 ;;
     --app-only) app_only=1 ;;
-    -h|--help) sed -n '2,10p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
     *) echo "unknown option: $1 (see --help)" >&2; exit 2 ;;
   esac
   shift
@@ -36,6 +38,9 @@ password="${QBR_TEST_PASSWORD:-qbr-test}"
 export QBR_TEST_PASSWORD="$password"
 # (not for a self-contained program such as the AppImage: LD_LIBRARY_PATH would win over its own run paths)
 [ -n "${QBR_APP:-}" ] || export LD_LIBRARY_PATH="$ROOT/backend/build-linux${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+# the programs run through this prefix (empty: here); the environment they need is passed explicitly
+read -r -a run_prefix <<< "${QBR_EXEC:-}"
+run() { "${run_prefix[@]}" env QBR_TEST_PASSWORD="$password" LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}" "$@"; }
 
 # image, env var for the root password, admin client used for readiness checks
 matrix=(
@@ -74,7 +79,7 @@ for entry in "${matrix[@]}"; do
   if [ "$app_only" = 1 ]; then
     status="skipped" details=""
   else
-    log=$(QBR_TEST_PORT="$port" timeout 300 "$EXE" --all --format=plain 2>&1)
+    log=$(run QBR_TEST_PORT="$port" timeout 300 "$EXE" --all --format=plain 2>&1)
     run=$(grep -oP 'Number of run tests:\s+\K\d+' <<< "$log")
     err=$(grep -oP 'Number of errors:\s+\K\d+' <<< "$log")
     fail=$(grep -oP 'Number of failures:\s+\K\d+' <<< "$log")
@@ -90,7 +95,7 @@ for entry in "${matrix[@]}"; do
   # once by driving the connect dialog (needs app/bin/querymole and `python tools/prepare_runtime.py`)
   app_result="n/a"
   # a virtual X server keeps the windows off the desktop (and works without one)
-  xvfb=(); if command -v xvfb-run >/dev/null; then xvfb=(xvfb-run -a); fi
+  xvfb=(); if run sh -c 'command -v xvfb-run' >/dev/null 2>&1; then xvfb=(xvfb-run -a); fi
   if [ -x "$APP" ]; then
     data_dir="${TMPDIR:-/tmp}/qbr-matrix-data"
     mkdir -p "$data_dir"
@@ -98,7 +103,7 @@ for entry in "${matrix[@]}"; do
     for mode in selftest-connect selftest-dialog; do
       report="$data_dir/$mode.txt"
       rm -f "$report"
-      timeout 60 "${xvfb[@]}" "$APP" -datadir "$data_dir" -u root -p "$password" -h 127.0.0.1 -P "$port" "--$mode" "$report" \
+      run timeout 60 "${xvfb[@]}" "$APP" -datadir "$data_dir" -u root -p "$password" -h 127.0.0.1 -P "$port" "--$mode" "$report" \
         >/dev/null 2>&1
       grep -qE '^(dialog )?connected' "$report" 2>/dev/null || app_result="FAIL"
     done

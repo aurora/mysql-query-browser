@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Build and test environment of tests/ci.sh (the test workflow, .github/workflows/test.yml): the toolchain of the
+# "freepascal" distrobox (tools/distrobox-setup.sh) without the IDE extras, Qt5, gdb and the mariadb client. The
+# test servers run next to it on the host (tests/run-matrix.sh), not in this image.
+FROM registry.fedoraproject.org/fedora:44
+RUN dnf -y install fpc lazarus lazarus-lcl-gtk2 lazarus-lcl-qt6 \
+      gcc gcc-c++ cmake ninja-build pkgconf-pkg-config \
+      glib2-devel libxml2-devel pcre-devel mariadb-connector-c-devel \
+      python3 python-unversioned-command mingw64-binutils mingw64-cpp \
+      xorg-x11-server-Xvfb xorg-x11-xauth dejavu-sans-fonts procps-ng which \
+ && dnf clean all

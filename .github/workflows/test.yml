@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Builds and tests every push and pull request (the release workflow, release.yml, only runs for tags).
+#
+# Linux:   tests/ci.sh -> backend, GTK2 compile check, Qt6 program, FPCUnit tests; then the FPCUnit tests and the
+#          program's self-tests against all six servers of tests/run-matrix.sh (MySQL 5.7, 8.0, 8.4, 9, MariaDB
+#          10.11, 11.4) in throw-away podman containers.
+# Windows: ./build.sh --backend --runtime, a build check only: the runner cannot start the Linux server containers.
+name: test
+
+on:
+  push:
+    branches: ['**']
+    paths-ignore: ['docs/**', '**.md', 'assets/**']
+  pull_request:
+    paths-ignore: ['docs/**', '**.md', 'assets/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LAZARUS_INSTALLER: https://downloads.sourceforge.net/project/lazarus/Lazarus%20Windows%2064%20bits/Lazarus%204.8/lazarus-4.8-fpc-3.2.2-win64.exe
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      # podman is preinstalled; tests/ci.sh builds its image, the program and the tests, and runs the server matrix
+      - name: Build and test against the server matrix
+        run: tests/ci.sh
+
+  windows:
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # the same toolchain as the release job (release.yml)
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          release: false
+          update: false
+          path-type: inherit
+          install: >-
+            mingw-w64-x86_64-gcc mingw-w64-x86_64-binutils mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-pkgconf mingw-w64-x86_64-glib2 mingw-w64-x86_64-libxml2 mingw-w64-x86_64-pcre
+            mingw-w64-x86_64-libmariadbclient
+      - name: Cache Lazarus
+        id: lazarus
+        uses: actions/cache@v4
+        with:
+          path: C:\lazarus
+          key: lazarus-4.8-fpc-3.2.2-win64
+      - name: Install Lazarus 4.8 to C:\lazarus
+        if: steps.lazarus.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri $env:LAZARUS_INSTALLER -OutFile lazarus-setup.exe -UserAgent 'Wget'
+          Start-Process -Wait -FilePath .\lazarus-setup.exe -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-','/DIR=C:\lazarus'
+          if (-not (Test-Path C:\lazarus\lazbuild.exe)) { throw 'Lazarus installation failed' }
+      - name: Build
+        run: ./build.sh --backend --runtime
