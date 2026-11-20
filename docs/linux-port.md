@@ -230,6 +230,36 @@ would hide real warnings as well.
 - Checked: menu smoke test (137 entries, the expected exception), the app self-tests on all six servers with Qt6 and
   with GTK2 (where nothing changes). The changes are guarded by `LCLQT6` or `MSWINDOWS`; no Win64 cross-build was done.
 
+**Qt6, review of all forms (2026-11-20).** Every form the program opens, photographed with the GTK2 and the Qt6 build
+side by side (developer modes `--shot-connect`, `--shot-main`, `--dialog optionpages:0,1,2,3,4|textsearch|regex|
+schemasel|about|credits`, `--cmd ... --modal-shot` for the table editor, field viewer, bookmark, create view/schema
+and drop dialogs; the connect dialog's details with `xdotool`). Not reachable that way: the "Compare Resultsets"
+message (an exception the developer mode writes to the error file instead of showing it) and `Progress.lfm` (no
+ported unit uses it). Found and fixed:
+- Connect dialog, "Details >>": the first advanced option ("Use compression protocol") was cut off at the top. Qt6
+  draws the tab row exactly `TabHeight` high, without the border of the original's tab control, so the page started
+  5 pixels higher and the panel that covers the tabs cut into it. `HidePageControlTabs` (until now GTK2 only) also
+  switches the tabs off under Qt6 and moves the page control down by the strip, the original's `TabHeight + 4` when
+  no strip is given; the connect dialog hides the covering panel under Qt6 as under GTK2. The options pages (same
+  pattern) now start where the original's value puts them, directly below the page title.
+- Bookmark caption dialog: "Please enter the caption for this bookmark" wrapped its last word; `TMyxModalDialog`
+  sizes the label to the measured text width, and Qt's fractional character advances need a pixel more than the
+  whole-pixel measurement. Two pixels of slack under Qt6.
+- About dialog: the lines of the copyright, licence and credits texts touched (9 pixels apart for a 10 pixel font).
+  The Tahoma stand-in has embedded bitmap glyphs for small sizes, and FreeType takes the line metrics of the bitmap
+  strike when there is one (ascent 8, descent 2, leading -1); Qt uses FreeType's metrics, cairo (GTK2) does not. A
+  fontconfig rule `embeddedbitmap=false` does not help, it changes the drawing, not the metrics. `prepare_runtime.py`
+  now installs the font without its bitmap tables (EBDT/EBLC/EBSC; the repository keeps Wine's files): line spacing
+  12 pixels under Qt6; GTK2 is pixel for pixel the same as before (all review screenshots compared).
+- Unchanged and fine under Qt6: main window, table editor, field viewer, text search, regex importer, schema
+  selection, credits, options pages (Browser, General, Connections, Editors), create schema/view and drop dialogs.
+  Lists (index columns, combo box lists) are tighter than under GTK2, as on Windows. The "FK naming" field still
+  shows its text scrolled to the end.
+- The "create view" developer run times out under both widgetsets after the screenshot (the dialog does not close
+  on the helper's cancel); the dialog itself is fine.
+- Checked: app self-tests on all six servers with GTK2 and Qt6; the Win64 executable is identical before and after
+  (`.text`, `.data`, `.rdata`).
+
 Reproducing under Xvfb with an open menu or list: start the program, then `xdotool` (`key alt+e`, or a click on the
 combo box arrow) and `import -window root` (both in the freepascal container). A connect dialog with stored
 connections needs a `mysqlx_user_connections.xml` in the data folder (`user_connection` elements with
