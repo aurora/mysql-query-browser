@@ -64,7 +64,11 @@ for entry in "${matrix[@]}"; do
 
   ready=0
   for _ in $(seq 60); do
-    if "$engine" exec "$name" "$admin" ping -uroot "-p$password" 2>&1 | grep -q alive; then ready=1; break; fi
+    # ready when the server's log says it listens on 3306 (the entrypoint's temporary server during initialisation
+    # has no network, port 0; MySQL's X plugin line names 33060). The admin client inside the container is only the
+    # fallback: on the GitHub runner it never answered for the MySQL images although the servers were running.
+    if "$engine" logs "$name" 2>&1 | grep -qE 'ready for connections.*port: 3306([^0-9]|$)' \
+       || "$engine" exec "$name" "$admin" ping -uroot "-p$password" 2>&1 | grep -q alive; then ready=1; break; fi
     sleep 3
   done
   if [ "$ready" = 0 ]; then
