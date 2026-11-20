@@ -21,6 +21,7 @@ type
     procedure TestIndices;
     procedure TestTableStatus;
     procedure TestStoredRoutines;
+    procedure TestRoutinesWithHiddenCode;
   end;
 
 implementation
@@ -156,6 +157,65 @@ begin
     AssertTrue('function found', GotFunc);
   finally
     myx_free_schema_sps(Sps);
+  end;
+end;
+
+// A user who may run the routines but not see their code gets NULL bodies from SHOW CREATE PROCEDURE/FUNCTION
+// (MySQL 8, MariaDB). The backend left the parameters of such routines uninitialised and freed garbage when the
+// schema tree loaded (munmap_chunk(): invalid pointer, 2026-11-20).
+procedure TSchemaInfoTest.TestRoutinesWithHiddenCode;
+const
+  User = 'qbr_sp_runner';
+  Pwd = 'qbr-Runner-1';
+var
+  Conn: MYX_USER_CONNECTION;
+  My: PMYSQL;
+  Sps: PMYX_SCHEMA_STORED_PROCEDURES;
+  Sp: PMYX_SCHEMA_STORED_PROCEDURE;
+  I, Round: Integer;
+  UserS, PwdS, Host: AnsiString;
+begin
+  ExecSQL(FMy, 'DROP USER IF EXISTS ''' + User + '''@''%''');
+  ExecSQL(FMy, 'CREATE USER ''' + User + '''@''%'' IDENTIFIED BY ''' + Pwd + '''');
+  try
+    ExecSQL(FMy, 'GRANT SELECT, EXECUTE ON ' + SchemaName + '.* TO ''' + User + '''@''%''');
+    UserS := User;
+    PwdS := Pwd;
+    Host := GetEnvironmentVariable('QBR_TEST_HOST');
+    if Host = '' then
+      Host := '127.0.0.1';
+    FillChar(Conn, SizeOf(Conn), 0);
+    Conn.connection_type := MYX_MYSQL_CONN;
+    Conn.storage_type := MYX_FAVORITE_USER_CONNECTION;
+    Conn.username := PAnsiChar(UserS);
+    Conn.password := PAnsiChar(PwdS);
+    Conn.hostname := PAnsiChar(Host);
+    Conn.port := StrToIntDef(GetEnvironmentVariable('QBR_TEST_PORT'), 33306);
+    My := myx_mysql_init;
+    try
+      AssertEquals('connect as ' + User + ' (' + myx_mysql_error(My) + ')', 0, myx_connect_to_instance(@Conn, My));
+      // several rounds: the garbage of one round would show in the next allocation
+      for Round := 1 to 5 do
+      begin
+        Sps := myx_get_schema_sps(My, '', SchemaName);
+        AssertNotNull('routines', Sps);
+        try
+          AssertTrue('at most the two routines', Sps^.schema_sps_num <= 2);
+          for I := 0 to Integer(Sps^.schema_sps_num) - 1 do
+          begin
+            Sp := Sps^.schema_sps + I;
+            AssertTrue(Sp^.name + ': parameter count is sane', Sp^.params_num <= 2);
+            AssertTrue(Sp^.name + ': parameters present when counted', (Sp^.params_num = 0) or (Sp^.params <> nil));
+          end;
+        finally
+          myx_free_schema_sps(Sps);
+        end;
+      end;
+    finally
+      myx_mysql_close(My);
+    end;
+  finally
+    ExecSQL(FMy, 'DROP USER IF EXISTS ''' + User + '''@''%''');
   end;
 end;
 

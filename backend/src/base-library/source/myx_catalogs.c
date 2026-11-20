@@ -1109,7 +1109,7 @@ MYX_SCHEMA_STORED_PROCEDURES * myx_get_schema_sps(MYSQL *mysql, const char *cata
   }
 
   pcre_exp2= pcre_compile(SP_RETURN_TYPE, PCRE_CASELESS, &error_str, &erroffset, NULL);
-  if (!pcre_exp)
+  if (!pcre_exp2)   /* revival: checked pcre_exp again */
   {
     g_free(sps);
     pcre_free(pcre_exp);
@@ -1168,7 +1168,12 @@ MYX_SCHEMA_STORED_PROCEDURES * myx_get_schema_sps(MYSQL *mysql, const char *cata
           continue;
         
         sp= sps->schema_sps+sp_num;
-        
+        /* revival: the array comes from g_realloc and is not zeroed; params and params_num were only set when
+           SHOW CREATE returned the routine's body, which MySQL 8 and MariaDB return as NULL to a user who may run
+           the routine but not see its code. myx_free_schema_sps_struct then freed garbage pointers
+           ("munmap_chunk(): invalid pointer" while the schema tree loaded, 2026-11-20). */
+        memset(sp, 0, sizeof(*sp));
+
         sp->name=        fi[1]==-1 ? 0 : myx_convert_dbstr_utf8(mysql, row_sps[fi[1]]);
         sp->sp_type=     fi[2]==-1 ? 0 : (
                                           (strcmp2(row_sps[fi[2]],"PROCEDURE")==0) ? MSPT_PROCEDURE : MSPT_FUNCTION);
