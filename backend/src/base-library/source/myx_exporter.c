@@ -16,9 +16,125 @@
 
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <glib.h>
 #include "myx_public_interface.h"
 #include "myx_shared_util_functions.h"
+#include "entities.h"
+
+
+/* revival: the values are written to the file as they are escaped, without a copy per cell (str_g_replace,
+   escape_*_entities). The markup formats (HTML, XML, Excel, PLIST) escape every value and every column name, write
+   an empty string as empty (the copies were NULL for it: "(null)" in HTML and PLIST, a crash in Excel), replace bytes
+   that are not UTF-8 by U+FFFD and, in XML, the control characters XML 1.0 does not allow. ADR-0049. */
+
+#define MARKUP_HTML 1   // named HTML entities (as escape_html_entities), control characters kept
+#define MARKUP_XML  2   // &quot; &amp; &lt; &gt; only (as escape_xml_entities), no XML 1.0 control characters
+
+static const char REPLACEMENT_CHAR[]= "\xEF\xBF\xBD";  // U+FFFD
+
+static int cmp_entity_code(const void *a, const void *b)
+{
+  gunichar ca= ((const HTMLEntity*)a)->code, cb= ((const HTMLEntity*)b)->code;
+  return ca < cb ? -1 : (ca > cb ? 1 : 0);
+}
+
+// length of the UTF-8 sequence at s, 0 if it is none (not UTF-8, cut off, overlong, a surrogate)
+static int utf8_len(const unsigned char *s, gunichar *code)
+{
+  gunichar c= g_utf8_get_char_validated((const char*)s, -1);
+  if (c == (gunichar)-1 || c == (gunichar)-2)
+    return 0;
+  *code= c;
+  return (int)(g_utf8_next_char((const char*)s) - (const char*)s);
+}
+
+static void write_markup(FILE *f, const char *text, int mode)
+{
+  static int html_entities_num= 0;
+  const unsigned char *s= (const unsigned char*)text;
+  const unsigned char *run= s;  // start of the bytes that are written unchanged
+
+  if (!s)
+    return;
+  if (!html_entities_num)
+    while (HTMLEntities[html_entities_num].name) html_entities_num++;
+
+  while (*s)
+  {
+    const char *entity= NULL;
+    char buffer[16];
+    int len= 1;
+    unsigned char c= *s;
+
+    if (c == '"') entity= "&quot;";
+    else if (c == '&') entity= "&amp;";
+    else if (c == '<') entity= "&lt;";
+    else if (c == '>') entity= "&gt;";
+    else if (c < 0x20)
+    {
+      if (mode == MARKUP_XML && c != '\t' && c != '\n' && c != '\r')
+        entity= REPLACEMENT_CHAR;
+    }
+    else if (c >= 0x80)
+    {
+      gunichar code= 0;
+
+      len= utf8_len(s, &code);
+      if (len == 0)
+      {
+        entity= REPLACEMENT_CHAR;
+        len= 1;
+      }
+      else if (mode == MARKUP_XML && (code == 0xFFFE || code == 0xFFFF))
+        entity= REPLACEMENT_CHAR;
+      else if (mode == MARKUP_HTML)
+      {
+        HTMLEntity key, *p;
+
+        key.code= code;
+        p= (HTMLEntity*)bsearch(&key, HTMLEntities, html_entities_num, sizeof(HTMLEntities[0]), cmp_entity_code);
+        if (p)
+        {
+          g_snprintf(buffer, sizeof(buffer), "&%s;", p->name);
+          entity= buffer;
+        }
+      }
+    }
+
+    if (entity)
+    {
+      if (s > run)
+        fwrite(run, 1, s - run, f);
+      fputs(entity, f);
+      s+= len;
+      run= s;
+    }
+    else
+      s+= len;
+  }
+  if (s > run)
+    fwrite(run, 1, s - run, f);
+}
+
+// a CSV field in quotes, quotes doubled (bytes unchanged, as before)
+static void write_csv_quoted(FILE *f, const char *s)
+{
+  fputc('"', f);
+  if (s)
+  {
+    const char *q;
+    while ((q= strchr(s, '"')) != NULL)
+    {
+      fwrite(s, 1, q - s + 1, f);
+      fputc('"', f);
+      s= q + 1;
+    }
+    fputs(s, f);
+  }
+  fputc('"', f);
+}
 
 
 static MYX_TABLE_EXPORTER_INFO *make_exporter_info(MYX_TABLE_EXPORTER *exporter)
@@ -29,7 +145,8 @@ static MYX_TABLE_EXPORTER_INFO *make_exporter_info(MYX_TABLE_EXPORTER *exporter)
   info->te= exporter;
 
   for (i= 0; info->te->options[i].name; i++);
-  info->option_values= g_new0(char*, i);
+  info->option_values_num= i;  // revival: was never set
+  info->option_values= g_new0(char*, i + 1);
   for (i= 0; info->te->options[i].name; i++)
     info->option_values[i]= g_strdup(info->te->options[i].value);
   
@@ -44,7 +161,7 @@ static void add_tabledef(MYX_TABLE_EXPORTER_INFO *info,
 
   info->table_levels++;
   info->columns_num= g_realloc(info->columns_num, sizeof(unsigned int)*info->table_levels);
-  info->columns= g_realloc(info->columns, sizeof(MYX_TE_COLUMN)*info->table_levels);
+  info->columns= g_realloc(info->columns, sizeof(MYX_TE_COLUMN*)*info->table_levels);
 
   info->columns_num[info->table_levels-1]= columns_num;
   info->columns[info->table_levels-1]= g_new(MYX_TE_COLUMN, columns_num);
@@ -59,8 +176,23 @@ static void add_tabledef(MYX_TABLE_EXPORTER_INFO *info,
 
 static void free_exporter_info(MYX_TABLE_EXPORTER_INFO *info)
 {
+  unsigned int i, j;
+
   if (info->file_stream)
     fclose(info->file_stream);
+
+  // revival: the option values and column definitions were leaked
+  for (i= 0; i < info->option_values_num; i++)
+    g_free(info->option_values[i]);
+  g_free(info->option_values);
+  for (i= 0; i < info->table_levels; i++)
+  {
+    for (j= 0; j < info->columns_num[i]; j++)
+      g_free(info->columns[i][j].name);
+    g_free(info->columns[i]);
+  }
+  g_free(info->columns);
+  g_free(info->columns_num);
 
   g_free(info);
 }
@@ -164,61 +296,35 @@ static void csv_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self)
   //fprintf(self->file_stream, "# ");
   for (i= 0; i < self->columns_num[0]; i++)
   {
-    char *s;
-    if (self->columns[0][i].name)
-      s= str_g_replace(g_strdup(self->columns[0][i].name), "\"", "\"\"");
-    else
-      s= NULL;
-
     if (i > 0)
-      fprintf(self->file_stream, "%s\"%s\"", self->option_values[0], s?s:"");
-    else
-      fprintf(self->file_stream, "\"%s\"", s?s:"");
-
-    g_free(s);
+      fputs(self->option_values[0], self->file_stream);
+    write_csv_quoted(self->file_stream, self->columns[0][i].name);
   }
 
-  fprintf(self->file_stream, "\n");
+  fputc('\n', self->file_stream);
 }
 
 
 static void csv_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *const*text)
 {
   unsigned int i;
+  FILE *f= self->file_stream;
+  const char *separator= self->option_values[0];
+
   for (i= 0; i < self->columns_num[0]; i++)
   {
-    if(self->columns[0][i].ctype == MYX_TE_COL_STRING || self->columns[0][i].ctype == MYX_TE_COL_DATE)
+    if (i > 0)
+      fputs(separator, f);
+    if (self->columns[0][i].ctype == MYX_TE_COL_STRING || self->columns[0][i].ctype == MYX_TE_COL_DATE)
     {
-      char *s;
-      
+      // NULL stays empty and unquoted, as before; the empty string is ""
       if (text[i])
-        s= str_g_replace(g_strdup(text[i]), "\"", "\"\"");
-      else
-        s= NULL;
-
-      if (i > 0)
-        fprintf(self->file_stream, "%s\"%s\"", self->option_values[0], s?s:"");
-      else
-        fprintf(self->file_stream, "\"%s\"", s?s:"");
-
-      g_free(s);
+        write_csv_quoted(f, text[i]);
     }
-    else
-    {
-      const char *s;
-      
-      if (text[i])
-        s= text[i];
-      else
-        s= "";
-      
-      if (i > 0)
-        fprintf(self->file_stream, "%s%s", self->option_values[0], s);
-      else
-        fprintf(self->file_stream, "%s", s);
-    }
+    else if (text[i])
+      fputs(text[i], f);
   }
-  fprintf(self->file_stream, "\n");
+  fputc('\n', f);
 }
 
 static void csv_exporter_table_footer(MYX_TABLE_EXPORTER_INFO *self)
@@ -309,10 +415,14 @@ static void html_exporter_begin(MYX_TABLE_EXPORTER_INFO *self, const char *text)
 {
   fprintf(self->file_stream, "<html>\n");
   fprintf(self->file_stream, "<head>\n");
-  fprintf(self->file_stream, "<title>%s</title>\n", text);
+  fputs("<title>", self->file_stream);
+  write_markup(self->file_stream, text, MARKUP_HTML);
+  fputs("</title>\n", self->file_stream);
   fprintf(self->file_stream, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n");
   fprintf(self->file_stream, "</head>\n");
-  fprintf(self->file_stream, "<body><h1>%s</h1>\n", text);
+  fputs("<body><h1>", self->file_stream);
+  write_markup(self->file_stream, text, MARKUP_HTML);
+  fputs("</h1>\n", self->file_stream);
 }
 
 
@@ -339,7 +449,9 @@ static void html_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self)
   fprintf(self->file_stream, "<table %s%s><tr>\n", table_extra, self->option_values[2]);
   for (i= 0; i < self->columns_num[self->current_level-1]; i++)
   {
-    fprintf(self->file_stream, "<th>%s</th>", self->columns[self->current_level-1][i].name);
+    fputs("<th>", self->file_stream);
+    write_markup(self->file_stream, self->columns[self->current_level-1][i].name, MARKUP_HTML);
+    fputs("</th>", self->file_stream);
   }
   fprintf(self->file_stream, "</tr>\n");
   
@@ -363,15 +475,9 @@ static void html_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *con
     fprintf(self->file_stream, "<tr>\n");
   for (i= 0; i < self->columns_num[self->current_level-1]; i++)
   {
-    char *tmp;
-    
-    if (text[i])
-      tmp= escape_html_entities(text[i]);
-    else
-      tmp= "";
-    fprintf(self->file_stream, "<td>%s</td>", tmp);
-    if (text[i])
-      g_free(tmp);
+    fputs("<td>", self->file_stream);
+    write_markup(self->file_stream, text[i], MARKUP_HTML);
+    fputs("</td>", self->file_stream);
   }
   fprintf(self->file_stream, "</tr>\n");
 }
@@ -480,7 +586,7 @@ static int xml_exporter_setup(MYX_TABLE_EXPORTER_INFO *self, const char *filenam
 
   ptr= strrchr(filename,'.');
   if (ptr)
-    xi->dtd_filename= g_strdup_printf("%.*s.dtd", ptr-filename, filename);
+    xi->dtd_filename= g_strdup_printf("%.*s.dtd", (int)(ptr-filename), filename);
   else
     xi->dtd_filename= g_strdup_printf("%s.dtd", filename);
 
@@ -500,7 +606,7 @@ static void xml_exporter_begin(MYX_TABLE_EXPORTER_INFO *self, const char *text)
 
   fprintf(self->file_stream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(self->file_stream, "<!DOCTYPE ROOT SYSTEM \"%s\">\n", fn);
-  fprintf(self->file_stream, "<ROOT>\n");
+  fprintf(self->file_stream, "<ROOT xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n");
 }
 
 
@@ -524,7 +630,9 @@ static void xml_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self)
     xi->dtd_written= 1;
     
 	// this is a "simple DTD" solution of #11830
-	fprintf(file, "<!ELEMENT field (#PCDATA) >\n<!ATTLIST field name CDATA #REQUIRED >\n<!ELEMENT row (field)+ >\n<!ELEMENT ROOT (row)+ >");
+	// revival: xsi:nil marks NULL values (as mysqldump --xml does); the DTD declares it and the namespace
+	if (file)
+	  fprintf(file, "<!ELEMENT field (#PCDATA) >\n<!ATTLIST field name CDATA #REQUIRED xsi:nil (true) #IMPLIED >\n<!ELEMENT row (field)+ >\n<!ELEMENT ROOT (row)+ >\n<!ATTLIST ROOT xmlns:xsi CDATA #FIXED \"http://www.w3.org/2001/XMLSchema-instance\" >");
 
 	/*	
     fprintf(file, "<!ELEMENT ROOT (%s)+>\n", self->option_values[1]);
@@ -547,7 +655,8 @@ static void xml_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self)
       g_free(s);
     }
 	*/
-    fclose(file);
+    if (file)  // revival: a DTD that cannot be written does not stop the export
+      fclose(file);
 	
   }
   
@@ -566,18 +675,17 @@ static void xml_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *cons
   fprintf(self->file_stream, "%*s<%s>\n", self->current_level*4, "", self->option_values[1]);
   for (i= 0; i < self->columns_num[self->current_level-1]; i++)
   {
-    if(text[i])
+    fprintf(self->file_stream, "%*s<field name=\"", self->current_level*4+2, "");
+    write_markup(self->file_stream, columns[i].name, MARKUP_XML);
+    if (text[i])
     {
-      char *s= escape_xml_entities(text[i]);
-
-      fprintf(self->file_stream, "%*s<field name=\"%s\">%s</field>\n", self->current_level*4+2, "",
-              columns[i].name, s?s:"");
-
-      g_free(s);
+      fputs("\">", self->file_stream);
+      write_markup(self->file_stream, text[i], MARKUP_XML);
+      fputs("</field>\n", self->file_stream);
     }
     else
-      fprintf(self->file_stream, "%*s<%s/>\n", self->current_level*4+2, "",
-              columns[i].name);
+      // revival: was <column name/>, not well-formed for most names and not in the DTD
+      fputs("\" xsi:nil=\"true\" />\n", self->file_stream);
   }
 
   if (self->table_levels > 1 && self->current_level == 1)
@@ -718,12 +826,9 @@ static void excel_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self)
   //Add column headers
   for(i= 0; i<self->columns_num[0]; i++)
   {
-    char *s= escape_xml_entities(self->columns[0][i].name);
-
-    fprintf(self->file_stream,"    <Cell><Data ss:Type=\"String\">%s</Data></Cell>\n", 
-      s);
-
-    g_free(s);
+    fputs("    <Cell><Data ss:Type=\"String\">", self->file_stream);
+    write_markup(self->file_stream, self->columns[0][i].name, MARKUP_XML);
+    fputs("</Data></Cell>\n", self->file_stream);
   }
 
   fprintf(self->file_stream, "   </Row>\n");
@@ -737,7 +842,7 @@ static void excel_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *co
     "String",//MYX_TE_COL_STRING
     "Number",//MYX_TE_COL_INTEGER
     "Number",//MYX_TE_COL_FLOAT
-    "Number"//MYX_TE_COL_BOOL,
+    "Number",//MYX_TE_COL_BOOL (revival: the comma was missing)
     "String",//MYX_TE_COL_DATE
   };
   
@@ -746,14 +851,9 @@ static void excel_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *co
   {
     if(text[i])
     {
-      char *s= escape_xml_entities(text[i]);
-      if (s == NULL)
-        s = "";
-
-      fprintf(self->file_stream, "    <Cell><Data ss:Type=\"%s\">%s</Data></Cell>\n", 
-        excel_types[self->columns[0][i].ctype], s);
-
-      g_free(s);
+      fprintf(self->file_stream, "    <Cell><Data ss:Type=\"%s\">", excel_types[self->columns[0][i].ctype]);
+      write_markup(self->file_stream, text[i], MARKUP_XML);
+      fputs("</Data></Cell>\n", self->file_stream);
     }
     else
       fprintf(self->file_stream, "    <Cell><Data ss:Type=\"String\"/></Cell>\n");
@@ -874,28 +974,21 @@ static void plist_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *co
   {
     if(text[i])
     {
-      char *s= escape_xml_entities(text[i]);
-      fprintf(self->file_stream, "        <key>%s</key>\n", columns[i].name);      
-      switch (columns[i].ctype)
+      static const char *tags[]= {"string", "integer", "real", NULL, "date"};
+      FILE *f= self->file_stream;
+
+      fputs("        <key>", f);
+      write_markup(f, columns[i].name, MARKUP_XML);
+      fputs("</key>\n", f);
+      if (columns[i].ctype == MYX_TE_COL_BOOL)
+        fprintf(f, "        <%s/>\n",
+                ((g_ascii_strcasecmp(text[i],"true")==0 || strcmp(text[i], "1")==0)) ? "true" : "false");
+      else
       {
-        case MYX_TE_COL_STRING:   
-          fprintf(self->file_stream, "        <string>%s</string>\n", s); 
-          break;
-        case MYX_TE_COL_INTEGER:  
-          fprintf(self->file_stream, "        <integer>%s</integer>\n", s);
-          break;
-        case MYX_TE_COL_FLOAT:
-          fprintf(self->file_stream, "        <real>%s</real>\n", s);
-          break;
-        case MYX_TE_COL_BOOL:
-          fprintf(self->file_stream, "        <%s/>\n", 
-                  ((strcasecmp(s,"true")==0 || strcasecmp(s, "1")==0)) ? "true" : "false");
-          break;
-        case MYX_TE_COL_DATE:
-          fprintf(self->file_stream, "        <date>%s</date>\n", s);
-          break;
-      }      
-      g_free(s);
+        fprintf(f, "        <%s>", tags[columns[i].ctype]);
+        write_markup(f, text[i], MARKUP_XML);
+        fprintf(f, "</%s>\n", tags[columns[i].ctype]);
+      }
     }
   }
   
@@ -914,6 +1007,267 @@ static void plist_exporter_end(MYX_TABLE_EXPORTER_INFO *self)
   fprintf(self->file_stream, "</plist>\n");
 }
 
+// ------------------------------------------------------------
+// JSON and JSON Lines exporters (revival, ADR-0049)
+// ------------------------------------------------------------
+
+/* JSON: an array of objects, one row per line; JSON Lines: one object per line and nothing else. The keys are the
+   column names, NULL is null, a value of a numeric column is a number (if its text is one, e.g. not a ZEROFILL
+   value), everything else a string. Strings are UTF-8 with the JSON escapes; bytes that are not UTF-8 become U+FFFD.
+   Only one table level: the master-detail export is offered for HTML and XML only (myx_export_resultset). */
+
+typedef struct {
+  int lines;     // JSON Lines
+  int row_num;
+} MYX_JSON_EXPORTER_INFO;
+
+static void write_json_string(FILE *f, const char *text)
+{
+  static const char hex[]= "0123456789abcdef";
+  const unsigned char *s= (const unsigned char*)text;
+  const unsigned char *run= s;
+
+  fputc('"', f);
+  while (*s)
+  {
+    const char *escape= NULL;
+    char buffer[8];
+    int len= 1;
+    unsigned char c= *s;
+
+    if (c == '"') escape= "\\\"";
+    else if (c == '\\') escape= "\\\\";
+    else if (c < 0x20)
+    {
+      switch (c)
+      {
+        case '\b': escape= "\\b"; break;
+        case '\f': escape= "\\f"; break;
+        case '\n': escape= "\\n"; break;
+        case '\r': escape= "\\r"; break;
+        case '\t': escape= "\\t"; break;
+        default:
+          buffer[0]= '\\'; buffer[1]= 'u'; buffer[2]= '0'; buffer[3]= '0';
+          buffer[4]= hex[c >> 4]; buffer[5]= hex[c & 15]; buffer[6]= 0;
+          escape= buffer;
+      }
+    }
+    else if (c >= 0x80)
+    {
+      gunichar code;
+
+      len= utf8_len(s, &code);
+      if (len == 0)
+      {
+        escape= REPLACEMENT_CHAR;
+        len= 1;
+      }
+    }
+
+    if (escape)
+    {
+      if (s > run)
+        fwrite(run, 1, s - run, f);
+      fputs(escape, f);
+      s+= len;
+      run= s;
+    }
+    else
+      s+= len;
+  }
+  if (s > run)
+    fwrite(run, 1, s - run, f);
+  fputc('"', f);
+}
+
+// -?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][+-]?[0-9]+)?
+static int is_json_number(const char *s)
+{
+  if (*s == '-')
+    s++;
+  if (*s == '0')
+    s++;
+  else if (*s >= '1' && *s <= '9')
+    while (*s >= '0' && *s <= '9') s++;
+  else
+    return 0;
+  if (*s == '.')
+  {
+    s++;
+    if (!(*s >= '0' && *s <= '9'))
+      return 0;
+    while (*s >= '0' && *s <= '9') s++;
+  }
+  if (*s == 'e' || *s == 'E')
+  {
+    s++;
+    if (*s == '+' || *s == '-')
+      s++;
+    if (!(*s >= '0' && *s <= '9'))
+      return 0;
+    while (*s >= '0' && *s <= '9') s++;
+  }
+  return *s == 0;
+}
+
+static MYX_TABLE_EXPORTER_INFO *json_exporter_init();
+static MYX_TABLE_EXPORTER_INFO *jsonl_exporter_init();
+static void json_exporter_free(MYX_TABLE_EXPORTER_INFO *info);
+static int json_exporter_setup(MYX_TABLE_EXPORTER_INFO *self, const char *filename);
+static void json_exporter_begin(MYX_TABLE_EXPORTER_INFO *self, const char *text);
+static void json_exporter_table_setup(MYX_TABLE_EXPORTER_INFO *self, unsigned int columns_num, MYX_TE_COLUMN *columns);
+static void json_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self);
+static void json_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *const*text);
+static void json_exporter_table_footer(MYX_TABLE_EXPORTER_INFO *self);
+static void json_exporter_end(MYX_TABLE_EXPORTER_INFO *self);
+
+static MYX_TE_OPTION json_exporter_options[]=
+{
+  {NULL, NULL, NULL, 0}
+};
+
+MYX_TABLE_EXPORTER JSON_TABLE_EXPORTER=
+{
+  "JSON",
+  "Generates a JSON File (an array of objects)",
+  "JSON File",
+  "json",
+  json_exporter_init,
+  json_exporter_free,
+  json_exporter_setup,
+  json_exporter_begin,
+  json_exporter_table_setup,
+  json_exporter_table_header,
+  json_exporter_columns,
+  json_exporter_table_footer,
+  json_exporter_end,
+
+  json_exporter_options
+};
+
+MYX_TABLE_EXPORTER JSONL_TABLE_EXPORTER=
+{
+  "JSON Lines",
+  "Generates a JSON Lines File (one object per line)",
+  "JSON Lines File",
+  "jsonl",
+  jsonl_exporter_init,
+  json_exporter_free,
+  json_exporter_setup,
+  json_exporter_begin,
+  json_exporter_table_setup,
+  json_exporter_table_header,
+  json_exporter_columns,
+  json_exporter_table_footer,
+  json_exporter_end,
+
+  json_exporter_options
+};
+
+
+static MYX_TABLE_EXPORTER_INFO *json_exporter_init()
+{
+  MYX_TABLE_EXPORTER_INFO *info= make_exporter_info(&JSON_TABLE_EXPORTER);
+
+  info->priv= g_new0(MYX_JSON_EXPORTER_INFO, 1);
+  return info;
+}
+
+static MYX_TABLE_EXPORTER_INFO *jsonl_exporter_init()
+{
+  MYX_TABLE_EXPORTER_INFO *info= make_exporter_info(&JSONL_TABLE_EXPORTER);
+
+  info->priv= g_new0(MYX_JSON_EXPORTER_INFO, 1);
+  ((MYX_JSON_EXPORTER_INFO*)info->priv)->lines= 1;
+  return info;
+}
+
+static void json_exporter_free(MYX_TABLE_EXPORTER_INFO *self)
+{
+  g_free(self->priv);
+  free_exporter_info(self);
+}
+
+static int json_exporter_setup(MYX_TABLE_EXPORTER_INFO *self, const char *filename)
+{
+  // binary: the same bytes on every platform (no CR LF on Windows), as JSON Lines readers expect
+  self->file_stream= myx_fopen(filename, "wb");
+  if (!self->file_stream)
+    return -1;
+  return 0;
+}
+
+static void json_exporter_begin(MYX_TABLE_EXPORTER_INFO *self, const char *text)
+{
+}
+
+static void json_exporter_table_setup(MYX_TABLE_EXPORTER_INFO *self, unsigned int columns_num, MYX_TE_COLUMN *columns)
+{
+  add_tabledef(self, columns_num, columns);
+}
+
+static void json_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self)
+{
+  MYX_JSON_EXPORTER_INFO *ji= (MYX_JSON_EXPORTER_INFO*)self->priv;
+
+  self->current_level++;
+  if (self->current_level > 1)
+    return;
+  ji->row_num= 0;
+  if (!ji->lines)
+    fputs("[\n", self->file_stream);
+}
+
+static void json_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *const*text)
+{
+  MYX_JSON_EXPORTER_INFO *ji= (MYX_JSON_EXPORTER_INFO*)self->priv;
+  MYX_TE_COLUMN *columns= self->columns[0];
+  FILE *f= self->file_stream;
+  unsigned int i;
+
+  if (self->current_level > 1)
+    return;
+  if (!ji->lines && ji->row_num > 0)
+    fputs(",\n", f);
+  ji->row_num++;
+
+  fputc('{', f);
+  for (i= 0; i < self->columns_num[0]; i++)
+  {
+    if (i > 0)
+      fputc(',', f);
+    write_json_string(f, columns[i].name ? columns[i].name : "");
+    fputc(':', f);
+    if (!text[i])
+      fputs("null", f);
+    else if ((columns[i].ctype == MYX_TE_COL_INTEGER || columns[i].ctype == MYX_TE_COL_FLOAT)
+             && is_json_number(text[i]))
+      fputs(text[i], f);
+    else if (columns[i].ctype == MYX_TE_COL_BOOL)
+      fputs((g_ascii_strcasecmp(text[i], "true") == 0 || strcmp(text[i], "1") == 0) ? "true" : "false", f);
+    else
+      write_json_string(f, text[i]);
+  }
+  fputc('}', f);
+  if (ji->lines)
+    fputc('\n', f);
+}
+
+static void json_exporter_table_footer(MYX_TABLE_EXPORTER_INFO *self)
+{
+  MYX_JSON_EXPORTER_INFO *ji= (MYX_JSON_EXPORTER_INFO*)self->priv;
+
+  self->current_level--;
+  if (self->current_level > 0)
+    return;
+  if (!ji->lines)
+    fputs(ji->row_num > 0 ? "\n]\n" : "]\n", self->file_stream);
+}
+
+static void json_exporter_end(MYX_TABLE_EXPORTER_INFO *self)
+{
+}
+
 // ============================================================
 
 static MYX_TABLE_EXPORTER *exporters[]= {
@@ -921,7 +1275,9 @@ static MYX_TABLE_EXPORTER *exporters[]= {
   &HTML_TABLE_EXPORTER,
   &XML_TABLE_EXPORTER,
   &EXCEL_TABLE_EXPORTER,
-  &PLIST_TABLE_EXPORTER
+  &PLIST_TABLE_EXPORTER,
+  &JSON_TABLE_EXPORTER,    // revival, ADR-0049
+  &JSONL_TABLE_EXPORTER
 };
 
 
