@@ -13,7 +13,7 @@ uses
   TntClasses, TntStdCtrls, TntCheckLst, TntExtCtrls, TntForms, TntComCtrls, TntButtons, TntGrids,
   TntMenus, TntActnList, TntDialogs, TntRegistry, TntSysUtils, TntSystem, TntClipBrd,
   gnugettext, PNGImage, PNGTools, ResSelfTest, AuxFuncs, Options, MyxError, AuxApplicationFuncs,
-  MySQLConnection, QueryCancel, LibSSH, SSHTunnel, SSHConnect, SSHConnectUI, ConnectToInstance, CommonFuncs, About, DevTools,
+  MySQLConnection, QueryCancel, LibSSH, SSHTunnel, SSHConnect, SSHConnectUI, SSHTunnelDialog, ConnectToInstance, CommonFuncs, About, DevTools,
   CommonTypes, MySQLCommonFuncs, AppInstanceMgmt, TextSearch, AdvancedEdit, TabHeader,
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,
@@ -187,6 +187,11 @@ begin
     else if ParamStr(I) = '--shot-options' then
     begin
       RunOptionsScreenshot(ParamStr(I + 1));
+      Exit;
+    end
+    else if ParamStr(I) = '--shot-ssh' then
+    begin
+      RunSSHDialogScreenshot(ParamStr(I + 1));
       Exit;
     end
     else if ParamStr(I) = '--selftest-dialog' then

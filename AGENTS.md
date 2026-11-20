@@ -134,10 +134,12 @@ python tools/port_unit.py <Unit>         # mechanical copy to app/src (encoding,
 python tools/drop_routines.py app/src/<Unit>.pas Name1 Name2   # remove unused routines
 
 # application self-tests (GUI program: results go to files; always use a timeout)
-querymole.exe -datadir <tmp> --shot-connect out.png                     # screenshot of the dialog
+querymole.exe -datadir <tmp> --shot-connect out.png                     # screenshot of the dialog (and out_details.png)
 querymole.exe -datadir <tmp> -u root -p <pwd> -h 127.0.0.1 -P <port> --selftest-connect out.txt
 querymole.exe ... --selftest-dialog out.txt                              # drives the connect dialog
-querymole.exe -datadir <tmp> --shot-options <base>                        # options dialog -> <base>_default.png, _connections.png
+querymole.exe -datadir <tmp> --shot-options <base>                        # options dialog -> <base>_default.png, _connections.png,
+                                                                          #   _connection.png (first stored connection selected)
+querymole.exe -datadir <tmp> --shot-ssh out.png                         # SSH tunnel dialog, filled from the last stored connection
 querymole ... --shot-main x.png --stress-schemata 90 out.txt              # schemata tree stress test (docs/linux-port.md)
 querymole ... --shot-main x.png --stop-and-edit 0 0 700 " LIMIT 5" out.txt # double click, run, stop, edit, run again
 querymole ... --shot-main x.png --sql "select ..." --menu-smoke run out.txt # click every menu entry, report exceptions

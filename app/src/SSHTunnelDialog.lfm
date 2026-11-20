@@ -1,0 +1,157 @@
+object SSHTunnelForm: TSSHTunnelForm
+  Left = 400
+  Top = 200
+  BorderStyle = bsDialog
+  Caption = 'SSH Tunnel'
+  ClientHeight = 286
+  ClientWidth = 360
+  Color = clBtnFace
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Position = poMainFormCenter
+  OnCreate = FormCreate
+  OnShow = FormShow
+  object SSHGBox: TGroupBox
+    Left = 12
+    Top = 10
+    Width = 336
+    Height = 232
+    Caption = 'Connect through an SSH Server'
+    TabOrder = 0
+    object SSHHostLbl: TLabel
+      Left = 8
+      Top = 29
+      Width = 86
+      Height = 13
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'SSH Host:'
+    end
+    object SSHHostEd: TEdit
+      Left = 100
+      Top = 25
+      Width = 146
+      Height = 21
+      TabOrder = 0
+      OnChange = FieldChange
+    end
+    object SSHPortLbl: TLabel
+      Left = 254
+      Top = 29
+      Width = 24
+      Height = 13
+      Caption = 'Port:'
+    end
+    object SSHPortEd: TEdit
+      Left = 284
+      Top = 25
+      Width = 38
+      Height = 21
+      TabOrder = 1
+    end
+    object SSHUserLbl: TLabel
+      Left = 8
+      Top = 57
+      Width = 86
+      Height = 13
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Username:'
+    end
+    object SSHUserEd: TEdit
+      Left = 100
+      Top = 53
+      Width = 146
+      Height = 21
+      TabOrder = 2
+    end
+    object SSHAuthLbl: TLabel
+      Left = 8
+      Top = 85
+      Width = 86
+      Height = 13
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Login with:'
+    end
+    object SSHAgentRBtn: TRadioButton
+      Left = 100
+      Top = 84
+      Width = 222
+      Height = 17
+      Caption = 'SSH agent (ssh-agent, Pageant)'
+      Checked = True
+      TabOrder = 3
+      TabStop = True
+      OnClick = FieldChange
+    end
+    object SSHKeyRBtn: TRadioButton
+      Left = 100
+      Top = 108
+      Width = 70
+      Height = 17
+      Caption = 'Key file:'
+      TabOrder = 4
+      OnClick = FieldChange
+    end
+    object SSHKeyEd: TEdit
+      Left = 172
+      Top = 106
+      Width = 124
+      Height = 21
+      Enabled = False
+      TabOrder = 5
+      OnChange = FieldChange
+    end
+    object SSHKeyBtn: TBitBtn
+      Left = 300
+      Top = 105
+      Width = 21
+      Height = 23
+      Caption = '...'
+      Enabled = False
+      TabOrder = 6
+      OnClick = SSHKeyBtnClick
+    end
+    object SSHPasswordRBtn: TRadioButton
+      Left = 100
+      Top = 132
+      Width = 222
+      Height = 17
+      Caption = 'Password'
+      TabOrder = 7
+      OnClick = FieldChange
+    end
+    object SSHNoteLbl: TLabel
+      Left = 14
+      Top = 160
+      Width = 308
+      Height = 56
+      AutoSize = False
+      Caption = 'Server Host and Port are reached from the SSH server. Host aliases, keys and jump hosts from ~/.ssh/config apply; host keys are checked against ~/.ssh/known_hosts.'
+      Font.Color = clGrayText
+      ParentFont = False
+      WordWrap = True
+    end
+  end
+  object OKBtn: TButton
+    Left = 192
+    Top = 252
+    Width = 75
+    Height = 25
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 1
+  end
+  object CancelBtn: TButton
+    Left = 273
+    Top = 252
+    Width = 75
+    Height = 25
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 2
+  end
+end

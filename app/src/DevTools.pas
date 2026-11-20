@@ -3,7 +3,10 @@ unit DevTools;
 
 { Developer modes of the executable (not part of the original program):
 
-    querymole --shot-connect out.png     show the connect dialog, save a screenshot of it, exit
+    querymole --shot-connect out.png     show the connect dialog, save a screenshot of it (and out_details.png with
+                                         "Details >>" open), exit
+    querymole --shot-ssh out.png         the same for the SSH tunnel dialog (ADR-0048), filled from the stored
+                                         connection named with -c
     querymole -u root -p ... -h ... -P ... --selftest-connect out.txt
                                    connect like the original does for command line
                                    parameters (no dialog) and report the result in out.txt
@@ -19,6 +22,7 @@ procedure EnsureMainForm;
 procedure CaptureWindowToPng(Wnd: TObject; const FileName: String);
 procedure RunConnectDialogScreenshot(const FileName: String);
 procedure RunOptionsScreenshot(const FileBase: String);
+procedure RunSSHDialogScreenshot(const FileName: String);
 procedure RunConnectSelftest(const ReportFile: String);
 procedure RunDialogConnectSelftest(const ReportFile: String);
 
@@ -26,7 +30,7 @@ implementation
 
 uses
   {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Classes, SysUtils, Forms, Graphics, Controls, MySQLConnection, ConnectToInstance, Options,
-  OptionsEditor,
+  OptionsEditor, SSHTunnelDialog,
   myx_types, myx_public_interface;
 
 {$IFDEF MSWINDOWS}
@@ -178,6 +182,34 @@ begin
     Dlg.Position := poDesigned;
     Dlg.Show;
     CaptureWindowToPng(Dlg, FileName);
+    Dlg.DetailsBtn.Click;
+    CaptureWindowToPng(Dlg, ChangeFileExt(FileName, '') + '_details.png');
+  finally
+    Dlg.Free;
+  end;
+end;
+
+procedure RunSSHDialogScreenshot(const FileName: String);
+var
+  Dlg: TSSHTunnelForm;
+  Stored: TConnectToInstanceForm;
+begin
+  EnsureMainForm;   // the dialog is centred on the main form
+  Dlg := TSSHTunnelForm.Create(nil);
+  try
+    // the SSH settings of the stored connection the dialog picks (the last one, or the one named with -c)
+    Stored := TConnectToInstanceForm.Create(nil, True, False);
+    try
+      if (Stored.User_Connection <> nil) then
+        Dlg.LoadOptions(Stored.User_Connection.advanced_options);
+    finally
+      Stored.Free;
+    end;
+    Dlg.Left := 40;
+    Dlg.Top := 40;
+    Dlg.Position := poDesigned;
+    Dlg.Show;
+    CaptureWindowToPng(Dlg, FileName);
   finally
     Dlg.Free;
   end;
@@ -186,6 +218,7 @@ end;
 procedure RunOptionsScreenshot(const FileBase: String);
 var
   Dlg: TOptionsForm;
+  I: Integer;
 begin
   EnsureMainForm;
   Dlg := TOptionsForm.Create(nil, nil);
@@ -197,6 +230,14 @@ begin
     CaptureWindowToPng(Dlg, FileBase + '_default.png');
     Dlg.ShowOptionPage(ConnectionsPage);
     CaptureWindowToPng(Dlg, FileBase + '_connections.png');
+    // the first stored connection selected, when there is one
+    for I := 0 to Dlg.ConnsTreeView.Items.Count - 1 do
+      if Dlg.ConnsTreeView.Items[I].Data <> nil then
+      begin
+        Dlg.ConnsTreeView.Selected := Dlg.ConnsTreeView.Items[I];
+        CaptureWindowToPng(Dlg, FileBase + '_connection.png');
+        Break;
+      end;
   finally
     Dlg.Free;
   end;

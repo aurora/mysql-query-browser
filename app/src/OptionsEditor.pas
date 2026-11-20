@@ -24,7 +24,7 @@ uses
   {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, Messages, SysUtils, Variants, Classes, Graphics, Controls, TntForms,
   Dialogs, TntStdCtrls, TntExtCtrls, TntComCtrls, ComCtrls, ImgList, AuxFuncs,
   myx_util_public_interface, myx_public_interface, Grids, ValEdit,
-  Options, PNGImage, MyxError, Forms, StdCtrls, ExtCtrls, TntClasses;
+  Options, PNGImage, MyxError, Forms, StdCtrls, ExtCtrls, TntClasses, SSHTunnelDialog;
 
 type
   TOptionsForm = class(TTntForm)
@@ -177,6 +177,8 @@ type
     FOptionImages: TList;
     FApplicationOptionsForm: TApplicationOptionsForm;
     FCodeFontCharset: TFontCharset;
+    FSSHRow: TSSHTunnelRow;   // revival: "Use SSH tunnel" on Connection Parameters (ADR-0048)
+    procedure SSHRowChange(Sender: TObject);
   protected
     procedure LoadConnectionPage; virtual;
     procedure ApplyConnectionChanges; virtual;
@@ -235,6 +237,15 @@ begin
     OptionPageControl.ActivePageIndex := 0;
     ConnectionPageControl.ActivePageIndex := 0;
 
+    // revival: the SSH tunnel row between Schema and Notes; Notes moves down by one row and its field gives up as
+    // much (ADR-0048)
+    FSSHRow := TSSHTunnelRow.Create(ConnGeneralTabSheet, ConnectionLbl.Left, SchemataEd.Top + 33,
+      SchemataEd.Left + SchemataEd.Width - ConnectionLbl.Left);
+    FSSHRow.OnChange := SSHRowChange;
+    Label1.Top := Label1.Top + 32;
+    ConnMemo.Top := ConnMemo.Top + 32;
+    ConnMemo.Height := ConnMemo.Height - 32;
+
     OptionPageControl.Top := 20;
     OptionPageControl.Height := OptionPageControl.Height - 16;
     HeaderPnl.BringToFront;
@@ -262,6 +273,7 @@ procedure TOptionsForm.FormDestroy(Sender: TObject);
 var
   i: Integer;
 begin
+  FreeAndNil(FSSHRow);
   MYXCommonOptions.AddWindowPos(Self);
 
   for i := 0 to FOptionImages.Count - 1 do
@@ -425,6 +437,18 @@ begin
   // Enable/Disable Controls on pages
   for i := 0 to ConnectionPageControl.PageCount - 1 do
     DisableEnableControls(ConnectionPageControl.Pages[i], Enable);
+  if FSSHRow <> nil then
+    FSSHRow.SetEnabled(Enable);   // the summary is grey while the box is unchecked
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+// revival: the row changed; the Advanced Parameters tab shows the same entries (ADR-0048)
+procedure TOptionsForm.SSHRowChange(Sender: TObject);
+
+begin
+  FSSHRow.Save(ConnValueListEditor.Strings);
+  DoPageContentChanged(Sender);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -489,6 +513,7 @@ begin
         ConnMemo.Text := TMYX_USER_CONNECTION(Node.Data).notes;
 
         ConnValueListEditor.Strings.Assign(TMYX_USER_CONNECTION(Node.Data).advanced_options);
+        FSSHRow.Load(TMYX_USER_CONNECTION(Node.Data).advanced_options);   // revival: ADR-0048
 
         // Enable Controls on pages.
         DisableEnableConnectionPages(True);
@@ -520,6 +545,7 @@ begin
         ConnMemo.Text := '';
 
         ConnValueListEditor.Strings.Clear;
+        FSSHRow.Clear;   // revival: ADR-0048
 
         // Disable controls on pages
         DisableEnableConnectionPages(False);
@@ -992,6 +1018,7 @@ begin
         notes := ConnMemo.Text;
 
         advanced_options.Assign(ConnValueListEditor.Strings);
+        FSSHRow.Save(advanced_options);   // revival: the row's SSH settings win (ADR-0048)
       end;
 
       ConnsTreeView.Selected.Text := ConnectionEd.Text;

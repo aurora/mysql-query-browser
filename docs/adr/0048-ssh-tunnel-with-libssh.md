@@ -119,8 +119,9 @@ Negative:
 - Whether MSYS2's libssh builds with agent support on Windows as expected, and which crypto backend both packages
   use.
 - The wording of the new texts and their translation entries (German first, as the original ships it).
-- Where the new form's `.lfm` lives: `app/forms` holds forms generated from the original's `.dfm` files; a form
-  written for the revival needs a place the generator leaves alone.
+- ~~Where the new form's `.lfm` lives.~~ Next to its unit (`app/src/SSHTunnelDialog.lfm`), outside `app/forms`,
+  which `tools/convert_forms.py` generates; the rows in the converted dialogs are created at run time
+  (`TSSHTunnelRow`), so their form files stay as converted.
 
 ## Related
 

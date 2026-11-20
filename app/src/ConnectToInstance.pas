@@ -8,7 +8,7 @@ uses
   gnugettext, {$IFDEF MSWINDOWS}Windows{$ELSE}LCLIntf, LCLType, WinAliases, Types{$ENDIF}, {$IFDEF MSWINDOWS}WinSock,{$ELSE}Sockets,{$ENDIF} Messages, SysUtils, Variants, Classes, Graphics, Controls,
   Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls, Buttons, Menus, Grids,
   PNGImage, myx_util_public_interface, myx_public_interface, AuxFuncs, MySQLConnection,
-  Options, OptionsEditor, MyxError, Math,
+  Options, OptionsEditor, MyxError, Math, SSHTunnelDialog,
   TntForms, TntStdCtrls, TntClasses, TntExtCtrls, TntButtons, TntGrids,
   TntComCtrls, AuxApplicationFuncs;
 
@@ -174,6 +174,7 @@ type
     function CreateOptionsForm: TOptionsForm; virtual;
   public
     PMySQL: Pointer;
+    SSHRow: TSSHTunnelRow;   // revival: the SSH tunnel row under "Details >>" (ADR-0048)
     User_Connection: TMYX_USER_CONNECTION;
 
     property AllowConnectionSkip: Boolean read FAllowConnectionSkip write FAllowConnectionSkip;
@@ -243,6 +244,11 @@ begin
   PingErrorMsgs := nil;
   Pinging := False;
 
+  // revival: "Use SSH tunnel" where the original keeps its hidden SSL check box, below "Pipe name" (ADR-0048);
+  // before the stored connections are read, which fills it
+  SSHRow := TSSHTunnelRow.Create(MySQLOptionsTabSheet, UseCompressionCBox.Left,
+    PipeNameEdit.Top + PipeNameEdit.Height + 8, UseCompressionCBox.Width);
+
   //Fetch Stored Connections
   GetStoredConnections;
 
@@ -272,6 +278,7 @@ end;
 procedure TConnectToInstanceForm.FormDestroy(Sender: TObject);
 
 begin
+  FreeAndNil(SSHRow);
   MYXCommonOptions.AddWindowPos(self);
 
   //Terminate PingThread if still running
@@ -394,6 +401,8 @@ begin
   UseAnsiQuotesCBox.Checked := (a_connection.advanced_options.IndexOf('ANSI_QUOTES=Yes') > -1);
   NamedPipeCBox.Checked := (a_connection.advanced_options.IndexOf('NAMED_PIPE=Yes') > -1);
   PipeNameEdit.Text := a_connection.advanced_options.values['SOCKET_PATH'];
+  if SSHRow <> nil then
+    SSHRow.Load(a_connection.advanced_options);   // revival: ADR-0048
 
   //Fill Advanced Option StringGrid
   for I := 0 to AdvancedOptionsStringGrid.ColCount-1 do
@@ -485,6 +494,9 @@ begin
     if Index >-1 then
       a_connection.advanced_options.Delete(Index);
   end;
+
+  if SSHRow <> nil then
+    SSHRow.Save(a_connection.advanced_options);   // revival: ADR-0048
 
   SetConnectionValues := a_connection;
 end;
@@ -739,6 +751,7 @@ begin
   HostnameCBox.Text := '';
   PortEd.Text := '3306';
   SchemataEd.Text := '';
+  SSHRow.Clear;   // revival: ADR-0048
 
   CheckBtnState;
 
