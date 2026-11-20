@@ -105,9 +105,10 @@ Negative:
 
 ## Open (to settle before or during implementation)
 
-- Pageant's pipe name: PuTTY derives it from the user name and a hash (`agent_named_pipe_name.c`); to be confirmed
-  from the PuTTY source and tested on Windows. Alternative: read it from the file written by `pageant
-  --openssh-config` via `Include`/`IdentityAgent` in `~/.ssh/config`.
+- Pageant: its pipe name is now known from the PuTTY source (`\\.\pipe\pageant.<user>.<SHA-256 of the
+  CryptProtectMemory-encrypted string "Pageant">`, details in `docs/ssh-tunnel-libraries.md`) and the pipe speaks the
+  OpenSSH agent protocol; the program computes the name, uses the pipe when it exists, and an `IdentityAgent` in
+  `~/.ssh/config` wins. Pageant before 0.75 is not supported. Still to test on Windows with a running Pageant.
 - Whether MSYS2's libssh builds with agent support on Windows as expected, and which crypto backend both packages
   use.
 - The wording of the new texts and their translation entries (German first, as the original ships it).

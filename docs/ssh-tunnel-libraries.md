@@ -54,9 +54,32 @@ Decision: libssh (ADR-0048, 2026-11-20).
   configuration line telling `ssh.exe` where Pageant is. The pipe name's construction could not be read from the
   PuTTY source here (its git host refused the request).
 
-## Still to check
+## Pageant's pipe (read in the PuTTY 0.84 source, 2026-11-20)
 
-- Pageant's pipe name construction (PuTTY `windows/utils/agent_named_pipe_name.c`) and a test on Windows.
+Pageant 0.75 and later listens on
+
+    \\.\pipe\pageant.<user>.<suffix>
+
+(`windows/utils/agent_named_pipe_name.c`), built as follows:
+
+- `<user>`: `GetUserNameExA(NameUserPrincipal)` cut at the first `@`; if that fails, `GetUserNameA`
+  (`windows/utils/get_username.c`).
+- `<suffix>`: `capi_obfuscate_string("Pageant")` (`windows/utils/cryptoapi.c`): the string with its terminating NUL,
+  zero-padded to a multiple of `CRYPTPROTECTMEMORY_BLOCK_SIZE` (16 bytes, so `"Pageant\0"` plus 8 zero bytes),
+  encrypted in place with `CryptProtectMemory(..., CRYPTPROTECTMEMORY_CROSS_PROCESS)` (the same key in every process
+  of the user, so the result is stable); if the call is not available or fails, the plain bytes are used. Then
+  SHA-256 over the SSH string encoding of those bytes (a 4-byte big-endian length, here 16, then the bytes), written
+  as 64 lower-case hex digits.
+- The pipe speaks the OpenSSH agent protocol: each message is a 4-byte big-endian length and the payload
+  (`strbuf_finalise_agent_query` in `utils/strbuf.c`; `windows/agent-client.c` writes the query and reads until the
+  response is complete). So libssh's Windows agent client can use it once `SSH_OPTIONS_IDENTITY_AGENT` names it.
+- `pageant --openssh-config <file>` writes exactly that path as `IdentityAgent "//./pipe/pageant.<user>.<suffix>"`
+  (slashes instead of backslashes, `windows/pageant.c`), meant for an `Include` in `~/.ssh/config`.
+
+So the program can find Pageant without user setup: compute the name the same way (crypt32's `CryptProtectMemory`,
+SHA-256 from OpenSSL), check that the pipe exists, and pass it as the identity agent; an `IdentityAgent` in
+`~/.ssh/config` takes precedence. Older Pageant versions (before 0.75, 2021) only have the window-message interface
+and are not supported. A test on Windows with a running Pageant is still outstanding.
 - Which crypto backend the MSYS2 and AlmaLinux packages use (OpenSSL is already in both packages for Connector/C).
 - Argon2 for `.ppk` format 3: OpenSSL 3.2 and later has an Argon2 KDF (AlmaLinux 9 has 3.5); otherwise a small
   implementation or libargon2.
@@ -77,6 +100,9 @@ Decision: libssh (ADR-0048, 2026-11-20).
 - libssh CHANGELOG (IdentityAgent in 0.10.0, ProxyJump in 0.11.0): <https://github.com/libssh/libssh-mirror/blob/master/CHANGELOG>;
   config keywords: <https://github.com/libssh/libssh-mirror/blob/master/src/config.c>
 - Pageant and Windows OpenSSH: <https://the.earth.li/~sgtatham/putty/latest/htmldoc/Chapter9.html> (9.3.3)
+- PuTTY 0.84 source (Fedora's `putty-0.84-1.fc44.src.rpm`): `windows/utils/agent_named_pipe_name.c`,
+  `windows/utils/cryptoapi.c`, `windows/utils/get_username.c`, `windows/agent-client.c`, `windows/pageant.c`,
+  `utils/strbuf.c`, `utils/marshal.c`
 - PuTTY key formats and Argon2 in format 3: <https://putty.cs.utah.edu/0.83/htmldoc/AppendixC.html>,
   <https://putty.cs.utah.edu/wishlist/ppk3.html>; Pageant and the OpenSSH pipe:
   <https://putty.cs.utah.edu/wishlist/win-pageant-openssh-interop.html>
