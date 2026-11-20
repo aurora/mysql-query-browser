@@ -54,8 +54,22 @@ if [ "$app_only" = 0 ]; then
     mkdir -p "$ssh_dir"
     # readable for the test program whoever owns the files (throw-away keys)
     "$engine" run --rm --security-opt label=disable -v "$ssh_dir:/out" "$ssh_image" sh -c \
-      'ssh-keygen -q -t ed25519 -N "" -C qbr -f /out/id_ed25519 && ssh-keygen -q -t ed25519 -N qbr-pass -C qbr \
-       -f /out/id_ed25519_pass && cat /out/*.pub > /out/authorized_keys && chmod 644 /out/*'
+      'set -e; cd /out
+       ssh-keygen -q -t ed25519 -N "" -C qbr -f id_ed25519
+       ssh-keygen -q -t ed25519 -N qbr-pass -C qbr -f id_ed25519_pass
+       ssh-keygen -q -t rsa -b 2048 -N "" -C qbr -f id_rsa
+       ssh-keygen -q -t ecdsa -b 256 -N "" -C qbr -f id_ecdsa
+       echo qbr-pass > pass.txt
+       # PuTTY keys in both formats, plain and encrypted (Argon2 kept cheap for the tests)
+       puttygen id_ed25519 -O private -o ed25519-v3.ppk
+       puttygen id_ed25519 -O private -o ed25519-v2-pass.ppk --new-passphrase pass.txt --ppk-param version=2
+       puttygen id_rsa -O private -o rsa-v3-pass.ppk --new-passphrase pass.txt \
+         --ppk-param kdf=argon2id,memory=8192,passes=2,parallel=1
+       puttygen id_rsa -O private -o rsa-v2.ppk --ppk-param version=2
+       puttygen id_ecdsa -O private -o ecdsa-v3-argon2i-pass.ppk --new-passphrase pass.txt \
+         --ppk-param kdf=argon2i,memory=8192,passes=2,parallel=2
+       cat *.pub > authorized_keys
+       chmod 644 *'
     "$engine" rm -f qbr-sshd >/dev/null 2>&1
     "$engine" run -d --name qbr-sshd --network host --security-opt label=disable -v "$ssh_dir:/keys:ro" \
       "$ssh_image" >/dev/null

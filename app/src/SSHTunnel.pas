@@ -103,7 +103,7 @@ function SSHHostKeyFingerprint(Session: ssh_session): String;
 implementation
 
 uses
-  Sockets{$IFDEF MSWINDOWS}, WinSock2{$ELSE}, BaseUnix, Unix{$ENDIF};
+  PuttyKey, PageantPipe, Sockets{$IFDEF MSWINDOWS}, WinSock2{$ELSE}, BaseUnix, Unix{$ENDIF};
 
 resourcestring
   SNoSession = 'Could not create an SSH session.';
@@ -119,8 +119,8 @@ resourcestring
   SAuthFailed = 'The SSH server %s did not accept the login (%s).';
   SAuthCancelled = 'The SSH login was cancelled.';
   SKeyFileRead = 'Could not read the key file %s (wrong passphrase or unsupported format).';
-  SPuttyKey = 'The key file %s is in PuTTY format, which is not supported yet. Convert it with PuTTYgen ' +
-    '(Conversions > Export OpenSSH key).';
+  SPuttyKey = 'The PuTTY key file %s cannot be used: %s. PuTTYgen can save it as an OpenSSH key (Conversions > ' +
+    'Export OpenSSH key).';
   SAskPassword = 'Password for %s@%s:';
   SAskPassphrase = 'Passphrase for the key %s:';
   SListenFailed = 'Could not open a local port for the SSH tunnel.';
@@ -319,8 +319,17 @@ end;
 procedure TSSHTunnel.Configure;
 var
   NoConfig: Boolean;
+  Pageant: String;
 begin
   SetOption(SSH_OPTIONS_HOST, SSHHost);
+  // Windows: a running Pageant serves as the agent unless SSH_AUTH_SOCK names one; set before the config is read,
+  // so an IdentityAgent there still wins
+  if (AuthMode = samAuto) and (IdentityAgent = '') and (GetEnvironmentVariable('SSH_AUTH_SOCK') = '') then
+  begin
+    Pageant := RunningPageantPipe;
+    if Pageant <> '' then
+      SetOption(SSH_OPTIONS_IDENTITY_AGENT, Pageant);
+  end;
   if ConfigFile = '' then
     ssh_options_parse_config(FSession, nil)
   else
@@ -380,39 +389,39 @@ begin
   end;
 end;
 
-function IsPuttyKey(const FileName: String): Boolean;
-var
-  F: TFileStream;
-  Head: array[0..19] of Char;
-begin
-  Result := False;
-  try
-    F := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
-    try
-      Result := (F.Read(Head, SizeOf(Head)) = SizeOf(Head)) and (Copy(Head, 1, 20) = 'PuTTY-User-Key-File-');
-    finally
-      F.Free;
-    end;
-  except
-    Result := False;
-  end;
-end;
-
+// PuTTY keys (.ppk) are converted in memory (PuttyKey.pas); OpenSSH and PEM keys are read by libssh
 function TSSHTunnel.AuthWithKeyFile: cint;
 var
   Key: ssh_key;
-  Secret: String;
+  Secret, PEM, Error: String;
   Attempt: Integer;
   Pass: PChar;
+  Loaded, Putty: Boolean;
 begin
-  if IsPuttyKey(KeyFile) then
-    Fail(Format(SPuttyKey, [KeyFile]));
+  Putty := IsPuttyKeyFile(KeyFile);
   Secret := Passphrase;
   for Attempt := 1 to 3 do
   begin
     Key := nil;
     if Secret = '' then Pass := nil else Pass := PChar(Secret);
-    if ssh_pki_import_privkey_file(PChar(KeyFile), Pass, nil, nil, @Key) = SSH_OK then
+    if Putty then
+    begin
+      Loaded := False;
+      case PuttyKeyToOpenSSH(KeyFile, Secret, PEM, Error) of
+        pkOK:
+          try
+            Loaded := ssh_pki_import_privkey_base64(PChar(PEM), nil, nil, nil, @Key) = SSH_OK;
+          finally
+            if PEM <> '' then
+              FillChar(PEM[1], Length(PEM), 0);   // the key in clear
+          end;
+        pkError:
+          Fail(Format(SPuttyKey, [KeyFile, Error]));
+      end;
+    end
+    else
+      Loaded := ssh_pki_import_privkey_file(PChar(KeyFile), Pass, nil, nil, @Key) = SSH_OK;
+    if Loaded then
     begin
       try
         Exit(ssh_userauth_publickey(FSession, nil, Key));

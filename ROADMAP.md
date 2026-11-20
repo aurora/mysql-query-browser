@@ -139,8 +139,9 @@ default, in the original's style.
   tested on the matrix against an OpenSSH container (`app/src/SSHTunnel.pas`, `tests/test_ssh_tunnel.pas`). The program
   connects through it when a stored connection has `SSH_TUNNEL=Yes` and the `SSH_*` advanced options (matrix self-test
   proves the SSH login). The UI follows the mock-up
-  (`app/src/SSHTunnelDialog.pas`; screenshots with `--shot-connect`, `--shot-ssh`, `--shot-options`). Next: `.ppk` keys
-  and Pageant, storing the SSH password, a test on Windows.
+  (`app/src/SSHTunnelDialog.pas`; screenshots with `--shot-connect`, `--shot-ssh`, `--shot-options`). `.ppk` keys
+  (formats 2 and 3) work and are tested; Pageant is implemented for Windows. Next: storing the SSH password, a test on
+  Windows (Pageant, libssh.dll).
 - TLS mode in the connection dialog: required / preferred / off (ADR-0005).
 - HiDPI scaling, then optional vector-rendered icon set (ADR-0009).
 - PostgreSQL, SQLite and SQL Server via a driver seam (ADR-0010); what is MySQL-specific today and a suggested order:

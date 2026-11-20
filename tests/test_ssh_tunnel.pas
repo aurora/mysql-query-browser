@@ -41,6 +41,8 @@ type
     procedure TestWrongPasswordCancelled;
     procedure TestConfigHostAlias;
     procedure TestPuttyKeyExplained;
+    procedure TestPuttyKeys;
+    procedure TestPuttyWrongPassphrase;
     procedure TestReopenAfterClose;
   end;
 
@@ -370,6 +372,53 @@ begin
   try
     T.KeyFile := FDir + '/fake.ppk';
     ExpectFailure(T, 'PuTTY');
+  finally
+    T.Free;
+  end;
+end;
+
+// every .ppk variant run-matrix.sh makes with puttygen: formats 2 and 3, plain and encrypted (Argon2id, Argon2i),
+// Ed25519, RSA and ECDSA
+procedure TSSHTunnelTest.TestPuttyKeys;
+const
+  Keys: array[0..4] of String = ('ed25519-v3.ppk', 'ed25519-v2-pass.ppk', 'rsa-v3-pass.ppk', 'rsa-v2.ppk',
+    'ecdsa-v3-argon2i-pass.ppk');
+var
+  T: TSSHTunnel;
+  I: Integer;
+begin
+  if not Enabled then Ignore('no SSH test server (QBR_TEST_SSH_PORT, QBR_TEST_SSH_DIR)');
+  for I := Low(Keys) to High(Keys) do
+  begin
+    AssertTrue('test key ' + Keys[I] + ' exists', FileExists(FKeyDir + '/' + Keys[I]));
+    FAskCalls := 0;
+    FSecret := 'qbr-pass';
+    T := NewTunnel;
+    try
+      T.KeyFile := FKeyDir + '/' + Keys[I];
+      T.Open;
+      AssertTrue(Keys[I] + ': active', T.Active);
+      AssertEquals(Keys[I] + ': passphrase asked only for encrypted keys', Ord(Pos('-pass', Keys[I]) > 0),
+        FAskCalls);
+      if I = 0 then
+        AssertTrue('query through the tunnel', QueryVersion(T.LocalPort) <> '');
+    finally
+      T.Free;
+    end;
+  end;
+end;
+
+procedure TSSHTunnelTest.TestPuttyWrongPassphrase;
+var
+  T: TSSHTunnel;
+begin
+  if not Enabled then Ignore('no SSH test server (QBR_TEST_SSH_PORT, QBR_TEST_SSH_DIR)');
+  T := NewTunnel;
+  try
+    T.KeyFile := FKeyDir + '/rsa-v3-pass.ppk';
+    FSecret := 'not-the-passphrase';
+    ExpectFailure(T, 'wrong passphrase');
+    AssertEquals('asked three times', 3, FAskCalls);
   finally
     T.Free;
   end;

@@ -115,7 +115,12 @@ Negative:
 - Pageant: its pipe name is now known from the PuTTY source (`\\.\pipe\pageant.<user>.<SHA-256 of the
   CryptProtectMemory-encrypted string "Pageant">`, details in `docs/ssh-tunnel-libraries.md`) and the pipe speaks the
   OpenSSH agent protocol; the program computes the name, uses the pipe when it exists, and an `IdentityAgent` in
-  `~/.ssh/config` wins. Pageant before 0.75 is not supported. Still to test on Windows with a running Pageant.
+  `~/.ssh/config` wins. Pageant before 0.75 is not supported. Implemented in `app/compat/PageantPipe.pas`
+  (compiled for Win64, not yet run); still to test on Windows with a running Pageant.
+- `.ppk` keys: implemented in `app/src/PuttyKey.pas` (formats 2 and 3, Ed25519, RSA, ECDSA; MAC checked as PuTTY
+  does; converted in memory to an unencrypted `openssh-key-v1` key for libssh), with SHA, HMAC, AES and Argon2 from
+  OpenSSL's libcrypto, loaded at run time (`app/compat/OpenSSLCrypto.pas`; Argon2 needs OpenSSL 3.2, which Fedora
+  44, AlmaLinux 9 and MSYS2 have). Tested on the matrix with keys made by `puttygen` in every variant.
 - Whether MSYS2's libssh builds with agent support on Windows as expected, and which crypto backend both packages
   use.
 - The wording of the new texts and their translation entries (German first, as the original ships it).
