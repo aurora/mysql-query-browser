@@ -81,9 +81,10 @@ waits until after parity and gets its own decision.
   enable Paste; under GTK2 each call is an X round trip with a nested main loop. Under Qt6 (2026-11-20): connected
   and idle about 1 % CPU, 3.5 % while the mouse moves (Xvfb); Qt's xcb clipboard keeps a foreign owner's format list
   until the owner changes. Left for GTK2 only, which goes away after this release cycle (ADR-0044).
-  The unresponsive instance after ~2 million rows (2026-11-17) had a different cause, found and fixed on 2026-11-20:
+  Loading ~2 million rows (the unresponsive instance of 2026-11-17) was slow for another reason, fixed on 2026-11-20:
   the result grid sorted all rows after every fetched block (laz.VirtualTrees' default `toAutoSort`, see
-  `VTCompat`); 2 million rows now load in about a minute with the window answering throughout.
+  `VTCompat`); 2 million rows now load in about a minute with the window answering throughout. That this was the
+  cause of that freeze is likely, not proven (its stack samples showed HandleIdle and GLib, not the sort).
 - Dead connections (standby, VPN gone) no longer freeze the window (ADR-0043): TCP timeouts on the socket, keep-alive
   ping in a thread. Open: the Windows backend build with the socket options; `Ping` before a query still blocks
   during an outage.
