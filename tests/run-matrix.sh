@@ -64,8 +64,9 @@ for entry in "${matrix[@]}"; do
   "$engine" rm -f "$name" >/dev/null 2>&1
   started=$("$engine" run -d --name "$name" -p "$port:3306" -e "$pwdvar=$password" "docker.io/library/$image" 2>&1 >/dev/null)
 
-  ready=0
-  for _ in $(seq 60); do
+  # up to six minutes: initialising MySQL 5.7 took about three on the GitHub runner, longer than the first limit
+  ready=0 waited_since=$SECONDS
+  for _ in $(seq 120); do
     # ready when the server's log says it listens on 3306 (the entrypoint's temporary server during initialisation
     # has no network, port 0; MySQL's X plugin line names 33060). The admin client inside the container is only the
     # fallback: on the GitHub runner it never answered for the MySQL images although the servers were running.
@@ -75,6 +76,7 @@ for entry in "${matrix[@]}"; do
        || grep -q alive <<< "$("$engine" exec "$name" "$admin" ping -uroot "-p$password" 2>&1)"; then ready=1; break; fi
     sleep 3
   done
+  echo "waited $((SECONDS - waited_since)) s for the server (ready=$ready)"
   if [ "$ready" = 0 ]; then
     # the server's last words and the container state say why (permissions, kernel features, image pull)
     why=$("$engine" ps -a --filter "name=^$name\$" --format '{{.Status}}' 2>&1 | head -1)
