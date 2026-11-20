@@ -68,7 +68,10 @@ for entry in "${matrix[@]}"; do
     sleep 3
   done
   if [ "$ready" = 0 ]; then
-    results+=("$image|server did not start|-|")
+    # the server's last words and the container state say why (permissions, kernel features, image pull)
+    why=$("$engine" ps -a --filter "name=^$name\$" --format '{{.Status}}' 2>&1 | head -1)
+    why="$why; $("$engine" logs --tail 6 "$name" 2>&1 | tr '\n|' ' /' | cut -c1-700)"
+    results+=("$image|server did not start|-|$why")
     failed=1
     [ "$keep" = 1 ] || "$engine" rm -f "$name" >/dev/null
     continue
