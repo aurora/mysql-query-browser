@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: GPL-2.0-or-later -->
 # ADR-0046 — Every push is built and tested by GitHub Actions
 
-- Status: Accepted (first run on GitHub outstanding)
+- Status: Accepted (first passing run on GitHub: 2026-11-20, commit 00a5ead)
 - Date: 2026-11-20
 - Deciders: Harald Lapp (project owner)
 

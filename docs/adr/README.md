@@ -54,7 +54,7 @@ Related.
 | [0043](0043-dead-connections-do-not-block-the-window.md) | Dead connections do not block the window | Accepted (Windows backend build not checked) |
 | [0044](0044-qt6-on-linux-before-the-first-release.md) | Qt6 on Linux before the first release | Accepted; switched with 0.1.0-alpha.6 |
 | [0045](0045-qt6-fusion-style-and-standard-palette.md) | Qt6 build draws with the Fusion style and its standard palette | Accepted |
-| [0046](0046-test-workflow-on-every-push.md) | Every push is built and tested by GitHub Actions | Accepted (first run on GitHub outstanding) |
+| [0046](0046-test-workflow-on-every-push.md) | Every push is built and tested by GitHub Actions | Accepted |
 
 ## Numbering
 
