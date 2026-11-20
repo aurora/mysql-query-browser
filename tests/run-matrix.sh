@@ -64,15 +64,17 @@ for entry in "${matrix[@]}"; do
   "$engine" rm -f "$name" >/dev/null 2>&1
   started=$("$engine" run -d --name "$name" -p "$port:3306" -e "$pwdvar=$password" "docker.io/library/$image" 2>&1 >/dev/null)
 
-  # up to six minutes: initialising MySQL 5.7 took about three on the GitHub runner, longer than the first limit
+  # up to six minutes (the servers usually need seconds; a slow runner should not fail the run)
   ready=0 waited_since=$SECONDS
   for _ in $(seq 120); do
     # ready when the server's log says it listens on 3306 (the entrypoint's temporary server during initialisation
     # has no network, port 0; MySQL's X plugin line names 33060). The admin client inside the container is only the
     # fallback: on the GitHub runner it never answered for the MySQL images although the servers were running.
     # Both outputs are read whole first: `cmd | grep -q` fails under pipefail when grep stops reading early (SIGPIPE).
-    server_log=$("$engine" logs "$name" 2>&1)
-    if grep -qE 'ready for connections.*port: 3306([^0-9]|$)' <<< "$server_log" \
+    # MySQL 5.7 and MariaDB put "Version: ... port: 3306" on the line after "ready for connections", hence one line.
+    server_log=$("$engine" logs "$name" 2>&1 | tr '\n' ' ')
+    if grep -qE "ready for connections\.?[[:space:]]+Version: '[^']*'[[:space:]]+socket: '[^']*'[[:space:]]+port: 3306[^0-9]" \
+         <<< "$server_log" \
        || grep -q alive <<< "$("$engine" exec "$name" "$admin" ping -uroot "-p$password" 2>&1)"; then ready=1; break; fi
     sleep 3
   done
