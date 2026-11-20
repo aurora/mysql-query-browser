@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# OpenSSH server for the SSH tunnel tests (tests/test_ssh_tunnel.pas, ADR-0048), started by tests/run-matrix.sh on the
+# host network so that it reaches the test servers at 127.0.0.1 like a bastion host reaches its database. Throw-away
+# test credentials only: user qbr, password qbr-test; the keys are made per run and mounted at /keys.
+FROM docker.io/library/alpine:3.20
+RUN apk add --no-cache openssh-server openssh-keygen \
+ && ssh-keygen -A \
+ && adduser -D -s /bin/sh qbr \
+ && echo 'qbr:qbr-test' | chpasswd \
+ && printf '%s\n' \
+      'Port 24022' \
+      'ListenAddress 127.0.0.1' \
+      'PermitRootLogin no' \
+      'PasswordAuthentication yes' \
+      'KbdInteractiveAuthentication no' \
+      'PubkeyAuthentication yes' \
+      'AuthorizedKeysFile /keys/authorized_keys' \
+      'StrictModes no' \
+      'AllowTcpForwarding yes' \
+      'X11Forwarding no' \
+      'PidFile /tmp/sshd.pid' \
+    > /etc/ssh/sshd_config
+CMD ["/usr/sbin/sshd", "-D", "-e"]

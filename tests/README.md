@@ -32,3 +32,10 @@ All supported servers in throw-away containers: `pwsh tests/run-matrix.ps1` (Win
 Everything the test workflow (`.github/workflows/test.yml`, ADR-0046) checks on Linux, in one command on a host with
 podman (not inside the distrobox): `tests/ci.sh [--only mysql:8.4]`. It builds the backend, the program (GTK2 as a
 compile check, Qt6 for the tests) and the tests in the image `tests/ci/Containerfile`, then runs the server matrix.
+
+The SSH tunnel tests (`test_ssh_tunnel.pas`, ADR-0048) need an OpenSSH server that reaches the database server, and
+its keys: `QBR_TEST_SSH_PORT` and `QBR_TEST_SSH_DIR` (with `id_ed25519`, `id_ed25519_pass` (passphrase `qbr-pass`)
+and their `.pub` files; user `qbr`, password `qbr-test`). `tests/run-matrix.sh` builds `tests/ci/sshd`, makes the keys
+and starts it on the host network (port 24022); without these variables the tests are reported as ignored, and the
+matrix table says how many were. On Windows the SSH tests need `mingw-w64-x86_64-libssh` from MSYS2 and are not run
+by `run-matrix.ps1` yet.

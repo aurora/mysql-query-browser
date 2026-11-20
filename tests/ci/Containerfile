@@ -5,7 +5,7 @@
 FROM registry.fedoraproject.org/fedora:44
 RUN dnf -y install fpc lazarus lazarus-lcl-gtk2 lazarus-lcl-qt6 \
       gcc gcc-c++ cmake ninja-build pkgconf-pkg-config \
-      glib2-devel libxml2-devel pcre-devel mariadb-connector-c-devel \
+      glib2-devel libxml2-devel pcre-devel mariadb-connector-c-devel libssh-devel \
       python3 python-unversioned-command mingw64-binutils mingw64-cpp \
       xorg-x11-server-Xvfb xorg-x11-xauth dejavu-sans-fonts procps-ng which \
  && dnf clean all

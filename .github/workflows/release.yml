@@ -62,7 +62,7 @@ jobs:
           install: >-
             mingw-w64-x86_64-gcc mingw-w64-x86_64-binutils mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
             mingw-w64-x86_64-pkgconf mingw-w64-x86_64-glib2 mingw-w64-x86_64-libxml2 mingw-w64-x86_64-pcre
-            mingw-w64-x86_64-libmariadbclient
+            mingw-w64-x86_64-libmariadbclient mingw-w64-x86_64-libssh
 
       - name: Cache Lazarus
         id: lazarus

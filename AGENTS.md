@@ -41,7 +41,7 @@ If you need a different generated result, change the generator, not its output.
 
 - Lazarus 4.8 / FPC 3.2.2 in `C:\lazarus` (`lazbuild.exe`, `fpc\3.2.2\bin\x86_64-win64\fpc.exe`).
 - MSYS2 in `C:\msys64` with the mingw64 toolchain (gcc, cmake, ninja, glib2,
-  libxml2, pcre, libmariadbclient). The DLLs it provides must be on `PATH` when
+  libxml2, pcre, libmariadbclient, libssh). The DLLs it provides must be on `PATH` when
   running anything that loads `libmysqlx.dll`.
 - Podman (with a `docker.bat` shim) for the test servers.
 - Python 3 for the tools.

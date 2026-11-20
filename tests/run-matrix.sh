@@ -40,7 +40,34 @@ export QBR_TEST_PASSWORD="$password"
 [ -n "${QBR_APP:-}" ] || export LD_LIBRARY_PATH="$ROOT/backend/build-linux${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 # the programs run through this prefix (empty: here); the environment they need is passed explicitly
 read -r -a run_prefix <<< "${QBR_EXEC:-}"
-run() { "${run_prefix[@]}" env QBR_TEST_PASSWORD="$password" LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}" "$@"; }
+ssh_env=()
+run() { "${run_prefix[@]}" env QBR_TEST_PASSWORD="$password" "${ssh_env[@]}" LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}" "$@"; }
+
+# OpenSSH server for the SSH tunnel tests (tests/ci/sshd, ADR-0048), on the host network so that it reaches the test
+# servers at 127.0.0.1; the keys are made per run. Without it the tunnel tests are skipped.
+if [ "$app_only" = 0 ]; then
+  ssh_image="qbr-sshd:$(sha256sum "$ROOT/tests/ci/sshd/Containerfile" | cut -c1-12)"
+  ssh_dir="${TMPDIR:-/tmp}/qbr-ssh-keys"
+  if "$engine" image inspect "$ssh_image" >/dev/null 2>&1 \
+     || "$engine" build -q -t "$ssh_image" "$ROOT/tests/ci/sshd" >/dev/null 2>&1; then
+    rm -rf "$ssh_dir"
+    mkdir -p "$ssh_dir"
+    # readable for the test program whoever owns the files (throw-away keys)
+    "$engine" run --rm --security-opt label=disable -v "$ssh_dir:/out" "$ssh_image" sh -c \
+      'ssh-keygen -q -t ed25519 -N "" -C qbr -f /out/id_ed25519 && ssh-keygen -q -t ed25519 -N qbr-pass -C qbr \
+       -f /out/id_ed25519_pass && cat /out/*.pub > /out/authorized_keys && chmod 644 /out/*'
+    "$engine" rm -f qbr-sshd >/dev/null 2>&1
+    "$engine" run -d --name qbr-sshd --network host --security-opt label=disable -v "$ssh_dir:/keys:ro" \
+      "$ssh_image" >/dev/null
+    for _ in $(seq 20); do
+      grep -q 'Server listening' <<< "$("$engine" logs qbr-sshd 2>&1)" && break
+      sleep 1
+    done
+    ssh_env=(QBR_TEST_SSH_PORT=24022 "QBR_TEST_SSH_DIR=$ssh_dir")
+  else
+    echo "warning: the SSH test server image did not build; the SSH tunnel tests are skipped" >&2
+  fi
+fi
 
 # image, env var for the root password, admin client used for readiness checks
 matrix=(
@@ -99,8 +126,10 @@ for entry in "${matrix[@]}"; do
     run=$(grep -oP 'Number of run tests:\s+\K\d+' <<< "$log")
     err=$(grep -oP 'Number of errors:\s+\K\d+' <<< "$log")
     fail=$(grep -oP 'Number of failures:\s+\K\d+' <<< "$log")
+    ign=$(grep -c 'Ignored test:' <<< "$log")
     if [ -n "$run" ] && [ "$err" = 0 ] && [ "$fail" = 0 ]; then
       status="PASS ($run tests)" details=""
+      [ "${ign:-0}" = 0 ] || status="PASS ($run tests, $ign ignored)"
     else
       status="FAIL ($run tests)" failed=1
       details=$(grep -E 'Failed:|Exception|Assertion|Message' <<< "$log" | head -5 | tr '\n' ' ')
@@ -138,6 +167,8 @@ for entry in "${matrix[@]}"; do
 
   [ "$keep" = 1 ] || "$engine" rm -f "$name" >/dev/null
 done
+
+[ "$keep" = 1 ] || "$engine" rm -f qbr-sshd >/dev/null 2>&1
 
 echo
 printf '%-15s %-22s %-6s %s\n' Server Result App Details
