@@ -66,7 +66,7 @@ waits until after parity and gets its own decision.
    servers (`tests/run-matrix.sh`); `build.sh` and the tools run there. The Linux release is an AppImage
    (`tools/package-appimage.sh`, ADR-0027); with `--velopack` it updates itself (ADR-0037, update cycle
    verified through the GitHub releases on Linux and Windows, 0.1.0-alpha.3 to alpha.5). The application compiles
-   with GTK2, connects on all six servers, and the main window's features (results, editing,
+   with Qt6 (the default since 2026-11-20, ADR-0044; Fusion style, ADR-0045) and still with GTK2, connects on all six servers, and the main window's features (results, editing,
    scripts, export, dialogs, help) work by screenshot. State and next steps: `docs/linux-port.md`.
    macOS is deferred (ADR-0039): the first Cocoa build runs but its dialogs are cut off; it waits for the
    widgetset decision of the Qt move (ADR-0024). State: `docs/macos-setup.md`.

@@ -260,6 +260,18 @@ ported unit uses it). Found and fixed:
 - Checked: app self-tests on all six servers with GTK2 and Qt6; the Win64 executable is identical before and after
   (`.text`, `.data`, `.rdata`).
 
+**Switch to Qt6 (2026-11-20, ADR-0044).** On the project owner's go-ahead after trying the Qt6 AppImage on the
+desktop, Qt6 is the default on Linux: `./build.sh` passes `--ws=qt6` unless `QBR_WIDGETSET` says otherwise (the
+project file keeps the LCL's default, which Windows and macOS do not use), and `tools/package-appimage.sh` and
+`stage.sh` build and bundle Qt6 unless `QBR_WIDGETSET=gtk2`. The release workflow uses those defaults and caches the
+libQt6Pas build directory (`actions/cache`, keyed by the Containerfiles and `build-qt6pas.sh`). Checked before:
+- `tools/package-appimage.sh --velopack` with Qt6: an 0.1.0-alpha.5 image updated itself from a local feed holding
+  alpha.5 and a temporary alpha.6 (`--selftest-update`: `available 0.1.0-alpha.6`, `downloaded`, `updater started`;
+  the next run `installed 0.1.0-alpha.6`, `no update`) and started.
+- When testing images inside the distrobox, set `QT_QPA_PLATFORM=xcb`: `XDG_SESSION_TYPE=wayland` and the host's
+  Wayland socket are visible there, so Qt opens the window on the real desktop and an Xvfb screenshot stays black.
+Still open from ADR-0044: the desktop checklist (`docs/linux-manual-test.md`, Wayland dragging above).
+
 Reproducing under Xvfb with an open menu or list: start the program, then `xdotool` (`key alt+e`, or a click on the
 combo box arrow) and `import -window root` (both in the freepascal container). A connect dialog with stored
 connections needs a `mysqlx_user_connections.xml` in the data folder (`user_connection` elements with

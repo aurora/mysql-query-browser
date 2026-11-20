@@ -78,9 +78,10 @@ chmod +x QueryMole-*.AppImage
 ./QueryMole-*.AppImage
 ```
 
-The AppImage brings GTK2 and the other libraries it needs and runs on distributions with **glibc 2.34 or newer**
-(RHEL 9, Ubuntu 22.04, Debian 12, Fedora 35 and newer). It needs libstdc++ and an X server (XWayland on a Wayland
-desktop). Without FUSE 2 on the system, start it with `--appimage-extract-and-run`.
+The AppImage brings Qt 6 and the other libraries it needs and runs on distributions with **glibc 2.34 or newer**
+(RHEL 9, Ubuntu 22.04, Debian 12, Fedora 35 and newer). It takes libstdc++, OpenGL (libglvnd) and the font libraries
+(fontconfig, freetype, harfbuzz) from the system, which every desktop has, and runs on Wayland and on X11. Without
+FUSE 2 on the system, start it with `--appimage-extract-and-run`.
 
 Settings are kept in `~/.config/querymole/` (`$XDG_CONFIG_HOME`); on the first start, those of the original Linux
 version are copied from `~/.mysqlgui/`. The AppImage updates itself in place (ADR-0037).
@@ -91,21 +92,24 @@ version are copied from `~/.mysqlgui/`. The AppImage updates itself in place (AD
 
 ## Known problems
 
-- **Linux (GTK2):** a crash after connecting was seen once (heap corruption), and the window froze once while
-  scrolling the schema tree of a database with many tables. Neither has been reproduced; if it happens to you,
-  see [Reporting problems](#reporting-problems).
+- **Linux, earlier GTK2 versions (up to 0.1.0-alpha.5):** a crash after connecting was seen once (heap corruption),
+  and the window froze once while scrolling the schema tree of a database with many tables. Neither has been
+  reproduced, nor seen with Qt 6; if it happens to you, see [Reporting problems](#reporting-problems).
+- **Linux on Wayland:** started from a terminal, the program prints messages from the Qt toolkit about combo boxes and
+  mouse grabbing; they are harmless. If dragging (splitters, column widths, drag and drop) misbehaves, start it with
+  `QT_QPA_PLATFORM=xcb` (XWayland) and tell us.
 - **Not worked through on a desktop yet:** real mouse and keyboard use, drag and drop, bookmarks and history, the
   field viewer; the checklist is in [docs/linux-manual-test.md](docs/linux-manual-test.md).
 - **Table editor:** generated columns, `ON UPDATE`, `INVISIBLE` and CHECK constraints are kept when a table is
   edited, but not shown or editable yet (ADR-0035).
-- **Linux on a scaled (HiDPI) desktop:** the layouts are in pixels for 96 dpi and GTK's dpi is pinned to 96; use
-  the desktop's scaling for X11 applications (KDE: "Legacy applications: scaled by the system"). Real HiDPI
-  support comes later (ADR-0009).
+- **Linux on a scaled (HiDPI) desktop:** the layouts are in pixels for 96 dpi; Qt scales the whole window with the
+  desktop's scale factor. Real HiDPI support comes later (ADR-0009).
 - **Linux:** no "OS specific" password storage, only "Plaintext" and "Obscured" (ADR-0021); no global hot keys
-  (ADR-0022). This release uses GTK2; a Qt version is planned (ADR-0024).
+  (ADR-0022). From 0.1.0-alpha.6 on the Linux version uses Qt 6 with Qt's Fusion style instead of GTK2 (ADR-0044,
+  ADR-0045): it looks the same on every desktop and does not follow the desktop's theme or dark mode.
 - **Windows:** no installer and no updates yet (Velopack's `Setup.exe` is planned, ADR-0037).
 - The user interface is the original's, including its look and its English texts; some parts look different
-  under GTK2 than on Windows.
+  under Qt on Linux than on Windows.
 
 Details and the state of the Linux port: [docs/linux-port.md](docs/linux-port.md).
 

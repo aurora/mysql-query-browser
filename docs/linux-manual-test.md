@@ -2,7 +2,8 @@
 # Linux: manual test checklist
 
 What the automated checks (`tests/run-matrix.sh`, screenshots under Xvfb) cannot cover: real mouse and
-keyboard use on a desktop session. Work through it on a real GTK2 session (X11 or XWayland), note the
+keyboard use on a desktop session. Work through it on a real desktop session (Wayland, and X11 or XWayland with
+`QT_QPA_PLATFORM=xcb`) with the Qt6 build, the default since 2026-11-20 (ADR-0044), note the
 result in the table and file each failure as a line in `docs/linux-port.md` ("Still open").
 
 A failure only counts as a port bug if the same step works in the Windows build; compare with
