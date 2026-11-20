@@ -213,8 +213,10 @@ choice that a future contributor would ask "why?" about, write the ADR.
   paths as escapes; `tools/build_resources.py` normalises them.
 - **MariaDB Connector/C >= 3.4 requires TLS by default** (ADR-0005). If a
   server without TLS suddenly fails to connect, look there first.
-- **MariaDB reports its version as `5.5.5-10.x`**; version checks that read it
-  as 5.5 are wrong (ADR-0004, not fixed yet).
+- **MariaDB 10.x reports its version as `5.5.5-10.x`** in the handshake. Connector/C strips the prefix, so
+  `mysql_get_server_info` and the backend's version functions see 10.x (`TConnectTest.TestDetectedVersionMatchesServer`
+  checks it on the matrix). Do not parse a version from anywhere else; another client library would bring the
+  5.5 reading back (ADR-0004).
 - **Old C code and modern compilers:** expect undefined behaviour of the kind
   `&vec.front()` on empty vectors, implicit `int`, `NULL` in integer fields; see
   ADR-0003 for the ones already fixed.

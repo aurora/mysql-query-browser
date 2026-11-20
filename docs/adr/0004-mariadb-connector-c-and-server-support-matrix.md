@@ -1,6 +1,7 @@
 # ADR-0004 — MariaDB Connector/C as client library; server support matrix
 
-- Status: Accepted
+- Status: Accepted (the `5.5.5-` version prefix turned out to be stripped by Connector/C, checked 2026-11-20 and
+  covered by a test; see AGENTS.md)
 - Date: 2026-10-08
 - Deciders: Harald Lapp (project owner)
 

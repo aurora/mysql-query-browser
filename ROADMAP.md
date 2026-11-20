@@ -77,7 +77,6 @@ waits until after parity and gets its own decision.
 - CI: releases are built and published by `.github/workflows/release.yml` (ADR-0040, in use since 0.1.0-alpha.3); every
   push is built and tested by `.github/workflows/test.yml` (ADR-0046: `tests/ci.sh`, server matrix on Linux, build
   check on Windows). Open: tests on Windows (servers there), screenshot comparison in CI.
-- MariaDB version detection: `5.5.5-10.x` is read as 5.5 (ADR-0004).
 - Idle CPU on Linux: `TMainForm.HandleIdle` (`Main.pas`) asks the clipboard for text on every idle pass to
   enable Paste; under GTK2 each call is an X round trip with a nested main loop. Stack samples of an instance
   that had become unresponsive after loading ~2 million rows (2026-11-17) showed the main thread there and in

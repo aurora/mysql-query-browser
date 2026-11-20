@@ -16,6 +16,7 @@ type
   published
     procedure TestInterfaceVersion;
     procedure TestConnectAndSelectVersion;
+    procedure TestDetectedVersionMatchesServer;
     procedure TestWrongPasswordFails;
   end;
 
@@ -78,6 +79,50 @@ begin
     finally
       myx_query_free_resultset(Rs);
     end;
+  finally
+    myx_mysql_close(My);
+  end;
+end;
+
+// The backend's version checks (myx_get_mysql_*_version, mysql_*version_is_later_or_equal_than) must see the
+// server's real version. MariaDB 10.x sends "5.5.5-10.x.y-MariaDB" in the handshake (ADR-0004); Connector/C strips
+// the prefix, a client that does not would make every MariaDB look like 5.5.
+procedure TConnectTest.TestDetectedVersionMatchesServer;
+var
+  Conn: MYX_USER_CONNECTION;
+  My: PMYSQL;
+  Err: MYX_LIB_ERROR;
+  Rs: PMYX_RESULTSET;
+  Value, Expected: AnsiString;
+  Parts: TStringArray;
+  Detected: string;
+begin
+  FillConnection(Conn, Env('QBR_TEST_USER', 'root'), Env('QBR_TEST_PASSWORD', 'qbr-test'),
+    Env('QBR_TEST_HOST', '127.0.0.1'));
+  My := myx_mysql_init;
+  AssertNotNull('myx_mysql_init', My);
+  try
+    AssertEquals('connect (' + myx_mysql_error(My) + ')', 0, myx_connect_to_instance(@Conn, My));
+    Err := MYX_NO_ERROR;
+    Rs := myx_query_execute(My, 'SELECT VERSION()', 0, nil, @Err, nil, nil, nil, nil);
+    AssertNotNull('resultset', Rs);
+    try
+      SetString(Value, Rs^.rows^.fields^.value, Rs^.rows^.fields^.value_length);
+    finally
+      myx_query_free_resultset(Rs);
+    end;
+    // "8.4.7", "10.11.19-MariaDB-ubu2204": the first three numbers
+    Parts := Copy(Value, 1, Pos('-', Value + '-') - 1).Split(['.']);
+    AssertTrue('VERSION() has three parts: ' + Value, Length(Parts) >= 3);
+    Expected := Parts[0] + '.' + Parts[1] + '.' + Parts[2];
+    Detected := Format('%d.%d.%d', [myx_get_mysql_major_version(My), myx_get_mysql_minor_version(My),
+      myx_get_mysql_release(My)]);
+    AssertEquals('version seen by the backend (server: ' + Value + ')', Expected, Detected);
+    AssertEquals('later or equal than 5.7', 1, mysql_version_is_later_or_equal_than(My, 5, 7));
+    AssertEquals('later or equal than itself', 1, mysql_full_version_is_later_or_equal_than(My,
+      StrToInt(Parts[0]), StrToInt(Parts[1]), StrToInt(Parts[2])));
+    AssertEquals('not later than the next major', 0, mysql_version_is_later_or_equal_than(My,
+      StrToInt(Parts[0]) + 1, 0));
   finally
     myx_mysql_close(My);
   end;
