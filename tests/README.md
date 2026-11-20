@@ -28,3 +28,7 @@ LD_LIBRARY_PATH=backend/build-linux tests/bin/qbr_tests --all --format=plain
 
 All supported servers in throw-away containers: `pwsh tests/run-matrix.ps1` (Windows),
 `tests/run-matrix.sh` (Linux).
+
+Everything the test workflow (`.github/workflows/test.yml`, ADR-0046) checks on Linux, in one command on a host with
+podman (not inside the distrobox): `tests/ci.sh [--only mysql:8.4]`. It builds the backend, the program (GTK2 as a
+compile check, Qt6 for the tests) and the tests in the image `tests/ci/Containerfile`, then runs the server matrix.

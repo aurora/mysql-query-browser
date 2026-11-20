@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: GPL-2.0-or-later -->
 # ADR-0044 — Qt6 on Linux before the first release
 
-- Status: Accepted (principle); the switch of the release build is open (criteria below)
+- Status: Accepted; the release build switched with 0.1.0-alpha.6 (2026-11-20; the desktop checklist is still open)
 - Date: 2026-11-19
 - Deciders: Harald Lapp (project owner)
 

@@ -111,6 +111,8 @@ fpc -Fubindings -Fuapp/compat -Fuapp/src -FUtests/lib -FEtests/bin \
   -Fu/c/lazarus/fpc/3.2.2/units/x86_64-win64/fcl-fpcunit tests/qbr_tests.lpr
 QBR_TEST_PORT=33306 tests/bin/qbr_tests.exe --all --format=plain   # backend/build and mingw64/bin on PATH
 pwsh tests/run-matrix.ps1                # all supported servers in throw-away containers
+tests/ci.sh [--only mysql:8.4]           # on a Linux host with podman: what the test workflow runs (ADR-0046):
+                                         #   builds in tests/ci/Containerfile, then the server matrix
 
 # the same on Linux (inside the freepascal container)
 cmake -S backend -B backend/build-linux -G Ninja && cmake --build backend/build-linux

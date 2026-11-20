@@ -52,8 +52,9 @@ Related.
 | [0041](0041-version-include-generated-at-build-time.md) | The version include is generated at build time, not committed | Accepted |
 | [0042](0042-tls-preferred-without-a-second-attempt.md) | TLS "preferred" in one attempt, without certificate verification | Accepted |
 | [0043](0043-dead-connections-do-not-block-the-window.md) | Dead connections do not block the window | Accepted (Windows backend build not checked) |
-| [0044](0044-qt6-on-linux-before-the-first-release.md) | Qt6 on Linux before the first release | Accepted (principle); release switch open |
+| [0044](0044-qt6-on-linux-before-the-first-release.md) | Qt6 on Linux before the first release | Accepted; switched with 0.1.0-alpha.6 |
 | [0045](0045-qt6-fusion-style-and-standard-palette.md) | Qt6 build draws with the Fusion style and its standard palette | Accepted |
+| [0046](0046-test-workflow-on-every-push.md) | Every push is built and tested by GitHub Actions | Accepted (first run on GitHub outstanding) |
 
 ## Numbering
 
