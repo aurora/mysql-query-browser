@@ -23,14 +23,25 @@ podman image exists "$IMAGE" || podman build -t "$IMAGE" -f "$ROOT/tests/ci/Cont
 in_image=(podman run --rm --init --network host --security-opt label=disable -v "$ROOT:$ROOT" -w "$ROOT" "$IMAGE")
 
 echo "== build (backend, GTK2 check, Qt6, tests)"
-# in GitHub Actions a failed build also becomes an error annotation (readable without signing in, unlike the log)
-trap '[ -z "${GITHUB_ACTIONS:-}" ] || echo "::error title=build::the build in the image failed, see the log"' ERR
+# in GitHub Actions a failed build also becomes an error annotation with the end of its output (readable without
+# signing in, unlike the log)
+mkdir -p "$ROOT/tests/tmp"
+BUILD_LOG="$ROOT/tests/tmp/ci-build.log"
+build_failed() {
+  [ -n "${GITHUB_ACTIONS:-}" ] || return 0
+  echo "::error title=build::the build in the image failed:%0A$(tail -25 "$BUILD_LOG" | sed 's/%/%25/g' \
+    | tr '\n' '\r' | sed 's/\r/%0A/g')"
+}
+trap build_failed ERR
 "${in_image[@]}" bash -c '
   set -euo pipefail
   cmake -S backend -B backend/build-linux -G Ninja >/dev/null
   cmake --build backend/build-linux | tail -1
+  # no binary of an earlier build may stand in for one that failed to build
+  rm -f app/bin/querymole tests/bin/qbr_tests
   QBR_WIDGETSET=gtk2 ./build.sh --runtime 2>&1 | grep -E -i "^built:| error|fatal" || true
   readelf -d app/bin/querymole | grep -q "libgtk-x11-2.0" || { echo "GTK2 build failed" >&2; exit 1; }
+  rm -f app/bin/querymole
   QBR_WIDGETSET=qt6 ./build.sh 2>&1 | grep -E -i "^built:| error|fatal" || true
   readelf -d app/bin/querymole | grep -q "libQt6Pas" || { echo "Qt6 build failed" >&2; exit 1; }
   units=$(ls -d /usr/lib64/fpc/*/units/x86_64-linux/fcl-fpcunit | head -1)
@@ -38,7 +49,7 @@ trap '[ -z "${GITHUB_ACTIONS:-}" ] || echo "::error title=build::the build in th
   fpc -Fubindings -Fuapp/compat -Fuapp/src -Flbackend/build-linux -FUtests/lib -FEtests/bin -Fu"$units" \
     tests/qbr_tests.lpr 2>&1 | grep -E -i "error|fatal|lines compiled" || true
   test -x tests/bin/qbr_tests || { echo "the tests did not build" >&2; exit 1; }
-'
+' 2>&1 | tee "$BUILD_LOG"
 
 trap - ERR
 

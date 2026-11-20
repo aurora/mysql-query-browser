@@ -184,7 +184,7 @@ type
 implementation
 
 uses
-  PNGTools, CommonFuncs, SSHConnect;
+  PNGTools, CommonFuncs, SSHConnect, SSHConnectUI;
 
 {$R ../forms/ConnectToInstance.lfm}
 

@@ -6,7 +6,8 @@
   local port; any other connection goes to myx_connect_to_instance unchanged. Tunnels are kept in a pool and shared
   by all connections with the same SSH settings and target (the program opens several: the main one, the threads of
   result tabs, the one that cancels queries); a tunnel whose SSH connection broke is opened again on the next
-  connect. Questions to the user (host key, password, passphrase) are always asked in the main thread.
+  connect. Questions to the user (host key, password, passphrase) are always asked in the main thread, through the
+  procedures SSHConnectUI sets: this unit stays free of the LCL, because QueryCancel (and so the tests) uses it.
 
   Advanced options read (the C connect code ignores names it does not know, so earlier releases keep them):
     SSH_TUNNEL=Yes        use the tunnel
@@ -30,19 +31,24 @@ const
   // SSHConnectToInstance: the tunnel could not be opened; SSHErrorMessage says why
   CONNECT_SSH_FAILED = -30;
 
+type
+  // the questions to the user (SSHConnectUI); called in the main thread. Without them unknown host keys are refused
+  // and nothing is asked.
+  TSSHVerifyHostKeyProc = function(const Host, Fingerprint: String; State: TSSHHostKeyState): Boolean;
+  TSSHAskSecretProc = function(const Prompt: String; out Secret: String): Boolean;
+
+var
+  SSHVerifyHostKeyProc: TSSHVerifyHostKeyProc = nil;
+  SSHAskSecretProc: TSSHAskSecretProc = nil;
+
 // like myx_connect_to_instance: 0 when connected
 function SSHConnectToInstance(UserConn: PMYX_USER_CONNECTION; MySQL: Pointer): Integer;
 function UsesSSHTunnel(UserConn: PMYX_USER_CONNECTION): Boolean;
 // the reason of the last CONNECT_SSH_FAILED
 function SSHErrorMessage: String;
-// shows SSHErrorMessage (main thread)
-procedure ShowSSHError;
 procedure CloseSSHTunnels;
 
 implementation
-
-uses
-  Forms, Controls, Dialogs, gnugettext, AuxFuncs;
 
 type
   TPoolEntry = class
@@ -101,35 +107,17 @@ begin
   end;
 end;
 
-procedure ShowSSHError;
-begin
-  ShowModalDialog(Application.Title + ' - ' + _('SSH Tunnel'), SSHErrorMessage, myx_mtError, _('OK'));
-end;
-
 { TAsker }
 
 procedure TAsker.DoVerify;
 begin
-  if FState <> hksUnknown then
-  begin
-    // refused by the tunnel in any case; its message says why
-    FAnswer := False;
-    Exit;
-  end;
-  FAnswer := ShowModalDialog(Application.Title + ' - ' + _('SSH Tunnel'),
-    Format(_('The authenticity of the SSH server %s cannot be established, it is not in your known_hosts file.' +
-    #13#10#13#10 + 'Key fingerprint: %s' + #13#10#13#10 +
-    'Do you trust this server and want to add its key to known_hosts?'), [FHost, FFingerprint]),
-    myx_mtConfirmation, _('Yes') + #13#10 + _('No')) = 1;
+  FAnswer := Assigned(SSHVerifyHostKeyProc) and SSHVerifyHostKeyProc(FHost, FFingerprint, FState);
 end;
 
 procedure TAsker.DoAsk;
-var
-  Value: String;
 begin
-  Value := '';
-  FAnswer := InputQuery(_('SSH Tunnel'), FPrompt, True, Value);
-  FSecret := Value;
+  FSecret := '';
+  FAnswer := Assigned(SSHAskSecretProc) and SSHAskSecretProc(FPrompt, FSecret);
 end;
 
 function TAsker.VerifyHostKey(Sender: TObject; const Host, Fingerprint: String; State: TSSHHostKeyState): Boolean;

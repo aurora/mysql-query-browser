@@ -13,7 +13,7 @@ uses
   TntClasses, TntStdCtrls, TntCheckLst, TntExtCtrls, TntForms, TntComCtrls, TntButtons, TntGrids,
   TntMenus, TntActnList, TntDialogs, TntRegistry, TntSysUtils, TntSystem, TntClipBrd,
   gnugettext, PNGImage, PNGTools, ResSelfTest, AuxFuncs, Options, MyxError, AuxApplicationFuncs,
-  MySQLConnection, QueryCancel, LibSSH, SSHTunnel, SSHConnect, ConnectToInstance, CommonFuncs, About, DevTools,
+  MySQLConnection, QueryCancel, LibSSH, SSHTunnel, SSHConnect, SSHConnectUI, ConnectToInstance, CommonFuncs, About, DevTools,
   CommonTypes, MySQLCommonFuncs, AppInstanceMgmt, TextSearch, AdvancedEdit, TabHeader,
   QueryBrowserOptionPages, ApplicationDataModule,
   Sections, InstanceSections, Toolbar, RegExTextImporter, ColorTypes, ColorTools,

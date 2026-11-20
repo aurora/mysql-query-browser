@@ -244,7 +244,7 @@ function ExecuteMultiCmdSQL(sql: PChar; user_data: Pointer): Integer cdecl;
 implementation
 
 uses
-  ConnectToInstance, SSHConnect;
+  ConnectToInstance, SSHConnect, SSHConnectUI;
 
 type
   // Port: the keep-alive ping runs in this thread instead of in the timer event. On a connection that has died
