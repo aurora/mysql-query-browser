@@ -78,10 +78,12 @@ waits until after parity and gets its own decision.
   push is built and tested by `.github/workflows/test.yml` (ADR-0046: `tests/ci.sh`, server matrix on Linux, build
   check on Windows). Open: tests on Windows (servers there), screenshot comparison in CI.
 - Idle CPU on Linux: `TMainForm.HandleIdle` (`Main.pas`) asks the clipboard for text on every idle pass to
-  enable Paste; under GTK2 each call is an X round trip with a nested main loop. Stack samples of an instance
-  that had become unresponsive after loading ~2 million rows (2026-11-17) showed the main thread there and in
-  GLib walking an apparently large list of event sources. Not reproduced; the link to the freeze is unclear. Fix
-  without a visible change (e.g. update Paste when the menu opens, or on clipboard change).
+  enable Paste; under GTK2 each call is an X round trip with a nested main loop. Under Qt6 (2026-11-20): connected
+  and idle about 1 % CPU, 3.5 % while the mouse moves (Xvfb); Qt's xcb clipboard keeps a foreign owner's format list
+  until the owner changes. Left for GTK2 only, which goes away after this release cycle (ADR-0044).
+  The unresponsive instance after ~2 million rows (2026-11-17) had a different cause, found and fixed on 2026-11-20:
+  the result grid sorted all rows after every fetched block (laz.VirtualTrees' default `toAutoSort`, see
+  `VTCompat`); 2 million rows now load in about a minute with the window answering throughout.
 - Dead connections (standby, VPN gone) no longer freeze the window (ADR-0043): TCP timeouts on the socket, keep-alive
   ping in a thread. Open: the Windows backend build with the socket options; `Ping` before a query still blocks
   during an outage.

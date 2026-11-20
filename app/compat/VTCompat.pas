@@ -32,8 +32,17 @@ type
     Grid and tree lines (Qt6 only): the tree draws them with a monochrome pattern brush whose colours come from the
     canvas (Font.Color for the line, Brush.Color between the dots), as on Windows. The Qt6 widgetset takes the
     pattern as a black and white image instead, so every grid line came out black. The two line routines draw the
-    same pattern with the canvas colours here (solid and dotted; a custom style keeps the original code). }
+    same pattern with the canvas colours here (solid and dotted; a custom style keeps the original code).
+
+    Auto sort (all platforms): the newer VirtualTreeView has toAutoSort among its default AutoOptions, 4.4 did not, and
+    its EndUpdate sorts the whole tree when the option is set, even without a sort column (NoColumn passes the
+    check against InvalidColumn). The result grid calls BeginUpdate/EndUpdate for every block of fetched rows, so
+    loading a large result sorted all rows again and again: 2 million rows had not finished after minutes, with the
+    window answering ever more slowly (2026-11-20). The constructor restores the 4.4 default; a form that sets the
+    option (the schemata tree) still gets it, since the .lfm is read afterwards. }
   TVirtualStringTree = class(TLazVirtualStringTree)
+  public
+    constructor Create(AOwner: TComponent); override;
   {$IFNDEF MSWINDOWS}
   private
     FInSize: Boolean;
@@ -52,6 +61,13 @@ type
   end;
 
 implementation
+
+constructor TVirtualStringTree.Create(AOwner: TComponent);
+
+begin
+  inherited Create(AOwner);
+  TreeOptions.AutoOptions := TreeOptions.AutoOptions - [toAutoSort];
+end;
 
 {$IFNDEF MSWINDOWS}
 function TVirtualStringTree.DoSetOffsetXY(Value: TPoint; Options: TScrollUpdateOptions; ClipRect: PRect): Boolean;

@@ -141,6 +141,7 @@ querymole ... --shot-main x.png --stress-schemata 90 out.txt              # sche
 querymole ... --shot-main x.png --stop-and-edit 0 0 700 " LIMIT 5" out.txt # double click, run, stop, edit, run again
 querymole ... --shot-main x.png --sql "select ..." --menu-smoke run out.txt # click every menu entry, report exceptions
 querymole ... --shot-main x.png --watch-connection 170 out.txt          # per second: longest UI pause, keep-alive state (ADR-0043)
+querymole ... --shot-main x.png --sql "SELECT seq FROM mysql.seq_1_to_2000000" --watch-connection 90 out.txt  # the same while a big result loads (MariaDB)
 QBR_UPDATE_URL=dist/Releases-linux QueryMole.AppImage --selftest-update out.txt  # check/download/apply without dialogs
 QBR_UPDATE_URL=owner/test-repo querymole --selftest-update out.txt  # the same against the GitHub releases of a test repository (docs/update-test.md)
 # unhandled exceptions are written with a stack trace to bin/querymole.error.txt (program exits with 3);
@@ -262,6 +263,10 @@ choice that a future contributor would ask "why?" about, write the ADR.
   (`TabHeight` became `QTabBar::tab { height: 16px; width: 0px; }`), which then hit every widget inside the control
   (the nested page control lost its tabs). `QtStyle.ScopeTabSizeStyleSheets` limits that one; suspect the same when a
   nested control looks wrong only under Qt6.
+- **laz.VirtualTrees has other defaults than the original's VirtualTreeView 4.4.** `toAutoSort` is on by default and
+  makes `EndUpdate` sort the whole tree even without a sort column; the result grid re-sorted every row after each
+  fetched block (2 million rows took minutes, 2026-11-20). `VTCompat.TVirtualStringTree` restores the 4.4 default;
+  compare `DefaultXxxOptions` in `legacy/.../VirtualTrees.pas` when a tree behaves differently from the original.
 - **Monochrome pattern brushes draw black and white under Qt6** (the canvas text and background colours are ignored).
   VirtualTreeView's grid and tree lines use one; `VTCompat` draws them itself under Qt6.
 - **`TImage.Canvas` is the picture's canvas,** not the control's: drawing on it changes the picture and
