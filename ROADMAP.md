@@ -144,8 +144,9 @@ default, in the original's style.
   Windows (Pageant, libssh.dll).
 - TLS mode in the connection dialog: required / preferred / off (ADR-0005).
 - Result export: JSON and JSON Lines added (ADR-0049), the five original exporters reviewed and fixed
-  (`docs/export-review.md`, 2026-11-20). Candidates, each with its own ADR: SQL INSERT statements, the CSV separator
-  in the UI (semicolon/tab), Markdown table, real XLSX. Open: export while rows still load writes only those rows;
+  (`docs/export-review.md`, 2026-11-20); CSV settings on the Browser options page (separator, quotes, line breaks,
+  header, BOM) and a TSV format in `LOAD DATA`'s format (ADR-0050). Candidates, each with its own ADR: SQL INSERT
+  statements, Markdown table, real XLSX. Open: export while rows still load writes only those rows;
   the grid's fetch of large results is much slower than the backend's.
 - HiDPI scaling, then optional vector-rendered icon set (ADR-0009).
 - PostgreSQL, SQLite and SQL Server via a driver seam (ADR-0010); what is MySQL-specific today and a suggested order:

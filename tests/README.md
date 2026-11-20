@@ -41,4 +41,6 @@ matrix table says how many were. On Windows the SSH tests need `mingw-w64-x86_64
 by `run-matrix.ps1` yet.
 
 The export tests (`test_export.pas`, ADR-0049) also time a large export (200,000 rows; `QBR_EXPORT_ROWS` sets
-another count) and print the times per format.
+another count) and print the times per format. They also cover the CSV/TSV settings and the TSV format (ADR-0050),
+including a round trip of a TSV file through `LOAD DATA LOCAL INFILE` (the test enables `local_infile` for the time
+of the load and restores it).
