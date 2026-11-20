@@ -141,8 +141,8 @@ default, in the original's style.
   proves the SSH login). Next: the UI, `.ppk` keys and Pageant, the Windows build with libssh.
 - TLS mode in the connection dialog: required / preferred / off (ADR-0005).
 - HiDPI scaling, then optional vector-rendered icon set (ADR-0009).
-- PostgreSQL and other databases via a driver seam (ADR-0010); candidate
-  libraries: FPC `postgres` units, ZEOS.
+- PostgreSQL, SQLite and SQL Server via a driver seam (ADR-0010); what is MySQL-specific today and a suggested order:
+  `docs/multi-database-inventory.md` (2026-11-20). Candidate libraries: libpq, sqlite3, FreeTDS, or FPC's SQLDB.
 - Replace C pieces by Pascal behind that seam, SQL parser last (ADR-0003).
 - Table editor, stage 3 (ADR-0036): a Pascal table model with a dialect per server family (reading, `CREATE`/
   `ALTER` generation, capabilities incl. server-specific types such as UUID, INET6, VECTOR) replaces
