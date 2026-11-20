@@ -56,7 +56,7 @@ Related.
 | [0045](0045-qt6-fusion-style-and-standard-palette.md) | Qt6 build draws with the Fusion style and its standard palette | Accepted |
 | [0046](0046-test-workflow-on-every-push.md) | Every push is built and tested by GitHub Actions | Accepted |
 | [0047](0047-parity-reached-features-after-parity.md) | Functional parity is reached; new features follow, each with its own decision | Accepted |
-| [0048](0048-ssh-tunnel-with-libssh.md) | SSH tunnel for connections, built on libssh | Proposed (library chosen; mock-up and open checks before implementation) |
+| [0048](0048-ssh-tunnel-with-libssh.md) | SSH tunnel for connections, built on libssh | Proposed (library chosen, mock-up done; open checks before implementation) |
 
 ## Numbering
 

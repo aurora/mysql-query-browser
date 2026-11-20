@@ -1,7 +1,7 @@
 <!-- SPDX-License-Identifier: GPL-2.0-or-later -->
 # ADR-0048 — SSH tunnel for connections, built on libssh
 
-- Status: Proposed (library chosen; dialog mock-up and the checks listed under "Open" before implementation)
+- Status: Proposed (library chosen, mock-up below; the checks listed under "Open" before implementation)
 - Date: 2026-11-20
 - Deciders: Harald Lapp (project owner)
 
@@ -45,14 +45,16 @@ library, libssh (LGPL-2.1-or-later) and libssh2 (BSD-3-Clause) were compared on 
   message, as `ssh` does.
 - **`~/.ssh/config` is read**, so a host alias, user, port, identity file, `IdentityAgent` and `ProxyJump` given
   there apply. The dialog has no field for jump hosts; they come from the config file.
-- **UI, additive and off by default** (ADR-0047):
-  - connect dialog, "Details >>" area: one new row below "Pipe name", a check box "Use SSH tunnel" with a "..."
-    button that opens a small SSH dialog (host, port, user, authentication: agent / key file with browse button /
-    password);
-  - stored connections (Options > Connections): a third tab "SSH" next to the two existing ones, with the same
-    fields;
-  - a connection without SSH shows the dialogs as before apart from that row and tab.
-  A mock-up (screenshots from `tools/lfmview` of the changed forms) is added to this ADR before implementation.
+- **UI, additive and off by default** (ADR-0047), the same in both places that edit a connection:
+  - one row "Use SSH tunnel" with a "..." button and a grey summary (`user@host:port`) of the tunnel;
+  - in the connect dialog's "Details >>" area it takes the place of the original's hidden SSL check box, below
+    "Pipe name"; the dialog keeps its size;
+  - in Options > Connections, "Connection Parameters", it sits between "Schema" and "Notes", whose field gives up
+    one line; a third tab was tried and dropped, three tabs do not fit side by side (less so with the German texts);
+  - "..." opens one small dialog "SSH Tunnel": SSH host and port, user name, login with the agent (ssh-agent,
+    Pageant), a key file (OpenSSH or `.ppk`, with a browse button) or a password, and a short note that Server Host
+    and Port are reached from the SSH server and that `~/.ssh/config` and `known_hosts` apply;
+  - a connection without SSH shows the dialogs as before apart from that unchecked row.
 - **Storage:** the settings are stored as entries of the stored connection's existing advanced option list
   (`SSH_TUNNEL=Yes`, `SSH_HOST=...`, `SSH_PORT=...`, `SSH_USER=...`, `SSH_AUTH=...`, `SSH_KEYFILE=...`); the
   connect code applies only the advanced options it knows, so earlier releases keep these entries and ignore them.
@@ -61,6 +63,15 @@ library, libssh (LGPL-2.1-or-later) and libssh2 (BSD-3-Clause) were compared on 
   `NOTICE`.
 - **Tests:** an OpenSSH server container joins `tests/run-matrix.sh`; the suite connects through it with key,
   passphrase-protected key, `.ppk` (format 2 and 3), password, an unknown and a changed host key, and a jump host.
+
+## Mock-up
+
+Rendered from the converted forms by `docs/mockups/ssh-tunnel/make_mockups.py` (Qt6, Fusion style, the bundled
+fonts; the connect dialog without its banner and title bar, which `lfmview` does not draw). The values are examples.
+
+| Connect dialog, "Details >>" | "SSH Tunnel" dialog | Options > Connections |
+|---|---|---|
+| ![](../mockups/ssh-tunnel/connect-dialog.png) | ![](../mockups/ssh-tunnel/ssh-dialog.png) | ![](../mockups/ssh-tunnel/options-connections.png) |
 
 ## Consequences
 
@@ -99,7 +110,9 @@ Negative:
   --openssh-config` via `Include`/`IdentityAgent` in `~/.ssh/config`.
 - Whether MSYS2's libssh builds with agent support on Windows as expected, and which crypto backend both packages
   use.
-- The SSH dialog's layout (mock-up), the wording of its texts and their translation entries.
+- The wording of the new texts and their translation entries (German first, as the original ships it).
+- Where the new form's `.lfm` lives: `app/forms` holds forms generated from the original's `.dfm` files; a form
+  written for the revival needs a place the generator leaves alone.
 
 ## Related
 
