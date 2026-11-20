@@ -1,6 +1,6 @@
 # ADR-0030 — Rename the application to QueryMole before the public announcement
 
-- Status: Accepted (implemented; busy animation open; About picture replaced by ADR-0032, the bolt icon by ADR-0033)
+- Status: Accepted (implemented; busy animation from the QueryMole artwork since 2026-11-20; About picture replaced by ADR-0032, the bolt icon by ADR-0033)
 - Date: 2026-11-14
 - Deciders: Harald Lapp (project owner)
 

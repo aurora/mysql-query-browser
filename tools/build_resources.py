@@ -37,7 +37,7 @@ OVERRIDES = {
     "sakila": os.path.join(IMAGES, "sakila.png"),       # main window, top right: the dolphin's still picture
 }
 DROPPED = {
-    "dolphin_loop",     # the MySQL dolphin as busy animation (AVI; TAnimate does not play it yet)
+    "dolphin_loop",     # the MySQL dolphin as busy animation (AVI); replaced by querymole_busy in qbr.rc
     "mysql_logo",       # the MySQL logo; the Query Browser does not show it
 }
 
@@ -66,7 +66,11 @@ def make_app_rc():
     strings = (("FileDescription", "QueryMole SQL client"),
                ("FileVersion", ver), ("InternalName", "querymole"), ("OriginalFilename", "querymole.exe"),
                ("ProductName", "QueryMole"), ("ProductVersion", ver))
+    # the busy animation top right in the main window (frames side by side, played by app/compat/Animate.pas), in
+    # place of the original's dolphin_loop (ADR-0030); written by tools/make_branding.sh
+    busy = os.path.join(IMAGES, "busy.png")
     lines = ['MAINICON ICON "%s"' % icon.replace("\\", "/"),
+             'querymole_busy PNG "%s"' % busy.replace("\\", "/"),
              "1 VERSIONINFO",
              "FILEVERSION %s" % ",".join(nums),
              "PRODUCTVERSION %s" % ",".join(nums),

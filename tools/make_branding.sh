@@ -59,4 +59,14 @@ magick "$SRC/connect_header_qb.png" \
 # icon, centred on a transparent canvas.
 magick -size 56x54 xc:none \( "$tmp/icon.png" -resize 48x48 \) -gravity center -composite -strip "$OUT/sakila.png"
 
-echo "written: $OUT/about.png $OUT/connect_header_qb.png $OUT/sakila.png $OUT/querymole.ico $OUT/querymole.png"
+# Busy animation top right in the main window (the original plays the MySQL dolphin there, dolphin_loop.avi): the
+# frames of assets/querymole-icon-animated.gif (12 frames, 150 ms each), light background made transparent from the
+# corners, each at the still picture's size (48x48) centred on a 54x54 canvas, side by side in one strip. TAnimate
+# (app/compat/Animate.pas) plays square frames as high as the strip, centred in the control, so the icon sits where
+# the still picture has it. The GIF's metadata is dropped (-strip).
+magick "$ROOT/assets/querymole-icon-animated.gif" -coalesce -alpha set -fuzz 12% -fill none \
+  -draw "color 0,0 floodfill" -draw "color %[fx:w-1],0 floodfill" \
+  -draw "color 0,%[fx:h-1] floodfill" -draw "color %[fx:w-1],%[fx:h-1] floodfill" \
+  -resize 48x48 -background none -gravity center -extent 54x54 +append -strip "$OUT/busy.png"
+
+echo "written: $OUT/about.png $OUT/connect_header_qb.png $OUT/sakila.png $OUT/busy.png $OUT/querymole.ico $OUT/querymole.png"

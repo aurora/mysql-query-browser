@@ -30,7 +30,7 @@ UNITS = {
         "TTntPanel": "TPanel", "TTntSplitter": "TSplitter"}),
     "TntForms": (["Types", "Forms"], {
         "TTntFrame": "TFrame", "TTntScrollBox": "TScrollBox"}),
-    "TntComCtrls": (["Classes", "Controls", "ExtCtrls", "ComCtrls", "StdCtrls"], {
+    "TntComCtrls": (["Classes", "Controls", "ExtCtrls", "ComCtrls", "StdCtrls", "Animate"], {
         "TTntPageControl": "TPageControl", "TTntTabSheet": "TTabSheet", "TTntTabControl": "TTabControl",
         "TTntTreeView": "TTreeView", "TTntTreeNode": "TTreeNode", "TTntListView": "TListView",
         "TTntListItem": "TListItem", "TTntStatusBar": "TStatusBar", "TTntProgressBar": "TProgressBar",
@@ -140,38 +140,11 @@ def main():
                                 "function TntApplication: TApplication;")
             impl = FORM_IMPL + "\nfunction TntApplication: TApplication;\nbegin\n  Result := Application;\nend;\n"
         if name == "TntComCtrls":
-            decl = ("{ The VCL's ComCtrls.TAnimate plays an AVI resource (the busy indicator). The LCL has no\n"
-                    "  equivalent; this placeholder keeps the properties the ported code uses and shows nothing\n"
-                    "  yet. ROADMAP: rebuild the animation. Declared here because every ported unit that uses\n"
-                    "  TAnimate also uses TntComCtrls. }\n"
+            # ComCtrls.TAnimate of the VCL, rebuilt in app/compat/Animate.pas; the ported units find it here
+            decl = ("{ The VCL's ComCtrls.TAnimate, rebuilt in Animate.pas. Re-exported here because every ported\n"
+                    "  unit that uses TAnimate also uses TntComCtrls. }\n"
                     "type\n"
-                    "  TAnimate = class(TPanel)\n"
-                    "  private\n"
-                    "    FResName: String;\n"
-                    "    FActive: Boolean;\n"
-                    "  public\n"
-                    "    constructor Create(AOwner: TComponent); override;\n"
-                    "    procedure Play(FromFrame, ToFrame: Word; Count: Integer);\n"
-                    "    procedure Stop;\n"
-                    "    property ResName: String read FResName write FResName;\n"
-                    "    property Active: Boolean read FActive write FActive;\n"
-                    "  end;")
-            impl = ("constructor TAnimate.Create(AOwner: TComponent);\n"
-                    "begin\n"
-                    "  inherited Create(AOwner);\n"
-                    "  BevelOuter := bvNone;\n"
-                    "  Caption := '';\n"
-                    "end;\n"
-                    "\n"
-                    "procedure TAnimate.Play(FromFrame, ToFrame: Word; Count: Integer);\n"
-                    "begin\n"
-                    "  FActive := True;\n"
-                    "end;\n"
-                    "\n"
-                    "procedure TAnimate.Stop;\n"
-                    "begin\n"
-                    "  FActive := False;\n"
-                    "end;\n")
+                    "  TAnimate = Animate.TAnimate;")
         write_unit(name, uses, aliases, decl, impl)
     print("wrote %d units to %s" % (len(UNITS), OUT))
 
