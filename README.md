@@ -18,7 +18,7 @@
 
 **QueryMole** brings back the **MySQL Query Browser** (2006): the original Windows user interface, rebuilt with
 Free Pascal and Lazarus so that it runs on Windows and Linux, against MySQL 5.7 to 9 and MariaDB 10.11 and 11.4.
-The look and behaviour stay those of the original until it is complete (ADR-0001); new features come after that.
+The look and behaviour are those of the original (ADR-0001); new features are added on top, off by default (ADR-0047).
 
 > [!WARNING]
 > **Alpha.** The program connects, runs queries, shows and edits results, runs scripts and exports, but it has

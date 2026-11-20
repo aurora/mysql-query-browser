@@ -10,9 +10,10 @@ Pascal / Lazarus application against current MySQL (5.7–9) and MariaDB, with
 the **original Windows UI reproduced unchanged**. Read `README.md`,
 `ROADMAP.md` and `docs/adr/` first; the ADRs are binding.
 
-The one rule that shapes everything: **no UX changes** until functional parity
-(ADR-0001). Do not "improve" layouts, icons, texts or behaviour while porting.
-Anything that changes what a user sees needs an ADR first.
+The one rule that shapes everything: **the original is the blueprint** (ADR-0001). Do not "improve" layouts,
+icons, texts or behaviour. Functional parity is reached (ADR-0047): new features are allowed, but each needs its
+own ADR first and must be additive, off by default and in the original's style, keeping stored files readable by
+the previous release. A place where the port differs from the original is a bug, not a feature.
 
 ## Layout
 

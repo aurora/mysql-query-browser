@@ -9,7 +9,7 @@ Related.
 
 | ADR | Title | Status |
 |---|---|---|
-| [0001](0001-revive-as-fork-windows-ui-as-blueprint.md) | Revive the Query Browser as a fork; the Windows UI is the blueprint | Accepted |
+| [0001](0001-revive-as-fork-windows-ui-as-blueprint.md) | Revive the Query Browser as a fork; the Windows UI is the blueprint | Accepted; first milestone completed by ADR-0047 |
 | [0002](0002-port-ui-to-lazarus-lcl.md) | Port the UI to Free Pascal / Lazarus (LCL) | Accepted |
 | [0003](0003-keep-c-backend-as-transition-layer.md) | Keep the C backend as a transitional layer, built with CMake | Accepted (transitional) |
 | [0004](0004-mariadb-connector-c-and-server-support-matrix.md) | MariaDB Connector/C as client library; server support matrix | Accepted |
@@ -55,6 +55,8 @@ Related.
 | [0044](0044-qt6-on-linux-before-the-first-release.md) | Qt6 on Linux before the first release | Accepted; switched with 0.1.0-alpha.6 |
 | [0045](0045-qt6-fusion-style-and-standard-palette.md) | Qt6 build draws with the Fusion style and its standard palette | Accepted |
 | [0046](0046-test-workflow-on-every-push.md) | Every push is built and tested by GitHub Actions | Accepted |
+| [0047](0047-parity-reached-features-after-parity.md) | Functional parity is reached; new features follow, each with its own decision | Accepted |
+| [0048](0048-ssh-tunnel-with-libssh.md) | SSH tunnel for connections, built on libssh | Proposed (library chosen; mock-up and open checks before implementation) |
 
 ## Numbering
 

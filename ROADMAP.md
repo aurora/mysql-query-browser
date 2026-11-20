@@ -5,8 +5,9 @@ are not lost. Decisions live in [`docs/adr/`](docs/adr/README.md); this file is
 the plan and the backlog and changes often.
 
 Guiding rule (ADR-0001): **the first milestone is the original Query Browser,
-unchanged, on current platforms and servers.** Anything that changes the UX
-waits until after parity and gets its own decision.
+unchanged, on current platforms and servers.** It is reached with 0.1.0-alpha.7
+(ADR-0047); new features now follow, each with its own ADR, additive and off by
+default, in the original's style.
 
 ## Done
 
@@ -133,6 +134,8 @@ waits until after parity and gets its own decision.
   - less memory per row (moves the limit, does not remove it).
   An automatic `LIMIT` on double click (as Workbench, DBeaver) would change the SQL users see and expect;
   least preferred.
+- **SSH tunnel** for connections (ADR-0048, proposed): libssh in the program, OpenSSH and PuTTY keys, agent and
+  Pageant, `known_hosts` and `~/.ssh/config`. Next: dialog mock-up, Pageant pipe name, libssh in the AppImage build.
 - TLS mode in the connection dialog: required / preferred / off (ADR-0005).
 - HiDPI scaling, then optional vector-rendered icon set (ADR-0009).
 - PostgreSQL and other databases via a driver seam (ADR-0010); candidate

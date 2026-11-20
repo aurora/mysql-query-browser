@@ -1,6 +1,6 @@
 # ADR-0001 — Revive the Query Browser as a fork; the Windows UI is the blueprint
 
-- Status: Accepted
+- Status: Accepted; first milestone (no UX changes until parity) completed by ADR-0047, the blueprint stays
 - Date: 2026-10-08
 - Deciders: Harald Lapp (project owner)
 
