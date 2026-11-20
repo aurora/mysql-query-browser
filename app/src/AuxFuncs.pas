@@ -1298,7 +1298,18 @@ var
   Hider: TPageControlTabHider;
 
 begin
-  // Only GTK2 draws tabs taller than the strip the original covers (ADR-0024); other widgetsets are left alone.
+  // GTK2 draws tabs taller than the strip the original covers (ADR-0024); Qt6 draws the tab row exactly TabHeight
+  // high, without the border the original's tab control adds, so the pages started higher and the covering panel cut
+  // into their first row (connect dialog, "Use compression protocol"). Both get the tabs switched off and the page
+  // control moved down by the strip; Qt6 takes the original's strip, TabHeight plus the 4 pixel border, when none is
+  // given. Other widgetsets are left alone.
+  {$IFDEF LCLQT6}
+  if Strip < 0 then
+    Strip := PC.TabHeight + 4;
+  PC.ShowTabs := False;
+  PC.Top := PC.Top + Strip;
+  PC.Height := PC.Height - Strip;
+  {$ENDIF}
   {$IFDEF LCLGTK2}
   if Strip >= 0 then
   begin
@@ -1431,6 +1442,11 @@ begin
       if Size.cx > MaxMessageWidth then
         MaxMessageWidth := Size.cx;
     end;
+    {$IFDEF LCLQT6}
+    // Port: Qt measures text with fractional character advances and returns whole pixels; with exactly the measured
+    // width the label wrapped its last word onto a second line ("Please enter the caption for this bookmark")
+    Inc(MaxMessageWidth, 2);
+    {$ENDIF}
 
     if MaxMessageWidth > 400 then
       MaxMessageWidth := 400;
