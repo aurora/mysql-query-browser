@@ -57,6 +57,7 @@ Related.
 | [0046](0046-test-workflow-on-every-push.md) | Every push is built and tested by GitHub Actions | Accepted |
 | [0047](0047-parity-reached-features-after-parity.md) | Functional parity is reached; new features follow, each with its own decision | Accepted |
 | [0048](0048-ssh-tunnel-with-libssh.md) | SSH tunnel for connections, built on libssh | Proposed (library chosen, mock-up done; open checks before implementation) |
+| [0049](0049-json-and-json-lines-export.md) | JSON and JSON Lines export of result sets | Proposed (implemented; Windows build not checked) |
 
 ## Numbering
 

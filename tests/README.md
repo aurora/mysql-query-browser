@@ -39,3 +39,6 @@ and their `.pub` files; user `qbr`, password `qbr-test`). `tests/run-matrix.sh` 
 and starts it on the host network (port 24022); without these variables the tests are reported as ignored, and the
 matrix table says how many were. On Windows the SSH tests need `mingw-w64-x86_64-libssh` from MSYS2 and are not run
 by `run-matrix.ps1` yet.
+
+The export tests (`test_export.pas`, ADR-0049) also time a large export (200,000 rows; `QBR_EXPORT_ROWS` sets
+another count) and print the times per format.

@@ -143,6 +143,10 @@ default, in the original's style.
   (formats 2 and 3) work and are tested; Pageant is implemented for Windows. Next: storing the SSH password, a test on
   Windows (Pageant, libssh.dll).
 - TLS mode in the connection dialog: required / preferred / off (ADR-0005).
+- Result export: JSON and JSON Lines added (ADR-0049), the five original exporters reviewed and fixed
+  (`docs/export-review.md`, 2026-11-20). Candidates, each with its own ADR: SQL INSERT statements, the CSV separator
+  in the UI (semicolon/tab), Markdown table, real XLSX. Open: export while rows still load writes only those rows;
+  the grid's fetch of large results is much slower than the backend's.
 - HiDPI scaling, then optional vector-rendered icon set (ADR-0009).
 - PostgreSQL, SQLite and SQL Server via a driver seam (ADR-0010); what is MySQL-specific today and a suggested order:
   `docs/multi-database-inventory.md` (2026-11-20). Candidate libraries: libpq, sqlite3, FreeTDS, or FPC's SQLDB.

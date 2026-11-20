@@ -7176,10 +7176,15 @@ begin
                     else
                       DetailQuery := '';
 
+                    // Port: while the query still fetches rows, the fetch thread may move the row array
+                    // (resultset_realloc_before/after take this lock, as the grid does); the export writes the
+                    // rows fetched so far and the fetch waits for it (ADR-0049)
+                    ActiveResultset.WorkWithResultset.Acquire;
                     try
                       Success := (myx_export_resultset(MySQLConn.MySQL, PMyxTableExporterInfo,
                         Filename, 'Query $QUERY$, $DATE$', ActiveResultset.ResultSet, DetailQuery) = 0);
                     finally
+                      ActiveResultset.WorkWithResultset.Release;
                       myx_free_table_exporter_info(PMyxTableExporterInfo);
                     end;
 

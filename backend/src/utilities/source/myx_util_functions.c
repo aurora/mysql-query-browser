@@ -2053,8 +2053,15 @@ static char *escape_entities(const char *str, HTMLEntity *entities)
   {
     HTMLEntity key;
     HTMLEntity *p;
-    
-    uc= g_utf8_get_char(str);
+    int step;
+
+    /* revival: a byte that does not start a complete UTF-8 sequence (binary data, a value cut in the middle of a
+       character) counts as one character; g_utf8_next_char would step over the terminating NUL. */
+    uc= g_utf8_get_char_validated(str, -1);
+    if (uc == (gunichar)-1 || uc == (gunichar)-2)
+      step= 1;
+    else
+      step= (int)(g_utf8_next_char(str)-str);
 
     key.code= uc;
     p= (HTMLEntity*)bsearch(&key, entities, entity_num, sizeof(entities[0]), cmp_entity);
@@ -2071,10 +2078,10 @@ static char *escape_entities(const char *str, HTMLEntity *entities)
     }
     else
     {
-      __sappend(&outstr, &alloced, &length, str, (int)(g_utf8_next_char(str)-str));
+      __sappend(&outstr, &alloced, &length, str, step);
     }
 
-    str= g_utf8_next_char(str);
+    str+= step;
   }
 
   return outstr;

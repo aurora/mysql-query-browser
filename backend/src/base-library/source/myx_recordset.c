@@ -2254,10 +2254,13 @@ static MYX_TE_COLUMN *setup_columns(MYX_RESULTSET *resultset)
     columns[c].name= resultset->columns[c].name;
     switch (resultset->columns[c].column_type)
     {
-    case MYX_RSCT_DECIMAL:
     case MYX_RSCT_INTEGER:
       columns[c].ctype= MYX_TE_COL_INTEGER;
       break;
+    // revival: DECIMAL columns come as NEWDECIMAL since MySQL 5.0 and were exported as strings; a decimal is a
+    // number with a fraction (PLIST <real>, not <integer>); CSV writes it unquoted, Excel as a Number (ADR-0049)
+    case MYX_RSCT_DECIMAL:
+    case MYX_RSCT_NEWDECIMAL:
     case MYX_RSCT_FLOAT:
       columns[c].ctype= MYX_TE_COL_FLOAT;
       break;
@@ -2292,7 +2295,10 @@ int myx_export_resultset(MYSQL *mysql, MYX_TABLE_EXPORTER_INFO *info,
   int table_setup_done= 0, detail_setup_done= 0;
   MYX_TE_COLUMN *master_columns;
   MYX_TE_COLUMN *detail_columns= NULL;
-  
+  unsigned char *row_has_action= NULL;
+  // revival: the rows as they are now; the grid may still be fetching more (it waits while the program exports)
+  unsigned int rows_num= resultset->rows_num;
+
   // we only support master-detail export for HTML and XML
   if (strcmp(info->te->name, "HTML")!=0 && strcmp(info->te->name, "XML")!=0)
     detail_query= NULL;
@@ -2321,7 +2327,17 @@ int myx_export_resultset(MYSQL *mysql, MYX_TABLE_EXPORTER_INFO *info,
   (*info->te->table_setup)(info, resultset->columns_num_to_display, master_columns);
 
   fields= g_new(const char *, resultset->columns_num_to_display);
-  for (r= 0; r < resultset->rows_num; r++)
+
+  // revival: the pending edits were searched for every row (rows x edits); mark the rows that have some
+  if (resultset->actions && resultset->actions->actions_num > 0)
+  {
+    row_has_action= g_new0(unsigned char, rows_num + 1);
+    for (i= 0; i < resultset->actions->actions_num; i++)
+      if (resultset->actions->actions[i].row < rows_num)
+        row_has_action[resultset->actions->actions[i].row]= 1;
+  }
+
+  for (r= 0; r < rows_num; r++)
   {
     unsigned int j;
     MYX_RS_ACTION *action;
@@ -2331,7 +2347,7 @@ int myx_export_resultset(MYSQL *mysql, MYX_TABLE_EXPORTER_INFO *info,
     for (c= 0; c < resultset->columns_num_to_display; c++)
       fields[c]= resultset->rows[r].fields[c].value;
 
-    if (resultset->actions)
+    if (row_has_action && row_has_action[r])
     {
       for (j= 0; j < resultset->actions->actions_num; j++)
       {
@@ -2398,10 +2414,15 @@ int myx_export_resultset(MYSQL *mysql, MYX_TABLE_EXPORTER_INFO *info,
     }
   }
 
+  // revival: without a row the header was never written, but the footer was (unbalanced HTML, XML, JSON);
+  // rows added in the grid follow
+  if (!table_setup_done)
+    (*info->te->table_header)(info);
+
   if (resultset->actions)
   {
     int has_more_rows= 0;
-    r= resultset->rows_num;
+    r= rows_num;
     // output remaining rows that were newly added
     do
     {
@@ -2444,6 +2465,7 @@ int myx_export_resultset(MYSQL *mysql, MYX_TABLE_EXPORTER_INFO *info,
 
   (*info->te->table_footer)(info);
 
+  g_free(row_has_action);
   g_free((char **)fields);
   g_free(master_columns);
   g_free(detail_columns);
