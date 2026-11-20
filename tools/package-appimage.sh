@@ -5,8 +5,8 @@
 #
 #   tools/package-appimage.sh              build everything, write dist/QueryMole-<version>-x86_64.AppImage
 #   tools/package-appimage.sh --no-build   reuse app/bin/querymole and backend/build-el9, only stage and pack
-#   QBR_WIDGETSET=qt6 tools/package-appimage.sh   the same with the Qt6 widgetset (ADR-0044; default gtk2 until the
-#                                          release switches): bundles Qt 6 and libQt6Pas instead of GTK2
+#   QBR_WIDGETSET=gtk2 tools/package-appimage.sh  the same with the GTK2 widgetset (bundles GTK2 instead of Qt 6 and
+#                                          libQt6Pas); the default is qt6 since ADR-0044
 #   tools/package-appimage.sh --velopack   additionally pack the same AppDir with `vpk pack` (ADR-0037): an AppImage
 #                                          that updates itself, plus the update feed, in dist/Releases-linux
 #
@@ -33,7 +33,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TOOL="$ROOT/tools/cache/appimagetool-x86_64.AppImage"
 # the image is rebuilt when its Containerfile changes
 IMAGE=qbr-appimage-el9:$(sha256sum "$ROOT/tools/appimage/Containerfile" | cut -c1-12)
-WIDGETSET="${QBR_WIDGETSET:-gtk2}"
+WIDGETSET="${QBR_WIDGETSET:-qt6}"
 case "$WIDGETSET" in gtk2|qt6) ;; *) echo "QBR_WIDGETSET must be gtk2 or qt6, not $WIDGETSET" >&2; exit 2 ;; esac
 VERSION="$(tr -d '[:space:]' < "$ROOT/VERSION")"
 DIST="$ROOT/dist"

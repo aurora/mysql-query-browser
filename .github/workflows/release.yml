@@ -135,6 +135,14 @@ jobs:
             --repoUrl "https://github.com/${GITHUB_REPOSITORY}" --pre --token "$GH_TOKEN" \
             || echo "no previous release: full package only"
 
+      # libQt6Pas (ADR-0044) takes about a quarter of an hour to build; its sources are copied with their timestamps,
+      # so make in the restored build directory only rebuilds what changed (a stale cache costs nothing)
+      - name: Cache the libQt6Pas build
+        uses: actions/cache@v4
+        with:
+          path: backend/build-el9/qt6pas
+          key: qt6pas-${{ hashFiles('tools/appimage/Containerfile', 'tools/appimage/Containerfile.fpc', 'tools/appimage/build-qt6pas.sh') }}
+
       # podman is preinstalled; the Pascal step runs in tools/appimage/Containerfile.fpc instead of the distrobox
       - name: Build and package
         env:

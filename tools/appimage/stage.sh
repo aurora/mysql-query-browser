@@ -1,8 +1,8 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Assembles the AppDir of the Linux AppImage. Runs INSIDE the qbr-appimage-el9 container (glibc 2.34), started by
-# tools/package-appimage.sh with the repository at /src and the output folder at /out. QBR_WIDGETSET (gtk2 or qt6) names
-# the widgetset app/bin/querymole was built with; GTK2 or Qt 6 is bundled accordingly.
+# tools/package-appimage.sh with the repository at /src and the output folder at /out. QBR_WIDGETSET (qt6, the default,
+# or gtk2) names the widgetset app/bin/querymole was built with; Qt 6 or GTK2 is bundled accordingly.
 #
 # Everything the program needs besides the C library, the X11 core, the font stack and libstdc++ is copied from the
 # container, so the result does not depend on what the host has (GTK2 is not installed by default any more, Qt 6 is not
@@ -12,7 +12,7 @@ set -eu
 SRC=/src
 APPDIR=/out/AppDir
 BACKEND=$SRC/backend/build-el9
-WIDGETSET=${QBR_WIDGETSET:-gtk2}
+WIDGETSET=${QBR_WIDGETSET:-qt6}
 QTPLUGINS=/usr/lib64/qt6/plugins
 
 # the program must be the one of this widgetset (app/bin holds the last one built)
