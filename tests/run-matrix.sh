@@ -88,6 +88,8 @@ for entry in "${matrix[@]}"; do
     else
       status="FAIL ($run tests)" failed=1
       details=$(grep -E 'Failed:|Exception|Assertion|Message' <<< "$log" | head -5 | tr '\n' ' ')
+      # no counts at all: the test program did not run; show how it started
+      [ -n "$run" ] || details="no test summary: $(head -3 <<< "$log" | tr '\n' ' ')"
     fi
   fi
 
@@ -105,7 +107,14 @@ for entry in "${matrix[@]}"; do
       rm -f "$report"
       run timeout 60 "${xvfb[@]}" "$APP" -datadir "$data_dir" -u root -p "$password" -h 127.0.0.1 -P "$port" "--$mode" "$report" \
         >/dev/null 2>&1
-      grep -qE '^(dialog )?connected' "$report" 2>/dev/null || app_result="FAIL"
+      if ! grep -qE '^(dialog )?connected' "$report" 2>/dev/null; then
+        app_result="FAIL"
+        # what the program reported, or the first line of its error file
+        why=$(head -1 "$report" 2>/dev/null || true)
+        err="$(dirname "$APP")/$(basename "$APP").error.txt"
+        [ -n "$why" ] || why=$(head -1 "$err" 2>/dev/null || echo "no report")
+        details="$details $mode: $why;"
+      fi
     done
     [ "$app_result" = PASS ] || failed=1
   fi
@@ -120,4 +129,23 @@ for r in "${results[@]}"; do
   IFS='|' read -r s res app det <<< "$r"
   printf '%-15s %-22s %-6s %s\n' "$s" "$res" "$app" "$det"
 done
+
+# in GitHub Actions: the table on the run's summary page, and every failed server as an error annotation (both can be
+# read without signing in, unlike the log)
+if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+  {
+    echo "| Server | Result | App | Details |"
+    echo "|---|---|---|---|"
+    for r in "${results[@]}"; do
+      IFS='|' read -r s res app det <<< "$r"
+      echo "| $s | $res | $app | $det |"
+    done
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
+if [ -n "${GITHUB_ACTIONS:-}" ]; then
+  for r in "${results[@]}"; do
+    IFS='|' read -r s res app det <<< "$r"
+    case "$res $app" in *FAIL*|*"did not start"*) echo "::error title=$s::$res, app $app. $det" ;; esac
+  done
+fi
 exit "$failed"

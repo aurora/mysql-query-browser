@@ -23,6 +23,8 @@ podman image exists "$IMAGE" || podman build -t "$IMAGE" -f "$ROOT/tests/ci/Cont
 in_image=(podman run --rm --init --network host --security-opt label=disable -v "$ROOT:$ROOT" -w "$ROOT" "$IMAGE")
 
 echo "== build (backend, GTK2 check, Qt6, tests)"
+# in GitHub Actions a failed build also becomes an error annotation (readable without signing in, unlike the log)
+trap '[ -z "${GITHUB_ACTIONS:-}" ] || echo "::error title=build::the build in the image failed, see the log"' ERR
 "${in_image[@]}" bash -c '
   set -euo pipefail
   cmake -S backend -B backend/build-linux -G Ninja >/dev/null
@@ -37,6 +39,8 @@ echo "== build (backend, GTK2 check, Qt6, tests)"
     tests/qbr_tests.lpr 2>&1 | grep -E -i "error|fatal|lines compiled" || true
   test -x tests/bin/qbr_tests || { echo "the tests did not build" >&2; exit 1; }
 '
+
+trap - ERR
 
 echo "== server matrix"
 # the self-tests write their reports below TMPDIR; inside the checkout both sides see them
