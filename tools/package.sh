@@ -49,7 +49,8 @@ cp "$ROOT"/backend/build/*.dll "$APP/"
 # ldd resolves some names to C:\Windows\System32 first (other software puts copies there), so go by
 # the names: whatever MSYS2 provides under that name is shipped.
 names=$( (ldd "$APP/querymole.exe"; for d in "$APP"/libmysql*.dll; do ldd "$d"; done) | awk '{print $1}' | sort -u )
-extra="libssl-3-x64.dll libcrypto-3-x64.dll"      # loaded by libmariadb/libcurl through plugins and TLS
+# loaded by libmariadb/libcurl through plugins and TLS, and by the PuTTY key reader at run time (OpenSSL 4 or 3)
+extra="libssl-4-x64.dll libcrypto-4-x64.dll libssl-3-x64.dll libcrypto-3-x64.dll"
 for n in $names $extra; do
   if [ -f "$MINGW/$n" ] && [ ! -f "$APP/$n" ]; then
     cp "$MINGW/$n" "$APP/"

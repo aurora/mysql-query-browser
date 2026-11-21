@@ -1,8 +1,10 @@
 { SPDX-License-Identifier: GPL-2.0-or-later }
 { The few primitives of OpenSSL's libcrypto (Apache-2.0) the PuTTY key reader needs (ADR-0048): SHA-1, SHA-256,
   HMAC, AES-256-CBC decryption and Argon2 (OpenSSL 3.2 and later). The library is loaded when first needed, not
-  linked: libssh and Connector/C bring it on every platform (libcrypto.so.3; libcrypto-3-x64.dll from MSYS2), so a
-  missing or too old copy only disables .ppk keys, with a message. }
+  linked: libssh and Connector/C bring it on every platform, so a missing or too old copy only disables .ppk keys
+  and Pageant, with a message. OpenSSL 4 and 3 are both looked for: MSYS2 ships libcrypto-4-x64.dll since late 2026
+  (0.1.0-alpha.8 looked for version 3 only and found nothing on Windows). Only long-standing EVP functions are used;
+  HMAC is computed here from the digest (RFC 2104), not with the one-shot HMAC() of the old API. }
 unit OpenSSLCrypto;
 
 {$mode objfpc}{$H+}
@@ -35,9 +37,10 @@ uses
 
 const
   {$IFDEF MSWINDOWS}
-  LibNames: array[0..1] of String = ('libcrypto-3-x64.dll', 'libcrypto-3.dll');
+  LibNames: array[0..3] of String = ('libcrypto-4-x64.dll', 'libcrypto-3-x64.dll', 'libcrypto-4.dll',
+    'libcrypto-3.dll');
   {$ELSE}
-  LibNames: array[0..1] of String = ('libcrypto.so.3', 'libcrypto.so');
+  LibNames: array[0..2] of String = ('libcrypto.so.4', 'libcrypto.so.3', 'libcrypto.so');
   {$ENDIF}
 
   // OSSL_PARAM data types
@@ -59,8 +62,6 @@ var
   p_EVP_sha1, p_EVP_sha256, p_EVP_aes_256_cbc: function: Pointer; cdecl;
   p_EVP_Digest: function(data: Pointer; count: csize_t; md: PByte; size: pcuint; type_: Pointer;
     impl: Pointer): cint; cdecl;
-  p_HMAC: function(evp_md: Pointer; key: Pointer; key_len: cint; d: PByte; n: csize_t; md: PByte;
-    md_len: pcuint): PByte; cdecl;
   p_EVP_CIPHER_CTX_new: function: Pointer; cdecl;
   p_EVP_CIPHER_CTX_free: procedure(ctx: Pointer); cdecl;
   p_EVP_DecryptInit_ex: function(ctx, cipher, impl: Pointer; key, iv: PByte): cint; cdecl;
@@ -98,7 +99,6 @@ begin
   Load(p_EVP_sha256, 'EVP_sha256');
   Load(p_EVP_aes_256_cbc, 'EVP_aes_256_cbc');
   Load(p_EVP_Digest, 'EVP_Digest');
-  Load(p_HMAC, 'HMAC');
   Load(p_EVP_CIPHER_CTX_new, 'EVP_CIPHER_CTX_new');
   Load(p_EVP_CIPHER_CTX_free, 'EVP_CIPHER_CTX_free');
   Load(p_EVP_DecryptInit_ex, 'EVP_DecryptInit_ex');
@@ -150,15 +150,33 @@ begin
   Result := Digest(p_EVP_sha256(), Data, 32);
 end;
 
+// RFC 2104 with the 64-byte block of SHA-1 and SHA-256
 function DoHMAC(MD: Pointer; const Key, Data: TBytesArray; Len: Integer): TBytesArray;
+const
+  BlockSize = 64;
 var
-  N: cuint;
+  K, Inner, Outer: TBytesArray;
+  I: Integer;
 begin
-  Result := nil;
-  SetLength(Result, Len);
-  N := Len;
-  if p_HMAC(MD, DataPtr(Key), Length(Key), DataPtr(Data), Length(Data), @Result[0], @N) = nil then
-    raise EOpenSSLCrypto.Create('HMAC failed');
+  if Length(Key) > BlockSize then
+    K := Digest(MD, Key, Len)
+  else
+    K := Copy(Key, 0, Length(Key));
+  SetLength(K, BlockSize);   // zero padded
+  Inner := nil;
+  SetLength(Inner, BlockSize + Length(Data));
+  Outer := nil;
+  SetLength(Outer, BlockSize + Len);
+  for I := 0 to BlockSize - 1 do
+  begin
+    Inner[I] := K[I] xor $36;
+    Outer[I] := K[I] xor $5C;
+  end;
+  if Length(Data) > 0 then
+    Move(Data[0], Inner[BlockSize], Length(Data));
+  Inner := Digest(MD, Inner, Len);
+  Move(Inner[0], Outer[BlockSize], Len);
+  Result := Digest(MD, Outer, Len);
 end;
 
 function HMAC_SHA1(const Key, Data: TBytesArray): TBytesArray;
