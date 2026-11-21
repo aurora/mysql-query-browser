@@ -58,6 +58,7 @@ Related.
 | [0047](0047-parity-reached-features-after-parity.md) | Functional parity is reached; new features follow, each with its own decision | Accepted |
 | [0048](0048-ssh-tunnel-with-libssh.md) | SSH tunnel for connections, built on libssh | Proposed (library chosen, mock-up done; open checks before implementation) |
 | [0049](0049-json-and-json-lines-export.md) | JSON and JSON Lines export of result sets | Proposed (implemented; Windows build not checked) |
+| [0050](0050-csv-export-options-and-tsv.md) | CSV export options and a TSV export format | Proposed (implemented; Windows build not checked) |
 | [0051](0051-connection-manager-test-button-and-groups.md) | Connection manager: a test button and groups of connections | Proposed |
 
 ## Numbering

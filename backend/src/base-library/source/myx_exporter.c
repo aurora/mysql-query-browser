@@ -137,6 +137,75 @@ static void write_csv_quoted(FILE *f, const char *s)
 }
 
 
+/* revival: the CSV and TSV settings of the Options dialog arrive as exporter options (ADR-0050); their defaults
+   give the output of the original. */
+
+static const char *option_value(MYX_TABLE_EXPORTER_INFO *self, const char *name, const char *dflt)
+{
+  unsigned int i;
+  for (i= 0; self->te->options[i].name; i++)
+    if (strcmp(self->te->options[i].name, name) == 0)
+      return self->option_values[i] ? self->option_values[i] : dflt;
+  return dflt;
+}
+
+static int option_on(MYX_TABLE_EXPORTER_INFO *self, const char *name, const char *dflt)
+{
+  return atoi(option_value(self, name, dflt)) != 0;
+}
+
+// "system": text mode, the platform's line end (as before); "lf"/"crlf": binary mode, exactly that line end
+static const char *line_break(MYX_TABLE_EXPORTER_INFO *self)
+{
+  return g_ascii_strcasecmp(option_value(self, "Line Breaks", "system"), "crlf") == 0 ? "\r\n" : "\n";
+}
+
+static int open_with_line_breaks(MYX_TABLE_EXPORTER_INFO *self, const char *filename)
+{
+  const char *mode= g_ascii_strcasecmp(option_value(self, "Line Breaks", "system"), "system") == 0 ? "w+" : "wb";
+
+  self->file_stream= myx_fopen(filename, mode);
+  if (!self->file_stream)
+    return -1;
+  if (option_on(self, "BOM", "0"))
+    fputs("\xEF\xBB\xBF", self->file_stream);
+  return 0;
+}
+
+#define CSV_QUOTE_TEXT   0  // text and date columns (the original)
+#define CSV_QUOTE_NEEDED 1  // only values that need it, and the empty string
+#define CSV_QUOTE_ALL    2  // every value (not NULL)
+
+static int csv_quoting(MYX_TABLE_EXPORTER_INFO *self)
+{
+  const char *q= option_value(self, "Quoting", "text");
+  if (g_ascii_strcasecmp(q, "needed") == 0)
+    return CSV_QUOTE_NEEDED;
+  if (g_ascii_strcasecmp(q, "all") == 0)
+    return CSV_QUOTE_ALL;
+  return CSV_QUOTE_TEXT;
+}
+
+static const char *csv_separator(MYX_TABLE_EXPORTER_INFO *self)
+{
+  const char *sep= option_value(self, "Separator", ",");
+  return *sep ? sep : ",";
+}
+
+static int csv_needs_quotes(const char *s, const char *separator)
+{
+  return !*s || strpbrk(s, "\"\r\n") != NULL || strstr(s, separator) != NULL;
+}
+
+static void write_csv_value(FILE *f, const char *s, int quote)
+{
+  if (quote)
+    write_csv_quoted(f, s);
+  else
+    fputs(s, f);
+}
+
+
 static MYX_TABLE_EXPORTER_INFO *make_exporter_info(MYX_TABLE_EXPORTER *exporter)
 {
   MYX_TABLE_EXPORTER_INFO *info= g_new0(MYX_TABLE_EXPORTER_INFO, 1);
@@ -221,6 +290,11 @@ static void csv_exporter_end(MYX_TABLE_EXPORTER_INFO *self);
 static MYX_TE_OPTION csv_exporter_options[]= 
 {
   {"Separator", ",", "Separator for column values.", MYX_TEOP_STRING},
+  // revival: ADR-0050
+  {"Header", "1", "Write the column names in the first line.", MYX_TEOP_BOOL},
+  {"Quoting", "text", "Values in quotes: text (text and date columns), needed, all.", MYX_TEOP_STRING},
+  {"Line Breaks", "system", "Line end: system, lf, crlf.", MYX_TEOP_STRING},
+  {"BOM", "0", "Start the file with a UTF-8 byte order mark.", MYX_TEOP_BOOL},
   {NULL, NULL, NULL, 0}
 };
 
@@ -264,10 +338,7 @@ static void csv_exporter_free(MYX_TABLE_EXPORTER_INFO *self)
 
 static int csv_exporter_setup(MYX_TABLE_EXPORTER_INFO *self, const char *filename)
 {
-  self->file_stream= myx_fopen(filename, "w+");
-  if (!self->file_stream)
-    return -1;
-  return 0;
+  return open_with_line_breaks(self, filename);
 }
 
 
@@ -293,15 +364,21 @@ static void csv_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self)
     return;
   }
   
+  if (!option_on(self, "Header", "1"))
+    return;
+
   //fprintf(self->file_stream, "# ");
   for (i= 0; i < self->columns_num[0]; i++)
   {
+    const char *name= self->columns[0][i].name ? self->columns[0][i].name : "";
+
     if (i > 0)
-      fputs(self->option_values[0], self->file_stream);
-    write_csv_quoted(self->file_stream, self->columns[0][i].name);
+      fputs(csv_separator(self), self->file_stream);
+    write_csv_value(self->file_stream, name,
+                    csv_quoting(self) != CSV_QUOTE_NEEDED || csv_needs_quotes(name, csv_separator(self)));
   }
 
-  fputc('\n', self->file_stream);
+  fputs(line_break(self), self->file_stream);
 }
 
 
@@ -309,22 +386,26 @@ static void csv_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *cons
 {
   unsigned int i;
   FILE *f= self->file_stream;
-  const char *separator= self->option_values[0];
+  const char *separator= csv_separator(self);
+  int quoting= csv_quoting(self);
 
   for (i= 0; i < self->columns_num[0]; i++)
   {
+    int text_column= self->columns[0][i].ctype == MYX_TE_COL_STRING || self->columns[0][i].ctype == MYX_TE_COL_DATE;
+
     if (i > 0)
       fputs(separator, f);
-    if (self->columns[0][i].ctype == MYX_TE_COL_STRING || self->columns[0][i].ctype == MYX_TE_COL_DATE)
-    {
-      // NULL stays empty and unquoted, as before; the empty string is ""
-      if (text[i])
-        write_csv_quoted(f, text[i]);
-    }
-    else if (text[i])
-      fputs(text[i], f);
+    // NULL stays empty and unquoted in every mode, as before; the empty string is ""
+    if (!text[i])
+      continue;
+    if (quoting == CSV_QUOTE_ALL)
+      write_csv_quoted(f, text[i]);
+    else if (quoting == CSV_QUOTE_NEEDED)
+      write_csv_value(f, text[i], csv_needs_quotes(text[i], separator));
+    else
+      write_csv_value(f, text[i], text_column);
   }
-  fputc('\n', f);
+  fputs(line_break(self), f);
 }
 
 static void csv_exporter_table_footer(MYX_TABLE_EXPORTER_INFO *self)
@@ -1008,6 +1089,144 @@ static void plist_exporter_end(MYX_TABLE_EXPORTER_INFO *self)
 }
 
 // ------------------------------------------------------------
+// TSV exporter (revival, ADR-0050)
+// ------------------------------------------------------------
+
+/* The format LOAD DATA INFILE and SELECT ... INTO OUTFILE use by default: values separated by a tab, no quotes,
+   backslash escapes for \ tab LF CR, NULL as \N. Header, line breaks and BOM as for CSV. */
+
+static MYX_TABLE_EXPORTER_INFO *tsv_exporter_init();
+static void tsv_exporter_free(MYX_TABLE_EXPORTER_INFO *info);
+static int tsv_exporter_setup(MYX_TABLE_EXPORTER_INFO *self, const char *filename);
+static void tsv_exporter_begin(MYX_TABLE_EXPORTER_INFO *self, const char *text);
+static void tsv_exporter_table_setup(MYX_TABLE_EXPORTER_INFO *self, unsigned int columns_num, MYX_TE_COLUMN *columns);
+static void tsv_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self);
+static void tsv_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *const*text);
+static void tsv_exporter_table_footer(MYX_TABLE_EXPORTER_INFO *self);
+static void tsv_exporter_end(MYX_TABLE_EXPORTER_INFO *self);
+
+static MYX_TE_OPTION tsv_exporter_options[]=
+{
+  {"Header", "1", "Write the column names in the first line.", MYX_TEOP_BOOL},
+  {"Line Breaks", "system", "Line end: system, lf, crlf.", MYX_TEOP_STRING},
+  {"BOM", "0", "Start the file with a UTF-8 byte order mark.", MYX_TEOP_BOOL},
+  {NULL, NULL, NULL, 0}
+};
+
+MYX_TABLE_EXPORTER TSV_TABLE_EXPORTER=
+{
+  "TSV",
+  "Generates a TSV (Tab Separated Values) File",
+  "Tab Separated Values File",
+  "tsv",
+  tsv_exporter_init,
+  tsv_exporter_free,
+  tsv_exporter_setup,
+  tsv_exporter_begin,
+  tsv_exporter_table_setup,
+  tsv_exporter_table_header,
+  tsv_exporter_columns,
+  tsv_exporter_table_footer,
+  tsv_exporter_end,
+
+  tsv_exporter_options
+};
+
+static void write_tsv_value(FILE *f, const char *text)
+{
+  const char *s= text, *run= text;
+
+  for (; *s; s++)
+  {
+    const char *escape;
+
+    switch (*s)
+    {
+      case '\\': escape= "\\\\"; break;
+      case '\t': escape= "\\t"; break;
+      case '\n': escape= "\\n"; break;
+      case '\r': escape= "\\r"; break;
+      default: continue;
+    }
+    if (s > run)
+      fwrite(run, 1, s - run, f);
+    fputs(escape, f);
+    run= s + 1;
+  }
+  if (s > run)
+    fwrite(run, 1, s - run, f);
+}
+
+static MYX_TABLE_EXPORTER_INFO *tsv_exporter_init()
+{
+  return make_exporter_info(&TSV_TABLE_EXPORTER);
+}
+
+static void tsv_exporter_free(MYX_TABLE_EXPORTER_INFO *self)
+{
+  free_exporter_info(self);
+}
+
+static int tsv_exporter_setup(MYX_TABLE_EXPORTER_INFO *self, const char *filename)
+{
+  return open_with_line_breaks(self, filename);
+}
+
+static void tsv_exporter_begin(MYX_TABLE_EXPORTER_INFO *self, const char *text)
+{
+}
+
+static void tsv_exporter_table_setup(MYX_TABLE_EXPORTER_INFO *self, unsigned int columns_num, MYX_TE_COLUMN *columns)
+{
+  add_tabledef(self, columns_num, columns);
+}
+
+static void tsv_exporter_table_header(MYX_TABLE_EXPORTER_INFO *self)
+{
+  unsigned int i;
+
+  self->current_level++;
+  if (self->current_level > 1 || !option_on(self, "Header", "1"))
+    return;
+  for (i= 0; i < self->columns_num[0]; i++)
+  {
+    if (i > 0)
+      fputc('\t', self->file_stream);
+    write_tsv_value(self->file_stream, self->columns[0][i].name ? self->columns[0][i].name : "");
+  }
+  fputs(line_break(self), self->file_stream);
+}
+
+static void tsv_exporter_columns(MYX_TABLE_EXPORTER_INFO *self, const char *const*text)
+{
+  unsigned int i;
+  FILE *f= self->file_stream;
+
+  if (self->current_level > 1)
+    return;
+  for (i= 0; i < self->columns_num[0]; i++)
+  {
+    if (i > 0)
+      fputc('\t', f);
+    if (text[i])
+      write_tsv_value(f, text[i]);
+    else
+      fputs("\\N", f);
+  }
+  fputs(line_break(self), f);
+}
+
+static void tsv_exporter_table_footer(MYX_TABLE_EXPORTER_INFO *self)
+{
+  self->current_level--;
+}
+
+static void tsv_exporter_end(MYX_TABLE_EXPORTER_INFO *self)
+{
+}
+
+
+// ------------------------------------------------------------
 // JSON and JSON Lines exporters (revival, ADR-0049)
 // ------------------------------------------------------------
 
@@ -1277,7 +1496,8 @@ static MYX_TABLE_EXPORTER *exporters[]= {
   &EXCEL_TABLE_EXPORTER,
   &PLIST_TABLE_EXPORTER,
   &JSON_TABLE_EXPORTER,    // revival, ADR-0049
-  &JSONL_TABLE_EXPORTER
+  &JSONL_TABLE_EXPORTER,
+  &TSV_TABLE_EXPORTER      // revival, ADR-0050
 };
 
 

@@ -59,6 +59,13 @@ type
     EnforceEditableQueries: Boolean;
     OpenExportedResultset: Boolean;
 
+    // revival: CSV and TSV export settings (ADR-0050); the defaults give the original's output
+    CSVSeparator: WideString;      // ',' ';' 'tab' or any text
+    CSVQuoting: WideString;        // 'text' (text and date columns), 'needed', 'all'
+    ExportLineBreaks: WideString;  // 'system', 'lf', 'crlf'
+    ExportHeader: Boolean;
+    ExportBOM: Boolean;
+
     AssociateFileExtensions: Boolean;
 
     ShowQueryBrowserSidebar: Boolean;
@@ -273,6 +280,12 @@ begin
   EnforceEditableQueries := True;
   OpenExportedResultset := False;
 
+  CSVSeparator := ',';
+  CSVQuoting := 'text';
+  ExportLineBreaks := 'system';
+  ExportHeader := True;
+  ExportBOM := False;
+
   AssociateFileExtensions := False;
 
   ShowDragTargetWindowOnAltPressedOnly := False;
@@ -401,6 +414,21 @@ begin
 
                   end
                   else
+                    // revival: ADR-0050; older releases ignore this group
+                    if (CompareText(OptionGroupName, 'Export') = 0) then
+                    begin
+                      if (CompareText(OptionName, 'CSVSeparator') = 0) then
+                        CSVSeparator := OptionValue
+                      else if (CompareText(OptionName, 'CSVQuoting') = 0) then
+                        CSVQuoting := OptionValue
+                      else if (CompareText(OptionName, 'ExportLineBreaks') = 0) then
+                        ExportLineBreaks := OptionValue
+                      else if (CompareText(OptionName, 'ExportHeader') = 0) then
+                        ExportHeader := (OptionValue = '1')
+                      else if (CompareText(OptionName, 'ExportBOM') = 0) then
+                        ExportBOM := (OptionValue = '1');
+                    end
+                    else
                     if (CompareText(OptionGroupName, 'Various') = 0) then
                     begin
                       if (CompareText(OptionName, 'AssociateFileExtensions') = 0) then
@@ -524,6 +552,17 @@ begin
 
     AddParam(OptionGroup, 'AlignNumericColsRight',
       IntToStr(Ord(AlignNumericColsRight)));
+
+    //-----------------------------------------------
+    // revival: CSV and TSV export settings (ADR-0050)
+    OptionGroup := TMYX_OPTION_GROUP.create('Export');
+    Options.option_groups.Add(OptionGroup);
+
+    AddParam(OptionGroup, 'CSVSeparator', CSVSeparator);
+    AddParam(OptionGroup, 'CSVQuoting', CSVQuoting);
+    AddParam(OptionGroup, 'ExportLineBreaks', ExportLineBreaks);
+    AddParam(OptionGroup, 'ExportHeader', IntToStr(Ord(ExportHeader)));
+    AddParam(OptionGroup, 'ExportBOM', IntToStr(Ord(ExportBOM)));
 
     //-----------------------------------------------
     //Create Option Group

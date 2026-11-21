@@ -7171,6 +7171,20 @@ begin
                   PMyxTableExporterInfo := myx_get_table_exporter_info(MyxStringList.strings[I]);
                   if (PMyxTableExporterInfo <> nil) then
                   begin
+                    // revival: the CSV/TSV settings of the Options dialog (ADR-0050); exporters without such an
+                    // option ignore it
+                    with ApplicationDM.Options do
+                    begin
+                      if CSVSeparator = 'tab' then
+                        myx_set_table_exporter_option(PMyxTableExporterInfo, 'Separator', #9)
+                      else
+                        myx_set_table_exporter_option(PMyxTableExporterInfo, 'Separator', CSVSeparator);
+                      myx_set_table_exporter_option(PMyxTableExporterInfo, 'Quoting', CSVQuoting);
+                      myx_set_table_exporter_option(PMyxTableExporterInfo, 'Line Breaks', ExportLineBreaks);
+                      myx_set_table_exporter_option(PMyxTableExporterInfo, 'Header', IntToStr(Ord(ExportHeader)));
+                      myx_set_table_exporter_option(PMyxTableExporterInfo, 'BOM', IntToStr(Ord(ExportBOM)));
+                    end;
+
                     if ActiveResultset.ConnectedDetailRSCount > 0 then
                       DetailQuery := ActiveResultset.ConnectedDetailRS[0].SQL
                     else

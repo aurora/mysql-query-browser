@@ -4,7 +4,7 @@ unit test_export;
 { Result set export (myx_exporter.c through myx_export_resultset, as the File > Export menu calls it): every format
   with the values that broke exporters before (NULL vs empty string, quotes, separators, newlines, markup characters,
   non-ASCII text, bytes that are not UTF-8, decimals, column names with special characters, very long values), plus
-  a timing check for a large result (ADR-0049). Needs a server (QBR_TEST_*).
+  a timing check for a large result (ADR-0049); the CSV/TSV settings and the TSV format (ADR-0050). Needs a server (QBR_TEST_*).
 
   QBR_EXPORT_ROWS sets the row count of the timing test (default 200000); the times are written to stdout. }
 
@@ -24,6 +24,8 @@ type
     function Query(const SQL: AnsiString): PMYX_RESULTSET;
     function ExportRs(const Format: AnsiString; Rs: PMYX_RESULTSET; const Ext: string = 'out'): AnsiString;
     function ExportSQL(const Format: AnsiString; const SQL: AnsiString): AnsiString;
+    // Options: name/value pairs set with myx_set_table_exporter_option, as SaveResultsetAs does (ADR-0050)
+    function ExportWith(const Format, SQL: AnsiString; const Options: array of AnsiString): AnsiString;
     function Tricky(const Format: AnsiString): AnsiString;
     procedure AssertXml(const What, Text: AnsiString);
     procedure AssertNotContains(const What, Needle, Hay: AnsiString);
@@ -45,6 +47,14 @@ type
     procedure TestLongValue;
     procedure TestWideRow;
     procedure TestLargeExportTime;
+    procedure TestCsvDefaultOptionsUnchanged;
+    procedure TestCsvSemicolonWhenNeeded;
+    procedure TestCsvQuoteAll;
+    procedure TestCsvTabNoHeader;
+    procedure TestCsvLineBreaksAndBom;
+    procedure TestTsv;
+    procedure TestTsvOptions;
+    procedure TestTsvLoadDataRoundTrip;
   end;
 
 implementation
@@ -151,6 +161,32 @@ begin
   end;
 end;
 
+function TExportTest.ExportWith(const Format, SQL: AnsiString; const Options: array of AnsiString): AnsiString;
+var
+  Rs: PMYX_RESULTSET;
+  Info: PMYX_TABLE_EXPORTER_INFO;
+  FileName: AnsiString;
+  I: Integer;
+begin
+  Rs := Query(SQL);
+  Info := _myx_get_table_exporter_info(PAnsiChar(Format));
+  AssertNotNull('exporter ' + Format, Info);
+  FileName := FDir + PathDelim + 'opts.out';
+  try
+    I := 0;
+    while I < High(Options) do
+    begin
+      _myx_set_table_exporter_option(Info, PAnsiChar(Options[I]), PAnsiChar(Options[I + 1]));
+      Inc(I, 2);
+    end;
+    AssertEquals('export ' + Format, 0, _myx_export_resultset(FMy, Info, PAnsiChar(FileName), '', Rs, ''));
+  finally
+    myx_free_table_exporter_info(Info);
+    myx_query_free_resultset(Rs);
+  end;
+  Result := ReadFileText(FileName);
+end;
+
 function TExportTest.Tricky(const Format: AnsiString): AnsiString;
 begin
   Result := ExportSQL(Format, TrickySQL);
@@ -201,7 +237,7 @@ begin
     myx_free_lib_stringlist(P);
   end;
   // the original's formats keep their order (the menu shows them in this order); the new ones follow
-  AssertEquals('CSV,HTML,XML,Excel,PLIST,JSON,JSON Lines,', Names);
+  AssertEquals('CSV,HTML,XML,Excel,PLIST,JSON,JSON Lines,TSV,', Names);
 end;
 
 procedure TExportTest.TestCsv;
@@ -381,7 +417,7 @@ end;
 // a value of 2 MB that is all markup: escaping must not grow its buffer in small steps (quadratic)
 procedure TExportTest.TestLongValue;
 const
-  Formats: array[0..6] of AnsiString = ('CSV', 'HTML', 'XML', 'Excel', 'PLIST', 'JSON', 'JSON Lines');
+  Formats: array[0..7] of AnsiString = ('CSV', 'HTML', 'XML', 'Excel', 'PLIST', 'JSON', 'JSON Lines', 'TSV');
 var
   Rs: PMYX_RESULTSET;
   F: AnsiString;
@@ -427,7 +463,7 @@ end;
 
 procedure TExportTest.TestLargeExportTime;
 const
-  Formats: array[0..6] of AnsiString = ('CSV', 'HTML', 'XML', 'Excel', 'PLIST', 'JSON', 'JSON Lines');
+  Formats: array[0..7] of AnsiString = ('CSV', 'HTML', 'XML', 'Excel', 'PLIST', 'JSON', 'JSON Lines', 'TSV');
 var
   Rows: Integer;
   Rs: PMYX_RESULTSET;
@@ -468,6 +504,115 @@ begin
   finally
     myx_query_free_resultset(Rs);
   end;
+end;
+
+// the values the program passes when the options were never changed give the original's output, byte for byte
+procedure TExportTest.TestCsvDefaultOptionsUnchanged;
+begin
+  AssertEquals(Tricky('CSV'), ExportWith('CSV', TrickySQL,
+    ['Separator', ',', 'Quoting', 'text', 'Line Breaks', 'system', 'Header', '1', 'BOM', '0']));
+  AssertEquals('TSV', ExportSQL('TSV', TrickySQL), ExportWith('TSV', TrickySQL,
+    ['Separator', ',', 'Quoting', 'text', 'Line Breaks', 'system', 'Header', '1', 'BOM', '0']));
+end;
+
+procedure TExportTest.TestCsvSemicolonWhenNeeded;
+var
+  S: AnsiString;
+begin
+  S := ExportWith('CSV', TrickySQL, ['Separator', ';', 'Quoting', 'needed']);
+  AssertContains('header', 'id;s;n;f;d;b;"we""ird <col>&"' + NL, S);
+  AssertContains('quote and newline need quotes', NL + '1;"a,b""c' + NL + 'd;e";1.50;2.5;2026-01-02 03:04:05;', S);
+  // the empty string keeps its quotes so that it differs from NULL
+  AssertContains('NULL vs empty', NL + '2;"";;;;;<&>' + NL, S);
+  AssertContains('NULL string', NL + '4;;0.00;0;;"";' + NL, S);
+end;
+
+procedure TExportTest.TestCsvQuoteAll;
+var
+  S: AnsiString;
+begin
+  S := ExportWith('CSV', TrickySQL, ['Quoting', 'all']);
+  AssertContains('header', '"id","s","n"', S);
+  AssertContains('numbers too', NL + '"1","a,b""c' + NL + 'd;e","1.50","2.5",', S);
+  AssertContains('NULL stays empty', NL + '"2","",,,,,"<&>"' + NL, S);
+end;
+
+procedure TExportTest.TestCsvTabNoHeader;
+var
+  S: AnsiString;
+begin
+  S := ExportWith('CSV', TrickySQL, ['Separator', #9, 'Header', '0']);
+  AssertEquals('no header', '1'#9'"a,b', Copy(S, 1, 6));
+  AssertContains('tab', NL + '2'#9'""'#9#9#9#9#9'"<&>"' + NL, S);
+end;
+
+procedure TExportTest.TestCsvLineBreaksAndBom;
+var
+  S: AnsiString;
+begin
+  S := ExportWith('CSV', TrickySQL, ['Line Breaks', 'crlf', 'BOM', '1']);
+  AssertEquals('BOM', #$EF#$BB#$BF'"id"', Copy(S, 1, 7));
+  AssertContains('CR LF after the header', '"we""ird <col>&"'#13#10'1,', S);
+  AssertContains('CR LF after a row', '"<&>"'#13#10'3,', S);
+  // the line break inside a value is the value's own
+  AssertContains('value unchanged', '"a,b""c'#10'd;e"', S);
+  S := ExportWith('CSV', TrickySQL, ['Line Breaks', 'lf']);
+  AssertEquals('LF only', 0, Pos(#13, S));
+  AssertEquals('no BOM by default', '"id"', Copy(S, 1, 4));
+end;
+
+procedure TExportTest.TestTsv;
+var
+  S: AnsiString;
+begin
+  S := ExportSQL('TSV', TrickySQL);
+  AssertContains('header, names unquoted', 'id'#9's'#9'n'#9'f'#9'd'#9'b'#9'we"ird <col>&' + NL, S);
+  AssertContains('newline escaped, no quotes', NL + '1'#9'a,b"c\nd;e'#9'1.50'#9'2.5'#9'2026-01-02 03:04:05'#9, S);
+  AssertContains('NULL as \N, empty string empty', NL + '2'#9#9'\N'#9'\N'#9'\N'#9'\N'#9'<&>' + NL, S);
+  AssertContains('tab escaped', 'Gr' + #$C3#$BC#$C3#$9F + 'e ' + #$E6#$97#$A5#$E6#$9C#$AC + '\tt'#1'c'#9'-0.25', S);
+  AssertContains('NULL string, empty binary', NL + '4'#9'\N'#9'0.00'#9'0'#9'\N'#9#9'\N' + NL, S);
+  AssertEquals('backslash', 'v' + NL + 'a\\b\r' + NL, ExportSQL('TSV', 'SELECT CONCAT(''a\\b'', CHAR(13)) AS v'));
+end;
+
+procedure TExportTest.TestTsvOptions;
+var
+  S: AnsiString;
+begin
+  S := ExportWith('TSV', TrickySQL, ['Header', '0', 'Line Breaks', 'crlf', 'BOM', '1']);
+  AssertEquals('BOM, no header', #$EF#$BB#$BF'1'#9, Copy(S, 1, 5));
+  AssertContains('CR LF', '<&>'#13#10'3'#9, S);
+end;
+
+// the format of LOAD DATA's defaults: a TSV file goes back into a table unchanged, NULLs included
+procedure TExportTest.TestTsvLoadDataRoundTrip;
+const
+  Cols = 'id, s, n, f, d, `we"ird <col>&`';
+var
+  Data, FileName, OldValue: AnsiString;
+  F: TFileStream;
+  Rs: PMYX_RESULTSET;
+begin
+  Data := ExportWith('TSV', 'SELECT ' + Cols + ' FROM qbr_export.t ORDER BY id', ['Header', '0', 'Line Breaks', 'lf']);
+  FileName := FDir + PathDelim + 'roundtrip.tsv';
+  F := TFileStream.Create(FileName, fmCreate);
+  try
+    F.WriteBuffer(Data[1], Length(Data));
+  finally
+    F.Free;
+  end;
+  Rs := Query('SELECT @@GLOBAL.local_infile');
+  SetString(OldValue, Rs^.rows^.fields^.value, Rs^.rows^.fields^.value_length);
+  myx_query_free_resultset(Rs);
+  ExecSQL(FMy, 'SET GLOBAL local_infile = 1');
+  try
+    ExecSQL(FMy, 'CREATE TABLE qbr_export.t2 LIKE qbr_export.t');
+    ExecSQL(FMy, 'LOAD DATA LOCAL INFILE ''' + StringReplace(FileName, '\', '\\', [rfReplaceAll]) +
+      ''' INTO TABLE qbr_export.t2 CHARACTER SET utf8mb4 (' + Cols + ')');
+  finally
+    ExecSQL(FMy, 'SET GLOBAL local_infile = ' + OldValue);
+  end;
+  AssertEquals(ExportSQL('CSV', 'SELECT ' + Cols + ' FROM qbr_export.t ORDER BY id'),
+    ExportSQL('CSV', 'SELECT ' + Cols + ' FROM qbr_export.t2 ORDER BY id'));
 end;
 
 initialization
