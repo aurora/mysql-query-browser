@@ -18,6 +18,8 @@ type
     procedure TestConnectAndSelectVersion;
     procedure TestDetectedVersionMatchesServer;
     procedure TestWrongPasswordFails;
+    procedure TestMissingSchemaStillConnects;
+    procedure TestUnreachableHostWaitsOnce;
   end;
 
 implementation
@@ -137,6 +139,59 @@ begin
   My := myx_mysql_init;
   try
     AssertTrue('connect with wrong password must fail', myx_connect_to_instance(@Conn, My) <> 0);
+  finally
+    myx_mysql_close(My);
+  end;
+end;
+
+// the original's second attempt without the default schema stays for a schema that does not exist
+procedure TConnectTest.TestMissingSchemaStillConnects;
+var
+  Conn: MYX_USER_CONNECTION;
+  User, Pwd, Host, Schema: AnsiString;
+  My: PMYSQL;
+begin
+  User := Env('QBR_TEST_USER', 'root');
+  Pwd := Env('QBR_TEST_PASSWORD', 'qbr-test');
+  Host := Env('QBR_TEST_HOST', '127.0.0.1');
+  Schema := 'qbr_no_such_schema';
+  FillConnection(Conn, User, Pwd, Host);
+  Conn.schema := PAnsiChar(Schema);
+  My := myx_mysql_init;
+  try
+    AssertEquals('connect without the missing schema (' + myx_mysql_error(My) + ')', 0,
+      myx_connect_to_instance(@Conn, My));
+  finally
+    myx_mysql_close(My);
+  end;
+end;
+
+// A host that never answers costs one connect timeout, not two: the second attempt only follows schema errors
+// (2026-11-21; before, every failed connect was tried twice). 192.0.2.1 is TEST-NET-1, never routed.
+procedure TConnectTest.TestUnreachableHostWaitsOnce;
+var
+  Conn: MYX_USER_CONNECTION;
+  User, Pwd, Host, Schema, Timeout: AnsiString;
+  Options: array[0..0] of PAnsiChar;
+  My: PMYSQL;
+  Start: QWord;
+begin
+  User := 'root';
+  Pwd := 'x';
+  Host := '192.0.2.1';
+  Schema := 'mysql';
+  Timeout := 'CONNECT_TIMEOUT=2';
+  FillConnection(Conn, User, Pwd, Host);
+  Conn.port := 3306;
+  Conn.schema := PAnsiChar(Schema);
+  Options[0] := PAnsiChar(Timeout);
+  Conn.advanced_options := @Options[0];
+  Conn.advanced_options_num := 1;
+  My := myx_mysql_init;
+  try
+    Start := GetTickCount64;
+    AssertTrue('must fail', myx_connect_to_instance(@Conn, My) <> 0);
+    AssertTrue(Format('one attempt of 2 s, took %d ms', [GetTickCount64 - Start]), GetTickCount64 - Start < 3500);
   finally
     myx_mysql_close(My);
   end;

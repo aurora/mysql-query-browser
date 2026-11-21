@@ -910,6 +910,7 @@ int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
 {
   static my_bool true= 1;
   int connected;
+  unsigned int effective_connect_timeout= MYX_DEFAULT_CONNECT_TIMEOUT_SECONDS;
 
   MYSQL_REAL_CONNECT_PARAMETERS connect_options= { NULL, 0, 0, -1};
   char *unix_socket= NULL;
@@ -1000,14 +1001,39 @@ int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
   }
 #endif
 
+  /* the timeout in force (the default above or CONNECT_TIMEOUT of the advanced options), for the second attempt */
+  {
+#ifdef MARIADB_PACKAGE_VERSION
+    unsigned int in_force= 0;
+    if (mysql_get_optionv(mysql, MYSQL_OPT_CONNECT_TIMEOUT, &in_force) == 0 && in_force > 0)
+      effective_connect_timeout= in_force;
+#endif
+  }
+
   connected= mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
                           user_conn->password, user_conn->schema,
                           user_conn->port,
                           unix_socket ? unix_socket : connect_options.unix_socket,
                           connect_options.client_flag | EXTRA_CONNECT_FLAGS) != NULL;
 
-  if (!connected)
+  /* revival: the second attempt without the default schema is for a schema that no longer exists (1049) or that the
+     user may not use (1044). After any other error (host unreachable, no answer, wrong password) it ran without a
+     connect timeout (see below): about two and a half minutes for a host that is down, at start and for each new
+     connection; and it made a second failed login, which servers count (max_connect_errors, fail2ban). */
+  if (!connected && user_conn->schema && user_conn->schema[0] &&
+      (mysql_errno(mysql) == 1049 || mysql_errno(mysql) == 1044))
   {
+    /* revival: a failed mysql_real_connect leaves the handle without its options: the second attempt ran without
+       the connect timeout (measured: over two minutes to a host that does not answer, 2026-11-21). Set it again,
+       and the TLS mode of ADR-0042. */
+    mysql_options(mysql, MYSQL_OPT_CONNECT_TIMEOUT, (char *)&effective_connect_timeout);
+#ifdef MARIADB_PACKAGE_VERSION
+    if (connect_options.use_ssl == 0)
+    {
+      my_bool no_verify= 0;
+      mysql_optionsv(mysql, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &no_verify);
+    }
+#endif
     if(!mysql_real_connect(mysql, user_conn->hostname, user_conn->username,
                           user_conn->password, NULL,
                           user_conn->port,
@@ -1017,6 +1043,11 @@ int myx_connect_to_instance(MYX_USER_CONNECTION *user_conn, MYSQL *mysql)
       g_free(unix_socket);
       return -1;
     }
+  }
+  else if (!connected)
+  {
+    g_free(unix_socket);
+    return -1;
   }
 
   g_free(unix_socket);

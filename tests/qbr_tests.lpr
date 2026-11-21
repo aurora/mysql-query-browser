@@ -8,7 +8,7 @@ uses
   {$IFDEF UNIX}cwstring,{$ENDIF} // UTF-8 aware WideString manager; LCL programs get it through LazUTF8
   Classes, consoletestrunner, test_connect, test_catalog, test_schema_info, test_classes, test_gettext,
   test_cancel, test_match_pattern, test_local_infile, test_edit_escaping, test_user_data, test_table_editor,
-  test_ssh_tunnel, test_file_filters, test_export, test_connection_groups;
+  test_ssh_tunnel, test_file_filters, test_export, test_connection_groups, test_crypto;
 
 var
   App: TTestRunner;
